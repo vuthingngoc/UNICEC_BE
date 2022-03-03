@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UNICS.Data.Models.DB;
+﻿using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.ImplRepo.UniversityRepo;
 using UNICS.Data.ViewModels.University;
 

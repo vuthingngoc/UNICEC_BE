@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UNICS.Bussiness.ViewModels.University
+namespace UNICS.Data.ViewModels.University
 {
     public class ViewUniversity
     {
