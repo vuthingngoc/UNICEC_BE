@@ -43,11 +43,8 @@ namespace UNICS.Data.Models.DB
         {
             if (!optionsBuilder.IsConfigured)
             {
-
-
-                optionsBuilder.UseLazyLoadingProxies();
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=localhost, 1433;Initial Catalog=UNICS;User ID=sa;Password=123456;Integrated Security=False;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;");
+                optionsBuilder.UseSqlServer("Server=.;Database=UNICS;Trusted_Connection=True;");
             }
         }
 
@@ -501,7 +498,7 @@ namespace UNICS.Data.Models.DB
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A7848C39A4F")
+                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A78BE7156AA")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("ID");

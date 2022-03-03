@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UNICS.Data.Enum
+﻿namespace UNICS.Data.Enum
 {
-    public enum Status
+    public enum Enum
     {
         Rejected,
         NotApproved,
         Approved,
-        InActive,
+        InActive
     }
 }

@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UNICS.Bussiness.Services.UniversitySvc;
-using UNICS.Bussiness.ViewModels.University;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using UNICS.Business.Services.UniversitySvc;
+using UNICS.Data.ViewModels.University;
 
 namespace UNICS.API.Controllers
 {
@@ -18,12 +17,12 @@ namespace UNICS.API.Controllers
         // GET: api/<UniversityController>
 
         //tạo service
-        IUniversityService universityService;
+        private IUniversityService _universityService;
 
         //constructor để DI Service vào
-        public UniversityController(IUniversityService universityService )
+        public UniversityController(IUniversityService universityService)
         {
-            this.universityService = universityService;
+            this._universityService = universityService;
         }
 
 
@@ -39,7 +38,7 @@ namespace UNICS.API.Controllers
         {
 
             //chưa check null
-            ViewUniversity result = universityService.GetUniversityById(id);
+            ViewUniversity result = _universityService.GetUniversityById(id);
             //
             return Ok(result);
         }

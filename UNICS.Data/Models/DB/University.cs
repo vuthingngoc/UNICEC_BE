@@ -18,11 +18,11 @@ namespace UNICS.Data.Models.DB
         public string Name { get; set; }
         public string Description { get; set; }
         public string Phone { get; set; }
-        public string Email { get; set; }
         public DateTime? Founding { get; set; }
         public DateTime? Openning { get; set; }
         public DateTime? Closing { get; set; }
         public int? Status { get; set; }
+        public string Email { get; set; }
 
         public virtual ICollection<Campus> Campuses { get; set; }
         public virtual ICollection<GroupUniversity> GroupUniversities { get; set; }

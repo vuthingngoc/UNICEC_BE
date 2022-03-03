@@ -1,21 +1,15 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UNICS.Bussiness.Services.UniversitySvc;
+using UNICS.Business.Services.UniversitySvc;
 using UNICS.Data.Models.DB;
-using UNICS.Data.Respository.GenericRepo;
-using UNICS.Data.Respository.ImpIRepo.UniversityRepo;
+using UNICS.Data.Repository.GenericRepo;
+using UNICS.Data.Repository.ImplRepo.UniversityRepo;
 
 namespace UNICS.API
 {
@@ -31,39 +25,35 @@ namespace UNICS.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //
             services.AddControllers();
 
-           
-            //Versioning
-            services.AddApiVersioning(config => {
-                
+            // versioning
+            services.AddApiVersioning(config =>
+            {
                 config.DefaultApiVersion = new ApiVersion(1,0);
                 config.AssumeDefaultVersionWhenUnspecified = true;
-                //show các version app support
+                // show many versions else that app support
                 config.ReportApiVersions = true;
                 //
                 config.ApiVersionReader = new HeaderApiVersionReader();
-
             });
-            //DÙNG PHƯƠNG PHÁP DI(DEPENDENCY INJECTION)
-            //add dbcontext
+
+            // DI - Dependency Injection
+            // Add DbContext
             services.AddDbContext<UNICSContext>();
-            // SERVICE
             services.AddScoped<IUniversityService, UniversityService>();
 
-
-            //REPOSITORY
-            // repo
+            // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            //University
             services.AddTransient<IUniversityRepo, UniversityRepo>();
-
-
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "UNICS.API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "UNICS.API",
+                    Version = "v1"
+                });
             });
         }
 
@@ -73,19 +63,32 @@ namespace UNICS.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "UNICS.API v1"));
             }
-
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger UNICS V1");
+            });
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
