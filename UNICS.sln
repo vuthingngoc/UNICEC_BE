@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNICS.Data", "UNICS.Data\UNICS.Data.csproj", "{6D3889D9-AA36-4C4E-9362-1AA98D3FF77C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNICS.Data", "UNICS.Data\UNICS.Data.csproj", "{6D3889D9-AA36-4C4E-9362-1AA98D3FF77C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNICS.Business", "UNICS.Business\UNICS.Business.csproj", "{89935E44-5733-4DB8-B1D7-0F3D434C7CA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNICS.Business", "UNICS.Business\UNICS.Business.csproj", "{89935E44-5733-4DB8-B1D7-0F3D434C7CA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UNICS.API", "UNICS.API\UNICS.API.csproj", "{D48B18D7-EDEE-48C2-8EFB-EA659B52BF03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UNICS.API", "UNICS.API\UNICS.API.csproj", "{D48B18D7-EDEE-48C2-8EFB-EA659B52BF03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
