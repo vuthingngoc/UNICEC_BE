@@ -33,8 +33,8 @@ namespace UNICS.Data.Models.DB
         public virtual DbSet<Participant> Participants { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<SeedsWallet> SeedsWallets { get; set; }
         public virtual DbSet<Team> Teams { get; set; }
-        public virtual DbSet<TokenWallet> TokenWallets { get; set; }
         public virtual DbSet<University> Universities { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Video> Videos { get; set; }
@@ -151,9 +151,7 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Name).HasMaxLength(50);
 
-                entity.Property(e => e.UniversityId)
-                    .HasMaxLength(20)
-                    .HasColumnName("UniversityID");
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
                 entity.HasOne(d => d.Area)
                     .WithMany(p => p.Campuses)
@@ -178,10 +176,7 @@ namespace UNICS.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(500);
 
-                entity.Property(e => e.StudentId)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasColumnName("StudentID");
+                entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
                 entity.Property(e => e.Title)
                     .IsRequired()
@@ -195,7 +190,6 @@ namespace UNICS.Data.Models.DB
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Comments)
-                    .HasPrincipalKey(p => p.StudentId)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Comment__Student__49C3F6B7");
@@ -223,14 +217,14 @@ namespace UNICS.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.StartTime).HasColumnType("datetime");
-
-                entity.Property(e => e.StartTimeRegister).HasColumnType("datetime");
-
-                entity.Property(e => e.TokenCode)
+                entity.Property(e => e.SeedsCode)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.StartTime).HasColumnType("datetime");
+
+                entity.Property(e => e.StartTimeRegister).HasColumnType("datetime");
 
                 entity.HasOne(d => d.CompetitionType)
                     .WithMany(p => p.Competitions)
@@ -256,9 +250,7 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.UniversityId)
-                    .HasMaxLength(20)
-                    .HasColumnName("UniversityID");
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.GroupUniversities)
@@ -374,15 +366,12 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.RegisterTime).HasColumnType("datetime");
 
-                entity.Property(e => e.StudentId)
-                    .HasMaxLength(20)
-                    .HasColumnName("StudentID");
+                entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
                 entity.Property(e => e.TeamId).HasColumnName("TeamID");
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Participants)
-                    .HasPrincipalKey(p => p.StudentId)
                     .HasForeignKey(d => d.StudentId)
                     .HasConstraintName("FK__Participa__Stude__46E78A0C");
 
@@ -400,10 +389,7 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.StudentId)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasColumnName("StudentID");
+                entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Ratings)
@@ -413,7 +399,6 @@ namespace UNICS.Data.Models.DB
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Ratings)
-                    .HasPrincipalKey(p => p.StudentId)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Rating__StudentI__4D94879B");
@@ -428,6 +413,22 @@ namespace UNICS.Data.Models.DB
                 entity.Property(e => e.RoleName)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<SeedsWallet>(entity =>
+            {
+                entity.ToTable("SeedsWallet");
+
+                entity.Property(e => e.Id)
+                    .HasMaxLength(20)
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.StudentId).HasColumnName("StudentID");
+
+                entity.HasOne(d => d.Student)
+                    .WithMany(p => p.SeedsWallets)
+                    .HasForeignKey(d => d.StudentId)
+                    .HasConstraintName("FK__SeedsWall__Stude__35BCFE0A");
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -450,32 +451,11 @@ namespace UNICS.Data.Models.DB
                     .HasConstraintName("FK__Team__Competitio__4316F928");
             });
 
-            modelBuilder.Entity<TokenWallet>(entity =>
-            {
-                entity.ToTable("TokenWallet");
-
-                entity.Property(e => e.Id)
-                    .HasMaxLength(20)
-                    .HasColumnName("ID");
-
-                entity.Property(e => e.StudentId)
-                    .HasMaxLength(20)
-                    .HasColumnName("StudentID");
-
-                entity.HasOne(d => d.Student)
-                    .WithMany(p => p.TokenWallets)
-                    .HasPrincipalKey(p => p.StudentId)
-                    .HasForeignKey(d => d.StudentId)
-                    .HasConstraintName("FK__TokenWall__Stude__35BCFE0A");
-            });
-
             modelBuilder.Entity<University>(entity =>
             {
                 entity.ToTable("University");
 
-                entity.Property(e => e.Id)
-                    .HasMaxLength(20)
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Closing).HasColumnType("datetime");
 
@@ -492,13 +472,18 @@ namespace UNICS.Data.Models.DB
                 entity.Property(e => e.Phone)
                     .HasMaxLength(15)
                     .IsFixedLength(true);
+
+                entity.Property(e => e.UniCode)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A78BE7156AA")
+                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A786FC3AE7B")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("ID");
@@ -519,13 +504,10 @@ namespace UNICS.Data.Models.DB
                 entity.Property(e => e.MajorId).HasColumnName("MajorID");
 
                 entity.Property(e => e.StudentId)
-                    .IsRequired()
                     .HasMaxLength(20)
                     .HasColumnName("StudentID");
 
-                entity.Property(e => e.UniversityId)
-                    .HasMaxLength(20)
-                    .HasColumnName("UniversityID");
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
                 entity.HasOne(d => d.Major)
                     .WithMany(p => p.Users)

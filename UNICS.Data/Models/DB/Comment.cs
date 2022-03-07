@@ -8,7 +8,7 @@ namespace UNICS.Data.Models.DB
     public partial class Comment
     {
         public int Id { get; set; }
-        public string StudentId { get; set; }
+        public int StudentId { get; set; }
         public int CompetitionId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }

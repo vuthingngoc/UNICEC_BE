@@ -13,12 +13,12 @@ namespace UNICS.Data.Models.DB
             Comments = new HashSet<Comment>();
             Participants = new HashSet<Participant>();
             Ratings = new HashSet<Rating>();
-            TokenWallets = new HashSet<TokenWallet>();
+            SeedsWallets = new HashSet<SeedsWallet>();
         }
 
         public int Id { get; set; }
         public int RoleId { get; set; }
-        public string UniversityId { get; set; }
+        public int? UniversityId { get; set; }
         public int? MajorId { get; set; }
         public string Fullname { get; set; }
         public string StudentId { get; set; }
@@ -35,6 +35,6 @@ namespace UNICS.Data.Models.DB
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
-        public virtual ICollection<TokenWallet> TokenWallets { get; set; }
+        public virtual ICollection<SeedsWallet> SeedsWallets { get; set; }
     }
 }
