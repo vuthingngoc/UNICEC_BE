@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UNICS.Business.Common
+namespace UNICS.Data.ViewModels.Common
 {
     public class PagingRequest
     {

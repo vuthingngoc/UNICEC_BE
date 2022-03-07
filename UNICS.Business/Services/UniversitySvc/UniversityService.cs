@@ -1,6 +1,6 @@
 ﻿using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.ImplRepo.UniversityRepo;
-using UNICS.Data.ViewModels.University;
+using UNICS.Data.ViewModels.Entities.University;
 
 namespace UNICS.Business.Services.UniversitySvc
 {
