@@ -5,14 +5,12 @@ using System.Collections.Generic;
 
 namespace UNICS.Data.Models.DB
 {
-    public partial class Participant
+    public partial class SeedsWallet
     {
-        public int Id { get; set; }
-        public int? TeamId { get; set; }
+        public string Id { get; set; }
+        public double? Ammount { get; set; }
         public int? StudentId { get; set; }
-        public DateTime? RegisterTime { get; set; }
 
         public virtual User Student { get; set; }
-        public virtual Team Team { get; set; }
     }
 }

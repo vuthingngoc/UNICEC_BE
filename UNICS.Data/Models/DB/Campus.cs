@@ -12,7 +12,7 @@ namespace UNICS.Data.Models.DB
         public string Description { get; set; }
         public int? Status { get; set; }
         public string Address { get; set; }
-        public string UniversityId { get; set; }
+        public int? UniversityId { get; set; }
         public int? AreaId { get; set; }
 
         public virtual Area Area { get; set; }

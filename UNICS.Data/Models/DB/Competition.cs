@@ -31,9 +31,9 @@ namespace UNICS.Data.Models.DB
         public bool Public { get; set; }
         public int Status { get; set; }
         public string Address { get; set; }
-        public string TokenCode { get; set; }
-        public double TokenPoint { get; set; }
-        public double TokenDeposited { get; set; }
+        public string SeedsCode { get; set; }
+        public double SeedsPoint { get; set; }
+        public double SeedsDeposited { get; set; }
         public int View { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
