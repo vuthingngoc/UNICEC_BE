@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UNICS.Data.ViewModels.Competition
+namespace UNICS.Data.ViewModels.Entities.Competition
 {
     public class ViewCompetition
     {

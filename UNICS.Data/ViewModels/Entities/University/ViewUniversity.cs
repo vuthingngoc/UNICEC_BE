@@ -1,4 +1,4 @@
-﻿namespace UNICS.Data.ViewModels.University
+﻿namespace UNICS.Data.ViewModels.Entities.University
 {
     public class ViewUniversity
     {

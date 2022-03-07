@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UNICS.Data.ViewModels.Image
+namespace UNICS.Data.ViewModels.Entities.Image
 {
     public class ViewImage
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace UNICS.Business.Common
+namespace UNICS.Data.ViewModels.Common
 {
     public class PagingResult<T>
     {
