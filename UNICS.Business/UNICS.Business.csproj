@@ -12,4 +12,22 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\CommentSvc\" />
+    <Folder Include="Services\CompetitionSvc\" />
+    <Folder Include="Services\CompetitionTypeSvc\" />
+    <Folder Include="Services\GroupUniversitySvc\" />
+    <Folder Include="Services\ImageSvc\" />
+    <Folder Include="Services\MajorSvc\" />
+    <Folder Include="Services\MajorTypeSvc\" />
+    <Folder Include="Services\ManagerInCompetitionSvc\" />
+    <Folder Include="Services\VideoSvc\" />
+    <Folder Include="Services\UserSvc\" />
+    <Folder Include="Services\TeamSvc\" />
+    <Folder Include="Services\SeedsWalletSvc\" />
+    <Folder Include="Services\RoleSvc\" />
+    <Folder Include="Services\RatingSvc\" />
+    <Folder Include="Services\ParticipantSvc\" />
+  </ItemGroup>
+
 </Project>
