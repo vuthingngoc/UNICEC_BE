@@ -3,9 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace UNICS.Data.ViewModels.Entities.Album
 {
-    public class ViewAlbum
+    public class AlbumInsertModel
     {
-        public int Id { get; set; }
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
         [JsonPropertyName("album_type_id")]

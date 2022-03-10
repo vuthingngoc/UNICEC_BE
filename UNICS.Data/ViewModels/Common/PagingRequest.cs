@@ -5,7 +5,7 @@ namespace UNICS.Data.ViewModels.Common
     public class PagingRequest
     {
         // maxPageSize chỉ cho 50 thôi
-        const int maxPageSize = 50;
+        const int MAX_PAGE_SIZE = 50;
         //
         // luôn luôn ở trang 1
         // change name of parameter
@@ -24,7 +24,7 @@ namespace UNICS.Data.ViewModels.Common
             {
                 // nếu true thì trả ra maxPageSize chỉ cho 50 thôi
                 // còn false thì sẽ lấy giá trị ng truyền
-                _pageSize = (value > maxPageSize) ? maxPageSize : value;
+                _pageSize = (value > MAX_PAGE_SIZE) ? MAX_PAGE_SIZE : value;
             }
         }
     }
