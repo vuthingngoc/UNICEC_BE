@@ -38,12 +38,12 @@ namespace UNICS.Business.Services.AlbumSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert()
+        public Task<bool> Insert(AlbumInsertModel album)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update()
+        public Task<bool> Update(AlbumUpdateModel album)
         {
             throw new NotImplementedException();
         }

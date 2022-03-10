@@ -19,12 +19,27 @@ namespace UNICS.Business.Services.AreaSvc
             _albumTypeRepo = albumTypeRepo;
         }
 
-        public ViewAlbumType getAll(PagingRequest request)
+        public Task<bool> Delete(int id)
         {
             throw new NotImplementedException();
         }
 
-        public ViewAlbumType getById(int id)
+        public Task<ViewAlbumType> GetAll(PagingRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ViewAlbumType> GetById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Insert()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Update()
         {
             throw new NotImplementedException();
         }

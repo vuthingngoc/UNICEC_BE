@@ -21,6 +21,7 @@ namespace UNICS.Data.Models.DB
         public virtual DbSet<AlbumType> AlbumTypes { get; set; }
         public virtual DbSet<Area> Areas { get; set; }
         public virtual DbSet<Blog> Blogs { get; set; }
+        public virtual DbSet<BlogType> BlogTypes { get; set; }
         public virtual DbSet<Campus> Campuses { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Competition> Competitions { get; set; }
@@ -115,6 +116,8 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.BlogTypeId).HasColumnName("BlogTypeID");
+
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
@@ -125,16 +128,38 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
+                entity.HasOne(d => d.BlogType)
+                    .WithMany(p => p.Blogs)
+                    .HasForeignKey(d => d.BlogTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Blog__BlogTypeID__3C69FB99");
+
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Blogs)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Blog__Competitio__398D8EEE");
+                    .HasConstraintName("FK__Blog__Competitio__3B75D760");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Blogs)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Blog__UserID__38996AB5");
+                    .HasConstraintName("FK__Blog__UserID__3A81B327");
+            });
+
+            modelBuilder.Entity<BlogType>(entity =>
+            {
+                entity.ToTable("BlogType");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Color)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<Campus>(entity =>
@@ -186,13 +211,13 @@ namespace UNICS.Data.Models.DB
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comment__Competi__4AB81AF0");
+                    .HasConstraintName("FK__Comment__Competi__4D94879B");
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comment__Student__49C3F6B7");
+                    .HasConstraintName("FK__Comment__Student__4CA06362");
             });
 
             modelBuilder.Entity<Competition>(entity =>
@@ -255,12 +280,12 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.GroupUniversities)
                     .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__GroupUniv__Compe__3D5E1FD2");
+                    .HasConstraintName("FK__GroupUniv__Compe__403A8C7D");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.GroupUniversities)
                     .HasForeignKey(d => d.UniversityId)
-                    .HasConstraintName("FK__GroupUniv__Unive__3C69FB99");
+                    .HasConstraintName("FK__GroupUniv__Unive__3F466844");
             });
 
             modelBuilder.Entity<Image>(entity =>
@@ -352,12 +377,12 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Competition)
                     .WithMany()
                     .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__ManagerIn__Compe__3F466844");
+                    .HasConstraintName("FK__ManagerIn__Compe__4222D4EF");
 
                 entity.HasOne(d => d.User)
                     .WithMany()
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__ManagerIn__UserI__403A8C7D");
+                    .HasConstraintName("FK__ManagerIn__UserI__4316F928");
             });
 
             modelBuilder.Entity<Participant>(entity =>
@@ -373,12 +398,12 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.StudentId)
-                    .HasConstraintName("FK__Participa__Stude__46E78A0C");
+                    .HasConstraintName("FK__Participa__Stude__49C3F6B7");
 
                 entity.HasOne(d => d.Team)
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.TeamId)
-                    .HasConstraintName("FK__Participa__TeamI__45F365D3");
+                    .HasConstraintName("FK__Participa__TeamI__48CFD27E");
             });
 
             modelBuilder.Entity<Rating>(entity =>
@@ -395,13 +420,13 @@ namespace UNICS.Data.Models.DB
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Rating__Competit__4E88ABD4");
+                    .HasConstraintName("FK__Rating__Competit__5165187F");
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Rating__StudentI__4D94879B");
+                    .HasConstraintName("FK__Rating__StudentI__5070F446");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -448,7 +473,7 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Teams)
                     .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__Team__Competitio__4316F928");
+                    .HasConstraintName("FK__Team__Competitio__45F365D3");
             });
 
             modelBuilder.Entity<University>(entity =>
@@ -483,7 +508,7 @@ namespace UNICS.Data.Models.DB
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A786FC3AE7B")
+                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A78DE04B075")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("ID");
