@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace UNICS.Data.ViewModels.Entities.Campus
 {
@@ -13,6 +9,7 @@ namespace UNICS.Data.ViewModels.Entities.Campus
         public string Description { get; set; }
         public int? Status { get; set; }
         public string Address { get; set; }
+        [JsonPropertyName("university_id")]
         public int? UniversityId { get; set; }
         public int? AreaId { get; set; }
     }

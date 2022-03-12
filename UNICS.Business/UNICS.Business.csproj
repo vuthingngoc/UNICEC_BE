@@ -14,8 +14,6 @@
 
   <ItemGroup>
     <Folder Include="Services\CommentSvc\" />
-    <Folder Include="Services\CompetitionSvc\" />
-    <Folder Include="Services\CompetitionTypeSvc\" />
     <Folder Include="Services\GroupUniversitySvc\" />
     <Folder Include="Services\ImageSvc\" />
     <Folder Include="Services\MajorSvc\" />

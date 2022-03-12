@@ -34,12 +34,12 @@ namespace UNICS.Business.Services.AreaSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert()
+        public Task<bool> Insert(AlbumTypeInsertModel albumType)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update()
+        public Task<bool> Update(ViewAlbumType albumType)
         {
             throw new NotImplementedException();
         }
