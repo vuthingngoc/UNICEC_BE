@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using UNICS.Data.ViewModels.Common;
+using UNICS.Data.ViewModels.Entities.CompetitionType;
 
 namespace UNICS.Business.Services.CompetitionTypeSvc
 {
-    class ICompetitionTypeSvc
+    public interface ICompetitionTypeSvc
     {
+        Task<PagingResult<ViewCompetitionType>> GetAll(PagingRequest request);
+        Task<ViewCompetitionType> GetById(int id);
+        Task<bool> Insert(CompetitionTypeInsertModel competitionType);
+        Task<bool> Update(ViewCompetitionType competitionType);
+        Task<bool> Delete(int id);
     }
 }

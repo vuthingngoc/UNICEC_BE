@@ -20,22 +20,22 @@ namespace UNICS.Business.Services.CampusSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewCampus>> GetAll()
+        public Task<PagingResult<ViewCampus>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ViewCampus> GetById()
+        public Task<ViewCampus> GetById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert()
+        public Task<bool> Insert(CampusInsertModel campus)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update()
+        public Task<bool> Update(CampusUpdateModel campus)
         {
             throw new NotImplementedException();
         }

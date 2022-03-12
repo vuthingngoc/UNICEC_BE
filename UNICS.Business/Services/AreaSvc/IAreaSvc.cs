@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UNICS.Data.ViewModels.Common;
 using UNICS.Data.ViewModels.Entities.Area;
 
@@ -10,7 +6,10 @@ namespace UNICS.Business.Services.AreaSvc
 {
     public interface IAreaSvc
     {
-        public PagingResult<ViewArea> getAll();
-        public ViewArea getByCampusId(int id);
+        public Task<PagingResult<ViewArea>> GetAll(PagingRequest request);
+        public Task<ViewArea> GetByCampusId(int id);
+        public Task<bool> Insert(AreaInsertModel area);
+        public Task<bool> Update(ViewArea area);
+        public Task<bool> Delete(int id);
     }
 }

@@ -6,7 +6,7 @@ namespace UNICS.Business.Services.AlbumTypeSvc
 {
     public interface IAlbumTypeSvc
     {
-        Task<ViewAlbumType> GetAll(PagingRequest request);
+        Task<PagingResult<ViewAlbumType>> GetAll(PagingRequest request);
         Task<ViewAlbumType> GetById(int id);
         Task<bool> Insert(AlbumTypeInsertModel albumType);
         Task<bool> Update(ViewAlbumType albumType);
