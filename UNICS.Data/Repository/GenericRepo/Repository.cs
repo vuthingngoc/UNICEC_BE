@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using UNICS.Data.Models.DB;
@@ -21,17 +20,11 @@ namespace UNICS.Data.Repository.GenericRepo
 
         public async Task<T> Get(string id)
         {
-            try
-            {
-                // finding record by id
-                T entity = await _entities.FindAsync(id);
-                return entity == null ?
-                    throw new NullReferenceException("Not found the given identity") : entity;
+            // finding record by id
+            T entity = await _entities.FindAsync(id);
+            return entity == null ?
+                throw new NullReferenceException("Not found the given identity") : entity;
 
-            }catch(SqlException ex)
-            {
-                throw;
-            }
             // finish this process then service will return result to view
         }
 

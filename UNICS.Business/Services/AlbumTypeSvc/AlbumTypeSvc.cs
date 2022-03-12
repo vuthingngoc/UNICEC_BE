@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UNICS.Business.Services.AlbumTypeSvc;
 using UNICS.Data.Repository.ImplRepo.AlbumTypeRepo;
@@ -24,7 +21,7 @@ namespace UNICS.Business.Services.AreaSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewAlbumType> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewAlbumType>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }

@@ -3,7 +3,7 @@ using UNICS.Data.Repository.GenericRepo;
 
 namespace UNICS.Data.Repository.ImplRepo.CompetitionTypeRepo
 {
-    public class CompetitionTypeRepo : Repository<CompetitionType>, ICompetitionType
+    public class CompetitionTypeRepo : Repository<CompetitionType>, ICompetitionTypeRepo
     {
         public CompetitionTypeRepo(UNICSContext context) : base(context)
         {

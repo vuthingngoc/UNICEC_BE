@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.CampusSvc
 {
     public interface ICampusSvc
     {
-        Task<PagingResult<ViewCampus>> GetAll();
-        Task<ViewCampus> GetById();
-        Task<bool> Insert();
-        Task<bool> Update();
+        Task<PagingResult<ViewCampus>> GetAll(PagingRequest request);
+        Task<ViewCampus> GetById(int id);
+        Task<bool> Insert(CampusInsertModel campus);
+        Task<bool> Update(CampusUpdateModel campus);
         Task<bool> Delete(int id);
     }
 }

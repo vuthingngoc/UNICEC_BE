@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
-using UNICS.Data.Repository.ImplRepo.AreaRepo;
+using UNICS.Data.Repository.ImplRepo.UserRepo;
 using UNICS.Data.ViewModels.Common;
-using UNICS.Data.ViewModels.Entities.Area;
+using UNICS.Data.ViewModels.Entities.User;
 
-namespace UNICS.Business.Services.AreaSvc
+namespace UNICS.Business.Services.UserSvc
 {
-    public class AreaSvc : IAreaSvc
+    public class UserSvc : IUserSvc
     {
-        private IAreaRepo _areaRepo;
+        private IUserRepo _userRepo;
 
-        public AreaSvc(IAreaRepo areaRepo)
+        public UserSvc(IUserRepo userRepo)
         {
-            _areaRepo = areaRepo;
+            _userRepo = userRepo;
         }
 
         public Task<bool> Delete(int id)
@@ -20,22 +20,22 @@ namespace UNICS.Business.Services.AreaSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewArea>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewUser>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ViewArea> GetByCampusId(int id)
+        public Task<ViewUser> GetById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(AreaInsertModel area)
+        public Task<bool> Insert(UserInsertModel user)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update(ViewArea area)
+        public Task<bool> Update(ViewUser user)
         {
             throw new NotImplementedException();
         }
