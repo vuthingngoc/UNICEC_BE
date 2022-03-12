@@ -8,8 +8,8 @@ namespace UNICS.Business.Services.AlbumTypeSvc
     {
         Task<ViewAlbumType> GetAll(PagingRequest request);
         Task<ViewAlbumType> GetById(int id);
-        Task<bool> Insert();
-        Task<bool> Update();
+        Task<bool> Insert(AlbumTypeInsertModel albumType);
+        Task<bool> Update(ViewAlbumType albumType);
         Task<bool> Delete(int id);
     }
 }

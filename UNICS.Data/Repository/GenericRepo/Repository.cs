@@ -1,8 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using UNICS.Data.Models.DB;
+using UNICS.Data.ViewModels.Common;
 
 namespace UNICS.Data.Repository.GenericRepo
 {
@@ -18,12 +19,12 @@ namespace UNICS.Data.Repository.GenericRepo
             _entities = context.Set<T>();
         }
 
-        public T Get(string id)
+        public async Task<T> Get(string id)
         {
             try
             {
                 // finding record by id
-                T entity = _entities.Find(id);
+                T entity = await _entities.FindAsync(id);
                 return entity == null ?
                     throw new NullReferenceException("Not found the given identity") : entity;
 
@@ -34,17 +35,17 @@ namespace UNICS.Data.Repository.GenericRepo
             // finish this process then service will return result to view
         }
 
-        public IEnumerable<T> GetAll()
+        public async Task<PagingResult<T>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public bool Insert(T entity)
+        public async Task<bool> Insert(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public bool Update(T entity)
+        public async Task<bool> Update(T entity)
         {
             throw new NotImplementedException();
         }

@@ -11,6 +11,7 @@ namespace UNICS.Data.Models.DB
         {
             Blogs = new HashSet<Blog>();
             Comments = new HashSet<Comment>();
+            ManagerInCompetitions = new HashSet<ManagerInCompetition>();
             Participants = new HashSet<Participant>();
             Ratings = new HashSet<Rating>();
             SeedsWallets = new HashSet<SeedsWallet>();
@@ -33,6 +34,7 @@ namespace UNICS.Data.Models.DB
         public virtual University University { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<ManagerInCompetition> ManagerInCompetitions { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
         public virtual ICollection<SeedsWallet> SeedsWallets { get; set; }
