@@ -500,7 +500,9 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.Closing).HasColumnType("datetime");
+                entity.Property(e => e.Closing)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Description).HasMaxLength(500);
 
@@ -510,11 +512,13 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Name).HasMaxLength(50);
 
-                entity.Property(e => e.Openning).HasColumnType("datetime");
+                entity.Property(e => e.Openning)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Phone)
                     .HasMaxLength(15)
-                    .IsFixedLength(true);
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UniCode)
                     .IsRequired()
@@ -535,10 +539,12 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Dob)
                     .HasMaxLength(20)
-                    .HasColumnName("DOB")
-                    .IsFixedLength(true);
+                    .IsUnicode(false)
+                    .HasColumnName("DOB");
 
-                entity.Property(e => e.Email).HasMaxLength(50);
+                entity.Property(e => e.Email)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Fullname).HasMaxLength(50);
 

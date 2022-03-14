@@ -21,12 +21,12 @@ namespace UNICS.Business.Services.CompetitionTypeSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<CompetitionType>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewCompetitionType>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CompetitionType> GetById(int id)
+        public Task<ViewCompetitionType> GetById(int id)
         {
             throw new NotImplementedException();
         }

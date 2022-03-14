@@ -33,12 +33,12 @@ namespace UNICS.Business.Services.BlogSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert()
+        public Task<bool> Insert(BlogInsertModel blog)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update()
+        public Task<bool> Update(BlogUpdateModel blog)
         {
             throw new NotImplementedException();
         }
