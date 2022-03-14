@@ -27,8 +27,8 @@ namespace UNICS.Business.Services.UniversitySvc
                 uniView.Description = uni.Description;
                 uniView.Phone = uni.Phone;
                 uniView.Email = uni.Email;
-                uniView.Openning = uni.Openning.ToString();
-                uniView.Closing = uni.Closing.ToString();
+                uniView.Openning = uni.Openning;
+                uniView.Closing = uni.Closing;
                 //
             }
             return uniView;
