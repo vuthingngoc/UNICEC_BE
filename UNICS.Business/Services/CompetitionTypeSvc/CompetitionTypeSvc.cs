@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UNICS.Data.ViewModels.Common;
 using UNICS.Data.ViewModels.Entities.CompetitionType;
