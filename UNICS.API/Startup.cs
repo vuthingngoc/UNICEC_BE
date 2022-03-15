@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.IO;
 using UNICS.Business.Services.UniversitySvc;
 using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.GenericRepo;
@@ -47,6 +50,18 @@ namespace UNICS.API
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IUniversityRepo, UniversityRepo>();
+
+            //----------------------------------------------FIREBASE-------------------------
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
+            //add firebase admin
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile(path),
+                ProjectId = "unics-e46a4",
+                ServiceAccountId = "firebase-adminsdk-td0dr@unics-e46a4.iam.gserviceaccount.com"
+
+            }) ;
+
 
             services.AddSwaggerGen(c =>
             {

@@ -13,6 +13,6 @@
         //
         public string Openning { get; set; }
         //
-        public string Closing { get; set; }
+        public string Closing { get; set; }       
     }
 }
