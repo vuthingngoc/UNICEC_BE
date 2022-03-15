@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+
+using System.IO;
+
 using UNICS.Business.Services.AlbumSvc;
 using UNICS.Business.Services.AlbumTypeSvc;
 using UNICS.Business.Services.AreaSvc;
@@ -26,6 +31,7 @@ using UNICS.Business.Services.RatingSvc;
 using UNICS.Business.Services.RoleSvc;
 using UNICS.Business.Services.SeedsWalletSvc;
 using UNICS.Business.Services.TeamSvc;
+
 using UNICS.Business.Services.UniversitySvc;
 using UNICS.Business.Services.UserSvc;
 using UNICS.Business.Services.VideoSvc;
@@ -137,6 +143,18 @@ namespace UNICS.API
             services.AddTransient<IUniversityRepo, UniversityRepo>();
             services.AddTransient<IUserRepo, UserRepo>();
             services.AddTransient<IVideoRepo, VideoRepo>();
+
+            //----------------------------------------------FIREBASE-------------------------
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
+            //add firebase admin
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile(path),
+                ProjectId = "unics-e46a4",
+                ServiceAccountId = "firebase-adminsdk-td0dr@unics-e46a4.iam.gserviceaccount.com"
+
+            }) ;
+
 
             services.AddSwaggerGen(c =>
             {
