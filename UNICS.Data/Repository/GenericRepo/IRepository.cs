@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Threading.Tasks;
+using UNICS.Data.ViewModels.Common;
 
 namespace UNICS.Data.Repository.GenericRepo
 {
     public interface IRepository<T> where T : class
     {
         // Get All
-        IEnumerable<T> GetAll();
+        Task<PagingResult<T>> GetAll(PagingRequest request);
         // Get By Id
-        T Get(String id);
+        Task<T> Get(string id);
         // Insert
-        bool Insert(T entity);
+        Task<bool> Insert(T entity);
         // Update / Delete = Enum status equal 0
-        bool Update(T entity);
-
-        //
+        Task<bool> Update(T entity);       
     }
 }

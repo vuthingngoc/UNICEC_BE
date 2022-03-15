@@ -1,9 +1,10 @@
-﻿using UNICS.Data.ViewModels.Entities.University;
+﻿using System.Threading.Tasks;
+using UNICS.Data.ViewModels.Entities.University;
 
 namespace UNICS.Business.Services.UniversitySvc
 {
     public interface IUniversityService
     {
-        public ViewUniversity GetUniversityById(string id);
+        Task<ViewUniversity> GetUniversityById(string id);
     }
 }

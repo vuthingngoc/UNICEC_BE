@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UNICS.Business.Services.UniversitySvc;
 using UNICS.Data.ViewModels.Entities.University;
 
@@ -31,11 +32,11 @@ namespace UNICS.API.Controllers
 
         //Get 1 university by ID
         [HttpGet("{id}")]
-        public IActionResult GetUniversityById(String id)
+        public async Task<IActionResult> GetUniversityById(string id)
         {
 
             //chưa check null
-            ViewUniversity result = _universityService.GetUniversityById(id);
+            ViewUniversity result = await _universityService.GetUniversityById(id);
             //
             return Ok(result);
         }

@@ -13,7 +13,8 @@ namespace UNICS.Data.Models.DB
             Blogs = new HashSet<Blog>();
             Comments = new HashSet<Comment>();
             GroupUniversities = new HashSet<GroupUniversity>();
-            Majors = new HashSet<Major>();
+            MajorInCompetitions = new HashSet<MajorInCompetition>();
+            ManagerInCompetitions = new HashSet<ManagerInCompetition>();
             Ratings = new HashSet<Rating>();
             Teams = new HashSet<Team>();
         }
@@ -41,7 +42,8 @@ namespace UNICS.Data.Models.DB
         public virtual ICollection<Blog> Blogs { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<GroupUniversity> GroupUniversities { get; set; }
-        public virtual ICollection<Major> Majors { get; set; }
+        public virtual ICollection<MajorInCompetition> MajorInCompetitions { get; set; }
+        public virtual ICollection<ManagerInCompetition> ManagerInCompetitions { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
     }

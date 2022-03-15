@@ -21,8 +21,8 @@ namespace UNICS.Data.Models.DB
         public string Description { get; set; }
         public string Phone { get; set; }
         public DateTime? Founding { get; set; }
-        public DateTime? Openning { get; set; }
-        public DateTime? Closing { get; set; }
+        public string Openning { get; set; }
+        public string Closing { get; set; }
         public int? Status { get; set; }
 
         public virtual ICollection<Campus> Campuses { get; set; }

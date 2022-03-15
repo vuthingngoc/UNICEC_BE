@@ -14,7 +14,9 @@ namespace UNICS.Data.Models.DB
         public int? Status { get; set; }
         public int? UserId { get; set; }
         public int CompetitionId { get; set; }
+        public int BlogTypeId { get; set; }
 
+        public virtual BlogType BlogType { get; set; }
         public virtual Competition Competition { get; set; }
         public virtual User User { get; set; }
     }
