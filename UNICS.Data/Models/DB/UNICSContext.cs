@@ -17,36 +17,35 @@ namespace UNICS.Data.Models.DB
         {
         }
 
-        public virtual DbSet<Album> Albums { get; set; }
-        public virtual DbSet<AlbumType> AlbumTypes { get; set; }
-        public virtual DbSet<Area> Areas { get; set; }
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
-        public virtual DbSet<Campus> Campuses { get; set; }
-        public virtual DbSet<Comment> Comments { get; set; }
+        public virtual DbSet<City> Cities { get; set; }
+        public virtual DbSet<Club> Clubs { get; set; }
+        public virtual DbSet<ClubActivity> ClubActivities { get; set; }
+        public virtual DbSet<ClubPreviou> ClubPrevious { get; set; }
+        public virtual DbSet<ClubRole> ClubRoles { get; set; }
         public virtual DbSet<Competition> Competitions { get; set; }
+        public virtual DbSet<CompetitionEntity> CompetitionEntities { get; set; }
+        public virtual DbSet<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual DbSet<CompetitionType> CompetitionTypes { get; set; }
-        public virtual DbSet<GroupUniversity> GroupUniversities { get; set; }
-        public virtual DbSet<Image> Images { get; set; }
+        public virtual DbSet<Department> Departments { get; set; }
+        public virtual DbSet<DepartmentInUniversity> DepartmentInUniversities { get; set; }
+        public virtual DbSet<EntityType> EntityTypes { get; set; }
         public virtual DbSet<Major> Majors { get; set; }
-        public virtual DbSet<MajorInCompetition> MajorInCompetitions { get; set; }
-        public virtual DbSet<MajorType> MajorTypes { get; set; }
-        public virtual DbSet<ManagerInCompetition> ManagerInCompetitions { get; set; }
+        public virtual DbSet<Member> Members { get; set; }
+        public virtual DbSet<MemberTakesActivity> MemberTakesActivities { get; set; }
         public virtual DbSet<Participant> Participants { get; set; }
-        public virtual DbSet<Rating> Ratings { get; set; }
+        public virtual DbSet<ParticipantInTeam> ParticipantInTeams { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<SeedsWallet> SeedsWallets { get; set; }
         public virtual DbSet<Team> Teams { get; set; }
         public virtual DbSet<University> Universities { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Video> Videos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                //Proxies
-                optionsBuilder.UseLazyLoadingProxies();
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=.;Database=UNICS;Trusted_Connection=True;");
             }
@@ -56,63 +55,6 @@ namespace UNICS.Data.Models.DB
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<Album>(entity =>
-            {
-                entity.ToTable("Album");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.AlbumTypeId).HasColumnName("AlbumTypeID");
-
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
-
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.HasOne(d => d.AlbumType)
-                    .WithMany(p => p.Albums)
-                    .HasForeignKey(d => d.AlbumTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Album__AlbumType__1FCDBCEB");
-
-                entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.Albums)
-                    .HasForeignKey(d => d.CompetitionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Album__Competiti__1ED998B2");
-            });
-
-            modelBuilder.Entity<AlbumType>(entity =>
-            {
-                entity.ToTable("AlbumType");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(255);
-            });
-
-            modelBuilder.Entity<Area>(entity =>
-            {
-                entity.ToTable("Area");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.City).HasMaxLength(50);
-            });
-
             modelBuilder.Entity<Blog>(entity =>
             {
                 entity.ToTable("Blog");
@@ -121,32 +63,36 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.BlogTypeId).HasColumnName("BlogTypeID");
 
+                entity.Property(e => e.ClubId).HasColumnName("ClubID");
+
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
 
-                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(1000);
 
-                entity.Property(e => e.Title).HasMaxLength(100);
-
-                entity.Property(e => e.UserId).HasColumnName("UserID");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
                 entity.HasOne(d => d.BlogType)
                     .WithMany(p => p.Blogs)
                     .HasForeignKey(d => d.BlogTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Blog__BlogTypeID__3F466844");
+                    .HasConstraintName("FK__Blog__BlogTypeID__440B1D61");
+
+                entity.HasOne(d => d.Club)
+                    .WithMany(p => p.Blogs)
+                    .HasForeignKey(d => d.ClubId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Blog__ClubID__44FF419A");
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Blogs)
                     .HasForeignKey(d => d.CompetitionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Blog__Competitio__3E52440B");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Blogs)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Blog__UserID__3D5E1FD2");
+                    .HasConstraintName("FK__Blog__Competitio__4316F928");
             });
 
             modelBuilder.Entity<BlogType>(entity =>
@@ -160,69 +106,134 @@ namespace UNICS.Data.Models.DB
                     .HasMaxLength(20)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.Description)
                     .IsRequired()
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Campus>(entity =>
-            {
-                entity.ToTable("Campus");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Address).HasMaxLength(100);
-
-                entity.Property(e => e.AreaId).HasColumnName("AreaID");
-
-                entity.Property(e => e.Description).HasMaxLength(500);
-
-                entity.Property(e => e.Name).HasMaxLength(50);
-
-                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
-
-                entity.HasOne(d => d.Area)
-                    .WithMany(p => p.Campuses)
-                    .HasForeignKey(d => d.AreaId)
-                    .HasConstraintName("FK__Campus__AreaID__15502E78");
-
-                entity.HasOne(d => d.University)
-                    .WithMany(p => p.Campuses)
-                    .HasForeignKey(d => d.UniversityId)
-                    .HasConstraintName("FK__Campus__Universi__145C0A3F");
-            });
-
-            modelBuilder.Entity<Comment>(entity =>
-            {
-                entity.ToTable("Comment");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
-
-                entity.Property(e => e.Content)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
-
-                entity.Property(e => e.StudentId).HasColumnName("StudentID");
+                    .HasMaxLength(200);
 
                 entity.Property(e => e.Title)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(50);
+            });
 
-                entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.Comments)
-                    .HasForeignKey(d => d.CompetitionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comment__Competi__5070F446");
+            modelBuilder.Entity<City>(entity =>
+            {
+                entity.ToTable("City");
 
-                entity.HasOne(d => d.Student)
-                    .WithMany(p => p.Comments)
-                    .HasForeignKey(d => d.StudentId)
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<Club>(entity =>
+            {
+                entity.ToTable("Club");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Founding).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
+
+                entity.HasOne(d => d.University)
+                    .WithMany(p => p.Clubs)
+                    .HasForeignKey(d => d.UniversityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comment__Student__4F7CD00D");
+                    .HasConstraintName("FK__Club__University__2D27B809");
+            });
+
+            modelBuilder.Entity<ClubActivity>(entity =>
+            {
+                entity.ToTable("ClubActivity");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Beginning).HasColumnType("datetime");
+
+                entity.Property(e => e.ClubId).HasColumnName("ClubID");
+
+                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Ending).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.SeedsCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Club)
+                    .WithMany(p => p.ClubActivities)
+                    .HasForeignKey(d => d.ClubId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ClubActiv__ClubI__36B12243");
+            });
+
+            modelBuilder.Entity<ClubPreviou>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.ClubId).HasColumnName("ClubID");
+
+                entity.Property(e => e.ClubRoleId).HasColumnName("ClubRoleID");
+
+                entity.Property(e => e.EndTime).HasColumnType("datetime");
+
+                entity.Property(e => e.MemberId).HasColumnName("MemberID");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.StartTime).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Club)
+                    .WithMany(p => p.ClubPrevious)
+                    .HasForeignKey(d => d.ClubId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ClubPrevi__ClubI__32E0915F");
+
+                entity.HasOne(d => d.ClubRole)
+                    .WithMany(p => p.ClubPrevious)
+                    .HasForeignKey(d => d.ClubRoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ClubPrevi__ClubR__31EC6D26");
+
+                entity.HasOne(d => d.Member)
+                    .WithMany(p => p.ClubPrevious)
+                    .HasForeignKey(d => d.MemberId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ClubPrevi__Membe__33D4B598");
+            });
+
+            modelBuilder.Entity<ClubRole>(entity =>
+            {
+                entity.ToTable("ClubRole");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<Competition>(entity =>
@@ -260,7 +271,68 @@ namespace UNICS.Data.Models.DB
                     .WithMany(p => p.Competitions)
                     .HasForeignKey(d => d.CompetitionTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Competiti__Compe__1A14E395");
+                    .HasConstraintName("FK__Competiti__Compe__173876EA");
+            });
+
+            modelBuilder.Entity<CompetitionEntity>(entity =>
+            {
+                entity.ToTable("CompetitionEntity");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.EntityTypeId).HasColumnName("EntityTypeID");
+
+                entity.Property(e => e.LastModified).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Size)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Competition)
+                    .WithMany(p => p.CompetitionEntities)
+                    .HasForeignKey(d => d.CompetitionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Compe__4AB81AF0");
+
+                entity.HasOne(d => d.EntityType)
+                    .WithMany(p => p.CompetitionEntities)
+                    .HasForeignKey(d => d.EntityTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Entit__49C3F6B7");
+            });
+
+            modelBuilder.Entity<CompetitionInClub>(entity =>
+            {
+                entity.ToTable("CompetitionInClub");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.ClubId).HasColumnName("ClubID");
+
+                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
+
+                entity.HasOne(d => d.Club)
+                    .WithMany(p => p.CompetitionInClubs)
+                    .HasForeignKey(d => d.ClubId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__ClubI__3D5E1FD2");
+
+                entity.HasOne(d => d.Competition)
+                    .WithMany(p => p.CompetitionInClubs)
+                    .HasForeignKey(d => d.CompetitionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Compe__3E52440B");
             });
 
             modelBuilder.Entity<CompetitionType>(entity =>
@@ -274,57 +346,56 @@ namespace UNICS.Data.Models.DB
                     .HasMaxLength(255);
             });
 
-            modelBuilder.Entity<GroupUniversity>(entity =>
+            modelBuilder.Entity<Department>(entity =>
             {
+                entity.ToTable("Department");
+
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
 
                 entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.GroupUniversities)
+                    .WithMany(p => p.Departments)
                     .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__GroupUniv__Compe__4316F928");
-
-                entity.HasOne(d => d.University)
-                    .WithMany(p => p.GroupUniversities)
-                    .HasForeignKey(d => d.UniversityId)
-                    .HasConstraintName("FK__GroupUniv__Unive__4222D4EF");
+                    .HasConstraintName("FK__Departmen__Compe__1A14E395");
             });
 
-            modelBuilder.Entity<Image>(entity =>
+            modelBuilder.Entity<DepartmentInUniversity>(entity =>
             {
-                entity.ToTable("Image");
+                entity.ToTable("DepartmentInUniversity");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.AlbumId).HasColumnName("AlbumID");
+                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
 
-                entity.Property(e => e.Alt)
-                    .IsRequired()
-                    .HasMaxLength(100);
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+                entity.HasOne(d => d.Department)
+                    .WithMany(p => p.DepartmentInUniversities)
+                    .HasForeignKey(d => d.DepartmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Departmen__Depar__1CF15040");
 
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(500);
+                entity.HasOne(d => d.University)
+                    .WithMany(p => p.DepartmentInUniversities)
+                    .HasForeignKey(d => d.UniversityId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Departmen__Unive__1DE57479");
+            });
+
+            modelBuilder.Entity<EntityType>(entity =>
+            {
+                entity.ToTable("EntityType");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
-
-                entity.Property(e => e.Src)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.HasOne(d => d.Album)
-                    .WithMany(p => p.Images)
-                    .HasForeignKey(d => d.AlbumId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Image__AlbumID__22AA2996");
             });
 
             modelBuilder.Entity<Major>(entity =>
@@ -333,120 +404,126 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+
                 entity.Property(e => e.Description)
                     .IsRequired()
                     .HasMaxLength(500);
 
-                entity.Property(e => e.MajorTypeId).HasColumnName("MajorTypeID");
+                entity.Property(e => e.MajorCode)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.HasOne(d => d.MajorType)
+                entity.HasOne(d => d.Department)
                     .WithMany(p => p.Majors)
-                    .HasForeignKey(d => d.MajorTypeId)
+                    .HasForeignKey(d => d.DepartmentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Major__MajorType__2A4B4B5E");
+                    .HasConstraintName("FK__Major__Departmen__20C1E124");
             });
 
-            modelBuilder.Entity<MajorInCompetition>(entity =>
+            modelBuilder.Entity<Member>(entity =>
             {
-                entity.ToTable("MajorInCompetition");
+                entity.ToTable("Member");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
-
-                entity.Property(e => e.MajorId).HasColumnName("MajorID");
-
-                entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.MajorInCompetitions)
-                    .HasForeignKey(d => d.CompetitionId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MajorInCo__Compe__2E1BDC42");
-
-                entity.HasOne(d => d.Major)
-                    .WithMany(p => p.MajorInCompetitions)
-                    .HasForeignKey(d => d.MajorId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MajorInCo__Major__2D27B809");
-            });
-
-            modelBuilder.Entity<MajorType>(entity =>
-            {
-                entity.ToTable("MajorType");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<ManagerInCompetition>(entity =>
-            {
-                entity.ToTable("ManagerInCompetition");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
-                entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.ManagerInCompetitions)
-                    .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__ManagerIn__Compe__44FF419A");
-
                 entity.HasOne(d => d.User)
-                    .WithMany(p => p.ManagerInCompetitions)
+                    .WithMany(p => p.Members)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__ManagerIn__UserI__45F365D3");
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Member__UserID__2A4B4B5E");
+            });
+
+            modelBuilder.Entity<MemberTakesActivity>(entity =>
+            {
+                entity.ToTable("MemberTakesActivity");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.ClubActivityId).HasColumnName("ClubActivityID");
+
+                entity.Property(e => e.Deadline).HasColumnType("datetime");
+
+                entity.Property(e => e.EndTime).HasColumnType("datetime");
+
+                entity.Property(e => e.MemberId).HasColumnName("MemberID");
+
+                entity.Property(e => e.StartTime).HasColumnType("datetime");
+
+                entity.HasOne(d => d.ClubActivity)
+                    .WithMany(p => p.MemberTakesActivities)
+                    .HasForeignKey(d => d.ClubActivityId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__MemberTak__ClubA__3A81B327");
+
+                entity.HasOne(d => d.Member)
+                    .WithMany(p => p.MemberTakesActivities)
+                    .HasForeignKey(d => d.MemberId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__MemberTak__Membe__398D8EEE");
             });
 
             modelBuilder.Entity<Participant>(entity =>
             {
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.RegisterTime).HasColumnType("datetime");
-
-                entity.Property(e => e.StudentId).HasColumnName("StudentID");
-
-                entity.Property(e => e.TeamId).HasColumnName("TeamID");
-
-                entity.HasOne(d => d.Student)
-                    .WithMany(p => p.Participants)
-                    .HasForeignKey(d => d.StudentId)
-                    .HasConstraintName("FK__Participa__Stude__4CA06362");
-
-                entity.HasOne(d => d.Team)
-                    .WithMany(p => p.Participants)
-                    .HasForeignKey(d => d.TeamId)
-                    .HasConstraintName("FK__Participa__TeamI__4BAC3F29");
-            });
-
-            modelBuilder.Entity<Rating>(entity =>
-            {
-                entity.ToTable("Rating");
+                entity.ToTable("Participant");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.StudentId).HasColumnName("StudentID");
+                entity.Property(e => e.MemberId).HasColumnName("MemberID");
+
+                entity.Property(e => e.RegisterTime).HasColumnType("datetime");
+
+                entity.Property(e => e.UserId).HasColumnName("UserID");
 
                 entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.Ratings)
+                    .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Rating__Competit__5441852A");
+                    .HasConstraintName("FK__Participa__Compe__5535A963");
 
-                entity.HasOne(d => d.Student)
-                    .WithMany(p => p.Ratings)
-                    .HasForeignKey(d => d.StudentId)
+                entity.HasOne(d => d.Member)
+                    .WithMany(p => p.Participants)
+                    .HasForeignKey(d => d.MemberId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Rating__StudentI__534D60F1");
+                    .HasConstraintName("FK__Participa__Membe__534D60F1");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Participants)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Participa__UserI__5441852A");
+            });
+
+            modelBuilder.Entity<ParticipantInTeam>(entity =>
+            {
+                entity.ToTable("ParticipantInTeam");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.ParticipantId).HasColumnName("ParticipantID");
+
+                entity.Property(e => e.TeamId).HasColumnName("TeamID");
+
+                entity.HasOne(d => d.Participant)
+                    .WithMany(p => p.ParticipantInTeams)
+                    .HasForeignKey(d => d.ParticipantId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Participa__Parti__59063A47");
+
+                entity.HasOne(d => d.Team)
+                    .WithMany(p => p.ParticipantInTeams)
+                    .HasForeignKey(d => d.TeamId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Participa__TeamI__5812160E");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -473,7 +550,8 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.SeedsWallets)
                     .HasForeignKey(d => d.StudentId)
-                    .HasConstraintName("FK__SeedsWall__Stude__38996AB5");
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__SeedsWall__Stude__4D94879B");
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -484,16 +562,22 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.Description).HasMaxLength(100);
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
-                entity.Property(e => e.InvitedCode).HasMaxLength(100);
+                entity.Property(e => e.InvitedCode)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
-                entity.Property(e => e.Name).HasMaxLength(50);
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Teams)
                     .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__Team__Competitio__48CFD27E");
+                    .HasConstraintName("FK__Team__Competitio__5070F446");
             });
 
             modelBuilder.Entity<University>(entity =>
@@ -502,23 +586,32 @@ namespace UNICS.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.CityId).HasColumnName("CityID");
+
                 entity.Property(e => e.Closing)
+                    .IsRequired()
                     .HasMaxLength(5)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Description).HasMaxLength(500);
 
-                entity.Property(e => e.Email).HasMaxLength(100);
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
                 entity.Property(e => e.Founding).HasColumnType("datetime");
 
-                entity.Property(e => e.Name).HasMaxLength(50);
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.Openning)
+                    .IsRequired()
                     .HasMaxLength(5)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Phone)
+                    .IsRequired()
                     .HasMaxLength(15)
                     .IsUnicode(false);
 
@@ -526,91 +619,67 @@ namespace UNICS.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(20)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.City)
+                    .WithMany(p => p.Universities)
+                    .HasForeignKey(d => d.CityId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Universit__CityI__1273C1CD");
             });
 
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.StudentId, "UQ__User__32C52A783E1278F5")
-                    .IsUnique();
-
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Description).HasMaxLength(500);
 
                 entity.Property(e => e.Dob)
+                    .IsRequired()
                     .HasMaxLength(20)
                     .IsUnicode(false)
                     .HasColumnName("DOB");
 
                 entity.Property(e => e.Email)
+                    .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Fullname).HasMaxLength(50);
+                entity.Property(e => e.Fullname)
+                    .IsRequired()
+                    .HasMaxLength(50);
 
-                entity.Property(e => e.Gender).HasMaxLength(15);
+                entity.Property(e => e.Gender)
+                    .IsRequired()
+                    .HasMaxLength(15);
 
                 entity.Property(e => e.MajorId).HasColumnName("MajorID");
 
                 entity.Property(e => e.RoleId).HasColumnName("RoleID");
 
-                entity.Property(e => e.StudentId)
-                    .HasMaxLength(20)
-                    .HasColumnName("StudentID");
-
                 entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
+
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnName("UserID");
 
                 entity.HasOne(d => d.Major)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.MajorId)
-                    .HasConstraintName("FK__User__MajorID__35BCFE0A");
+                    .HasConstraintName("FK__User__MajorID__276EDEB3");
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__User__RoleID__33D4B598");
+                    .HasConstraintName("FK__User__RoleID__25869641");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UniversityId)
-                    .HasConstraintName("FK__User__University__34C8D9D1");
-            });
-
-            modelBuilder.Entity<Video>(entity =>
-            {
-                entity.ToTable("Video");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.AlbumId).HasColumnName("AlbumID");
-
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Src)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Title)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.HasOne(d => d.Album)
-                    .WithMany(p => p.Videos)
-                    .HasForeignKey(d => d.AlbumId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Video__AlbumID__25869641");
+                    .HasConstraintName("FK__User__University__267ABA7A");
             });
 
             OnModelCreatingPartial(modelBuilder);

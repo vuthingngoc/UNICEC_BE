@@ -9,13 +9,11 @@ namespace UNICS.Data.Models.DB
     {
         public Competition()
         {
-            Albums = new HashSet<Album>();
             Blogs = new HashSet<Blog>();
-            Comments = new HashSet<Comment>();
-            GroupUniversities = new HashSet<GroupUniversity>();
-            MajorInCompetitions = new HashSet<MajorInCompetition>();
-            ManagerInCompetitions = new HashSet<ManagerInCompetition>();
-            Ratings = new HashSet<Rating>();
+            CompetitionEntities = new HashSet<CompetitionEntity>();
+            CompetitionInClubs = new HashSet<CompetitionInClub>();
+            Departments = new HashSet<Department>();
+            Participants = new HashSet<Participant>();
             Teams = new HashSet<Team>();
         }
 
@@ -23,28 +21,26 @@ namespace UNICS.Data.Models.DB
         public int CompetitionTypeId { get; set; }
         public string Organizer { get; set; }
         public int NumberOfParticipations { get; set; }
-        public int NumberOfGroups { get; set; }
+        public int NumberOfGroup { get; set; }
+        public DateTime ApprovedTime { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
         public DateTime EndTimeRegister { get; set; }
-        public DateTime ApprovedTime { get; set; }
-        public bool Public { get; set; }
-        public int Status { get; set; }
-        public string Address { get; set; }
         public string SeedsCode { get; set; }
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }
+        public bool Public { get; set; }
+        public int Status { get; set; }
+        public string Address { get; set; }
         public int View { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
-        public virtual ICollection<Album> Albums { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<GroupUniversity> GroupUniversities { get; set; }
-        public virtual ICollection<MajorInCompetition> MajorInCompetitions { get; set; }
-        public virtual ICollection<ManagerInCompetition> ManagerInCompetitions { get; set; }
-        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<CompetitionEntity> CompetitionEntities { get; set; }
+        public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
+        public virtual ICollection<Department> Departments { get; set; }
+        public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
     }
 }
