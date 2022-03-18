@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UNICS.Business.Services.UniversitySvc;
+using UNICS.Data.ViewModels.Entities.University;
 
-namespace UNICS.API.Controllers
-{
+namespace UNICS.API.Controllers {
     [Route("api/v1/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
@@ -13,12 +13,12 @@ namespace UNICS.API.Controllers
         // GET: api/<UniversityController>
 
         //tạo service
-        //private IUniversityService _universityService;
+        private IUniversityService _universityService;
 
         //constructor để DI Service vào
-        public UniversityController()
+        public UniversityController(IUniversityService universityService)
         {
-            //this._universityService = universityService;
+            this._universityService = universityService;
         }
 
 
@@ -34,9 +34,9 @@ namespace UNICS.API.Controllers
         {
 
             //chưa check null
-            //ViewUniversity result = await _universityService.GetUniversityById(id);
+            ViewUniversity result = await _universityService.GetUniversityById(id);
             //
-            return Ok();
+            return Ok(result);
         }
 
         // POST api/<UniversityController>
