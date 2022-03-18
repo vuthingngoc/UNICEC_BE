@@ -12,8 +12,7 @@ namespace UNICS.Data.Repository.GenericRepo
         protected readonly UNICSContext context;
         private DbSet<T> _entities;
 
-        public Repository(UNICSContext context)
-        {
+        public Repository(UNICSContext context) {
             this.context = context;
             _entities = context.Set<T>();
         }
