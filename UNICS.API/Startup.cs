@@ -120,9 +120,9 @@ namespace UNICS.API
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddTransient<IAlbumRepo, AlbumRepo>();
-            services.AddTransient<IAlbumTypeRepo, AlbumTypeRepo>();
-            services.AddTransient<IAreaRepo, AreaRepo>();
+            services.AddTransient<IEntityTypeRepo, EntityTypeRepo>();
+            services.AddTransient<ICompetitionEntityRepo, CompetitionEntityRepo>();
+            services.AddTransient<ICityRepo, CityRepo>();
             services.AddTransient<IBlogRepo, BlogRepo>();
             services.AddTransient<IBlogTypeRepo, BlogTypeRepo>();
             services.AddTransient<ICampusRepo, CampusRepo>();
