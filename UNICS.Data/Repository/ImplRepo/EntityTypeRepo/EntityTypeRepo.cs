@@ -3,9 +3,9 @@ using UNICS.Data.Repository.GenericRepo;
 
 namespace UNICS.Data.Repository.ImplRepo.AlbumRepo
 {
-    public class AlbumRepo : Repository<Album>, IAlbumRepo
+    public class EntityTypeRepo : Repository<EntityType>, IEntityTypeRepo
     {
-        public AlbumRepo(UNICSContext context) : base(context)
+        public EntityTypeRepo(UNICSContext context) : base(context)
         {
 
         }

@@ -8,9 +8,9 @@ namespace UNICS.Business.Services.AreaSvc
 {
     public class AreaService : IAreaService
     {
-        private IAreaRepo _areaRepo;
+        private ICityRepo _areaRepo;
 
-        public AreaService(IAreaRepo areaRepo)
+        public AreaService(ICityRepo areaRepo)
         {
             _areaRepo = areaRepo;
         }

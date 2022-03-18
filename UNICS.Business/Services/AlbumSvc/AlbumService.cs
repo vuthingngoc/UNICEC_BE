@@ -8,9 +8,9 @@ namespace UNICS.Business.Services.AlbumSvc
 {
     public class AlbumService : IAlbumService
     {
-        private IAlbumRepo _albumRepo;
+        private IEntityTypeRepo _albumRepo;
 
-        public AlbumService(IAlbumRepo albumRepo)
+        public AlbumService(IEntityTypeRepo albumRepo)
         {
             _albumRepo = albumRepo;
         }

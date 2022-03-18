@@ -1,9 +1,9 @@
 ﻿using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.GenericRepo;
 
-namespace UNICS.Data.Repository.ImplRepo.VideoRepo
+namespace UNICS.Data.Repository.ImplRepo.MemberRepo 
 {
-    public interface IVideoRepo : IRepository<Video>
+    public interface IMemberRepo : IRepository<Member> 
     {
         // To be continued ...
     }
