@@ -10,9 +10,11 @@ namespace UNICS.Data.ViewModels.Entities.Competition
         public int CompetitionTypeId { get; set; }
         public string Organizer { get; set; }
         [JsonPropertyName("number_of_participations")]
-        public int NumberOfParticipations { get; set; }
+        public int NumberOfParticipation { get; set; }
         [JsonPropertyName("number_of_groups")]
-        public int NumberOfGroups { get; set; }
+        public int NumberOfGroup { get; set; }
+        [JsonPropertyName("approved_time")]
+        public DateTime ApprovedTime { get; set; }
         [JsonPropertyName("start_time")]
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
@@ -21,17 +23,15 @@ namespace UNICS.Data.ViewModels.Entities.Competition
         public DateTime StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
         public DateTime EndTimeRegister { get; set; }
-        [JsonPropertyName("approved_time")]
-        public DateTime ApprovedTime { get; set; }
-        public bool Public { get; set; }
-        public int Status { get; set; }
-        public string Address { get; set; }
         [JsonPropertyName("seeds_code")]
         public string SeedsCode { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
+        public bool Public { get; set; }
+        public int Status { get; set; }
+        public string Address { get; set; }
         public int View { get; set; }
     }
 }

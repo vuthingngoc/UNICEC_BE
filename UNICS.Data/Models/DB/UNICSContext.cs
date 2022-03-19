@@ -493,7 +493,6 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Member)
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.MemberId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Participa__Membe__534D60F1");
 
                 entity.HasOne(d => d.User)
@@ -545,13 +544,13 @@ namespace UNICS.Data.Models.DB
                     .HasMaxLength(20)
                     .HasColumnName("ID");
 
-                entity.Property(e => e.StudentId).HasColumnName("StudentID");
+                entity.Property(e => e.UserId).HasColumnName("UserID");
 
-                entity.HasOne(d => d.Student)
+                entity.HasOne(d => d.User)
                     .WithMany(p => p.SeedsWallets)
-                    .HasForeignKey(d => d.StudentId)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__SeedsWall__Stude__4D94879B");
+                    .HasConstraintName("FK__SeedsWall__UserI__4D94879B");
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -577,6 +576,7 @@ namespace UNICS.Data.Models.DB
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Teams)
                     .HasForeignKey(d => d.CompetitionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Team__Competitio__5070F446");
             });
 

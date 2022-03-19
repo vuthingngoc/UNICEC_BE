@@ -10,7 +10,8 @@ namespace UNICS.Business.Services.ParticipantSvc
     {
         private IParticipantRepo _participantRepo;
 
-        public ParticipantService(IParticipantRepo participantRepo) {
+        public ParticipantService(IParticipantRepo participantRepo)
+        {
             _participantRepo = participantRepo;
         }
 
