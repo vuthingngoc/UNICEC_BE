@@ -13,7 +13,7 @@ namespace UNICS.Data.Models.DB
         public int MemberId { get; set; }
         public string Name { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
         public virtual Club Club { get; set; }
         public virtual ClubRole ClubRole { get; set; }

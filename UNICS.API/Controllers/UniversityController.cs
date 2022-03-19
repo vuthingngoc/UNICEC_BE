@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using UNICS.Business.Services.UniversitySvc;
 using UNICS.Data.ViewModels.Entities.University;
 
-namespace UNICS.API.Controllers {
+namespace UNICS.API.Controllers
+{
     [Route("api/v1/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]

@@ -1,10 +1,12 @@
 ﻿using UNICS.Data.Models.DB;
 using UNICS.Data.Repository.GenericRepo;
 
-namespace UNICS.Data.Repository.ImplRepo.CompetitionInClubRepo 
+namespace UNICS.Data.Repository.ImplRepo.CompetitionInClubRepo
 {
-    public class CompetitionInClubRepo : Repository<CompetitionInClub>, ICompetitionInClubRepo {
-        public CompetitionInClubRepo(UNICSContext context) : base(context) {
+    public class CompetitionInClubRepo : Repository<CompetitionInClub>, ICompetitionInClubRepo
+    {
+        public CompetitionInClubRepo(UNICSContext context) : base(context)
+        {
 
         }
     }

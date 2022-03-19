@@ -12,7 +12,8 @@ namespace UNICS.Data.Repository.GenericRepo
         protected readonly UNICSContext context;
         private DbSet<T> _entities;
 
-        public Repository(UNICSContext context) {
+        public Repository(UNICSContext context)
+        {
             this.context = context;
             _entities = context.Set<T>();
         }
@@ -27,17 +28,17 @@ namespace UNICS.Data.Repository.GenericRepo
             // finish this process then service will return result to view
         }
 
-        public async Task<PagingResult<T>> GetAll(PagingRequest request)
+        public Task<PagingResult<T>> GetAll(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Insert(T entity)
+        public Task<bool> Insert(T entity)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Update(T entity)
+        public Task<bool> Update(T entity)
         {
             throw new NotImplementedException();
         }

@@ -4,8 +4,8 @@ namespace UNICS.Data.ViewModels.Entities.SeedsWallet
 {
     public class SeedsWalletInsertModel
     {
-        public double? Ammount { get; set; }
-        [JsonPropertyName("student_id")]
-        public int? StudentId { get; set; }
+        [JsonPropertyName("user_id")]
+        public int UserId { get; set; }
+        public double Ammount { get; set; }
     }
 }

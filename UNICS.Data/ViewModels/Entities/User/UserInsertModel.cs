@@ -10,12 +10,12 @@ namespace UNICS.Data.ViewModels.Entities.User
         public int? UniversityId { get; set; }
         [JsonPropertyName("major_id")]
         public int? MajorId { get; set; }
+        [JsonPropertyName("user_id")]
+        public string UserId { get; set; }
         public string Fullname { get; set; }
-        [JsonPropertyName("student_id")]
-        public string StudentId { get; set; }
         public string Email { get; set; }
         public string Gender { get; set; }
-        public int? Status { get; set; }
+        public bool Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
     }

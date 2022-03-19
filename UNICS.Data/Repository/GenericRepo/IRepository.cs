@@ -12,6 +12,6 @@ namespace UNICS.Data.Repository.GenericRepo
         // Insert
         Task<bool> Insert(T entity);
         // Update / Delete = Enum status equal 0
-        Task<bool> Update(T entity);       
+        Task<bool> Update(T entity);
     }
 }
