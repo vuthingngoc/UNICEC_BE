@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.CompetitionSvc
 {
     public interface ICompetitionService
     {
-        Task<PagingResult<ViewCompetition>> GetAll(PagingRequest request);
-        Task<ViewCompetition> GetById(int id);
-        Task<bool> Insert(CompetitionInsertModel competition);
-        Task<bool> Update(ViewCompetition competition);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewCompetition>> GetAll(PagingRequest request);
+        public Task<ViewCompetition> GetById(int id);
+        public Task<ViewCompetition> Insert(CompetitionInsertModel competition);
+        public Task<bool> Update(ViewCompetition competition);
+        public Task<bool> Delete(int id);
     }
 }

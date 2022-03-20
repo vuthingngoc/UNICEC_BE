@@ -6,11 +6,11 @@ namespace UNICS.Business.Services.MajorSvc
 {
     public interface IMajorService
     {
-        Task<PagingResult<ViewMajor>> GetAll(PagingRequest request);
-        Task<ViewMajor> GetById(int id);
-        Task<bool> Insert(MajorInsertModel major);
-        Task<bool> Update(ViewMajor major);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewMajor>> GetAll(PagingRequest request);
+        public Task<ViewMajor> GetByMajorId(int id);
+        public Task<ViewMajor> Insert(MajorInsertModel major);
+        public Task<bool> Update(ViewMajor major);
+        public Task<bool> Delete(int id);
 
     }
 }

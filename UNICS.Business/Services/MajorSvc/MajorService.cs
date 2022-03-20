@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.MajorSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewMajor> GetById(int id)
+        public Task<ViewMajor> GetByMajorId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(MajorInsertModel major)
+        public Task<ViewMajor> Insert(MajorInsertModel major)
         {
             throw new NotImplementedException();
         }

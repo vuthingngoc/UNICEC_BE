@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.TeamSvc
 {
     public interface ITeamService
     {
-        Task<PagingResult<ViewTeam>> GetAll(PagingRequest request);
-        Task<ViewTeam> GetById(int id);
-        Task<bool> Insert(TeamInsertModel team);
-        Task<bool> Update(TeamUpdateModel team);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewTeam>> GetAll(PagingRequest request);
+        public Task<ViewTeam> GetByTeamId(int id);
+        public Task<ViewTeam> Insert(TeamInsertModel team);
+        public Task<bool> Update(TeamUpdateModel team);
+        public Task<bool> Delete(int id);
     }
 }

@@ -2,17 +2,17 @@
 using System.Threading.Tasks;
 using UNICS.Data.Repository.ImplRepo.AreaRepo;
 using UNICS.Data.ViewModels.Common;
-using UNICS.Data.ViewModels.Entities.Area;
+using UNICS.Data.ViewModels.Entities.City;
 
 namespace UNICS.Business.Services.AreaSvc
 {
     public class CityService : ICityService
     {
-        private ICityRepo _areaRepo;
+        private ICityRepo _cityRepo;
 
-        public CityService(ICityRepo areaRepo)
+        public CityService(ICityRepo cityRepo)
         {
-            _areaRepo = areaRepo;
+            _cityRepo = cityRepo;
         }
 
         public Task<bool> Delete(int id)
@@ -25,17 +25,17 @@ namespace UNICS.Business.Services.AreaSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewCity> GetByCampusId(int id)
+        public Task<ViewCity> GetByCityId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(CityInsertModel area)
+        public Task<ViewCity> Insert(CityInsertModel city)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update(ViewCity area)
+        public Task<bool> Update(ViewCity city)
         {
             throw new NotImplementedException();
         }

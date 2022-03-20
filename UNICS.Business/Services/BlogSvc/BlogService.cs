@@ -30,7 +30,7 @@ namespace UNICS.Business.Services.BlogSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(BlogInsertModel blog)
+        public Task<ViewBlog> Insert(BlogInsertModel blog)
         {
             throw new NotImplementedException();
         }

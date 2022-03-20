@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.UserSvc
 {
     public interface IUserService
     {
-        Task<PagingResult<ViewUser>> GetAll(PagingRequest request);
-        Task<ViewUser> GetById(int id);
-        Task<bool> Insert(UserInsertModel user);
-        Task<bool> Update(ViewUser user);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewUser>> GetAll(PagingRequest request);
+        public Task<ViewUser> GetByUserId(int id);
+        public Task<ViewUser> Insert(UserInsertModel user);
+        public Task<bool> Update(ViewUser user);
+        public Task<bool> Delete(int id);
     }
 }

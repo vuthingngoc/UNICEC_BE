@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.ParticipantSvc
 {
     public interface IParticipantService
     {
-        Task<PagingResult<ViewParticipant>> GetAll(PagingRequest request);
-        Task<ViewParticipant> GetById(int id);
-        Task<bool> Insert(ParticipantInsertModel participant);
-        Task<bool> Update(ViewParticipant participant);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewParticipant>> GetAll(PagingRequest request);
+        public Task<ViewParticipant> GetById(int id);
+        public Task<ViewParticipant> Insert(ParticipantInsertModel participant);
+        public Task<bool> Update(ViewParticipant participant);
+        public Task<bool> Delete(int id);
     }
 }

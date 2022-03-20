@@ -1,15 +1,15 @@
 ﻿using System.Threading.Tasks;
 using UNICS.Data.ViewModels.Common;
-using UNICS.Data.ViewModels.Entities.Area;
+using UNICS.Data.ViewModels.Entities.City;
 
 namespace UNICS.Business.Services.AreaSvc
 {
     public interface ICityService
     {
         public Task<PagingResult<ViewCity>> GetAll(PagingRequest request);
-        public Task<ViewCity> GetByCampusId(int id);
-        public Task<bool> Insert(CityInsertModel area);
-        public Task<bool> Update(ViewCity area);
+        public Task<ViewCity> GetByCityId(int id);
+        public Task<ViewCity> Insert(CityInsertModel city);
+        public Task<bool> Update(ViewCity city);
         public Task<bool> Delete(int id);
     }
 }

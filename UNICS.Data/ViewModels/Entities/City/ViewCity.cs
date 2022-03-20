@@ -1,4 +1,4 @@
-﻿namespace UNICS.Data.ViewModels.Entities.Area
+﻿namespace UNICS.Data.ViewModels.Entities.City
 {
     public class ViewCity
     {

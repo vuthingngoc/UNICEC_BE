@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.RoleSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewRole> GetById(int id)
+        public Task<ViewRole> GetByRoleId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(RoleInsertModel role)
+        public Task<ViewRole> Insert(RoleInsertModel role)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,4 @@
-﻿namespace UNICS.Data.ViewModels.Entities.AlbumType
+﻿namespace UNICS.Data.ViewModels.Entities.EntityType
 {
     public class ViewEntityType
     {

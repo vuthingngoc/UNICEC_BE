@@ -30,7 +30,7 @@ namespace UNICS.Business.Services.CompetitionSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(CompetitionInsertModel competition)
+        public Task<ViewCompetition> Insert(CompetitionInsertModel competition)
         {
             throw new NotImplementedException();
         }

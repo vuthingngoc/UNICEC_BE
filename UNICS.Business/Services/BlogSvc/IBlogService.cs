@@ -8,7 +8,7 @@ namespace UNICS.Business.Services.BlogSvc
     {
         Task<PagingResult<ViewBlog>> GetAll(PagingRequest request);
         Task<ViewBlog> GetById(int id);
-        Task<bool> Insert(BlogInsertModel blog);
+        Task<ViewBlog> Insert(BlogInsertModel blog);
         Task<bool> Update(BlogUpdateModel blog);
         Task<bool> Delete(int id);
 

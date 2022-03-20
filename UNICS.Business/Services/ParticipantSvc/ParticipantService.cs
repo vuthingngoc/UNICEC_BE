@@ -30,7 +30,7 @@ namespace UNICS.Business.Services.ParticipantSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(ParticipantInsertModel participant)
+        public Task<ViewParticipant> Insert(ParticipantInsertModel participant)
         {
             throw new NotImplementedException();
         }

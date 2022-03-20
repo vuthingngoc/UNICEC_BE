@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.CompetitionTypeSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewCompetitionType> GetById(int id)
+        public Task<ViewCompetitionType> GetByCompetitionTypeId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(CompetitionTypeInsertModel competitionType)
+        public Task<ViewCompetitionType> Insert(CompetitionTypeInsertModel competitionType)
         {
             throw new NotImplementedException();
         }

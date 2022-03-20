@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.UserSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewUser> GetById(int id)
+        public Task<ViewUser> GetByUserId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(UserInsertModel user)
+        public Task<ViewUser> Insert(UserInsertModel user)
         {
             throw new NotImplementedException();
         }
