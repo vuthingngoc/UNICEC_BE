@@ -1,4 +1,4 @@
-﻿namespace UNICS.Business.GetRequest
+﻿namespace UNICS.Data.ViewModels.Entities.University
 {
     public class GetUniversityPagingRequest
     {

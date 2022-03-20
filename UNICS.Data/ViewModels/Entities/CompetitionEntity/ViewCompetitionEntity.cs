@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace UNICS.Data.ViewModels.Entities.Album
+namespace UNICS.Data.ViewModels.Entities.CompetitionEntity
 {
     public class ViewCompetitionEntity
     {

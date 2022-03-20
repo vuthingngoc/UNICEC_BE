@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.TeamSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewTeam> GetById(int id)
+        public Task<ViewTeam> GetByTeamId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(TeamInsertModel team)
+        public Task<ViewTeam> Insert(TeamInsertModel team)
         {
             throw new NotImplementedException();
         }

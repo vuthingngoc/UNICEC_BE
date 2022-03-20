@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace UNICS.Data.ViewModels.Entities.Comment
+namespace UNICS.Data.ViewModels.Entities.ClubActivity
 {
     public class ClubActivityInsertModel
     {

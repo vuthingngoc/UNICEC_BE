@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace UNICS.Data.ViewModels.Entities.ManagerInCompetition
+namespace UNICS.Data.ViewModels.Entities.Member
 {
     public class ViewMember
     {

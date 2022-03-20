@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace UNICS.Data.ViewModels.Entities.Campus
+namespace UNICS.Data.ViewModels.Entities.Club
 {
     public class ViewClub
     {

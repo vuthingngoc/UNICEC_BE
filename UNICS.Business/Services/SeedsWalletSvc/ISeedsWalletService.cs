@@ -6,10 +6,10 @@ namespace UNICS.Business.Services.SeedsWalletSvc
 {
     public interface ISeedsWalletService
     {
-        Task<PagingResult<ViewSeedsWallet>> GetAll(PagingRequest request);
-        Task<ViewSeedsWallet> GetById(int id);
-        Task<bool> Insert(SeedsWalletInsertModel seedsWallet);
-        Task<bool> Update(ViewSeedsWallet seedsWallet);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewSeedsWallet>> GetAll(PagingRequest request);
+        public Task<ViewSeedsWallet> GetBySeedsWalletId(int id);
+        public Task<ViewSeedsWallet> Insert(SeedsWalletInsertModel seedsWallet);
+        public Task<bool> Update(ViewSeedsWallet seedsWallet);
+        public Task<bool> Delete(int id);
     }
 }

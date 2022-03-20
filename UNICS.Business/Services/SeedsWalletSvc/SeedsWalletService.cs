@@ -25,12 +25,12 @@ namespace UNICS.Business.Services.SeedsWalletSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewSeedsWallet> GetById(int id)
+        public Task<ViewSeedsWallet> GetBySeedsWalletId(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(SeedsWalletInsertModel seedsWallet)
+        public Task<ViewSeedsWallet> Insert(SeedsWalletInsertModel seedsWallet)
         {
             throw new NotImplementedException();
         }

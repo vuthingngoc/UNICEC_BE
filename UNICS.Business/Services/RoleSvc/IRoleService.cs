@@ -6,11 +6,10 @@ namespace UNICS.Business.Services.RoleSvc
 {
     public interface IRoleService
     {
-        Task<PagingResult<ViewRole>> GetAll(PagingRequest request);
-        Task<ViewRole> GetById(int id);
-
-        Task<bool> Insert(RoleInsertModel role);
-        Task<bool> Update(ViewRole role);
-        Task<bool> Delete(int id);
+        public Task<PagingResult<ViewRole>> GetAll(PagingRequest request);
+        public Task<ViewRole> GetByRoleId(int id);
+        public Task<ViewRole> Insert(RoleInsertModel role);
+        public Task<bool> Update(ViewRole role);
+        public Task<bool> Delete(int id);
     }
 }
