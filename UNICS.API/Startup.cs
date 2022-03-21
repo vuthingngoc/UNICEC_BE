@@ -60,6 +60,10 @@ using UNICS.Data.Repository.ImplRepo.DepartmentRepo;
 using UNICS.Data.Repository.ImplRepo.MemberRepo;
 using UNICS.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UNICS.Data.Repository.ImplRepo.ParticipantInTeamRepo;
+using UNICS.Business.Services.SponsorSvc;
+using UNICS.Business.Services.SponsorInCompetitionSvc;
+using UNICS.Data.Repository.ImplRepo.SponsorRepo;
+using UNICS.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 
 namespace UNICS.API
 {
@@ -114,6 +118,8 @@ namespace UNICS.API
             services.AddScoped<IParticipantService, ParticipantService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<ISeedsWalletService, SeedsWalletService>();
+            services.AddScoped<ISponsorService, SponsorService>();
+            services.AddScoped<ISponsorInCompetitionService, SponsorInCompetitionService>();
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IUniversityService, UniversityService>();      
             services.AddScoped<IUserService, UserService>();
@@ -142,6 +148,8 @@ namespace UNICS.API
             services.AddTransient<IParticipantRepo, ParticipantRepo>();
             services.AddTransient<IRoleRepo, RoleRepo>();
             services.AddTransient<ISeedsWalletRepo, SeedsWalletRepo>();
+            services.AddTransient<ISponsorRepo, SponsorRepo>();
+            services.AddTransient<ISponsorInCompetitionRepo, SponsorInCompetitionRepo>();
             services.AddTransient<ITeamRepo, TeamRepo>();
             services.AddTransient<IUniversityRepo, UniversityRepo>();
             services.AddTransient<IUserRepo, UserRepo>();
