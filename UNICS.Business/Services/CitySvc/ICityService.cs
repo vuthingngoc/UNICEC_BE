@@ -2,7 +2,7 @@
 using UNICS.Data.ViewModels.Common;
 using UNICS.Data.ViewModels.Entities.City;
 
-namespace UNICS.Business.Services.AreaSvc
+namespace UNICS.Business.Services.CitySvc
 {
     public interface ICityService
     {

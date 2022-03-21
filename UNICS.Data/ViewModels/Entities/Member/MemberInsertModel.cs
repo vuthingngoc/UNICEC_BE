@@ -4,8 +4,8 @@ namespace UNICS.Data.ViewModels.Entities.Member
 {
     public class MemberInsertModel
     {
-        [JsonPropertyName("user_id")]
-        public int UserId { get; set; }
+        [JsonPropertyName("student_id")]
+        public int StudentId { get; set; }
         public bool Status { get; set; }
     }
 }

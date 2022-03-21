@@ -12,6 +12,7 @@ namespace UNICS.Data.Models.DB
             Members = new HashSet<Member>();
             Participants = new HashSet<Participant>();
             SeedsWallets = new HashSet<SeedsWallet>();
+            Sponsors = new HashSet<Sponsor>();
         }
 
         public int Id { get; set; }
@@ -32,5 +33,6 @@ namespace UNICS.Data.Models.DB
         public virtual ICollection<Member> Members { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<SeedsWallet> SeedsWallets { get; set; }
+        public virtual ICollection<Sponsor> Sponsors { get; set; }
     }
 }

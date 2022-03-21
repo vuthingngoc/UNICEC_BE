@@ -15,10 +15,10 @@ namespace UNICS.Data.Models.DB
         }
 
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public int StudentId { get; set; }
         public bool Status { get; set; }
 
-        public virtual User User { get; set; }
+        public virtual User Student { get; set; }
         public virtual ICollection<ClubPreviou> ClubPrevious { get; set; }
         public virtual ICollection<MemberTakesActivity> MemberTakesActivities { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
