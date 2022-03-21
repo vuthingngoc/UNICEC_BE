@@ -14,6 +14,7 @@ namespace UNICS.Data.Models.DB
             CompetitionInClubs = new HashSet<CompetitionInClub>();
             Departments = new HashSet<Department>();
             Participants = new HashSet<Participant>();
+            SponsorInCompetitions = new HashSet<SponsorInCompetition>();
             Teams = new HashSet<Team>();
         }
 
@@ -41,6 +42,7 @@ namespace UNICS.Data.Models.DB
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual ICollection<Department> Departments { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
+        public virtual ICollection<SponsorInCompetition> SponsorInCompetitions { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
     }
 }

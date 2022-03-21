@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using UNICS.Data.Repository.ImplRepo.AlbumTypeRepo;
+using UNICS.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UNICS.Data.ViewModels.Common;
 using UNICS.Data.ViewModels.Entities.CompetitionEntity;
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using UNICS.Data.Repository.ImplRepo.AreaRepo;
+using UNICS.Data.Repository.ImplRepo.CityRepo;
 using UNICS.Data.ViewModels.Common;
 using UNICS.Data.ViewModels.Entities.City;
 
-namespace UNICS.Business.Services.AreaSvc
+namespace UNICS.Business.Services.CitySvc
 {
     public class CityService : ICityService
     {
