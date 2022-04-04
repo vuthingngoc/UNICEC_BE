@@ -14,12 +14,10 @@ namespace UniCEC.Data.ViewModels.Common
         public int PageSize { get; set; }
         [JsonPropertyName("total_count")]
         public int TotalCount { get; set; }
+        public List<T> Items { get; set; }
         //Front End
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
-        //
-        public List<T> Items { get; set; }
-        //
 
         public PagingResult(List<T> items, int count, int currentPage, int pageSize)
         {
