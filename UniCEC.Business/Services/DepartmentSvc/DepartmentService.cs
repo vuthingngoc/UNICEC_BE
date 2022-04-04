@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewDepartment>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.SeedsWalletSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewSeedsWallet>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewSeedsWallet>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

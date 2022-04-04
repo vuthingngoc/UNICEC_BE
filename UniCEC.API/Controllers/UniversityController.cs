@@ -31,7 +31,7 @@ namespace UniCEC.API.Controllers
 
         //Get 1 university by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUniversityById(string id)
+        public async Task<IActionResult> GetUniversityById(int id)
         {
 
             //chưa check null

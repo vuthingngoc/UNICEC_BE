@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.SponsorSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewSponsor>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewSponsor>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

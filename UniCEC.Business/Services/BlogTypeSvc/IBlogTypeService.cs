@@ -7,7 +7,7 @@ namespace UniCEC.Business.Services.BlogTypeSvc
 {
     public interface IBlogTypeService
     {
-        Task<PagingResult<BlogType>> GetAll(PagingRequest request);
+        Task<PagingResult<BlogType>> GetAllPaging(PagingRequest request);
         Task<BlogType> GetById(int id);
         Task<ViewBlogType> Insert(BlogTypeInsertModel blogType);
         Task<bool> Update(ViewBlogType blogType);

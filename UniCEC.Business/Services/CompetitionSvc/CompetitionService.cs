@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewCompetition>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

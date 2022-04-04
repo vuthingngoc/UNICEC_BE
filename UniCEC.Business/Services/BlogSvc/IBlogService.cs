@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.BlogSvc
 {
     public interface IBlogService
     {
-        Task<PagingResult<ViewBlog>> GetAll(PagingRequest request);
+        Task<PagingResult<ViewBlog>> GetAllPaging(PagingRequest request);
         Task<ViewBlog> GetById(int id);
         Task<ViewBlog> Insert(BlogInsertModel blog);
         Task<bool> Update(BlogUpdateModel blog);

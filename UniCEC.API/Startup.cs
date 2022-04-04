@@ -155,13 +155,13 @@ namespace UniCEC.API
             services.AddTransient<IUserRepo, UserRepo>();
 
             //----------------------------------------------FIREBASE-------------------------
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "UniCEC-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
             //add firebase admin
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = GoogleCredential.FromFile(path),
-                ProjectId = "UniCEC-e46a4",
-                ServiceAccountId = "firebase-adminsdk-td0dr@UniCEC-e46a4.iam.gserviceaccount.com"
+                ProjectId = "unics-e46a4",
+                ServiceAccountId = "firebase-adminsdk-td0dr@unics-e46a4.iam.gserviceaccount.com"
 
             });
 
