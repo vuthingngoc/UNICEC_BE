@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.ViewModels.Common;
@@ -20,27 +21,25 @@ namespace UniCEC.Data.Repository.GenericRepo
 
         public async Task<T> Get(string id)
         {
-            // finding record by id
-            T entity = await _entities.FindAsync(id);
-            return entity == null ?
-                throw new NullReferenceException("Not found the given identity") : entity;
-
-            // finish this process then service will return result to view
+            return await _entities.FindAsync(id);
         }
 
-        public Task<PagingResult<T>> GetAll(PagingRequest request)
+        public async Task<PagingResult<T>> GetAllPaging(PagingRequest request)
         {
-            throw new NotImplementedException();
+            List<T> items = await _entities.Skip((request.currentPage - 1) * request.pageSize).Take(request.pageSize).ToListAsync();
+            return new PagingResult<T>(items, _entities.Count(), request.currentPage, request.pageSize);
         }
 
-        public Task<bool> Insert(T entity)
+        public async Task<int> Insert(T entity)
         {
-            throw new NotImplementedException();
+            await _entities.AddAsync(entity);
+            await context.SaveChangesAsync();
+            return (int) entity.GetType().GetProperty("Id").GetValue(entity);
         }
 
-        public Task<bool> Update(T entity)
+        public async Task<bool> Update()
         {
-            throw new NotImplementedException();
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }
