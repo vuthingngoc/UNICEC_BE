@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.SponsorInCompetitionSvc
 {
     public interface ISponsorInCompetitionService
     {
-        public Task<PagingResult<ViewSponsorInCompetition>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewSponsorInCompetition>> GetAllPaging(PagingRequest request);
         public Task<ViewSponsorInCompetition> GetBySponsorInCompetitionId(int id);
         public Task<ViewSponsorInCompetition> Insert(SponsorInCompetitionInsertModel sponsorInCompetition);
         public Task<bool> Update(ViewSponsorInCompetition sponsorInCompetition);

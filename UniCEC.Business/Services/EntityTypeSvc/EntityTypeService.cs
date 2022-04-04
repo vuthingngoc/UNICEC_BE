@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.EntityTypeSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewEntityType>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewEntityType>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

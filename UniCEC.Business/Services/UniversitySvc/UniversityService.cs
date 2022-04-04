@@ -20,12 +20,12 @@ namespace UniCEC.Business.Services.UniversitySvc
             throw new System.NotImplementedException();
         }
 
-        public Task<PagingResult<ViewUniversity>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewUniversity>> GetAllPaging(PagingRequest request)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<ViewUniversity> GetUniversityById(string id)
+        public async Task<ViewUniversity> GetUniversityById(int id)
         {
             University uni = await _universityRepo.Get(id);
             //

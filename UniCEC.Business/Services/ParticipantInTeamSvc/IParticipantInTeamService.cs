@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.ParticipantInTeamSvc
 {
     public interface IParticipantInTeamService
     {
-        public Task<PagingResult<ViewParticipantInTeam>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewParticipantInTeam>> GetAllPaging(PagingRequest request);
         public Task<ViewParticipantInTeam> GetByParticipantInTeamId(int id);
         public Task<ViewParticipantInTeam> Insert(ParticipantInTeamInsertModel participantInTeam);
         public Task<bool> Update(ViewParticipantInTeam participantInTeam);

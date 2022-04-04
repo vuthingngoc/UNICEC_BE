@@ -21,7 +21,7 @@ namespace UniCEC.Business.Services.BlogTypeSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<BlogType>> GetAll(PagingRequest request)
+        public Task<PagingResult<BlogType>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

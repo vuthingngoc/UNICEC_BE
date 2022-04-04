@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.DepartmentInUniversitySvc
 {
     public interface IDepartmentInUniversityService
     {
-        public Task<PagingResult<ViewDepartmentInUniversity>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewDepartmentInUniversity>> GetAllPaging(PagingRequest request);
         public Task<ViewDepartmentInUniversity> GetByDepartmentInUniversityId(int id);
         public Task<ViewDepartmentInUniversity> Insert(DepartmentInUniversityInsertModel departmentInUniversity);
         public Task<bool> Update(ViewDepartmentInUniversity departmentInUniversity);

@@ -19,12 +19,12 @@ namespace UniCEC.Data.Repository.GenericRepo
             _entities = context.Set<T>();
         }
 
-        public async Task<T> Get(string id)
+        public async Task<T> Get(int id)
         {
             return await _entities.FindAsync(id);
         }
 
-        public async Task<PagingResult<T>> GetAllPaging(PagingRequest request)
+        public async Task<PagingResult<T>> GetAllPagingPaging(PagingRequest request)
         {
             List<T> items = await _entities.Skip((request.currentPage - 1) * request.pageSize).Take(request.pageSize).ToListAsync();
             return new PagingResult<T>(items, _entities.Count(), request.currentPage, request.pageSize);

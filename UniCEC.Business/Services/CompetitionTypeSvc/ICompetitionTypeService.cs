@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.CompetitionTypeSvc
 {
     public interface ICompetitionTypeService
     {
-        public Task<PagingResult<ViewCompetitionType>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewCompetitionType>> GetAllPaging(PagingRequest request);
         public Task<ViewCompetitionType> GetByCompetitionTypeId(int id);
         public Task<ViewCompetitionType> Insert(CompetitionTypeInsertModel competitionType);
         public Task<bool> Update(ViewCompetitionType competitionType);

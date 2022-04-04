@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.RoleSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewRole>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewRole>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

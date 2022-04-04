@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.TeamSvc
 {
     public interface ITeamService
     {
-        public Task<PagingResult<ViewTeam>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewTeam>> GetAllPaging(PagingRequest request);
         public Task<ViewTeam> GetByTeamId(int id);
         public Task<ViewTeam> Insert(TeamInsertModel team);
         public Task<bool> Update(TeamUpdateModel team);

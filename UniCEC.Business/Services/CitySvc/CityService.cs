@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.CitySvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewCity>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewCity>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

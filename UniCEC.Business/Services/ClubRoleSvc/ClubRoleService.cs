@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.ClubRoleSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewClubRole>> GetAll(PagingRequest request)
+        public Task<PagingResult<ViewClubRole>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }

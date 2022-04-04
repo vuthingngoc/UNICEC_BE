@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.SponsorSvc
 {
     public interface ISponsorService
     {
-        public Task<PagingResult<ViewSponsor>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewSponsor>> GetAllPaging(PagingRequest request);
         public Task<ViewSponsor> GetBySponsorId(int id);
         public Task<ViewSponsor> Insert(SponsorInsertModel sponsor);
         public Task<bool> Update(SponsorUpdateModel sponsor);

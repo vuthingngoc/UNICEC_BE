@@ -6,7 +6,7 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
 {
     public interface IClubPreviousService
     {
-        public Task<PagingResult<ViewClubPrevious>> GetAll(PagingRequest request);
+        public Task<PagingResult<ViewClubPrevious>> GetAllPaging(PagingRequest request);
         public Task<ViewClubPrevious> GetByClubPreviousId(int id);
         public Task<ViewClubPrevious> Insert(ClubPreviousInsertModel clubPrevious);
         public Task<bool> Update(ClubPreviousUpdateModel clubPrevious);
