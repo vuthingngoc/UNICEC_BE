@@ -20,18 +20,18 @@ namespace UniCEC.Data.Repository.GenericRepo
         }
 
         public async Task<T> Get(int id)
-        {
+        {          
             return await _entities.FindAsync(id);
         }
 
-        public async Task<PagingResult<T>> GetAllPagingPaging(PagingRequest request)
+        public async Task<PagingResult<T>> GetAllPaging(PagingRequest request)
         {
-            List<T> items = await _entities.Skip((request.currentPage - 1) * request.pageSize).Take(request.pageSize).ToListAsync();
-            return new PagingResult<T>(items, _entities.Count(), request.currentPage, request.pageSize);
+            List<T> items = await _entities.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+            return new PagingResult<T>(items, _entities.Count(), request.CurrentPage, request.PageSize);
         }
 
         public async Task<int> Insert(T entity)
-        {
+        {           
             await _entities.AddAsync(entity);
             await context.SaveChangesAsync();
             return (int) entity.GetType().GetProperty("Id").GetValue(entity);
