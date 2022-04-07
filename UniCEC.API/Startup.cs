@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using System.IO;
 using UniCEC.Business.Services.CitySvc;
 using UniCEC.Business.Services.BlogSvc;
@@ -19,7 +21,6 @@ using UniCEC.Business.Services.ParticipantSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Services.TeamSvc;
-
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
@@ -156,7 +157,7 @@ namespace UniCEC.API
 
             //----------------------------------------------FIREBASE-------------------------
             string path = Path.Combine(Directory.GetCurrentDirectory(), "unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
-            //add firebase admin
+            //add firebase admin sdk
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = GoogleCredential.FromFile(path),
@@ -165,6 +166,19 @@ namespace UniCEC.API
 
             });
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => 
+            {
+                opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
+                    ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]                 
+                };
+            });
 
             services.AddSwaggerGen(c =>
             {
@@ -189,6 +203,8 @@ namespace UniCEC.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
