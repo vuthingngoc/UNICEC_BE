@@ -180,6 +180,17 @@ namespace UniCEC.API
                 };
             });
 
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("AllowOrigin",
+                    builder => {
+                        builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                    });
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -204,9 +215,11 @@ namespace UniCEC.API
 
             app.UseRouting();
 
+            app.UseCors("AllowOrigin");
+
             app.UseAuthentication();
 
-            app.UseAuthorization();
+            app.UseAuthorization();            
 
             app.UseEndpoints(endpoints =>
             {
