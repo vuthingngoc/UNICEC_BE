@@ -57,12 +57,12 @@ namespace UniCEC.Business.Services.MajorSvc
 
         }
 
-        public async Task<ViewMajor> GetByMajorId(int id)
+        public async Task<PagingResult<ViewMajor>> GetByDeparmentId(int id)
         {
             Major major = await _majorRepo.Get(id);
             if (major != null)
             {
-                return new ViewMajor()
+                new ViewMajor()
                 {
                     Id = major.Id,
                     DepartmentId = major.DepartmentId,
@@ -74,21 +74,6 @@ namespace UniCEC.Business.Services.MajorSvc
             }
 
             throw new NullReferenceException("Not Found");
-        }
-
-        public async Task<ViewMajor> GetByMajorCode(string majorCode)
-        {
-            Major major = await _majorRepo.GetByMajorCode(majorCode);
-            if (major == null) throw new NullReferenceException("Not Found");
-            return new ViewMajor()
-            {
-                Id = major.Id,
-                DepartmentId = major.DepartmentId,
-                Description = major.Description,
-                MajorCode = major.MajorCode,
-                Name = major.Name,
-                Status = major.Status
-            };
         }
 
         public async Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request)
@@ -121,8 +106,8 @@ namespace UniCEC.Business.Services.MajorSvc
         {
             if (major == null) throw new ArgumentNullException("Null Argument");
             
-            ViewMajor checkExistedMajorCode = await GetByMajorCode(major.MajorCode);
-            if (checkExistedMajorCode != null) throw new ArgumentException("Duplicated MajorCode");
+            bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
+            if (check) throw new ArgumentException("Duplicated MajorCode");
             
             Major element = new Major()
             {
@@ -151,8 +136,8 @@ namespace UniCEC.Business.Services.MajorSvc
             Major element = await _majorRepo.Get(major.Id);
             if (element != null)
             {
-                ViewMajor checkExistedMajorCode = await GetByMajorCode(major.MajorCode);
-                if (checkExistedMajorCode != null) throw new ArgumentException("Duplicated MajorCode");
+                bool check= await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
+                if (check) throw new ArgumentException("Duplicated MajorCode");
                 
                 element.DepartmentId = major.DepartmentId;
                 element.Description = major.Description;

@@ -21,26 +21,6 @@ namespace UniCEC.API.Controllers
             _majorService = majorService;
         }
 
-
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMajorById(int id)
-        {
-            try
-            {
-                ViewMajor major = await _majorService.GetByMajorId(id);
-                return Ok(major);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
         [HttpGet("search")]
         public async Task<IActionResult> GetMajorByCondition([FromQuery] MajorRequestModel request)
         {

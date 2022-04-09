@@ -5,7 +5,6 @@ using UniCEC.Data.RequestModels;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
-using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 {
@@ -24,6 +23,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             if (request.DepartmentId != null) query = query.Where(x => x.m.DepartmentId == request.DepartmentId);
 
+            if (!string.IsNullOrEmpty(request.MajorCode)) query = query.Where(x => x.m.MajorCode.Equals(request.MajorCode));
+
             if (request.Status != null) query = query.Where(x => x.m.Status == request.Status);
 
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
@@ -41,9 +42,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
             return new PagingResult<Major>(items, context.Majors.Count(), request.CurrentPage, request.PageSize);
         }
 
-        public async Task<Major> GetByMajorCode(string code)
+        public async Task<bool> CheckExistedMajorCode(int departmentId, string code)
         {
-            return await context.Majors.FirstOrDefaultAsync(m => m.MajorCode.Equals(code));            
+            Major major = await context.Majors.FirstOrDefaultAsync(m => m.DepartmentId.Equals(departmentId)
+                                                                        && m.MajorCode.Equals(code));
+            return (major == null) ? false : true;
         }
     }
 }
