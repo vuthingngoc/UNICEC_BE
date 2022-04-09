@@ -40,5 +40,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             return new PagingResult<Major>(items, context.Majors.Count(), request.CurrentPage, request.PageSize);
         }
+
+        public async Task<Major> GetByMajorCode(string code)
+        {
+            return await context.Majors.FirstOrDefaultAsync(m => m.MajorCode.Equals(code));            
+        }
     }
 }

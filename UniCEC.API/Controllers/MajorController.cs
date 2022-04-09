@@ -41,8 +41,8 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMajorByCondition(MajorRequestModel request)
+        [HttpGet("search")]
+        public async Task<IActionResult> GetMajorByCondition([FromQuery] MajorRequestModel request)
         {
             try
             {
@@ -77,8 +77,8 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(ViewMajor major)
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] ViewMajor major)
         {
             try
             {

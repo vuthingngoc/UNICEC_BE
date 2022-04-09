@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.User;
@@ -15,23 +17,68 @@ namespace UniCEC.Business.Services.UserSvc
             _userRepo = userRepo;
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            User user = await _userRepo.Get(id);
+            if (user == null) throw new NullReferenceException("Not found");
+            user.Status = false;
+            return await _userRepo.Update();
         }
 
-        public Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request)
+        public async Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request)
         {
-            throw new NotImplementedException();
+            PagingResult<User> users = await _userRepo.GetAllPaging(request);
+            if(users.Items != null)
+            {
+                List<ViewUser> listViewUser = new List<ViewUser>();
+                users.Items.ForEach(e =>
+                {
+                    ViewUser viewUser = new ViewUser()
+                    {
+                        Id = e.Id,
+                        Description = e.Description,
+                        Dob = e.Dob,
+                        Email = e.Email,
+                        Fullname = e.Fullname,
+                        Gender = e.Gender,
+                        MajorId = e.MajorId,
+                        RoleId = e.RoleId,
+                        UniversityId = e.UniversityId,
+                        UserId = e.UserId,
+                        Status = e.Status
+                    };
+                    listViewUser.Add(viewUser);
+                });
+
+                return new PagingResult<ViewUser>(listViewUser, users.TotalCount, users.CurrentPage, users.PageSize);
+            }
+
+            throw new NullReferenceException("Not Found");
         }
 
-        public Task<ViewUser> GetByUserId(int id)
+        public async Task<ViewUser> GetByUserId(int id)
         {
-            throw new NotImplementedException();
+            User user = await _userRepo.Get(id);
+            if (user == null) throw new NullReferenceException("Not Found");
+            return new ViewUser()
+            {
+                Id = user.Id,
+                Description = user.Description,
+                Dob = user.Dob,
+                Email = user.Email,
+                Fullname = user.Fullname,
+                Gender = user.Gender,
+                MajorId = user.MajorId,
+                RoleId = user.RoleId,
+                UniversityId = user.UniversityId,
+                UserId = user.UserId,
+                Status = user.Status
+            }; 
         }
 
         public Task<ViewUser> Insert(UserInsertModel user)
         {
+
             throw new NotImplementedException();
         }
 
