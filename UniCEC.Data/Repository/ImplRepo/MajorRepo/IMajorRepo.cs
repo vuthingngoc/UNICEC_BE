@@ -9,5 +9,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
     public interface IMajorRepo : IRepository<Major>
     {
         public Task<PagingResult<Major>> GetByCondition(MajorRequestModel request);
+        public Task<Major> GetByMajorCode(string code);
     }
 }

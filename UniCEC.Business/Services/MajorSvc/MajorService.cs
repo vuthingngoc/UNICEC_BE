@@ -76,6 +76,21 @@ namespace UniCEC.Business.Services.MajorSvc
             throw new NullReferenceException("Not Found");
         }
 
+        public async Task<ViewMajor> GetByMajorCode(string majorCode)
+        {
+            Major major = await _majorRepo.GetByMajorCode(majorCode);
+            if (major == null) throw new NullReferenceException("Not Found");
+            return new ViewMajor()
+            {
+                Id = major.Id,
+                DepartmentId = major.DepartmentId,
+                Description = major.Description,
+                MajorCode = major.MajorCode,
+                Name = major.Name,
+                Status = major.Status
+            };
+        }
+
         public async Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request)
         {
             PagingResult<Major> majors = await _majorRepo.GetByCondition(request);
@@ -106,6 +121,9 @@ namespace UniCEC.Business.Services.MajorSvc
         {
             if (major == null) throw new ArgumentNullException("Null Argument");
             
+            ViewMajor checkExistedMajorCode = await GetByMajorCode(major.MajorCode);
+            if (checkExistedMajorCode != null) throw new ArgumentException("Duplicated MajorCode");
+            
             Major element = new Major()
             {
                 DepartmentId = major.DepartmentId,
@@ -133,6 +151,9 @@ namespace UniCEC.Business.Services.MajorSvc
             Major element = await _majorRepo.Get(major.Id);
             if (element != null)
             {
+                ViewMajor checkExistedMajorCode = await GetByMajorCode(major.MajorCode);
+                if (checkExistedMajorCode != null) throw new ArgumentException("Duplicated MajorCode");
+                
                 element.DepartmentId = major.DepartmentId;
                 element.Description = major.Description;
                 element.MajorCode = major.MajorCode;

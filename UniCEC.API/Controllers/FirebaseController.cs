@@ -31,7 +31,14 @@ namespace UniCEC.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AuthenticateUser()
         {
+            try
+            {
 
+            }
+            catch (Exception e)
+            {
+                BadRequest(e.Message);
+            }
 
             FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("IdToken");
             string uid = decodedToken.Uid;
