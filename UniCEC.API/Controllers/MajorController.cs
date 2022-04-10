@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MajorSvc;
@@ -19,6 +20,24 @@ namespace UniCEC.API.Controllers
         public MajorController(IMajorService majorService)
         {
             _majorService = majorService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllMajor([FromQuery] PagingRequest request)
+        {
+            try
+            {
+                PagingResult<ViewMajor> majors = await _majorService.GetAllPaging(request);
+                return Ok(majors);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpGet("search")]
@@ -55,6 +74,10 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPut]
@@ -63,9 +86,7 @@ namespace UniCEC.API.Controllers
             try
             {
                 bool result = await _majorService.Update(major);
-                if(result) return Ok();
-                return StatusCode(500, "Internal Server Exception");
-
+                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");                
             }
             catch(NullReferenceException ex)
             {
@@ -79,6 +100,10 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpDelete("{id}")]
@@ -86,11 +111,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _majorService.Delete(id);
-                if (!result)
-                {
-                    return StatusCode(500, "Internal Server Exception");
-                }
+                bool result = await _majorService.Delete(id);                
+                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
             }
             catch (NullReferenceException ex)
             {
@@ -100,8 +122,10 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-
-            return NoContent();
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }            
         }
     }
 }

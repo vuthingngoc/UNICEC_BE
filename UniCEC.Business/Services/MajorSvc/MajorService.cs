@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
@@ -57,25 +58,6 @@ namespace UniCEC.Business.Services.MajorSvc
 
         }
 
-        public async Task<PagingResult<ViewMajor>> GetByDeparmentId(int id)
-        {
-            Major major = await _majorRepo.Get(id);
-            if (major != null)
-            {
-                new ViewMajor()
-                {
-                    Id = major.Id,
-                    DepartmentId = major.DepartmentId,
-                    Description = major.Description,
-                    MajorCode = major.MajorCode,
-                    Name = major.Name,
-                    Status = major.Status
-                };
-            }
-
-            throw new NullReferenceException("Not Found");
-        }
-
         public async Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request)
         {
             PagingResult<Major> majors = await _majorRepo.GetByCondition(request);
@@ -108,25 +90,30 @@ namespace UniCEC.Business.Services.MajorSvc
             
             bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
             if (check) throw new ArgumentException("Duplicated MajorCode");
-            
+            // default status when insert is true
+            bool status = true;            
             Major element = new Major()
             {
                 DepartmentId = major.DepartmentId,
                 Description = major.Description,
                 MajorCode = major.MajorCode,
                 Name = major.Name,
-                Status = major.Status
+                Status = status
             };
             int id = await _majorRepo.Insert(element);
-            return new ViewMajor()
+            if(id > 0)
             {
-                Id = id,
-                DepartmentId = major.DepartmentId,
-                Description = major.Description,
-                MajorCode = major.MajorCode,
-                Name = major.Name,
-                Status = major.Status
+                return new ViewMajor()
+                {
+                    Id = id,
+                    DepartmentId = major.DepartmentId,
+                    Description = major.Description,
+                    MajorCode = major.MajorCode,
+                    Name = major.Name,
+                    Status = status
             };
+            }
+            throw new DbUpdateException();            
         }
 
         public async Task<bool> Update(ViewMajor major)
@@ -144,7 +131,7 @@ namespace UniCEC.Business.Services.MajorSvc
                 element.MajorCode = major.MajorCode;
                 element.Name = major.Name;
                 element.Status = major.Status;
-                return true;
+                return await _majorRepo.Update();
             }
 
             throw new NullReferenceException("Not found this element");

@@ -33,8 +33,8 @@ namespace UniCEC.Data.Repository.GenericRepo
         public async Task<int> Insert(T entity)
         {           
             await _entities.AddAsync(entity);
-            await context.SaveChangesAsync();
-            return (int) entity.GetType().GetProperty("Id").GetValue(entity);
+            bool result = await Update();
+            return (result) ? (int)entity.GetType().GetProperty("Id").GetValue(entity) : 0;            
         }
 
         public async Task<bool> Update()

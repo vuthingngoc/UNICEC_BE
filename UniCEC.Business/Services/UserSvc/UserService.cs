@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
@@ -56,9 +57,9 @@ namespace UniCEC.Business.Services.UserSvc
             throw new NullReferenceException("Not Found");
         }
 
-        public async Task<ViewUser> GetByUserId(int id)
+        public async Task<ViewUser> GetByUserId(string userId)
         {
-            User user = await _userRepo.Get(id);
+            User user = await _userRepo.GetUser(userId);
             if (user == null) throw new NullReferenceException("Not Found");
             return new ViewUser()
             {
@@ -76,14 +77,89 @@ namespace UniCEC.Business.Services.UserSvc
             }; 
         }
 
-        public Task<ViewUser> Insert(UserInsertModel user)
+        private async Task<bool> CheckDuplicatedEmailAndUserId(int? universityId, string email, string userId)
         {
+            bool isExisted = await _userRepo.CheckExistedEmail(email);
+            if (isExisted) throw new ArgumentException("Duplicated Email");
 
-            throw new NotImplementedException();
+            if (universityId != null)
+            {
+                isExisted = await _userRepo.CheckExistedUser((int)universityId, userId);
+            }
+            else
+            {
+                isExisted = await _userRepo.CheckExistedUser(userId);
+            }
+
+            if (isExisted) throw new ArgumentException("Duplicated UserId");
+
+            return isExisted;
         }
 
-        public Task<bool> Update(ViewUser user)
+        public async Task<ViewUser> Insert(UserInsertModel user)
         {
+            if (user == null) throw new ArgumentNullException("Null Argument");
+
+            bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
+
+            if (isInvalid) return null;
+
+            // default status when insert is true
+            bool status = true;
+            User element = new User()
+            {
+                Description = user.Description,
+                Dob = user.Dob,
+                Email = user.Email,
+                Fullname = user.Fullname,
+                Gender = user.Gender,
+                MajorId = user.MajorId,
+                RoleId = user.RoleId,
+                Status = status,
+                UniversityId = user.UniversityId,
+                UserId = user.UserId
+            };
+            int id = await _userRepo.Insert(element);
+            if(id > 0)
+            {
+                return new ViewUser()
+                {
+                    Id = id,
+                    Description = user.Description,
+                    Dob = user.Dob,
+                    Email = user.Email,
+                    Fullname = user.Fullname,
+                    Gender = user.Gender,
+                    MajorId = user.MajorId,
+                    RoleId = user.RoleId,
+                    UniversityId = user.UniversityId,
+                    UserId = user.UserId,
+                    Status = status
+                };
+            }
+
+            throw new DbUpdateException();
+        }
+
+        public async Task<bool> Update(ViewUser user)
+        {
+            User element = await _userRepo.Get(user.Id);
+            if(element != null)
+            {
+                bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
+                if (isInvalid) return isInvalid;
+
+                element.Description = user.Description;
+                element.Dob = user.Dob;
+                element.Email = user.Email;
+                element.Fullname = user.Fullname;
+                element.Gender = user.Gender;
+                element.MajorId = user.MajorId;
+                element.RoleId = user.RoleId;
+                element.UserId = user.UserId;
+                element.UniversityId = user.UniversityId;
+                element.Status = user.Status;
+            }
             throw new NotImplementedException();
         }
     }
