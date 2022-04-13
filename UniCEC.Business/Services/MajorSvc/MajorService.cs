@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
@@ -87,11 +86,11 @@ namespace UniCEC.Business.Services.MajorSvc
         public async Task<ViewMajor> Insert(MajorInsertModel major)
         {
             if (major == null) throw new ArgumentNullException("Null Argument");
-            
+
             bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
             if (check) throw new ArgumentException("Duplicated MajorCode");
             // default status when insert is true
-            bool status = true;            
+            bool status = true;
             Major element = new Major()
             {
                 DepartmentId = major.DepartmentId,
@@ -101,7 +100,7 @@ namespace UniCEC.Business.Services.MajorSvc
                 Status = status
             };
             int id = await _majorRepo.Insert(element);
-            if(id > 0)
+            if (id > 0)
             {
                 return new ViewMajor()
                 {
@@ -111,9 +110,9 @@ namespace UniCEC.Business.Services.MajorSvc
                     MajorCode = major.MajorCode,
                     Name = major.Name,
                     Status = status
-            };
+                };
             }
-            throw new DbUpdateException();            
+            return null;
         }
 
         public async Task<bool> Update(ViewMajor major)
@@ -121,20 +120,18 @@ namespace UniCEC.Business.Services.MajorSvc
             if (major == null) throw new ArgumentNullException("Null Argument");
 
             Major element = await _majorRepo.Get(major.Id);
-            if (element != null)
-            {
-                bool check= await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
-                if (check) throw new ArgumentException("Duplicated MajorCode");
-                
-                element.DepartmentId = major.DepartmentId;
-                element.Description = major.Description;
-                element.MajorCode = major.MajorCode;
-                element.Name = major.Name;
-                element.Status = major.Status;
-                return await _majorRepo.Update();
-            }
+            if (element == null) throw new NullReferenceException("Not found this element");
 
-            throw new NullReferenceException("Not found this element");
+            bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
+            if (check) throw new ArgumentException("Duplicated MajorCode");
+
+            element.DepartmentId = major.DepartmentId;
+            element.Description = major.Description;
+            element.MajorCode = major.MajorCode;
+            element.Name = major.Name;
+            element.Status = major.Status;
+
+            return await _majorRepo.Update();
         }
     }
 }
