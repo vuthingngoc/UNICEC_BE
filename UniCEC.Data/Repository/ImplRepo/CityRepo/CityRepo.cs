@@ -26,11 +26,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
             //
             var query = from City c in context.Cities
                         select c;
+            //
+            int count = query.Count();
             //filter...
             //phân trang
             List<City> listCities = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
             //
-            int count = listCities.Count();
+            
             //
             listCities.ForEach((City c) => {
                 //gán qua view
