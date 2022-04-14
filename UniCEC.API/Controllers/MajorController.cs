@@ -59,7 +59,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert([FromBody] MajorInsertModel major)
+        public async Task<IActionResult> InsertMajor([FromBody] MajorInsertModel major)
         {
             try
             {
@@ -67,6 +67,10 @@ namespace UniCEC.API.Controllers
                 return Created($"api/v1/[controller]/{viewMajor.Id}", viewMajor);
             }
             catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -81,7 +85,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] ViewMajor major)
+        public async Task<IActionResult> UpdateMajor([FromBody] ViewMajor major)
         {
             try
             {
@@ -96,6 +100,10 @@ namespace UniCEC.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
@@ -107,7 +115,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteMajor(int id)
         {
             try
             {
