@@ -29,7 +29,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                     .Select(x => new Major()
-                                        {
+                                        {       
                                             Id = x.m.Id,
                                             DepartmentId = x.m.DepartmentId,
                                             Description = x.m.Description,

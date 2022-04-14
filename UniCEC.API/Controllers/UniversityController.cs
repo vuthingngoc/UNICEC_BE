@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.UniversitySvc;
@@ -33,17 +35,39 @@ namespace UniCEC.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
-
-            //chưa check null
-            ViewUniversity result = await _universityService.GetUniversityById(id);
-            //
-            return Ok(result);
+            try {
+                
+                ViewUniversity result = await _universityService.GetUniversityById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                else 
+                {
+                    //
+                    return Ok(result);
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         // POST api/<UniversityController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
+            //gọi service
+            ViewUniversity result = await _universityService.Insert(model);
+
+
+            return Ok();
+
         }
 
         // PUT api/<UniversityController>/5

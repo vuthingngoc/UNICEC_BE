@@ -5,8 +5,8 @@ namespace UniCEC.Data.ViewModels.Entities.University
 {
     public class UniversityInsertModel
     {
-        [JsonPropertyName("city_id")]
-        public int CityId { get; set; }
+        //[JsonPropertyName("city_id")]
+        //public int CityId { get; set; }
         public string UniCode { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }

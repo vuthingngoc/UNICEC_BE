@@ -32,20 +32,5 @@ namespace UniCEC.API.Controllers
         {
             throw new NotImplementedException();
         }
-
-        public Task<IActionResult> GetAllUser(PagingRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IActionResult> GetAllUser(PagingRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IActionResult> GetAllUser(PagingRequest request)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
