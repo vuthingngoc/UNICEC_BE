@@ -58,6 +58,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
         [HttpPost]
         public async Task<IActionResult> InsertUser([FromBody] UserInsertModel request)
         {
@@ -127,5 +128,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
+
     }
 }
