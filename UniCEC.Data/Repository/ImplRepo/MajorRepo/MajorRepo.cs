@@ -5,6 +5,8 @@ using UniCEC.Data.RequestModels;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
+using System.Collections.Generic;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 {
@@ -40,6 +42,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                                     ).ToListAsync();
 
             return new PagingResult<Major>(items, context.Majors.Count(), request.CurrentPage, request.PageSize);
+        }
+
+        public Task<List<Major>> GetByUniversity(int universityId)
+        {
+            //var query = from u in context.DepartmentInUniversities
+            //            join d in context.Departments on u.UniversityId equals d.Id
+            //            join 
+            //            ;
+            throw new NotImplementedException();
+
         }
 
         public async Task<bool> CheckExistedMajorCode(int departmentId, string code)

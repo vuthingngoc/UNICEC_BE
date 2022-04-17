@@ -54,7 +54,11 @@ namespace UniCEC.Business.Services.MajorSvc
             }
 
             throw new NullReferenceException("Not found");
+        }
 
+        public Task<PagingResult<ViewMajor>> GetByUniversity(int universityId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request)

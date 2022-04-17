@@ -15,17 +15,17 @@ namespace UniCEC.Business.Services.DepartmentSvc
             _departmentRepo = departmentRepo;
         }
 
-        public Task<bool> Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ViewDepartment> GetByDepartmentId(int id)
+        public Task<ViewDepartment> GetByCompetitionId(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ViewDepartment> GetByUniversityId(int universityId)
         {
             throw new NotImplementedException();
         }
@@ -36,6 +36,11 @@ namespace UniCEC.Business.Services.DepartmentSvc
         }
 
         public Task<bool> Update(ViewDepartment department)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Delete(int id)
         {
             throw new NotImplementedException();
         }
