@@ -378,16 +378,9 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
-
-                entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.Departments)
-                    .HasForeignKey(d => d.CompetitionId)
-                    .HasConstraintName("FK__Departmen__Compe__60A75C0F");
             });
 
             modelBuilder.Entity<DepartmentInUniversity>(entity =>

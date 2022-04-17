@@ -12,7 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 
         }
 
-        public Task<PagingResult<Department>> GetByCompetitionId(int competitionId)
+        public Task<PagingResult<Department>> GetByCompetition(int competitionId)
         {
             throw new System.NotImplementedException();
         }

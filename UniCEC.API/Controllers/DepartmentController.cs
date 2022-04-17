@@ -26,6 +26,12 @@ namespace UniCEC.API.Controllers
             throw new NotImplementedException();
         }
 
+        [HttpGet("search")]
+        public Task<IActionResult> GetDepartmentByName(string name)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpGet("competition/{id}")]
         public Task<IActionResult> GetDepartmentByCompetition(int competitionId)
         {

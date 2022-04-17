@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Department;
+using System.Collections.Generic;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
@@ -20,12 +21,12 @@ namespace UniCEC.Business.Services.DepartmentSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewDepartment> GetByCompetition(int id)
+        public Task<List<ViewDepartment>> GetByName(string name)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ViewDepartment> GetByUniversityId(int universityId)
+        public Task<List<ViewDepartment>> GetByCompetition(int competitionId)
         {
             throw new NotImplementedException();
         }

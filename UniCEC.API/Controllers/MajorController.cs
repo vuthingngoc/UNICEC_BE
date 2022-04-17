@@ -7,6 +7,7 @@ using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Major;
+using System.Collections.Generic;
 
 namespace UniCEC.API.Controllers
 {
@@ -40,7 +41,8 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        public async Task<IActionResult> GetMajorByUniversity(int universityId)
+        [HttpGet("university/{id}")]
+        public async Task<IActionResult> GetMajorByUniversity([FromQuery] int universityId)
         {
             try
             {

@@ -18,18 +18,6 @@ namespace UniCEC.Business.Services.MajorSvc
             _majorRepo = majorRepo;
         }
 
-        public async Task<bool> Delete(int id)
-        {
-            Major major = await _majorRepo.Get(id);
-            if (major != null)
-            {
-                major.Status = false;
-                return await _majorRepo.Update();
-            }
-
-            throw new NullReferenceException($"Not found this id: {id}");
-        }
-
         public async Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Major> result = await _majorRepo.GetAllPaging(request);
@@ -153,6 +141,18 @@ namespace UniCEC.Business.Services.MajorSvc
             element.Status = major.Status;
 
             return await _majorRepo.Update();
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            Major major = await _majorRepo.Get(id);
+            if (major != null)
+            {
+                major.Status = false;
+                return await _majorRepo.Update();
+            }
+
+            throw new NullReferenceException($"Not found this id: {id}");
         }
     }
 }

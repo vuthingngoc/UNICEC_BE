@@ -2,6 +2,7 @@
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Major;
+using System.Collections.Generic;
 
 namespace UniCEC.Business.Services.MajorSvc
 {
