@@ -44,14 +44,15 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
             return new PagingResult<Major>(items, context.Majors.Count(), request.CurrentPage, request.PageSize);
         }
 
-        public Task<List<Major>> GetByUniversity(int universityId)
+        public async Task<List<Major>> GetByUniversity(int universityId)
         {
-            //var query = from u in context.DepartmentInUniversities
-            //            join d in context.Departments on u.UniversityId equals d.Id
-            //            join 
-            //            ;
-            throw new NotImplementedException();
+            var query = from diu in context.DepartmentInUniversities
+                        where diu.UniversityId == universityId
+                        join d in context.Departments on diu.DepartmentId equals d.Id
+                        join m in context.Majors on d.Id equals m.DepartmentId
+                        select new { m };
 
+            return await query.ToListAsync();
         }
 
         public async Task<bool> CheckExistedMajorCode(int departmentId, string code)

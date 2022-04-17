@@ -44,7 +44,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                throw new NotImplementedException();
+                List<ViewMajor> majors = await _majorService.GetByUniversity(universityId);
+                return Ok(majors);
             }
             catch (SqlException)
             {

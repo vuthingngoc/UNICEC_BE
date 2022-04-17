@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewDepartment> GetByCompetitionId(int id)
+        public Task<ViewDepartment> GetByCompetition(int id)
         {
             throw new NotImplementedException();
         }

@@ -56,9 +56,26 @@ namespace UniCEC.Business.Services.MajorSvc
             throw new NullReferenceException("Not found");
         }
 
-        public Task<PagingResult<ViewMajor>> GetByUniversity(int universityId)
+        public async Task<List<ViewMajor>> GetByUniversity(int universityId)
         {
-            throw new NotImplementedException();
+            List<Major> majorList = await _majorRepo.GetByUniversity(universityId);
+            if (majorList == null) throw new NullReferenceException("Not Found");
+
+            List<ViewMajor> viewMajors = new List<ViewMajor>();
+            majorList.ForEach(m =>
+            {
+                ViewMajor viewMajor = new ViewMajor()
+                {
+                    Id = m.Id,
+                    DepartmentId = m.DepartmentId,
+                    Description = m.Description,
+                    MajorCode= m.MajorCode,
+                    Name= m.Name,
+                    Status= m.Status,                    
+                };
+                viewMajors.Add(viewMajor);
+            });
+            return viewMajors;
         }
 
         public async Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request)
