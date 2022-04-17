@@ -52,7 +52,15 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                         join m in context.Majors on d.Id equals m.DepartmentId
                         select new { m };
 
-            return await query.ToListAsync();
+            return await query.Select(x => new Major()
+            {
+                Id= x.m.Id,
+                DepartmentId = x.m.DepartmentId,
+                Description= x.m.Description,
+                MajorCode= x.m.MajorCode,
+                Name= x.m.Name,
+                Status= x.m.Status
+            }).ToListAsync();
         }
 
         public async Task<bool> CheckExistedMajorCode(int departmentId, string code)
