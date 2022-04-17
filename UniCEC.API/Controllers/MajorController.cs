@@ -40,6 +40,22 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        public async Task<IActionResult> GetMajorByUniversity(int universityId)
+        {
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
         [HttpGet("search")]
         public async Task<IActionResult> GetMajorByCondition([FromQuery] MajorRequestModel request)
         {

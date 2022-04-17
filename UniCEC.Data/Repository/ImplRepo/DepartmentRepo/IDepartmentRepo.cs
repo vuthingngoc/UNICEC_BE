@@ -1,10 +1,12 @@
-﻿using UniCEC.Data.Models.DB;
+﻿using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 {
     public interface IDepartmentRepo : IRepository<Department>
     {
-        // To be continued ...
+        public Task<PagingResult<Department>> GetByCompetitionId(int competitionId);
     }
 }

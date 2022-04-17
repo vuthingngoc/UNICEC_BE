@@ -10,6 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
     public interface IMajorRepo : IRepository<Major>
     {
         public Task<PagingResult<Major>> GetByCondition(MajorRequestModel request);
+        public Task<List<Major>> GetByUniversity(int universityId);
         public Task<bool> CheckExistedMajorCode(int departmentId, string code);
 
     }

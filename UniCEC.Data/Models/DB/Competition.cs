@@ -12,6 +12,7 @@ namespace UniCEC.Data.Models.DB
             Blogs = new HashSet<Blog>();
             CompetitionEntities = new HashSet<CompetitionEntity>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
+            CompetitionInDepartments = new HashSet<CompetitionInDepartment>();
             Departments = new HashSet<Department>();
             Participants = new HashSet<Participant>();
             SponsorInCompetitions = new HashSet<SponsorInCompetition>();
@@ -40,6 +41,7 @@ namespace UniCEC.Data.Models.DB
         public virtual ICollection<Blog> Blogs { get; set; }
         public virtual ICollection<CompetitionEntity> CompetitionEntities { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
+        public virtual ICollection<CompetitionInDepartment> CompetitionInDepartments { get; set; }
         public virtual ICollection<Department> Departments { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<SponsorInCompetition> SponsorInCompetitions { get; set; }

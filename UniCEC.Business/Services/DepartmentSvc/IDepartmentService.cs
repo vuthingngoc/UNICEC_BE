@@ -7,7 +7,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
     public interface IDepartmentService
     {
         public Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request);
-        public Task<ViewDepartment> GetByDepartmentId(int id);
+        public Task<ViewDepartment> GetByCompetitionId(int competitionId);
         public Task<ViewDepartment> Insert(DepartmentInsertModel department);
         public Task<bool> Update(ViewDepartment department);
         public Task<bool> Delete(int id);

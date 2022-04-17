@@ -27,6 +27,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Competition> Competitions { get; set; }
         public virtual DbSet<CompetitionEntity> CompetitionEntities { get; set; }
         public virtual DbSet<CompetitionInClub> CompetitionInClubs { get; set; }
+        public virtual DbSet<CompetitionInDepartment> CompetitionInDepartments { get; set; }
         public virtual DbSet<CompetitionType> CompetitionTypes { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<DepartmentInUniversity> DepartmentInUniversities { get; set; }
@@ -50,9 +51,6 @@ namespace UniCEC.Data.Models.DB
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=.;Database=UniCEC;Trusted_Connection=True;");
-                //thêm lazyLoading
-                optionsBuilder.UseLazyLoadingProxies();
-
             }
         }
 
@@ -338,6 +336,29 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__5FB337D6");
+            });
+
+            modelBuilder.Entity<CompetitionInDepartment>(entity =>
+            {
+                entity.ToTable("CompetitionInDepartment");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
+
+                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+
+                entity.HasOne(d => d.Competition)
+                    .WithMany(p => p.CompetitionInDepartments)
+                    .HasForeignKey(d => d.CompetitionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Compe__0E6E26BF");
+
+                entity.HasOne(d => d.Department)
+                    .WithMany(p => p.CompetitionInDepartments)
+                    .HasForeignKey(d => d.DepartmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Depar__0D7A0286");
             });
 
             modelBuilder.Entity<CompetitionType>(entity =>
