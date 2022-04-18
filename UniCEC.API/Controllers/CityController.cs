@@ -58,7 +58,7 @@ namespace UniCEC.API.Controllers
         }
 
         //GET CITY BY ID
-        [HttpGet("SearchCityBy{id}")]
+        [HttpGet("GetCityBy{id}")]
         public async Task<IActionResult> GetCityById(int id)
         {
             try
