@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.UniversitySvc;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.University;
 
 namespace UniCEC.API.Controllers
@@ -25,14 +27,36 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("GetUniversityByConditions")]
+        public async Task<IActionResult> GetUniversityByConditions([FromQuery] UniversityRequestModel request)
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                PagingResult<ViewUniversity> result = await _universityService.GetUniversitiesByConditions(request);
+                
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+
         }
 
         //Get 1 university by ID
-        [HttpGet("{id}")]
+        [HttpGet("GetUniversityBy{id}")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
             try {
@@ -59,27 +83,71 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<UniversityController>
-        [HttpPost]
+        [HttpPost("InsertUniversity")]
         public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
-            //gọi service
-            ViewUniversity result = await _universityService.Insert(model);
+            try
+            {
+                //gọi service
+                ViewUniversity result = await _universityService.Insert(model);
+                if (result != null)
+                {
 
-
-            return Ok();
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
 
         }
 
         // PUT api/<UniversityController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("UpdateUniversityById")]
+        public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
+            try {
+                Boolean check = false;
+                check = await _universityService.Update(university);
+                if (check)
+                {
+                    return Ok();
+                }
+                else { 
+                   return BadRequest();
+                }
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         // DELETE api/<UniversityController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("DeleteUniversityBy{id}")]
+        public async Task<IActionResult> DeleteUniversityById(int id)
         {
+            try
+            {
+                bool result = false;
+                result = await _universityService.Delete(id);
+                if (result)
+                {
+                    return Ok();
+                }
+                else {
+                    return BadRequest();
+                }
+            }
+            catch (SqlException)
+            {
+               return StatusCode(500, "Internal server exception");
+            }
         }
     }
 }
