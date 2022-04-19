@@ -171,11 +171,40 @@ namespace UniCEC.Business.Services.UserSvc
             return await _userRepo.Update();
         }
 
+
+
+        //------------------------------------------------LOGIN------------------------------------------------
+
+        //CheckUserEmail
         public async Task<bool> CheckUserEmailExsit(string email_user)
         {
             bool check = false;
             check = await _userRepo.CheckExistedEmail(email_user);
             return check;
+        }
+
+        //Insert - UserTemporary
+        public async Task<ViewUser> InsertUserTemporary(UserModelTemporary userTem)
+        {
+            try {
+                User user = new User
+                {
+                    RoleId = userTem.RoleId,
+                    Email = userTem.Email,
+                    Status = true
+                };
+               int id = await _userRepo.Insert(user);
+                if (id > 0) {
+                    return new ViewUser { 
+                        Id = id,
+                        RoleId = userTem.RoleId,
+                        Email = userTem.Email,
+                        Status = true
+                    };
+                }
+                return null;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

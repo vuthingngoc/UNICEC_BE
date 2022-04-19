@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.Data.JWT
 {
-    class JWTUserToken
+    public class JWTUserToken
     {
-
+        
+        
+      
     }
 }

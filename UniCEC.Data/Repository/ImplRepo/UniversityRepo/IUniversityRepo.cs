@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -13,5 +14,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         public Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request);
         //Check-Email-University
         public Task<bool> CheckEmailUniversity(string email);
+        //Get-List-Universities-By-Email
+        public Task<List<ViewUniversity>> GetListUniversityByEmail(string email);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.University;
@@ -15,5 +16,7 @@ namespace UniCEC.Business.Services.UniversitySvc
 
         //Check Email Of University
         public Task<bool> CheckEmailUniversity(string email);
+        //Get List University By Email
+        public Task<List<ViewUniversity>> GetListUniversityByEmail(string email);
     }
 }

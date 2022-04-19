@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
@@ -106,13 +107,14 @@ namespace UniCEC.Business.Services.UniversitySvc
                 bool check = false;
                 if (uni != null)
                 {
-                    //update name-des-phone-opening-closing-founding
+                    //update name-des-phone-opening-closing-founding-cityId
                     uni.Name = (!university.Name.Equals("")) ? university.Name : uni.Name;
                     uni.Description = (!university.Description.Equals("")) ? university.Description : uni.Description;
                     uni.Phone = (!university.Phone.Equals("")) ? university.Phone : uni.Phone;
                     uni.Openning = (!university.Openning.Equals("")) ? university.Openning : uni.Openning;
                     uni.Closing = (!university.Closing.Equals("")) ? university.Closing : uni.Closing;
-                    uni.Status = university.Status; 
+                    uni.CityId = (!university.CityId.Equals("")) ? university.CityId : uni.CityId;
+                    uni.Status = university.Status;
                     check = await _universityRepo.Update();
                     return check;
                 }
@@ -168,6 +170,12 @@ namespace UniCEC.Business.Services.UniversitySvc
             check = await _universityRepo.CheckEmailUniversity(email);
 
             return check;
+        }
+
+        //Get-List-Universities-By-Email
+        public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
+        {
+            List<ViewUniversity> result = await _universityRepo.GetListUniversityByEmail(email);
         }
     }
 }

@@ -17,5 +17,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         //Check-User-Exist
         public Task<bool> CheckUserEmailExsit(string email_user);
+        //Insert-User-Temporary
+        public Task<ViewUser> InsertUserTemporary(UserModelTemporary userTem);
     }
 }

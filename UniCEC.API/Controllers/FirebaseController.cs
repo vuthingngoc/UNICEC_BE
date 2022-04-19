@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Entities.University;
+using UniCEC.Data.ViewModels.Entities.User;
+using UniCEC.Data.ViewModels.Firebase.Auth;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -61,6 +64,7 @@ namespace UniCEC.API.Controllers
                 string[] arrList = email_user.Split('@');
                 string email_Uni = arrList[1]; 
                 bool checkUni = await _universityService.CheckEmailUniversity(email_Uni);
+                //check Uni in System or not
                 if (checkUni)
                 {
                     //-------Check User
@@ -68,17 +72,37 @@ namespace UniCEC.API.Controllers
                     //1.If User not in system
                     if (checkExistUser == false)
                     {
-                
+                      //Create UserModelTemporary
+                      UserModelTemporary userModelTemporary = new UserModelTemporary();
+                      userModelTemporary.Email = email_user;
+                      //auto Role Student - Status True 
+                      userModelTemporary.RoleId = 3;
+                      //Add In DB [User]
+                      ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);
+                      //Get List University Belong To Email
+                      List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(email_Uni);
+                      //complete ViewUserInfo
+                      //thông tin để trả ra cho BE để User Tiếp tục Update thông tin User
+                      ViewUserInfo vui = new ViewUserInfo { 
+                            Email = userTem.Email,
+                            RoleId = userTem.RoleId,
+                            listUniBelongToGmail = listUniBelongToEmail
+                      };
+                      //----------------Generate JWT Token và kèm theo thông tin này lên FE
+
                     }
                     //2.If User in system
                     else
-                    { 
-                    
-                    
-                    }
-                   
+                    {
 
+
+                        //Check Role
+                        //----------------Generate JWT Token
+
+
+                    }
                 }
+                //Not In System
                 else {
                     BadRequest();
                 }
