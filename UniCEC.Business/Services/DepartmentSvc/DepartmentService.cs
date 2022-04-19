@@ -17,6 +17,17 @@ namespace UniCEC.Business.Services.DepartmentSvc
             _departmentRepo = departmentRepo;
         }
 
+        public async Task<ViewDepartment> GetByDepartment(int id)
+        {
+            Department department = await _departmentRepo.Get(id);            
+            return (department != null) ? new ViewDepartment()
+            {
+                Id = id,
+                Name = department.Name,
+                Status = department.Status
+            } : throw new NullReferenceException("Not Found");
+        }
+
         public async Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Department> departments = await _departmentRepo.GetAllPaging(request);
