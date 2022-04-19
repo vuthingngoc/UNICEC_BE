@@ -18,6 +18,28 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         {
 
         }
+        //Check-University-Email
+        public async Task<bool> CheckEmailUniversity(string email)
+        {
+            int count = 0;
+            bool check = false;
+
+            //Constain Email
+            var query = from University u in context.Universities
+                        where u.Email .Contains(email)
+                        select u;
+            
+            List<University> universities = await query.ToListAsync();
+
+            count = universities.Count();
+
+            if (count > 0)
+            {
+                check = true;
+            }
+            return check;
+        }
+
 
         //Get-Universities-By-Conditions
         public async Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request)

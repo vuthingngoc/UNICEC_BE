@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.UniversitySvc;
+using UniCEC.Business.Services.UserSvc;
+using UniCEC.Data.RequestModels;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,6 +16,16 @@ namespace UniCEC.API.Controllers
     [ApiVersion("1.0")]
     public class FirebaseController : ControllerBase
     {
+
+        private IUserService _userService;
+        private IUniversityService _universityService;
+
+        public FirebaseController(IUserService userService, IUniversityService universityService)
+        {
+            _userService = userService;
+            _universityService = universityService; 
+        }
+
         // GET: api/<FirebaseController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -28,11 +41,51 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<FirebaseController>
-        [HttpPost]
+        [HttpPost("Authenicated/User")]
         public async Task<IActionResult> AuthenticateUser()
         {
             try
             {
+                //Get The IDToken From FE
+                //... continute
+
+                //decoded IDToken
+                FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("IdToken");
+                string uid = decodedToken.Uid;
+            
+                //lấy user info
+                UserRecord userInfo = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+
+                //-----------University
+                string email_user = userInfo.Email;
+                string[] arrList = email_user.Split('@');
+                string email_Uni = arrList[1]; 
+                bool checkUni = await _universityService.CheckEmailUniversity(email_Uni);
+                if (checkUni)
+                {
+                    //-------Check User
+                    bool checkExistUser = await _userService.CheckUserEmailExsit(email_user);
+                    //1.If User not in system
+                    if (checkExistUser == false)
+                    {
+                
+                    }
+                    //2.If User in system
+                    else
+                    { 
+                    
+                    
+                    }
+                   
+
+                }
+                else {
+                    BadRequest();
+                }
+
+
+
+
 
             }
             catch (Exception e)
@@ -40,10 +93,7 @@ namespace UniCEC.API.Controllers
                 BadRequest(e.Message);
             }
 
-            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("IdToken");
-            string uid = decodedToken.Uid;
-
-            //decodedToken
+            
 
             return Ok();
         }

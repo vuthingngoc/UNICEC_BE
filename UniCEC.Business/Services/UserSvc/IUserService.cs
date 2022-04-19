@@ -14,5 +14,8 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<ViewUser> Insert(UserInsertModel user);
         public Task<bool> Update(ViewUser user);
         public Task<bool> Delete(int id);
+
+        //Check-User-Exist
+        public Task<bool> CheckUserEmailExsit(string email_user);
     }
 }

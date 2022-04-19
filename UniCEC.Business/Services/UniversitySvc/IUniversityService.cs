@@ -12,5 +12,8 @@ namespace UniCEC.Business.Services.UniversitySvc
         public Task<ViewUniversity> Insert(UniversityInsertModel university);
         public Task<bool> Update(ViewUniversity university);
         public Task<bool> Delete(int id);
+
+        //Check Email Of University
+        public Task<bool> CheckEmailUniversity(string email);
     }
 }

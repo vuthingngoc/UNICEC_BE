@@ -11,5 +11,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
     {
         //Get-Universities-By-Conditions
         public Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request);
+        //Check-Email-University
+        public Task<bool> CheckEmailUniversity(string email);
     }
 }

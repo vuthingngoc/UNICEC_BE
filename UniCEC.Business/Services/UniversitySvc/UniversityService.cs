@@ -159,5 +159,15 @@ namespace UniCEC.Business.Services.UniversitySvc
             //
             return result;
         }
+
+        //Check-Email-University
+        public async Task<bool> CheckEmailUniversity(string email)
+        {
+            bool check = false;
+
+            check = await _universityRepo.CheckEmailUniversity(email);
+
+            return check;
+        }
     }
 }

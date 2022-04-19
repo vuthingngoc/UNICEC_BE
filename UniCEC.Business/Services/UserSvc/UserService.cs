@@ -87,6 +87,8 @@ namespace UniCEC.Business.Services.UserSvc
             return isExisted;
         }
 
+
+
         public async Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request)
         {
             PagingResult<User> users = await _userRepo.GetByCondition(request);
@@ -167,6 +169,13 @@ namespace UniCEC.Business.Services.UserSvc
 
             user.Status = false;
             return await _userRepo.Update();
+        }
+
+        public async Task<bool> CheckUserEmailExsit(string email_user)
+        {
+            bool check = false;
+            check = await _userRepo.CheckExistedEmail(email_user);
+            return check;
         }
     }
 }
