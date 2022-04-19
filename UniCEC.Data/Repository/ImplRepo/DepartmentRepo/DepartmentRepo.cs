@@ -19,11 +19,13 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             var query = from d in context.Departments
                         where d.Name.Contains(name)
                         select new { d };
-            return await query.Select(x => new Department()
+            List<Department> departments = await query.Select(x => new Department()
             {
                 Id = x.d.Id,
                 Name = x.d.Name
             }).ToListAsync();
+
+            return (departments.Count > 0) ? departments : null;            
         }
 
         public async Task<List<Department>> GetByCompetition(int competitionId)
@@ -32,13 +34,14 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                         join d in context.Departments on cid.DepartmentId equals d.Id
                         where cid.CompetitionId == competitionId
                         select new { d };
-            return await query.Select(x => 
+            List<Department> departments = await query.Select(x => 
                 new Department()
                 {
                     Id = x.d.Id,
                     Name= x.d.Name
                 }
-            ).ToListAsync();            
+            ).ToListAsync();
+            return (departments.Count > 0) ? departments : null;
         }
     }
 }

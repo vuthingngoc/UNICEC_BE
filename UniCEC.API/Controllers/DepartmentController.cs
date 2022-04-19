@@ -41,7 +41,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllDepartment(PagingRequest request)
+        public async Task<IActionResult> GetAllDepartment([FromQuery] PagingRequest request)
         {
             try
             {
@@ -77,11 +77,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
-        public async Task<IActionResult> GetDepartmentByCompetition(int competitionId)
+        public async Task<IActionResult> GetDepartmentByCompetition(int id)
         {
             try
             {
-                List<ViewDepartment> departments = await _departmentService.GetByCompetition(competitionId);
+                List<ViewDepartment> departments = await _departmentService.GetByCompetition(id);
                 return Ok(departments);
             }
             catch (SqlException)
