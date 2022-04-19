@@ -16,6 +16,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public bool Status { get; set; }
 
         public virtual ICollection<CompetitionInDepartment> CompetitionInDepartments { get; set; }
         public virtual ICollection<DepartmentInUniversity> DepartmentInUniversities { get; set; }
