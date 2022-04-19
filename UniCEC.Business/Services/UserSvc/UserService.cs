@@ -95,7 +95,8 @@ namespace UniCEC.Business.Services.UserSvc
             if (users.Items == null) throw new NullReferenceException("Not Found");
 
             List<ViewUser> items = new List<ViewUser>();
-            users.Items.ForEach(u => {
+            users.Items.ForEach(u =>
+            {
                 ViewUser user = TransformViewModel(u);
                 items.Add(user);
             });
@@ -159,7 +160,7 @@ namespace UniCEC.Business.Services.UserSvc
             element.Status = user.Status;
 
             return await _userRepo.Update();
-            
+
         }
 
         public async Task<bool> Delete(int id)
@@ -186,16 +187,19 @@ namespace UniCEC.Business.Services.UserSvc
         //Insert - UserTemporary
         public async Task<ViewUser> InsertUserTemporary(UserModelTemporary userTem)
         {
-            try {
+            try
+            {
                 User user = new User
                 {
                     RoleId = userTem.RoleId,
                     Email = userTem.Email,
                     Status = true
                 };
-               int id = await _userRepo.Insert(user);
-                if (id > 0) {
-                    return new ViewUser { 
+                int id = await _userRepo.Insert(user);
+                if (id > 0)
+                {
+                    return new ViewUser
+                    {
                         Id = id,
                         RoleId = userTem.RoleId,
                         Email = userTem.Email,

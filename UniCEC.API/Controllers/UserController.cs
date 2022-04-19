@@ -30,7 +30,7 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewUser> users = await _userService.GetAllPaging(request);
                 return Ok(users);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -48,7 +48,7 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewUser> users = await _userService.GetUserCondition(request);
                 return Ok(users);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -66,6 +66,7 @@ namespace UniCEC.API.Controllers
             {
                 ViewUser user = await _userService.Insert(request);
                 return Created($"api/v1/[controller]/{user.Id}", user);
+
             }
             catch (ArgumentNullException ex)
             {
@@ -89,7 +90,7 @@ namespace UniCEC.API.Controllers
                 bool result = await _userService.Update(request);
                 return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }

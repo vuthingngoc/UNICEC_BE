@@ -26,7 +26,7 @@ namespace UniCEC.API.Controllers
         public FirebaseController(IUserService userService, IUniversityService universityService)
         {
             _userService = userService;
-            _universityService = universityService; 
+            _universityService = universityService;
         }
 
         // GET: api/<FirebaseController>
@@ -55,14 +55,12 @@ namespace UniCEC.API.Controllers
                 //decoded IDToken
                 FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("IdToken");
                 string uid = decodedToken.Uid;
-            
                 //lấy user info
                 UserRecord userInfo = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-
                 //-----------University
                 string email_user = userInfo.Email;
                 string[] arrList = email_user.Split('@');
-                string email_Uni = arrList[1]; 
+                string email_Uni = arrList[1];
                 bool checkUni = await _universityService.CheckEmailUniversity(email_Uni);
                 //check Uni in System or not
                 if (checkUni)
@@ -72,53 +70,43 @@ namespace UniCEC.API.Controllers
                     //1.If User not in system
                     if (checkExistUser == false)
                     {
-                      //Create UserModelTemporary
-                      UserModelTemporary userModelTemporary = new UserModelTemporary();
-                      userModelTemporary.Email = email_user;
-                      //auto Role Student - Status True 
-                      userModelTemporary.RoleId = 3;
-                      //Add In DB [User]
-                      ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);
-                      //Get List University Belong To Email
-                      List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(email_Uni);
-                      //complete ViewUserInfo
-                      //thông tin để trả ra cho BE để User Tiếp tục Update thông tin User
-                      ViewUserInfo vui = new ViewUserInfo { 
+                        //Create UserModelTemporary
+                        UserModelTemporary userModelTemporary = new UserModelTemporary();
+                        userModelTemporary.Email = email_user;
+                        //auto Role Student - Status True 
+                        userModelTemporary.RoleId = 3;
+                        //Add In DB [User]
+                        ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);
+                        //Get List University Belong To Email
+                        List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(email_Uni);
+                        //complete ViewUserInfo
+                        //thông tin để trả ra cho BE để User Tiếp tục Update thông tin User
+                        ViewUserInfo vui = new ViewUserInfo
+                        {
                             Email = userTem.Email,
                             RoleId = userTem.RoleId,
                             listUniBelongToGmail = listUniBelongToEmail
-                      };
-                      //----------------Generate JWT Token và kèm theo thông tin này lên FE
+                        };
+                        //----------------Generate JWT Token và kèm theo thông tin này lên FE
 
                     }
                     //2.If User in system
                     else
                     {
-
-
                         //Check Role
                         //----------------Generate JWT Token
-
-
                     }
                 }
                 //Not In System
-                else {
+                else
+                {
                     BadRequest();
                 }
-
-
-
-
-
             }
             catch (Exception e)
             {
                 BadRequest(e.Message);
             }
-
-            
-
             return Ok();
         }
 
