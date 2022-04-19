@@ -160,6 +160,7 @@ namespace UniCEC.Business.Services.MajorSvc
             Major major = await _majorRepo.Get(id);
             if (major != null)
             {
+                if (major.Status == false) return true;                
                 major.Status = false;
                 return await _majorRepo.Update();
             }

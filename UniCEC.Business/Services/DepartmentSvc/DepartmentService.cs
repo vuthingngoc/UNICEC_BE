@@ -25,7 +25,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 Id = id,
                 Name = department.Name,
                 Status = department.Status
-            } : throw new NullReferenceException("Not Found");
+            } : throw new NullReferenceException("Not found this department");
         }
 
         public async Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
@@ -49,7 +49,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public async Task<List<ViewDepartment>> GetByName(string name)
         {
             List<Department> listDepartment = await _departmentRepo.GetByName(name);
-            if (listDepartment == null) throw new NullReferenceException("Not Found");
+            if (listDepartment == null) throw new NullReferenceException("Not found any departments");
 
             List<ViewDepartment> departments = new List<ViewDepartment>();
             listDepartment.ForEach(element =>
@@ -123,6 +123,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             Department element = await _departmentRepo.Get(id);
             if(element != null)
             {
+                if (element.Status == false) return true;
                 element.Status = false;
                 return await _departmentRepo.Update();
             }
