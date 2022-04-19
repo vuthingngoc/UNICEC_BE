@@ -29,6 +29,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             if (request.Status != null) query = query.Where(x => x.m.Status == request.Status);
 
+            int totalCount = query.Count();
+
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                     .Select(x => new Major()
                                         {       
@@ -40,19 +42,19 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                                             Status = x.m.Status
                                         }
                                     ).ToListAsync();
-
-            return new PagingResult<Major>(items, context.Majors.Count(), request.CurrentPage, request.PageSize);
+            return (items.Count > 0) ? new PagingResult<Major>(items, totalCount, request.CurrentPage, request.PageSize)
+                                     : new PagingResult<Major>(null, 0, request.CurrentPage, request.PageSize);
         }
 
         public async Task<List<Major>> GetByUniversity(int universityId)
         {
-            var query = from diu in context.DepartmentInUniversities
-                        where diu.UniversityId == universityId
+            var query = from diu in context.DepartmentInUniversities                        
                         join d in context.Departments on diu.DepartmentId equals d.Id
                         join m in context.Majors on d.Id equals m.DepartmentId
+                        where diu.UniversityId == universityId
                         select new { m };
 
-            return await query.Select(x => new Major()
+            List<Major> majors =  await query.Select(x => new Major()
             {
                 Id= x.m.Id,
                 DepartmentId = x.m.DepartmentId,
@@ -61,13 +63,15 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                 Name= x.m.Name,
                 Status= x.m.Status
             }).ToListAsync();
+
+            return (majors.Count > 0) ? majors : null;
         }
 
-        public async Task<bool> CheckExistedMajorCode(int departmentId, string code)
+        public async Task<Major> CheckExistedMajorCode(int departmentId, string code)
         {
             Major major = await context.Majors.FirstOrDefaultAsync(m => m.DepartmentId.Equals(departmentId)
                                                                         && m.MajorCode.Equals(code));
-            return (major == null) ? false : true;
+            return major;
         }
     }
 }
