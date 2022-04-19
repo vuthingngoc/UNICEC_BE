@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,6 +20,24 @@ namespace UniCEC.API.Controllers
         public DepartmentController(IDepartmentService departmentService)
         {
             _departmentService = departmentService;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDepartmentById(int id)
+        {
+            try
+            {
+                ViewDepartment department = await _departmentService.GetByDepartment(id);
+                return Ok(department);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpGet]
