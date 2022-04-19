@@ -42,11 +42,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("university/{id}")]
-        public async Task<IActionResult> GetMajorByUniversity([FromQuery] int universityId)
+        public async Task<IActionResult> GetMajorByUniversity(int id)
         {
             try
             {
-                List<ViewMajor> majors = await _majorService.GetByUniversity(universityId);
+                List<ViewMajor> majors = await _majorService.GetByUniversity(id);
                 return Ok(majors);
             }
             catch (SqlException)

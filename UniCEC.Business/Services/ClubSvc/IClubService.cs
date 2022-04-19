@@ -7,8 +7,8 @@ namespace UniCEC.Business.Services.ClubSvc
 {
     public interface IClubService
     {
-        public Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request);
         public Task<ViewClub> GetByClub(int id);
+        public Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request);        
         public Task<List<ViewClub>> GetByName(string name);
         public Task<List<ViewClub>> GetByCompetition(int competitionId);
         public Task<ViewClub> Insert(ClubInsertModel club);

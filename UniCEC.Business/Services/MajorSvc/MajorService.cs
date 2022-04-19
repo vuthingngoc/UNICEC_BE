@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -12,10 +13,12 @@ namespace UniCEC.Business.Services.MajorSvc
     public class MajorService : IMajorService
     {
         private IMajorRepo _majorRepo;
+        private IDepartmentRepo _departmentRepo;
 
-        public MajorService(IMajorRepo majorRepo)
+        public MajorService(IMajorRepo majorRepo, IDepartmentRepo departmentRepo)
         {
             _majorRepo = majorRepo;
+            _departmentRepo = departmentRepo;
         }
 
         public async Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request)
@@ -23,7 +26,7 @@ namespace UniCEC.Business.Services.MajorSvc
             PagingResult<Major> result = await _majorRepo.GetAllPaging(request);
             if (result.Items != null)
             {
-                List<ViewMajor> listMajor = new List<ViewMajor>();
+                List<ViewMajor> majors = new List<ViewMajor>();
                 result.Items.ForEach(e =>
                 {
                     ViewMajor viewMajor = new ViewMajor()
@@ -35,10 +38,10 @@ namespace UniCEC.Business.Services.MajorSvc
                         Name = e.Name,
                         Status = e.Status
                     };
-                    listMajor.Add(viewMajor);
+                    majors.Add(viewMajor);
                 });
 
-                return new PagingResult<ViewMajor>(listMajor, result.TotalCount, result.CurrentPage, result.PageSize);
+                return new PagingResult<ViewMajor>(majors, result.TotalCount, result.CurrentPage, result.PageSize);
             }
 
             throw new NullReferenceException("Not found");
@@ -47,7 +50,7 @@ namespace UniCEC.Business.Services.MajorSvc
         public async Task<List<ViewMajor>> GetByUniversity(int universityId)
         {
             List<Major> majorList = await _majorRepo.GetByUniversity(universityId);
-            if (majorList == null) throw new NullReferenceException("Not Found");
+            if (majorList == null) throw new NullReferenceException("No any majors with this university");
 
             List<ViewMajor> viewMajors = new List<ViewMajor>();
             majorList.ForEach(m =>
@@ -57,9 +60,9 @@ namespace UniCEC.Business.Services.MajorSvc
                     Id = m.Id,
                     DepartmentId = m.DepartmentId,
                     Description = m.Description,
-                    MajorCode= m.MajorCode,
-                    Name= m.Name,
-                    Status= m.Status,                    
+                    MajorCode = m.MajorCode,
+                    Name = m.Name,
+                    Status = m.Status,
                 };
                 viewMajors.Add(viewMajor);
             });
@@ -89,15 +92,18 @@ namespace UniCEC.Business.Services.MajorSvc
                 return new PagingResult<ViewMajor>(items, majors.TotalCount, majors.CurrentPage, majors.PageSize);
             }
 
-            throw new NullReferenceException("Not Found");
+            throw new NullReferenceException("Not found any majors satisfying the condition");
         }
 
         public async Task<ViewMajor> Insert(MajorInsertModel major)
         {
             if (major == null) throw new ArgumentNullException("Null Argument");
 
-            bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
-            if (check) throw new ArgumentException("Duplicated MajorCode");
+            Major majorObject = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
+            if (majorObject != null) throw new ArgumentException("Duplicated MajorCode");
+            Department department = await _departmentRepo.Get(major.DepartmentId);
+            if (department == null) throw new ArgumentException("Can not find this department");
+
             // default status when insert is true
             bool status = true;
             Major element = new Major()
@@ -131,8 +137,14 @@ namespace UniCEC.Business.Services.MajorSvc
             Major element = await _majorRepo.Get(major.Id);
             if (element == null) throw new NullReferenceException("Not found this element");
 
-            bool check = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
-            if (check) throw new ArgumentException("Duplicated MajorCode");
+            Major majorObject = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
+            if(majorObject != null)
+            {
+                if (majorObject.Id != major.Id) throw new ArgumentException("Duplicated MajorCode");                
+            }
+
+            Department department = await _departmentRepo.Get(major.DepartmentId);
+            if (department == null) throw new ArgumentException("Can not find this department");
 
             element.DepartmentId = major.DepartmentId;
             element.Description = major.Description;
