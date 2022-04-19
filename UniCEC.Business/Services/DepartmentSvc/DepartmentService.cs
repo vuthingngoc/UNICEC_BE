@@ -67,7 +67,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public async Task<List<ViewDepartment>> GetByCompetition(int competitionId)
         {
             List<Department> listDepartment = await _departmentRepo.GetByCompetition(competitionId);
-            if (listDepartment == null) throw new NullReferenceException();
+            if (listDepartment == null) throw new NullReferenceException("Not found any departments");
 
             List<ViewDepartment> departments = new List<ViewDepartment>();
             listDepartment.ForEach(element =>
@@ -115,7 +115,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 element.Status = department.Status;
                 return await _departmentRepo.Update();                 
             }
-            throw new NullReferenceException("Not Found this element");
+            throw new NullReferenceException("Not found this element");
         }
 
         public async Task<bool> Delete(int id)
@@ -127,7 +127,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 element.Status = false;
                 return await _departmentRepo.Update();
             }
-            throw new NullReferenceException("Not Found this element");
+            throw new NullReferenceException("Not found this element");
         }
     }
 }
