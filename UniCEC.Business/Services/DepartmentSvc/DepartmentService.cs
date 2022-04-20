@@ -17,15 +17,20 @@ namespace UniCEC.Business.Services.DepartmentSvc
             _departmentRepo = departmentRepo;
         }
 
+        private ViewDepartment TranformViewDepartment(Department department)
+        {
+            return new ViewDepartment()
+            {
+                Id = department.Id,
+                Name = department.Name,
+                Status = department.Status,                
+            };
+        }
+
         public async Task<ViewDepartment> GetByDepartment(int id)
         {
             Department department = await _departmentRepo.Get(id);            
-            return (department != null) ? new ViewDepartment()
-            {
-                Id = id,
-                Name = department.Name,
-                Status = department.Status
-            } : throw new NullReferenceException("Not found this department");
+            return (department != null) ? TranformViewDepartment(department) : throw new NullReferenceException("Not found this department");
         }
 
         public async Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
@@ -36,11 +41,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             List<ViewDepartment> items = new List<ViewDepartment>();
             departments.Items.ForEach(item =>
             {
-                ViewDepartment department = new ViewDepartment()
-                {
-                    Id = item.Id,
-                    Name = item.Name
-                };
+                ViewDepartment department = TranformViewDepartment(item);
                 items.Add(department);
             });
             return new PagingResult<ViewDepartment>(items, departments.TotalCount, departments.CurrentPage, departments.PageSize);
@@ -54,11 +55,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             List<ViewDepartment> departments = new List<ViewDepartment>();
             listDepartment.ForEach(element =>
             {
-                ViewDepartment department = new ViewDepartment()
-                {
-                    Id = element.Id,
-                    Name = element.Name
-                };
+                ViewDepartment department = TranformViewDepartment(element);
                 departments.Add(department);
             });
             return departments;
@@ -72,11 +69,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             List<ViewDepartment> departments = new List<ViewDepartment>();
             listDepartment.ForEach(element =>
             {
-                ViewDepartment department = new ViewDepartment()
-                {
-                    Id = element.Id,
-                    Name = element.Name
-                };
+                ViewDepartment department = TranformViewDepartment(element);
                 departments.Add(department);
             });
             return departments;
@@ -95,13 +88,10 @@ namespace UniCEC.Business.Services.DepartmentSvc
             int id = await _departmentRepo.Insert(element);
             if (id > 0)
             {
-                return new ViewDepartment()
-                {
-                    Id = id,
-                    Name = department.Name,
-                    Status = status
-                };
+                element.Id = id;
+                return TranformViewDepartment(element);
             }
+
             return null;
         }
 

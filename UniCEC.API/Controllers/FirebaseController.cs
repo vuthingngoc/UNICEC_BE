@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.UserSvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,6 +14,12 @@ namespace UniCEC.API.Controllers
     [ApiVersion("1.0")]
     public class FirebaseController : ControllerBase
     {
+        private IUserService _userService;
+        public FirebaseController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
         // GET: api/<FirebaseController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -40,9 +47,8 @@ namespace UniCEC.API.Controllers
                 BadRequest(e.Message);
             }
 
-            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("IdToken");
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync("idToken");
             string uid = decodedToken.Uid;
-
             //decodedToken
 
             return Ok();

@@ -21,23 +21,28 @@ namespace UniCEC.Business.Services.MajorSvc
             _departmentRepo = departmentRepo;
         }
 
+        private ViewMajor TransformViewMajor(Major major)
+        {
+            return new ViewMajor()
+            {
+                Id = major.Id,
+                DepartmentId = major.DepartmentId,
+                Description = major.Description,
+                MajorCode = major.MajorCode,
+                Name = major.Name,
+                Status = major.Status,
+            };
+        }
+
         public async Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Major> result = await _majorRepo.GetAllPaging(request);
             if (result.Items != null)
             {
                 List<ViewMajor> majors = new List<ViewMajor>();
-                result.Items.ForEach(e =>
+                result.Items.ForEach(element =>
                 {
-                    ViewMajor viewMajor = new ViewMajor()
-                    {
-                        Id = e.Id,
-                        DepartmentId = e.DepartmentId,
-                        Description = e.Description,
-                        MajorCode = e.MajorCode,
-                        Name = e.Name,
-                        Status = e.Status
-                    };
+                    ViewMajor viewMajor = TransformViewMajor(element);
                     majors.Add(viewMajor);
                 });
 
@@ -53,17 +58,9 @@ namespace UniCEC.Business.Services.MajorSvc
             if (majorList == null) throw new NullReferenceException("No any majors with this university");
 
             List<ViewMajor> viewMajors = new List<ViewMajor>();
-            majorList.ForEach(m =>
+            majorList.ForEach(element =>
             {
-                ViewMajor viewMajor = new ViewMajor()
-                {
-                    Id = m.Id,
-                    DepartmentId = m.DepartmentId,
-                    Description = m.Description,
-                    MajorCode = m.MajorCode,
-                    Name = m.Name,
-                    Status = m.Status,
-                };
+                ViewMajor viewMajor = TransformViewMajor(element);
                 viewMajors.Add(viewMajor);
             });
             return viewMajors;
@@ -75,17 +72,9 @@ namespace UniCEC.Business.Services.MajorSvc
             if (majors.Items != null)
             {
                 List<ViewMajor> items = new List<ViewMajor>();
-                majors.Items.ForEach(x =>
+                majors.Items.ForEach(element =>
                 {
-                    ViewMajor viewMajor = new ViewMajor()
-                    {
-                        Id = x.Id,
-                        DepartmentId = x.DepartmentId,
-                        Description = x.Description,
-                        MajorCode = x.MajorCode,
-                        Name = x.Name,
-                        Status = x.Status
-                    };
+                    ViewMajor viewMajor = TransformViewMajor(element);
                     items.Add(viewMajor);
                 });
 
@@ -117,15 +106,8 @@ namespace UniCEC.Business.Services.MajorSvc
             int id = await _majorRepo.Insert(element);
             if (id > 0)
             {
-                return new ViewMajor()
-                {
-                    Id = id,
-                    DepartmentId = major.DepartmentId,
-                    Description = major.Description,
-                    MajorCode = major.MajorCode,
-                    Name = major.Name,
-                    Status = status
-                };
+                element.Id = id;
+                return TransformViewMajor(element);
             }
             return null;
         }
