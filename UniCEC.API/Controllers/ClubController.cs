@@ -2,34 +2,33 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Threading.Tasks;
-using UniCEC.Business.Services.MajorSvc;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Major;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UniCEC.Business.Services.ClubSvc;
+using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Club;
 
 namespace UniCEC.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class MajorController : ControllerBase
+    public class ClubController : ControllerBase
     {
-        private IMajorService _majorService;
+        private IClubService _clubService;
 
-        public MajorController(IMajorService majorService)
+        public ClubController(IClubService clubService)
         {
-            _majorService = majorService;
+            _clubService = clubService; 
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllMajor([FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetAllClub(PagingRequest request)
         {
             try
             {
-                PagingResult<ViewMajor> majors = await _majorService.GetAllPaging(request);
-                return Ok(majors);
+                PagingResult<ViewClub> clubs = await _clubService.GetAllPaging(request);
+                return Ok(clubs);
             }
             catch (NullReferenceException ex)
             {
@@ -37,35 +36,35 @@ namespace UniCEC.API.Controllers
             }
             catch (SqlException)
             {
-                return StatusCode(500, "Internal Server Exception");
-            }
+                return StatusCode(500, "Internal Server Exeption");
+            }            
         }
 
-        [HttpGet("university/{id}")]
-        public async Task<IActionResult> GetMajorByUniversity(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetClubById(int id)
         {
             try
             {
-                List<ViewMajor> majors = await _majorService.GetByUniversity(id);
-                return Ok(majors);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
+                ViewClub club = await _clubService.GetByClub(id);
+                return Ok(club);
             }
             catch(NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> GetMajorByCondition([FromQuery] MajorRequestModel request)
+        [HttpGet("name")]
+        public async Task<IActionResult> GetClubByName(string name)
         {
             try
             {
-                PagingResult<ViewMajor> majors = await _majorService.GetMajorByCondition(request);
-                return Ok(majors);
+                List<ViewClub> clubs = await _clubService.GetByName(name);
+                return Ok(clubs);
             }
             catch (NullReferenceException ex)
             {
@@ -73,23 +72,41 @@ namespace UniCEC.API.Controllers
             }
             catch (SqlException)
             {
-                return StatusCode(500, "Internal Server Exception");
+                return StatusCode(500, "Internal Server Exeption");
             }
         }
 
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetClubByCompetition(int id)
+        //{
+        //    try
+        //    {
+        //        List<ViewClub> clubs = await _clubService.GetByCompetition(id);
+        //        return Ok(clubs);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return NotFound(ex.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exeption");
+        //    }
+        //}
+
         [HttpPost]
-        public async Task<IActionResult> InsertMajor([FromBody] MajorInsertModel major)
+        public async Task<IActionResult> InsertClub(ClubInsertModel club)
         {
             try
             {
-                ViewMajor viewMajor = await _majorService.Insert(major);
-                return Created($"api/v1/[controller]/{viewMajor.Id}", viewMajor);
+                ViewClub viewClub = await _clubService.Insert(club);
+                return Created("api/v1/[controller]", club); 
             }
             catch (ArgumentNullException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -104,18 +121,18 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateMajor([FromBody] ViewMajor major)
+        public async Task<IActionResult> UpdateClub(ClubUpdateModel club)
         {
             try
             {
-                bool result = await _majorService.Update(major);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");                
+                bool result = await _clubService.Update(club);
+                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
-            catch(ArgumentNullException ex)
+            catch (ArgumentNullException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -134,11 +151,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMajor(int id)
+        public async Task<IActionResult> DeleteClub(int id)
         {
             try
             {
-                bool result = await _majorService.Delete(id);                
+                bool result = await _clubService.Delete(id);
                 return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
             }
             catch (NullReferenceException ex)
@@ -152,7 +169,7 @@ namespace UniCEC.API.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal Server Exception");
-            }            
+            }
         }
     }
 }

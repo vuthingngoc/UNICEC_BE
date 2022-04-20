@@ -119,33 +119,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-
-
-
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            try
-            {
-                bool result = await _userService.Delete(id);
-                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
-
         //-------------------LOGIN
         [Authorize(Roles = "Student")]
         [HttpPut("UpdateUserHaveJWTToken")]
@@ -186,6 +159,33 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
+
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            try
+            {
+                bool result = await _userService.Delete(id);
+                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+
+        
 
 
     }

@@ -13,6 +13,6 @@ namespace UniCEC.Data.ViewModels.Firebase.Auth
         //TokenTemp
         public string tokenTemp { get; set; }
         //
-        public List<ViewUniversity> listUniBelongToGmail { get; set; }
+        public List<ViewUniversity> listUniBelongToEmail { get; set; }
     }
 }

@@ -104,7 +104,7 @@ namespace UniCEC.Data.JWT
 
 
         //tạo tạm để trả về FE cho User tiếp tục update
-        public static string GenerateJWTTokenUserTemp(ViewUserInfo user)
+        public static string GenerateJWTTokenUserTemp(UserModelTemporary user)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
                 issuer: "https://securetoken.google.com/unics-e46a4",
