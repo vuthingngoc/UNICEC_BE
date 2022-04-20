@@ -8,8 +8,11 @@ using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.Data.ViewModels.Firebase.Auth
 {
-    public class ViewUserInfo : UserModelTemporary
+    public class ViewUserInfo
     {
+        //TokenTemp
+        public string tokenTemp { get; set; }
+        //
         public List<ViewUniversity> listUniBelongToGmail { get; set; }
     }
 }

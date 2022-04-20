@@ -64,8 +64,16 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<ViewUser> GetUserByEmail(string email)
         {
             User user = await _userRepo.GetByEmail(email);
-            if (user == null) throw new NullReferenceException("Not Found");
-            return TransformViewModel(user);
+            if (user != null)
+            {
+                return TransformViewModel(user);
+
+            }
+            else
+            {
+                return null;    
+            }
+
         }
 
         private async Task<bool> CheckDuplicatedEmailAndUserId(int? universityId, string email, string userId)
@@ -145,8 +153,8 @@ namespace UniCEC.Business.Services.UserSvc
             User element = await _userRepo.Get(user.Id);
             if (element == null) throw new NullReferenceException("Not Found");
 
-            bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
-            if (isInvalid) return isInvalid;
+            //bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
+            //if (isInvalid) return isInvalid;
 
             element.Description = user.Description;
             element.Dob = user.Dob;
@@ -193,7 +201,13 @@ namespace UniCEC.Business.Services.UserSvc
                 {
                     RoleId = userTem.RoleId,
                     Email = userTem.Email,
-                    Status = true
+                    Status = true,
+                    //auto
+                    Dob = "",
+                    Fullname = "",
+                    Gender = "",
+                    UserId = "",
+                    Description = ""
                 };
                 int id = await _userRepo.Insert(user);
                 if (id > 0)
