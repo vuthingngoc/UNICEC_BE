@@ -76,7 +76,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("competition/{id}")]
         public async Task<IActionResult> GetClubByCompetition(int id)
         {
             try
