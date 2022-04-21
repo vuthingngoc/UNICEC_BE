@@ -59,9 +59,21 @@ namespace UniCEC.Business.Services.MemberSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewMember> GetByMemberId(int id)
+        public async Task<ViewMember> GetByMemberId(int id)
         {
-            throw new NotImplementedException();
+            //
+            Member mem = await _memberRepo.Get(id);
+            //
+            if (mem != null)
+            {
+                return new ViewMember()
+                {
+                    Id = mem.Id,
+                    StudentId = mem.StudentId,
+                    Status = mem.Status
+                };
+            }
+            else return null;
         }
 
 

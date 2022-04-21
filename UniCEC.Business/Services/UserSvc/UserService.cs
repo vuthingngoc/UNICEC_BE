@@ -39,7 +39,7 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request)
         {
             PagingResult<User> users = await _userRepo.GetAllPaging(request);
-            if (users.Items != null)
+            if (users != null)
             {
                 List<ViewUser> listViewUser = new List<ViewUser>();
                 users.Items.ForEach(e =>
