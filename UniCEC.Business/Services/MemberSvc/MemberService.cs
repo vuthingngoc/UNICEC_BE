@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
@@ -15,9 +16,42 @@ namespace UniCEC.Business.Services.MemberSvc
             _memberRepo = memberRepo;
         }
 
-        public Task<bool> Delete(int id)
+        //Transfer
+        private ViewMember TransferViewModel(Member member)
         {
-            throw new NotImplementedException();
+            return new ViewMember()
+            {
+                Id = member.Id,
+                StudentId = member.StudentId,
+                Status = member.Status,
+            };
+
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            try
+            {
+                bool check = false;
+                //
+                Member member = await _memberRepo.Get(id);
+                if (member != null)
+                {
+                    //
+                    member.Status = false;
+                    check = await _memberRepo.Update();
+                    if (check)
+                    {
+                        return check;
+                    }
+                }
+                else
+                {
+                    return check;
+                }
+                return check;
+            }
+            catch (Exception) { throw; }
         }
 
         public Task<PagingResult<ViewMember>> GetAllPaging(PagingRequest request)
@@ -30,14 +64,56 @@ namespace UniCEC.Business.Services.MemberSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewMember> Insert(MemberInsertModel member)
+
+
+        //Insert-Member
+        public async Task<ViewMember> Insert(MemberInsertModel model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Member member = new Member()
+                {
+                    StudentId = model.StudentId,
+                    Status = model.Status,
+                };
+                //
+                int result = await _memberRepo.Insert(member);
+                if (result > 0)
+                {
+                    //
+                    Member m = await _memberRepo.Get(result);
+                    ViewMember viewMember = TransferViewModel(m);
+                    return viewMember;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception) { throw; }
         }
 
-        public Task<bool> Update(MemberUpdateModel member)
+        //Update-Member
+        public async Task<bool> Update(MemberUpdateModel model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //get that member
+                Member member = await _memberRepo.Get(model.Id);
+                bool check = false;
+
+                if (member != null)
+                {
+                    member.Status = (model.Status != null) ? model.Status : member.Status;
+                    check = await _memberRepo.Update();
+                    return check;
+                }
+                return check;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

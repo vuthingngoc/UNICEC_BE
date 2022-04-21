@@ -73,6 +73,8 @@ namespace UniCEC.API.Controllers
                         userModelTemporary.RoleId = 3;
                         //Add In DB [User]
                         ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);
+                        //
+                        userModelTemporary.Id = userTem.Id.ToString();
                         //Get List University Belong To Email
                         List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(email_Uni);
                         //complete ViewUserInfo
@@ -109,6 +111,7 @@ namespace UniCEC.API.Controllers
                         {
                             UserModelTemporary userModelTemporary = new UserModelTemporary()
                             {
+                                Id = user.Id.ToString(),
                                 Email = user.Email,
                                 RoleName = role.RoleName,
                                 RoleId = user.RoleId,
