@@ -2,7 +2,6 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.DepartmentSvc;
 using UniCEC.Data.ViewModels.Common;
@@ -59,11 +58,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetDepartmentByName(string name)
+        public async Task<IActionResult> GetDepartmentByName(string name, [FromQuery] PagingRequest request)
         {
             try 
             {
-                List<ViewDepartment> departments = await _departmentService.GetByName(name);
+                PagingResult<ViewDepartment> departments = await _departmentService.GetByName(name, request);
                 return Ok(departments);
             }
             catch (SqlException)
@@ -77,11 +76,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
-        public async Task<IActionResult> GetDepartmentByCompetition(int id)
+        public async Task<IActionResult> GetDepartmentByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
             {
-                List<ViewDepartment> departments = await _departmentService.GetByCompetition(id);
+                PagingResult<ViewDepartment> departments = await _departmentService.GetByCompetition(id, request);
                 return Ok(departments);
             }
             catch (SqlException)

@@ -23,7 +23,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClub(PagingRequest request)
+        public async Task<IActionResult> GetAllClub([FromQuery] PagingRequest request)
         {
             try
             {
@@ -59,11 +59,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("name")]
-        public async Task<IActionResult> GetClubByName(string name)
+        public async Task<IActionResult> GetClubByName(string name, [FromQuery] PagingRequest request)
         {
             try
             {
-                List<ViewClub> clubs = await _clubService.GetByName(name);
+                PagingResult<ViewClub> clubs = await _clubService.GetByName(name, request);
                 return Ok(clubs);
             }
             catch (NullReferenceException ex)
@@ -77,11 +77,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
-        public async Task<IActionResult> GetClubByCompetition(int id)
+        public async Task<IActionResult> GetClubByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
             {
-                List<ViewClub> clubs = await _clubService.GetByCompetition(id);
+                PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(id, request);
                 return Ok(clubs);
             }
             catch (NullReferenceException ex)
@@ -95,7 +95,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertClub(ClubInsertModel club)
+        public async Task<IActionResult> InsertClub([FromBody] ClubInsertModel club)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateClub(ClubUpdateModel club)
+        public async Task<IActionResult> UpdateClub([FromBody] ClubUpdateModel club)
         {
             try
             {
