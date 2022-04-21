@@ -76,23 +76,25 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetClubByCompetition(int id)
-        //{
-        //    try
-        //    {
-        //        List<ViewClub> clubs = await _clubService.GetByCompetition(id);
-        //        return Ok(clubs);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exeption");
-        //    }
-        //}
+
+        [HttpGet("competition/{id}")]
+        public async Task<IActionResult> GetClubByCompetition(int id)
+        {
+            try
+            {
+                List<ViewClub> clubs = await _clubService.GetByCompetition(id);
+                return Ok(clubs);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> InsertClub(ClubInsertModel club)
