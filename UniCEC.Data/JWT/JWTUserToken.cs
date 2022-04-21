@@ -27,6 +27,8 @@ namespace UniCEC.Data.JWT
                 issuer: "https://securetoken.google.com/unics-e46a4",
                 audience: "unics-e46a4",
                 claims: new[] {
+                 //Id
+                 new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
                  //fullname
@@ -59,6 +61,8 @@ namespace UniCEC.Data.JWT
                 issuer: "https://securetoken.google.com/unics-e46a4",
                 audience: "unics-e46a4",
                 claims: new[] {
+                 //Id
+                 new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
                  //fullname
@@ -83,6 +87,8 @@ namespace UniCEC.Data.JWT
                 issuer: "https://securetoken.google.com/unics-e46a4",
                 audience: "unics-e46a4",
                 claims: new[] {
+                 //Id
+                 new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
                  //fullname
@@ -110,6 +116,8 @@ namespace UniCEC.Data.JWT
                 issuer: "https://securetoken.google.com/unics-e46a4",
                 audience: "unics-e46a4",
                 claims: new[] {
+                 //Id
+                 new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
                  //Role
