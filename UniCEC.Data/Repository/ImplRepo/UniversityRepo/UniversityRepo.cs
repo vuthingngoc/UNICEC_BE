@@ -18,6 +18,61 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         {
 
         }
+        //Check-University-Email
+        public async Task<bool> CheckEmailUniversity(string email)
+        {
+            int count = 0;
+            bool check = false;
+
+            //Constain Email
+            var query = from University u in context.Universities
+                        where u.Email .Contains(email)
+                        select u;
+            
+            List<University> universities = await query.ToListAsync();
+
+            count = universities.Count();
+
+            if (count > 0)
+            {
+                check = true;
+            }
+            return check;
+        }
+
+        //Get-List-Universities-By-Email
+        public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
+        {
+            //Constain Email
+            var query = from University u in context.Universities
+                        where u.Email.Contains(email)
+                        select u;
+
+            List<University> universities = await query.ToListAsync();
+            List<ViewUniversity> viewUniversities = new List<ViewUniversity>();
+            //return view
+            universities.ForEach(u =>
+            {
+                ViewUniversity viewUniversity = new ViewUniversity();
+                viewUniversity.Id = u.Id;
+                viewUniversity.CityId = u.CityId;
+                viewUniversity.UniCode = u.UniCode;
+                viewUniversity.Name = u.Name;
+                viewUniversity.Description = u.Description;
+                viewUniversity.Phone = u.Phone;
+                viewUniversity.Email = u.Email;
+                viewUniversity.Founding = u.Founding;
+                viewUniversity.Openning = u.Openning;
+                viewUniversity.Closing = u.Closing;
+                viewUniversity.Status = u.Status;
+                //
+                viewUniversities.Add(viewUniversity);
+            });
+
+            return viewUniversities;
+
+        }
+
 
         //Get-Universities-By-Conditions
         public async Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request)

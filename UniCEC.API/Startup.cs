@@ -65,6 +65,7 @@ using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.SponsorInCompetitionSvc;
 using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
+using System.Text;
 
 namespace UniCEC.API
 {
@@ -168,7 +169,7 @@ namespace UniCEC.API
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => 
             {
-                opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
+                //opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -176,7 +177,8 @@ namespace UniCEC.API
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
-                    ValidAudience = Configuration["Jwt:Firebase:ValidAudience"]                 
+                    ValidAudience = Configuration["Jwt:Firebase:ValidAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB"))
                 };
             });
 

@@ -76,6 +76,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
         [HttpGet("competition/{id}")]
         public async Task<IActionResult> GetClubByCompetition(int id)
         {
@@ -93,6 +94,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exeption");
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> InsertClub(ClubInsertModel club)

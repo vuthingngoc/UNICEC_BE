@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
@@ -18,7 +19,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         }
 
         //
-        
+
 
         //Get-University-By-Id
         public async Task<ViewUniversity> GetUniversityById(int id)
@@ -40,7 +41,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uniView.Status = uni.Status;
                 uniView.Id = id;
                 uniView.Founding = uni.Founding;
-                uniView.UniCode = uni.UniCode;  
+                uniView.UniCode = uni.UniCode;
                 //
             }
             return uniView;
@@ -50,12 +51,12 @@ namespace UniCEC.Business.Services.UniversitySvc
         //Insert-University
         public async Task<ViewUniversity> Insert(UniversityInsertModel universityModel)
         {
-            
+
             try
             {
                 University uni = new University();
 
-                uni.CityId = universityModel.CityId;    
+                uni.CityId = universityModel.CityId;
                 uni.UniCode = universityModel.UniCode;
                 uni.Name = universityModel.Name;
                 uni.Description = universityModel.Description;
@@ -67,7 +68,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 //auto set true
                 uni.Status = true;
                 //view
-                ViewUniversity viewUniversity = new ViewUniversity();   
+                ViewUniversity viewUniversity = new ViewUniversity();
                 int result = await _universityRepo.Insert(uni);
                 //return data when insert success
                 if (result > 0)
@@ -88,7 +89,8 @@ namespace UniCEC.Business.Services.UniversitySvc
                     viewUniversity.Status = u.Status;
                     return viewUniversity;
                 }
-                else {
+                else
+                {
                     return null;
                 }
             }
@@ -106,13 +108,14 @@ namespace UniCEC.Business.Services.UniversitySvc
                 bool check = false;
                 if (uni != null)
                 {
-                    //update name-des-phone-opening-closing-founding
+                    //update name-des-phone-opening-closing-founding-cityId
                     uni.Name = (!university.Name.Equals("")) ? university.Name : uni.Name;
                     uni.Description = (!university.Description.Equals("")) ? university.Description : uni.Description;
                     uni.Phone = (!university.Phone.Equals("")) ? university.Phone : uni.Phone;
                     uni.Openning = (!university.Openning.Equals("")) ? university.Openning : uni.Openning;
                     uni.Closing = (!university.Closing.Equals("")) ? university.Closing : uni.Closing;
-                    uni.Status = university.Status; 
+                    uni.CityId = (!university.CityId.Equals("")) ? university.CityId : uni.CityId;
+                    uni.Status = university.Status;
                     check = await _universityRepo.Update();
                     return check;
                 }
@@ -138,7 +141,8 @@ namespace UniCEC.Business.Services.UniversitySvc
                     //
                     university.Status = false;
                     check = await _universityRepo.Update();
-                    if (check) {
+                    if (check)
+                    {
                         return check;
                     }
                 }
@@ -146,7 +150,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 {
                     return check;
                 }
-             return check;
+                return check;
             }
             catch (Exception) { throw; }
         }
@@ -157,6 +161,23 @@ namespace UniCEC.Business.Services.UniversitySvc
             //
             PagingResult<ViewUniversity> result = await _universityRepo.GetUniversitiesByConditions(request);
             //
+            return result;
+        }
+
+        //Check-Email-University
+        public async Task<bool> CheckEmailUniversity(string email)
+        {
+            bool check = false;
+
+            check = await _universityRepo.CheckEmailUniversity(email);
+
+            return check;
+        }
+
+        //Get-List-Universities-By-Email
+        public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
+        {
+            List<ViewUniversity> result = await _universityRepo.GetListUniversityByEmail(email);
             return result;
         }
     }

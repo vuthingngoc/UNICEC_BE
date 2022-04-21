@@ -12,5 +12,6 @@ namespace UniCEC.Data.RequestModels
         public int? CityId { get; set; }
         //find-by-status
         public bool? Status { get; set; }
+       
     }
 }
