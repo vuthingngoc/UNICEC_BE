@@ -20,23 +20,23 @@ namespace UniCEC.API.Controllers
             _clubPreviousService = clubPreviousService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllClubPrevious(PagingRequest request)
-        {
-            try
-            {
-                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetAllPaging(request);
-                return Ok(previousClubs);
-            }
-            catch(NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAllClubPrevious(PagingRequest request)
+        //{
+        //    try
+        //    {
+        //        PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetAllPaging(request);
+        //        return Ok(previousClubs);
+        //    }
+        //    catch(NullReferenceException ex)
+        //    {
+        //        return NotFound(ex.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetClubPreviousById(int id)
@@ -56,23 +56,23 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetClubPreviousByConditions(ClubPreviousRequestModel request)
-        {
-            try
-            {
-                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetByContitions(request);
-                return Ok(previousClubs);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetClubPreviousByConditions(ClubPreviousRequestModel request)
+        //{
+        //    try
+        //    {
+        //        PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetByContitions(request);
+        //        return Ok(previousClubs);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return NotFound(ex.Message);
+        //    }
+        //}
 
         [HttpPost]
         public Task<IActionResult> InsertClubPrevious(ClubPreviousInsertModel clubPrevious)

@@ -41,6 +41,8 @@ namespace UniCEC.Data.JWT
                  new Claim("UserId", user.UserId),
                  //Dob
                  new Claim("DOB", user.Dob),
+                 //Role Id
+                 new Claim("RoleId", user.RoleId.ToString()),
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
                 },
@@ -69,6 +71,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Fullname", user.Fullname),
                  //Dob
                  new Claim("DOB", user.Dob),
+                 //Role Id
+                 new Claim("RoleId", user.RoleId.ToString()),
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
                 },
@@ -95,6 +99,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Fullname", user.Fullname),
                  //Dob
                  new Claim("DOB", user.Dob),
+                 //Role Id
+                 new Claim("RoleId", user.RoleId.ToString()),
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
                 },
@@ -120,6 +126,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
+                 //Role Id
+                 new Claim("RoleId", user.RoleId.ToString()),
                  //Role
                  new Claim(ClaimTypes.Role, user.RoleName)
                 },
