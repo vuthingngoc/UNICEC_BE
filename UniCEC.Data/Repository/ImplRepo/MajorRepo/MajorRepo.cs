@@ -23,11 +23,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                         select new { m };
             if (!string.IsNullOrEmpty(request.Name)) query = query.Where(x => x.m.Name.Contains(request.Name));
 
-            if (request.DepartmentId != null) query = query.Where(x => x.m.DepartmentId == request.DepartmentId);
+            if (request.DepartmentId.HasValue) query = query.Where(x => x.m.DepartmentId == request.DepartmentId);
 
             if (!string.IsNullOrEmpty(request.MajorCode)) query = query.Where(x => x.m.MajorCode.Equals(request.MajorCode));
 
-            if (request.Status != null) query = query.Where(x => x.m.Status == request.Status);
+            if (request.Status.HasValue) query = query.Where(x => x.m.Status == request.Status);
 
             int totalCount = query.Count();
 
