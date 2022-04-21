@@ -27,7 +27,7 @@ namespace UniCEC.Data.Repository.GenericRepo
         public async Task<PagingResult<T>> GetAllPaging(PagingRequest request)
         {
             List<T> items = await _entities.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
-            return new PagingResult<T>(items, _entities.Count(), request.CurrentPage, request.PageSize);
+            return (items.Count > 0) ? new PagingResult<T>(items, _entities.Count(), request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<int> Insert(T entity)
