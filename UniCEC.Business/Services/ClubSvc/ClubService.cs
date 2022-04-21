@@ -17,7 +17,7 @@ namespace UniCEC.Business.Services.ClubSvc
             _clubRepo = clubRepo;
         }
 
-        private ViewClub transformViewClub(Club club)
+        private ViewClub TransformViewClub(Club club)
         {
             return new ViewClub()
             {
@@ -39,7 +39,7 @@ namespace UniCEC.Business.Services.ClubSvc
                 List<ViewClub> items = new List<ViewClub>();
                 clubs.Items.ForEach(item =>
                 {
-                    ViewClub club = transformViewClub(item);
+                    ViewClub club = TransformViewClub(item);
                     items.Add(club);
                 });
                 return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
@@ -53,35 +53,90 @@ namespace UniCEC.Business.Services.ClubSvc
             Club club = await _clubRepo.Get(id);
             if(club != null)
             {
-                return transformViewClub(club);                
+                return TransformViewClub(club);                
             }
 
             throw new NullReferenceException("Not found this club");
         }
 
-        public Task<List<ViewClub>> GetByCompetition(int competitionId)
+        public async Task<List<ViewClub>> GetByCompetition(int competitionId)
         {
-            throw new NotImplementedException();
+            List<Club> listClub = await _clubRepo.GetByCompetition(competitionId);
+            if (listClub == null) throw new NullReferenceException("Not found any club with this competition id");
+
+            List<ViewClub> clubs = new List<ViewClub>();
+            listClub.ForEach(element =>
+            {
+                ViewClub club = TransformViewClub(element);
+                clubs.Add(club);
+            });
+            return clubs;
         }
 
-        public Task<List<ViewClub>> GetByName(string name)
+        public async Task<List<ViewClub>> GetByName(string name)
         {
-            throw new NotImplementedException();
+            List<Club> listClub = await _clubRepo.GetByName(name);
+            if (listClub == null) throw new NullReferenceException("Not found any club with this name");
+
+            List<ViewClub> clubs = new List<ViewClub>();
+            listClub.ForEach(element =>
+            {
+                ViewClub club = TransformViewClub(element);
+                clubs.Add(club);
+            });
+            return clubs;            
         }
 
-        public Task<ViewClub> Insert(ClubInsertModel club)
+        public async Task<ViewClub> Insert(ClubInsertModel club)
         {
-            throw new NotImplementedException();
+            if (club == null) throw new ArgumentNullException("Null argument");
+
+            bool checkExistedClubName = await _clubRepo.CheckExistedClubName(club.UniversityId, club.Name);
+            if (checkExistedClubName) throw new ArgumentException("Duplicated club name");
+
+            Club clubObject = new Club()
+            {
+                Description = club.Description,
+                Founding = club.Founding,
+                Name = club.Name,                
+                TotalMember = club.TotalMember,
+                UniversityId = club.UniversityId,
+                Status = club.Status,
+            };
+            int id = await _clubRepo.Insert(clubObject);
+            if(id > 0)
+            {
+                clubObject.Id = id;
+                return TransformViewClub(clubObject);
+            }
+
+            return null;
         }
 
-        public Task<bool> Update(ClubUpdateModel club)
+        public async Task<bool> Update(ClubUpdateModel club)
         {
-            throw new NotImplementedException();
+            if (club == null) throw new ArgumentNullException("Null argument");
+
+            Club clubObject = await _clubRepo.Get(club.Id);
+            if (clubObject == null) throw new NullReferenceException("Not found this club");
+            bool checkExistedClubName = await _clubRepo.CheckExistedClubName(clubObject.UniversityId, club.Name);
+            if (checkExistedClubName) throw new ArgumentException("Duplicated club name");
+
+            clubObject.Description = club.Description;
+            clubObject.Founding = club.Founding;
+            clubObject.Name = club.Name;            
+            clubObject.TotalMember = club.TotalMember;
+            clubObject.Status = club.Status;
+            
+            return await _clubRepo.Update();
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            Club clubObject = await _clubRepo.Get(id);
+            if (clubObject == null) throw new NullReferenceException("Not found this club");
+            if (clubObject.Status != false) clubObject.Status = false;
+            return await _clubRepo.Update();
         }
     }
 }
