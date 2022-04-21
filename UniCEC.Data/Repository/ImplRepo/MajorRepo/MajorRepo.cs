@@ -46,15 +46,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                                      : new PagingResult<Major>(null, 0, request.CurrentPage, request.PageSize);
         }
 
-        public async Task<List<Major>> GetByUniversity(int universityId)
+        public async Task<PagingResult<Major>> GetByUniversity(int universityId, PagingRequest request)
         {
             var query = from diu in context.DepartmentInUniversities                        
                         join d in context.Departments on diu.DepartmentId equals d.Id
                         join m in context.Majors on d.Id equals m.DepartmentId
                         where diu.UniversityId == universityId
                         select new { m };
+            int totalCount = query.Count();
 
-            List<Major> majors =  await query.Select(x => new Major()
+            List<Major> majors =  await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Major()
             {
                 Id= x.m.Id,
                 DepartmentId = x.m.DepartmentId,
@@ -64,14 +65,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
                 Status= x.m.Status
             }).ToListAsync();
 
-            return (majors.Count > 0) ? majors : null;
+            return (majors.Count > 0) ? new PagingResult<Major>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<Major> CheckExistedMajorCode(int departmentId, string code)
+        public async Task<int> CheckExistedMajorCode(int departmentId, string code)
         {
             Major major = await context.Majors.FirstOrDefaultAsync(m => m.DepartmentId.Equals(departmentId)
                                                                         && m.MajorCode.Equals(code));
-            return major;
+            return (major != null) ? major.Id : 0;
         }
     }
 }

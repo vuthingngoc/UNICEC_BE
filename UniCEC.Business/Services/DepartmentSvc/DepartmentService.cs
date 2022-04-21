@@ -47,32 +47,32 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return new PagingResult<ViewDepartment>(items, departments.TotalCount, departments.CurrentPage, departments.PageSize);
         }
 
-        public async Task<List<ViewDepartment>> GetByName(string name)
+        public async Task<PagingResult<ViewDepartment>> GetByName(string name, PagingRequest request)
         {
-            List<Department> listDepartment = await _departmentRepo.GetByName(name);
+            PagingResult<Department> listDepartment = await _departmentRepo.GetByName(name, request);
             if (listDepartment == null) throw new NullReferenceException("Not found any departments");
 
             List<ViewDepartment> departments = new List<ViewDepartment>();
-            listDepartment.ForEach(element =>
+            listDepartment.Items.ForEach(element =>
             {
                 ViewDepartment department = TranformViewDepartment(element);
                 departments.Add(department);
             });
-            return departments;
+            return new PagingResult<ViewDepartment>(departments, listDepartment.TotalCount, listDepartment.CurrentPage, listDepartment.PageSize);
         }
 
-        public async Task<List<ViewDepartment>> GetByCompetition(int competitionId)
+        public async Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request)
         {
-            List<Department> listDepartment = await _departmentRepo.GetByCompetition(competitionId);
+            PagingResult<Department> listDepartment = await _departmentRepo.GetByCompetition(competitionId, request);
             if (listDepartment == null) throw new NullReferenceException("Not found any departments");
 
             List<ViewDepartment> departments = new List<ViewDepartment>();
-            listDepartment.ForEach(element =>
+            listDepartment.Items.ForEach(element =>
             {
                 ViewDepartment department = TranformViewDepartment(element);
                 departments.Add(department);
             });
-            return departments;
+            return new PagingResult<ViewDepartment>(departments, listDepartment.TotalCount, listDepartment.CurrentPage, listDepartment.PageSize);
         }
 
         public async Task<ViewDepartment> Insert(DepartmentInsertModel department)
@@ -99,25 +99,19 @@ namespace UniCEC.Business.Services.DepartmentSvc
         {
             if (department == null) throw new ArgumentNullException("Null Argument");
             Department element = await _departmentRepo.Get(department.Id);
-            if(element != null)
-            {
-                element.Name = department.Name;
-                element.Status = department.Status;
-                return await _departmentRepo.Update();                 
-            }
-            throw new NullReferenceException("Not found this element");
+            if(element == null) throw new NullReferenceException("Not found this element");
+            element.Name = department.Name;
+            element.Status = department.Status;
+            return await _departmentRepo.Update();
         }
 
         public async Task<bool> Delete(int id)
         {
             Department element = await _departmentRepo.Get(id);
-            if(element != null)
-            {
-                if (element.Status == false) return true;
-                element.Status = false;
-                return await _departmentRepo.Update();
-            }
-            throw new NullReferenceException("Not found this element");
+            if(element != null) throw new NullReferenceException("Not found this element");
+            if (element.Status == false) return true;
+            element.Status = false;
+            return await _departmentRepo.Update();            
         }
     }
 }

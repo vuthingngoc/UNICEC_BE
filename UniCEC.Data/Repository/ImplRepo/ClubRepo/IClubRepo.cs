@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
     public interface IClubRepo : IRepository<Club>
     {
-        Task<List<Club>> GetByCompetition(int competitionId);
-        Task<List<Club>> GetByName(string name);
-        Task<bool> CheckExistedClubName(int universityId, string name);
+        Task<PagingResult<Club>> GetByCompetition(int competitionId, PagingRequest request);
+        Task<PagingResult<Club>> GetByName(string name, PagingRequest request);
+        Task<int> CheckExistedClubName(int universityId, string name);
     }
 }
