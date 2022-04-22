@@ -37,7 +37,7 @@ namespace UniCEC.Business.Services.MajorSvc
         public async Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Major> result = await _majorRepo.GetAllPaging(request);
-            if (result.Items != null)
+            if (result != null)
             {
                 List<ViewMajor> majors = new List<ViewMajor>();
                 result.Items.ForEach(element =>

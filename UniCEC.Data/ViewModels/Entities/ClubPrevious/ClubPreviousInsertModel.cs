@@ -11,10 +11,10 @@ namespace UniCEC.Data.ViewModels.Entities.ClubPrevious
         public int ClubId { get; set; }
         [JsonPropertyName("member_id")]
         public int MemberId { get; set; }
-        public string Name { get; set; }
         [JsonPropertyName("start_time")]
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
+        public string Year { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public async Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Department> departments = await _departmentRepo.GetAllPaging(request);
-            if (departments.Items == null) throw new NullReferenceException("Not Found");
+            if (departments == null) throw new NullReferenceException("Not Found");
 
             List<ViewDepartment> items = new List<ViewDepartment>();
             departments.Items.ForEach(item =>

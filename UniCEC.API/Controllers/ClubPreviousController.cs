@@ -56,7 +56,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("search")]
         public async Task<IActionResult> GetClubPreviousByConditions(ClubPreviousRequestModel request)
         {
             try
