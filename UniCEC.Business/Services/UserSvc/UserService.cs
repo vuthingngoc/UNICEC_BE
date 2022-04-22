@@ -39,7 +39,7 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request)
         {
             PagingResult<User> users = await _userRepo.GetAllPaging(request);
-            if (users.Items != null)
+            if (users != null)
             {
                 List<ViewUser> listViewUser = new List<ViewUser>();
                 users.Items.ForEach(e =>
@@ -71,7 +71,7 @@ namespace UniCEC.Business.Services.UserSvc
             }
             else
             {
-                return null;    
+                return null;
             }
 
         }
@@ -188,8 +188,17 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<bool> CheckUserEmailExsit(string email_user)
         {
             bool check = false;
-            check = await _userRepo.CheckExistedEmail(email_user);
-            return check;
+            User user = await _userRepo.GetByEmail(email_user);
+            if (user != null)
+            {
+                check = true;
+                return check;
+            }
+            else
+            {
+                return check;
+            }
+
         }
 
         //Insert - UserTemporary

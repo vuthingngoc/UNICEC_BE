@@ -32,7 +32,7 @@ namespace UniCEC.Business.Services.RoleSvc
         public async Task<PagingResult<ViewRole>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Role> result = await _roleRepo.GetAllPaging(request);
-            if (result.Items != null)
+            if (result != null)
             {
                 List<ViewRole> listViewRole = new List<ViewRole>();
                 result.Items.ForEach(e =>

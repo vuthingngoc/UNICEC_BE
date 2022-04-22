@@ -24,14 +24,35 @@ namespace UniCEC.API.Controllers
 
 
         // GET api/<MemberController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("get-member-by-{id}")]
+        public async Task<IActionResult> GetMemberById(int id)
         {
-            return "value";
+            try
+            {
+
+                ViewMember member = await _ImemberService.GetByMemberId(id);
+                if (member == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    //
+                    return Ok(member);
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         // Add Member In Club
-        [HttpPost]
+        [HttpPost("insert-member")]
         public async Task<IActionResult> InsertMember([FromBody] MemberInsertModel model)
         {
             try
