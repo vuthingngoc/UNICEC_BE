@@ -92,7 +92,7 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             return TransformViewClubPrevious(clubPreviousObject);
         }
 
-        public async Task<bool> Update(ClubPreviousUpdateModel clubPrevious)
+        public async Task Update(ClubPreviousUpdateModel clubPrevious)
         {
             if (clubPrevious == null) throw new ArgumentNullException("Null argument");            
 
@@ -111,16 +111,15 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             clubPreviousObject.Status = clubPrevious.Status;
             clubPreviousObject.Year = clubPrevious.Year;            
 
-            return await _clubPreviousRepo.Update();
+            await _clubPreviousRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
             ClubPreviou clubPreviousObject = await _clubPreviousRepo.Get(id);
             if (clubPreviousObject == null) throw new NullReferenceException("Not found this club previous");
-            if (clubPreviousObject.Status == 0) return true;
-            clubPreviousObject.Status = 0;
-            return await _clubPreviousRepo.Update();
+            clubPreviousObject.Status = ClubPreviousStatus.Inactive;
+            await _clubPreviousRepo.Update();
         }
     }
 }

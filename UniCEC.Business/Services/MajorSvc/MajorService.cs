@@ -112,7 +112,7 @@ namespace UniCEC.Business.Services.MajorSvc
             return null;
         }
 
-        public async Task<bool> Update(ViewMajor major)
+        public async Task Update(ViewMajor major)
         {
             if (major == null) throw new ArgumentNullException("Null Argument");
 
@@ -131,16 +131,15 @@ namespace UniCEC.Business.Services.MajorSvc
             element.Name = major.Name;
             element.Status = major.Status;
 
-            return await _majorRepo.Update();
+            await _majorRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
             Major major = await _majorRepo.Get(id);
-            if (major == null) throw new NullReferenceException($"Not found this id: {id}");
-            if (major.Status == false) return true;
+            if (major == null) throw new NullReferenceException($"Not found this id: {id}");            
             major.Status = false;
-            return await _majorRepo.Update();
+            await _majorRepo.Update();
         }
     }
 }

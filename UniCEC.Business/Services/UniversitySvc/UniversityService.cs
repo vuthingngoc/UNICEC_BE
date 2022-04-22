@@ -116,8 +116,8 @@ namespace UniCEC.Business.Services.UniversitySvc
                     uni.Closing = (!university.Closing.Equals("")) ? university.Closing : uni.Closing;
                     uni.CityId = (!university.CityId.Equals("")) ? university.CityId : uni.CityId;
                     uni.Status = university.Status;
-                    check = await _universityRepo.Update();
-                    return check;
+                    await _universityRepo.Update();
+                    return true;
                 }
                 return check;
             }
@@ -133,24 +133,15 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             try
             {
-                bool check = false;
-                //
                 University university = await _universityRepo.Get(id);
                 if (university != null)
                 {
                     //
                     university.Status = false;
-                    check = await _universityRepo.Update();
-                    if (check)
-                    {
-                        return check;
-                    }
+                    await _universityRepo.Update();
+                    return true;
                 }
-                else
-                {
-                    return check;
-                }
-                return check;
+                return false;
             }
             catch (Exception) { throw; }
         }

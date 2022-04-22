@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.ClubSvc
         public Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request);
         public Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request);
         public Task<ViewClub> Insert(ClubInsertModel club);
-        public Task<bool> Update(ClubUpdateModel club);
-        public Task<bool> Delete(int id);
+        public Task Update(ClubUpdateModel club);
+        public Task Delete(int id);
     }
 }

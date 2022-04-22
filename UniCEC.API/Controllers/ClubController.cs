@@ -127,8 +127,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _clubService.Update(club);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
+                await _clubService.Update(club);
+                return Ok();
             }
             catch (NullReferenceException ex)
             {
@@ -157,8 +157,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _clubService.Delete(id);
-                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+                await _clubService.Delete(id);
+                return NoContent();
             }
             catch (NullReferenceException ex)
             {

@@ -120,8 +120,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _departmentService.Update(department);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception"); 
+                await _departmentService.Update(department);
+                return Ok(); 
             }
             catch (SqlException)
             {
@@ -147,8 +147,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _departmentService.Delete(id);
-                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+                await _departmentService.Delete(id);
+                return NoContent();
             }
             catch (SqlException)
             {

@@ -12,7 +12,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public Task<PagingResult<ViewDepartment>> GetByName(string name, PagingRequest request);
         public Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request);
         public Task<ViewDepartment> Insert(DepartmentInsertModel department);
-        public Task<bool> Update(ViewDepartment department);
-        public Task<bool> Delete(int id);
+        public Task Update(ViewDepartment department);
+        public Task Delete(int id);
     }
 }

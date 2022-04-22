@@ -83,17 +83,16 @@ namespace UniCEC.Business.Services.CitySvc
             try{
                 //get city
                 City c = await _cityRepo.Get(city.Id);
-                bool check = false;
                 //
                 if (c != null)
                 {
                     c.Name = (!city.Name.Equals("")) ? city.Name : c.Name;
                     c.Description = (!city.Description.Equals("")) ? city.Description : c.Description;
 
-                    check = await _cityRepo.Update();
-                    return check;
+                    await _cityRepo.Update();
+                    return true;
                 }
-                return check;
+                return false;
             }
             catch (Exception) { 
                 throw;

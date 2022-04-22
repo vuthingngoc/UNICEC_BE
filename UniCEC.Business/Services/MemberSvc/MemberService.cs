@@ -32,24 +32,15 @@ namespace UniCEC.Business.Services.MemberSvc
         {
             try
             {
-                bool check = false;
-                //
                 Member member = await _memberRepo.Get(id);
                 if (member != null)
                 {
                     //
                     member.Status = false;
-                    check = await _memberRepo.Update();
-                    if (check)
-                    {
-                        return check;
-                    }
+                    await _memberRepo.Update();
+                    return true;
                 }
-                else
-                {
-                    return check;
-                }
-                return check;
+                return false;
             }
             catch (Exception) { throw; }
         }
@@ -111,16 +102,15 @@ namespace UniCEC.Business.Services.MemberSvc
             try
             {
                 //get that member
-                Member member = await _memberRepo.Get(model.Id);
-                bool check = false;
+                Member member = await _memberRepo.Get(model.Id);                
 
                 if (member != null)
                 {
                     member.Status = (model.Status != null) ? model.Status : member.Status;
-                    check = await _memberRepo.Update();
-                    return check;
+                    await _memberRepo.Update();
+                    return true;
                 }
-                return check;
+                return false;
             }
             catch (Exception)
             {

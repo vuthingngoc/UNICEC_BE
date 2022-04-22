@@ -95,16 +95,15 @@ namespace UniCEC.Business.Services.RoleSvc
             try
             {
                 //get Role
-                Role getRole = await _roleRepo.Get(role.Id);
-                bool check = false;
+                Role getRole = await _roleRepo.Get(role.Id);                
                 if (getRole != null)
                 {
                     //Update Role Name
                     getRole.RoleName = (!role.RoleName.Equals("")) ? role.RoleName : getRole.RoleName;
-                    check = await _roleRepo.Update();
-                    return check;
+                    await _roleRepo.Update();
+                    return true;
                 }
-                return check;
+                return false;
             }
             catch (Exception)
             {
