@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -14,7 +14,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public string Year { get; set; }
-        public int Status { get; set; }
+        public ClubPreviousStatus Status { get; set; }
 
         public virtual Club Club { get; set; }
         public virtual ClubRole ClubRole { get; set; }

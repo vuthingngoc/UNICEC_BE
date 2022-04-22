@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.ClubPrevious
 {
@@ -13,6 +14,6 @@ namespace UniCEC.Data.ViewModels.Entities.ClubPrevious
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
         public string Year { get; set; }
-        public int Status { get; set; }
+        public ClubPreviousStatus Status { get; set; }
     }
 }

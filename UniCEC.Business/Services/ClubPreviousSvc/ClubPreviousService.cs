@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo;
 using UniCEC.Data.RequestModels;
@@ -72,7 +73,8 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
         public async Task<ViewClubPrevious> Insert(ClubPreviousInsertModel clubPrevious)
         {
             if (clubPrevious == null) throw new ArgumentNullException("Null argument");
-            int checkId = await _clubPreviousRepo.CheckDuplicated(clubPrevious.ClubId, clubPrevious.ClubRoleId, clubPrevious.MemberId, clubPrevious.Year);
+            string year = DateTime.Now.Year.ToString();
+            int checkId = await _clubPreviousRepo.CheckDuplicated(clubPrevious.ClubId, clubPrevious.ClubRoleId, clubPrevious.MemberId, year);
             if (checkId > 0) throw new ArgumentException("Duplicated record");
 
             ClubPreviou clubPreviousObject = new ClubPreviou()
@@ -81,7 +83,9 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
                 ClubRoleId = clubPrevious.ClubRoleId,
                 MemberId = clubPrevious.MemberId,
                 StartTime = clubPrevious.StartTime,
-                EndTime = clubPrevious.EndTime
+                EndTime = clubPrevious.EndTime,
+                Year = year,
+                Status = ClubPreviousStatus.Active
             };
             int id = await _clubPreviousRepo.Insert(clubPreviousObject);
             clubPreviousObject.Id = id;
@@ -105,7 +109,7 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             clubPreviousObject.StartTime = clubPrevious.StartTime;
             clubPreviousObject.EndTime = clubPrevious.EndTime;
             clubPreviousObject.Status = clubPrevious.Status;
-            clubPreviousObject.Year = clubPrevious.Year;
+            clubPreviousObject.Year = clubPrevious.Year;            
 
             return await _clubPreviousRepo.Update();
         }

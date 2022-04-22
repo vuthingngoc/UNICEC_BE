@@ -15,6 +15,5 @@ namespace UniCEC.Data.ViewModels.Entities.ClubPrevious
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
-        public string Year { get; set; }
     }
 }
