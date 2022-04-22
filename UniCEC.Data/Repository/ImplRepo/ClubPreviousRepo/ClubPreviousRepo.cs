@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Common;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
 {
@@ -14,6 +15,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
         public ClubPreviousRepo(UniCECContext context) : base(context)
         {
 
+        }
+
+        public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, string year)
+        {
+            ClubPreviou clubPrevious = await context.ClubPrevious.FirstOrDefaultAsync(x => x.ClubId.Equals(clubId)
+                                                                && x.ClubRoleId.Equals(clubRoleId)
+                                                                && x.MemberId.Equals(memberId)
+                                                                && x.Year.Equals(year));
+            return (clubPrevious != null) ? clubPrevious.Id : 0;
         }
 
         public async Task<PagingResult<ClubPreviou>> GetByConditions(ClubPreviousRequestModel request)
@@ -30,7 +40,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
 
             if (request.EndTime.HasValue) query = query.Where(x => x.cp.EndTime.Equals(request.EndTime));
 
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(x => x.cp.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.Year)) query = query.Where(x => x.cp.Year.Equals(request.Year));
+
+            if (request.Status.HasValue) query = query.Where(x => x.cp.Status.Equals(request.Status));
 
             int totalCount = query.Count();
             List<ClubPreviou> previousClubs = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ClubPreviou()
@@ -40,10 +52,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
                 MemberId = x.cp.MemberId,
                 StartTime = x.cp.StartTime,
                 EndTime = x.cp.EndTime,
-                Name = x.cp.Name                
+                Year = x.cp.Year,
+                Status = x.cp.Status
             }).ToListAsync();
 
-            return new PagingResult<ClubPreviou>(previousClubs, totalCount, request.CurrentPage, request.PageSize);
+            return (previousClubs.Count > 0) ? new PagingResult<ClubPreviou>(previousClubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
     }
 }

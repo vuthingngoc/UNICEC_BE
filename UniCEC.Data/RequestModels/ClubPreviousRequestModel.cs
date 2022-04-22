@@ -12,11 +12,11 @@ namespace UniCEC.Data.RequestModels
         public int? ClubId { get; set; }
         [FromQuery(Name = "member-id")]
         public int? MemberId { get; set; }
-        [FromQuery(Name = "name")]
-        public string Name { get; set; }
         [FromQuery(Name = "start-time")]
         public DateTime? StartTime { get; set; }
         [FromQuery(Name = "end-time")]
         public DateTime? EndTime { get; set; }
+        public string Year { get; set; }
+        public int? Status { get; set; }
     }
 }

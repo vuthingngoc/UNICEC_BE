@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubPreviousSvc;
@@ -20,23 +21,23 @@ namespace UniCEC.API.Controllers
             _clubPreviousService = clubPreviousService;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllClubPrevious(PagingRequest request)
-        //{
-        //    try
-        //    {
-        //        PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetAllPaging(request);
-        //        return Ok(previousClubs);
-        //    }
-        //    catch(NullReferenceException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetAllClubPrevious([FromQuery] PagingRequest request)
+        {
+            try
+            {
+                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetAllPaging(request);
+                return Ok(previousClubs);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetClubPreviousById(int id)
@@ -50,47 +51,106 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetClubPreviousByConditions(ClubPreviousRequestModel request)
-        //{
-        //    try
-        //    {
-        //        PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetByContitions(request);
-        //        return Ok(previousClubs);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //}
+        [HttpGet("search")]
+        public async Task<IActionResult> GetClubPreviousByConditions([FromQuery] ClubPreviousRequestModel request)
+        {
+            try
+            {
+                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetByContitions(request);
+                return Ok(previousClubs);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
         [HttpPost]
-        public Task<IActionResult> InsertClubPrevious(ClubPreviousInsertModel clubPrevious)
+        public async Task<IActionResult> InsertClubPrevious(ClubPreviousInsertModel clubPrevious)
         {
-
-            throw new NotImplementedException();
+            try
+            {
+                ViewClubPrevious viewClubPrevious = await _clubPreviousService.Insert(clubPrevious);
+                return Created($"api/v1/[controller]/{viewClubPrevious.Id}", viewClubPrevious);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception"); 
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPut]
-        public Task<IActionResult> UpdateClubPrevious(ClubPreviousUpdateModel clubPrevious)
+        public async Task<IActionResult> UpdateClubPrevious(ClubPreviousUpdateModel clubPrevious)
         {
-            throw new NotImplementedException();
+            try
+            {
+                bool result = await _clubPreviousService.Update(clubPrevious);
+                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpDelete("{id}")]
-        public Task<IActionResult> DeleteClubPrevious(int id)
+        public async Task<IActionResult> DeleteClubPrevious(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                bool result = await _clubPreviousService.Delete(id);
+                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
     }

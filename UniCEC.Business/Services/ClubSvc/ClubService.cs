@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.ClubSvc
         public async Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request)
         {
             PagingResult<Club> clubs = await _clubRepo.GetAllPaging(request);
-            if (clubs.Items != null)
+            if (clubs != null)
             {
                 List<ViewClub> items = new List<ViewClub>();
                 clubs.Items.ForEach(item =>
