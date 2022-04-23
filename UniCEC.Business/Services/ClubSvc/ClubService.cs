@@ -113,7 +113,7 @@ namespace UniCEC.Business.Services.ClubSvc
             return null;
         }
 
-        public async Task<bool> Update(ClubUpdateModel club)
+        public async Task Update(ClubUpdateModel club)
         {
             if (club == null) throw new ArgumentNullException("Null argument");
 
@@ -128,16 +128,15 @@ namespace UniCEC.Business.Services.ClubSvc
             clubObject.TotalMember = club.TotalMember;
             clubObject.Status = club.Status;
 
-            return await _clubRepo.Update();
+            await _clubRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
             Club clubObject = await _clubRepo.Get(id);
-            if (clubObject != null) throw new NullReferenceException("Not found this club");
-            if (clubObject.Status == false) return true;
+            if (clubObject == null) throw new NullReferenceException("Not found this club");            
             clubObject.Status = false;
-            return await _clubRepo.Update();
+            await _clubRepo.Update();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -76,7 +75,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertClubPrevious(ClubPreviousInsertModel clubPrevious)
+        public async Task<IActionResult> InsertClubPrevious([FromBody] ClubPreviousInsertModel clubPrevious)
         {
             try
             {
@@ -102,12 +101,12 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateClubPrevious(ClubPreviousUpdateModel clubPrevious)
+        public async Task<IActionResult> UpdateClubPrevious([FromBody] ClubPreviousUpdateModel clubPrevious)
         {
             try
             {
-                bool result = await _clubPreviousService.Update(clubPrevious);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
+                await _clubPreviousService.Update(clubPrevious);
+                return Ok();
             }
             catch (NullReferenceException ex)
             {
@@ -136,8 +135,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _clubPreviousService.Delete(id);
-                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+                await _clubPreviousService.Delete(id);
+                return NoContent();
             }
             catch (NullReferenceException ex)
             {

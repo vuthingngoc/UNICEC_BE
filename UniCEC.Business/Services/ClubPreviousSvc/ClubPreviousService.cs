@@ -28,7 +28,9 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
                 ClubRoleId = clubPrevious.ClubRoleId,
                 MemberId = clubPrevious.MemberId,
                 StartTime = clubPrevious.StartTime,
-                EndTime = clubPrevious.EndTime
+                EndTime = clubPrevious.EndTime,
+                Year = clubPrevious.Year,
+                Status = clubPrevious.Status
             };
         }
 
@@ -92,7 +94,7 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             return TransformViewClubPrevious(clubPreviousObject);
         }
 
-        public async Task<bool> Update(ClubPreviousUpdateModel clubPrevious)
+        public async Task Update(ClubPreviousUpdateModel clubPrevious)
         {
             if (clubPrevious == null) throw new ArgumentNullException("Null argument");            
 
@@ -111,16 +113,21 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             clubPreviousObject.Status = clubPrevious.Status;
             clubPreviousObject.Year = clubPrevious.Year;            
 
-            return await _clubPreviousRepo.Update();
+            await _clubPreviousRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int memberId)
         {
-            ClubPreviou clubPreviousObject = await _clubPreviousRepo.Get(id);
-            if (clubPreviousObject == null) throw new NullReferenceException("Not found this club previous");
-            if (clubPreviousObject.Status == 0) return true;
-            clubPreviousObject.Status = 0;
-            return await _clubPreviousRepo.Update();
+            List<int> clubPreviousIds = await _clubPreviousRepo.GetIdsByMember(memberId);
+            if (clubPreviousIds == null) throw new NullReferenceException("Not found this member");
+            foreach(int id in clubPreviousIds)
+            {
+                ClubPreviou element = await _clubPreviousRepo.Get(id);
+                if (!element.EndTime.HasValue) element.EndTime = DateTime.Now;
+                element.Status = ClubPreviousStatus.Inactive;
+            }
+
+            await _clubPreviousRepo.Update();
         }
     }
 }

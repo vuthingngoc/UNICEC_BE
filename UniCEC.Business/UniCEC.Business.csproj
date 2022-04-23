@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\ClubPreviousSvc\ClubPreviousService.cs~RF8e031a.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UniCEC.Data\UniCEC.Data.csproj" />
   </ItemGroup>
 

@@ -167,7 +167,8 @@ namespace UniCEC.Business.Services.UserSvc
             element.UniversityId = user.UniversityId;
             element.Status = user.Status;
 
-            return await _userRepo.Update();
+            await _userRepo.Update();
+            return true;
 
         }
 
@@ -177,7 +178,8 @@ namespace UniCEC.Business.Services.UserSvc
             if (user == null) throw new NullReferenceException("Not found");
 
             user.Status = false;
-            return await _userRepo.Update();
+            await _userRepo.Update();
+            return true;
         }
 
 

@@ -58,5 +58,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
 
             return (previousClubs.Count > 0) ? new PagingResult<ClubPreviou>(previousClubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
+
+        public async Task<List<int>> GetIdsByMember(int memberID)
+        {
+            var query = from cp in context.ClubPrevious
+                        where cp.MemberId == memberID
+                        select new { cp };
+            List<int> previousClubs = await query.Select(x => x.cp.Id).ToListAsync();
+
+            return (previousClubs.Count > 0) ? previousClubs : null;
+        }
     }
 }

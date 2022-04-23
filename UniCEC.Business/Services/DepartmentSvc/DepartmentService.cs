@@ -95,23 +95,22 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return null;
         }
 
-        public async Task<bool> Update(ViewDepartment department)
+        public async Task Update(ViewDepartment department)
         {
             if (department == null) throw new ArgumentNullException("Null Argument");
             Department element = await _departmentRepo.Get(department.Id);
             if(element == null) throw new NullReferenceException("Not found this element");
             element.Name = department.Name;
             element.Status = department.Status;
-            return await _departmentRepo.Update();
+            await _departmentRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
             Department element = await _departmentRepo.Get(id);
-            if(element != null) throw new NullReferenceException("Not found this element");
-            if (element.Status == false) return true;
+            if(element == null) throw new NullReferenceException("Not found this element");
             element.Status = false;
-            return await _departmentRepo.Update();            
+            await _departmentRepo.Update();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -100,6 +101,10 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -121,6 +126,10 @@ namespace UniCEC.API.Controllers
                 else { 
                    return BadRequest();
                 }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
             catch (SqlException)
             {

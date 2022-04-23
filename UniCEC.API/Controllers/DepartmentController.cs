@@ -94,7 +94,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertDepartment(DepartmentInsertModel department)
+        public async Task<IActionResult> InsertDepartment([FromBody] DepartmentInsertModel department)
         {
             try 
             {
@@ -116,12 +116,12 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateDepartment(ViewDepartment department)
+        public async Task<IActionResult> UpdateDepartment([FromBody] ViewDepartment department)
         {
             try
             {
-                bool result = await _departmentService.Update(department);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception"); 
+                await _departmentService.Update(department);
+                return Ok(); 
             }
             catch (SqlException)
             {
@@ -147,8 +147,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool result = await _departmentService.Delete(id);
-                return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+                await _departmentService.Delete(id);
+                return NoContent();
             }
             catch (SqlException)
             {

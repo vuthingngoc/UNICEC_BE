@@ -9,6 +9,6 @@ namespace UniCEC.Data.Repository.GenericRepo
         Task<T> Get(int id);
         Task<int> Insert(T entity);
         // Update / Delete = Enum status equal 0
-        Task<bool> Update();
+        Task Update();
     }
 }

@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.MajorSvc
         public Task<PagingResult<ViewMajor>> GetByUniversity(int universityId, PagingRequest request);
         public Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request);
         public Task<ViewMajor> Insert(MajorInsertModel major);
-        public Task<bool> Update(ViewMajor major);
-        public Task<bool> Delete(int id);
+        public Task Update(ViewMajor major);
+        public Task Delete(int id);
     }
 }
