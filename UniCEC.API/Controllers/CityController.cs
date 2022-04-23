@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,16 +87,19 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCity result = await _ICityService.Insert(model);
+                ViewCity result = await _ICityService.Insert(model);                
                 if (result != null)
                 {
-                    
                     return Ok(result);
                 }
                 else
                 {
                     return BadRequest();
                 }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
             catch (SqlException)
             {
@@ -113,12 +117,15 @@ namespace UniCEC.API.Controllers
                 //
                 check = await _ICityService.Update(city);
                 if (check) {
-
                     return Ok();
                 }
                 else {
                     return NotFound("Not found this City");
                 }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
             catch (SqlException)
             {

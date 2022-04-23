@@ -12,6 +12,6 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
         public Task<PagingResult<ViewClubPrevious>> GetByContitions(ClubPreviousRequestModel request);
         public Task<ViewClubPrevious> Insert(ClubPreviousInsertModel clubPrevious);
         public Task Update(ClubPreviousUpdateModel clubPrevious);
-        public Task Delete(int id);
+        public Task Delete(int memberId);
     }
 }

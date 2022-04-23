@@ -75,7 +75,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertClubPrevious(ClubPreviousInsertModel clubPrevious)
+        public async Task<IActionResult> InsertClubPrevious([FromBody] ClubPreviousInsertModel clubPrevious)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateClubPrevious(ClubPreviousUpdateModel clubPrevious)
+        public async Task<IActionResult> UpdateClubPrevious([FromBody] ClubPreviousUpdateModel clubPrevious)
         {
             try
             {

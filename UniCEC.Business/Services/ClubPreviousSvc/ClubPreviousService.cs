@@ -28,7 +28,9 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
                 ClubRoleId = clubPrevious.ClubRoleId,
                 MemberId = clubPrevious.MemberId,
                 StartTime = clubPrevious.StartTime,
-                EndTime = clubPrevious.EndTime
+                EndTime = clubPrevious.EndTime,
+                Year = clubPrevious.Year,
+                Status = clubPrevious.Status
             };
         }
 
@@ -114,11 +116,17 @@ namespace UniCEC.Business.Services.ClubPreviousSvc
             await _clubPreviousRepo.Update();
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(int memberId)
         {
-            ClubPreviou clubPreviousObject = await _clubPreviousRepo.Get(id);
-            if (clubPreviousObject == null) throw new NullReferenceException("Not found this club previous");
-            clubPreviousObject.Status = ClubPreviousStatus.Inactive;
+            List<int> clubPreviousIds = await _clubPreviousRepo.GetIdsByMember(memberId);
+            if (clubPreviousIds == null) throw new NullReferenceException("Not found this member");
+            foreach(int id in clubPreviousIds)
+            {
+                ClubPreviou element = await _clubPreviousRepo.Get(id);
+                if (!element.EndTime.HasValue) element.EndTime = DateTime.Now;
+                element.Status = ClubPreviousStatus.Inactive;
+            }
+
             await _clubPreviousRepo.Update();
         }
     }

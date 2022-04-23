@@ -94,7 +94,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertDepartment(DepartmentInsertModel department)
+        public async Task<IActionResult> InsertDepartment([FromBody] DepartmentInsertModel department)
         {
             try 
             {
@@ -116,7 +116,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateDepartment(ViewDepartment department)
+        public async Task<IActionResult> UpdateDepartment([FromBody] ViewDepartment department)
         {
             try
             {
