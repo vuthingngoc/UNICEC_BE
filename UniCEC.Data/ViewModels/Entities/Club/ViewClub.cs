@@ -14,7 +14,7 @@ namespace UniCEC.Data.ViewModels.Entities.Club
         [JsonPropertyName("total_member")]
         public int TotalMember { get; set; }
         public DateTime Founding { get; set; }
-        public GenericStatus Status { get; set; }
+        public bool Status { get; set; }
 
     }
 }
