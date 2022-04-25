@@ -26,6 +26,7 @@ namespace UniCEC.Data.Models.DB
         public bool Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
+        public string Avatar { get; set; }
 
         public virtual Major Major { get; set; }
         public virtual Role Role { get; set; }

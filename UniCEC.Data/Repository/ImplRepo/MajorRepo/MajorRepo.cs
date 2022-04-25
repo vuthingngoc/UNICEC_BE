@@ -6,7 +6,6 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
 using System.Collections.Generic;
-using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 {
@@ -33,14 +32,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                     .Select(x => new Major()
-                                        {       
-                                            Id = x.m.Id,
-                                            DepartmentId = x.m.DepartmentId,
-                                            Description = x.m.Description,
-                                            MajorCode = x.m.MajorCode,
-                                            Name = x.m.Name,
-                                            Status = x.m.Status
-                                        }
+                                    {
+                                        Id = x.m.Id,
+                                        DepartmentId = x.m.DepartmentId,
+                                        Description = x.m.Description,
+                                        MajorCode = x.m.MajorCode,
+                                        Name = x.m.Name,
+                                        Status = x.m.Status
+                                    }
                                     ).ToListAsync();
             return (items.Count > 0) ? new PagingResult<Major>(items, totalCount, request.CurrentPage, request.PageSize)
                                      : new PagingResult<Major>(null, 0, request.CurrentPage, request.PageSize);
@@ -48,21 +47,21 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
         public async Task<PagingResult<Major>> GetByUniversity(int universityId, PagingRequest request)
         {
-            var query = from diu in context.DepartmentInUniversities                        
+            var query = from diu in context.DepartmentInUniversities
                         join d in context.Departments on diu.DepartmentId equals d.Id
                         join m in context.Majors on d.Id equals m.DepartmentId
                         where diu.UniversityId == universityId
                         select new { m };
             int totalCount = query.Count();
 
-            List<Major> majors =  await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Major()
+            List<Major> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Major()
             {
-                Id= x.m.Id,
+                Id = x.m.Id,
                 DepartmentId = x.m.DepartmentId,
-                Description= x.m.Description,
-                MajorCode= x.m.MajorCode,
-                Name= x.m.Name,
-                Status= x.m.Status
+                Description = x.m.Description,
+                MajorCode = x.m.MajorCode,
+                Name = x.m.Name,
+                Status = x.m.Status
             }).ToListAsync();
 
             return (majors.Count > 0) ? new PagingResult<Major>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -73,6 +72,15 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
             Major major = await context.Majors.FirstOrDefaultAsync(m => m.DepartmentId.Equals(departmentId)
                                                                         && m.MajorCode.Equals(code));
             return (major != null) ? major.Id : 0;
+        }
+
+        public async Task<List<int>> GetByDepartment(int departmentId)
+        {
+            var query = from m in context.Majors
+                        where m.DepartmentId == departmentId
+                        select new { m };
+            List<int> majorIds = await query.Select(x => x.m.Id).ToListAsync();
+            return (majorIds.Count > 0) ? majorIds : null;
         }
     }
 }

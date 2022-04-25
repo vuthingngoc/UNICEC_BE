@@ -145,6 +145,10 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Founding).HasColumnType("datetime");
 
+                entity.Property(e => e.Image)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -717,6 +721,10 @@ namespace UniCEC.Data.Models.DB
                 entity.ToTable("User");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Avatar)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Description).HasMaxLength(500);
 
