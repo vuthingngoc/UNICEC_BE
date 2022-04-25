@@ -5,16 +5,19 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Department;
 using System.Collections.Generic;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
     public class DepartmentService : IDepartmentService
     {
         private IDepartmentRepo _departmentRepo;
+        private IMajorRepo _majorRepo;
 
-        public DepartmentService(IDepartmentRepo departmentRepo)
+        public DepartmentService(IDepartmentRepo departmentRepo, IMajorRepo majorRepo)
         {
             _departmentRepo = departmentRepo;
+            _majorRepo = majorRepo;
         }
 
         private ViewDepartment TranformViewDepartment(Department department)
@@ -100,6 +103,17 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (department == null) throw new ArgumentNullException("Null Argument");
             Department element = await _departmentRepo.Get(department.Id);
             if(element == null) throw new NullReferenceException("Not found this element");
+            if(department.Status != element.Status)
+            {
+                List<int> majorIds = await _majorRepo.GetByDepartment(department.Id);
+                foreach(int majorId in majorIds)
+                {
+                    Major major = await _majorRepo.Get(majorId);
+                    major.Status = department.Status;
+                }
+                await _majorRepo.Update();
+            }
+
             element.Name = department.Name;
             element.Status = department.Status;
             await _departmentRepo.Update();
@@ -110,6 +124,14 @@ namespace UniCEC.Business.Services.DepartmentSvc
             Department element = await _departmentRepo.Get(id);
             if(element == null) throw new NullReferenceException("Not found this element");
             element.Status = false;
+            // delete concerned major
+            List<int> majorIds = await _majorRepo.GetByDepartment(id);
+            foreach (int majorId in majorIds)
+            {
+                Major major = await _majorRepo.Get(majorId);
+                major.Status = false;
+            }
+            await _majorRepo.Update();
             await _departmentRepo.Update();
         }
     }

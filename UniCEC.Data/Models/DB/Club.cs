@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -22,6 +23,7 @@ namespace UniCEC.Data.Models.DB
         public int TotalMember { get; set; }
         public DateTime Founding { get; set; }
         public bool Status { get; set; }
+        public string Image { get; set; }
 
         public virtual University University { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }
