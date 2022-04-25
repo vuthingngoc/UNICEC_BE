@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.ClubActivity
 {
@@ -14,6 +15,6 @@ namespace UniCEC.Data.ViewModels.Entities.ClubActivity
         public DateTime Ending { get; set; }
         [JsonPropertyName("num_of_member")]
         public int NumOfMember { get; set; }
-        public int Status { get; set; }
+        public ClubActivityStatus Status { get; set; }
     }
 }
