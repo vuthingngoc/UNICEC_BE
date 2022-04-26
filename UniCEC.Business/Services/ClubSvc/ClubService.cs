@@ -87,6 +87,20 @@ namespace UniCEC.Business.Services.ClubSvc
             return new PagingResult<ViewClub>(clubs, listClub.TotalCount, listClub.CurrentPage, listClub.PageSize);
         }
 
+        public async Task<List<ViewClub>> GetByUser(int userId)
+        {
+            List<Club> listClub = await _clubRepo.GetByUser(userId);
+            if (listClub == null) throw new NullReferenceException("This user is not a member of any clubs");
+
+            List<ViewClub> clubs = new List<ViewClub>();
+            listClub.ForEach(element =>
+            {
+                ViewClub club = TransformViewClub(element);
+                clubs.Add(club);
+            });
+            return clubs;           
+        }
+
         public async Task<ViewClub> Insert(ClubInsertModel club)
         {
             if (club == null) throw new ArgumentNullException("Null argument");

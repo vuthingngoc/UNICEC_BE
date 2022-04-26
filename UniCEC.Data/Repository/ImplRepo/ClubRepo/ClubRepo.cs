@@ -5,6 +5,7 @@ using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
@@ -59,6 +60,28 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             ).ToListAsync();
 
             return (clubs.Count > 0) ? new PagingResult<Club>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
+
+        public async Task<List<Club>> GetByUser(int userId)
+        {
+            var query = from m in context.Members
+                        join cp in context.ClubPrevious on m.Id equals cp.MemberId
+                        join c in context.Clubs on cp.ClubId equals c.Id
+                        where m.StudentId == userId && cp.Status == ClubPreviousStatus.Active
+                        select new { c };
+            int totalCount = query.Count();
+            List<Club> clubs = await query.Select(x => new Club()
+            {
+                Id = x.c.Id,
+                Name = x.c.Name,
+                Description = x.c.Description,
+                Founding = x.c.Founding,
+                Status = x.c.Status,
+                TotalMember = x.c.TotalMember,
+                UniversityId = x.c.UniversityId
+            }).ToListAsync();
+
+            return (clubs.Count > 0) ? clubs : null; 
         }
 
         public async Task<int> CheckExistedClubName(int universityId, string name)
