@@ -69,6 +69,14 @@ namespace UniCEC.API.Controllers
                         //Create UserModelTemporary
                         UserModelTemporary userModelTemporary = new UserModelTemporary();
                         userModelTemporary.Email = email_user;
+                        if (userInfo.PhotoUrl != null)
+                        {
+                            userModelTemporary.Avatar = userInfo.PhotoUrl.ToString();
+                        }
+                        else
+                        {
+                            userModelTemporary.Avatar = "";
+                        }
                         //auto Role Student - Status True 
                         userModelTemporary.RoleId = 3;
                         //Add In DB [User]

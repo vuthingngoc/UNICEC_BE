@@ -213,6 +213,7 @@ namespace UniCEC.Business.Services.UserSvc
                     RoleId = userTem.RoleId,
                     Email = userTem.Email,
                     Status = true,
+                    Avatar = userTem.Avatar,    
                     //auto
                     Dob = "",
                     Fullname = "",
@@ -228,6 +229,7 @@ namespace UniCEC.Business.Services.UserSvc
                         Id = id,
                         RoleId = userTem.RoleId,
                         Email = userTem.Email,
+                        Avatar = userTem.Avatar,
                         Status = true
                     };
                 }

@@ -42,7 +42,10 @@ namespace UniCEC.Business.Services.MemberSvc
                 }
                 return false;
             }
-            catch (Exception) { throw; }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public Task<PagingResult<ViewMember>> GetAllPaging(PagingRequest request)
@@ -64,7 +67,11 @@ namespace UniCEC.Business.Services.MemberSvc
                     Status = mem.Status
                 };
             }
-            else return null;
+            else
+            {
+                return null;
+            }
+
         }
 
 
@@ -93,7 +100,10 @@ namespace UniCEC.Business.Services.MemberSvc
                     return null;
                 }
             }
-            catch (Exception) { throw; }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         //Update-Member
@@ -102,7 +112,7 @@ namespace UniCEC.Business.Services.MemberSvc
             try
             {
                 //get that member
-                Member member = await _memberRepo.Get(model.Id);                
+                Member member = await _memberRepo.Get(model.Id);
 
                 if (member != null)
                 {

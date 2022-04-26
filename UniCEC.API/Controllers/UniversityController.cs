@@ -28,7 +28,7 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet("GetUniversityByConditions")]
+        [HttpGet("get-university-by-conditions")]
         public async Task<IActionResult> GetUniversityByConditions([FromQuery] UniversityRequestModel request)
         {
             try
@@ -57,7 +57,7 @@ namespace UniCEC.API.Controllers
         }
 
         //Get 1 university by ID
-        [HttpGet("GetUniversityBy{id}")]
+        [HttpGet("get-university-by-{id}")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
             try {
@@ -84,7 +84,7 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<UniversityController>
-        [HttpPost("InsertUniversity")]
+        [HttpPost("insert-university")]
         public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
             try
@@ -113,7 +113,7 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<UniversityController>/5
-        [HttpPut("UpdateUniversityById")]
+        [HttpPut("update-university-by-id")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
             try {
@@ -138,7 +138,7 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<UniversityController>/5
-        [HttpDelete("DeleteUniversityBy{id}")]
+        [HttpDelete("delete-university-by-{id}")]
         public async Task<IActionResult> DeleteUniversityById(int id)
         {
             try
