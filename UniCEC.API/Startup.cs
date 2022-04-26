@@ -104,7 +104,7 @@ namespace UniCEC.API
             services.AddScoped<IBlogTypeService, BlogTypeService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IClubActivityService, ClubActivityService>();
-            services.AddScoped<IClubPreviousService, ClubPreviousService>();
+            services.AddScoped<IClubHistoryService, ClubHistoryService>();
             services.AddScoped<IClubRoleService, ClubRoleService>();
             services.AddScoped<IClubService, ClubService>();
             services.AddScoped<ICompetitionEntityService, CompetitionEntityService>();
@@ -133,7 +133,7 @@ namespace UniCEC.API
             services.AddTransient<IBlogTypeRepo, BlogTypeRepo>();
             services.AddTransient<ICityRepo, CityRepo>();
             services.AddTransient<IClubActivityRepo, ClubActivityRepo>();
-            services.AddTransient<IClubPreviousRepo, ClubPreviousRepo>();
+            services.AddTransient<IClubHistoryRepo, ClubHistoryRepo>();
             services.AddTransient<IClubRepo, ClubRepo>();
             services.AddTransient<IClubRoleRepo, ClubRoleRepo>();
             services.AddTransient<ICompetitionEntityRepo, CompetitionEntityRepo>();

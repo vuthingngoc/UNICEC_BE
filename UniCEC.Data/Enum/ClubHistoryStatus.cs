@@ -1,9 +1,8 @@
 ﻿namespace UniCEC.Data.Enum
 {
-    public enum ClubPreviousStatus
+    public enum ClubHistoryStatus
     {
         Inactive,
-        Active
-        
+        Active        
     }
 }

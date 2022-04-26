@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -12,7 +11,7 @@ namespace UniCEC.Data.Models.DB
         {
             Blogs = new HashSet<Blog>();
             ClubActivities = new HashSet<ClubActivity>();
-            ClubPrevious = new HashSet<ClubPreviou>();
+            ClubHistories = new HashSet<ClubHistory>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
         }
 
@@ -28,7 +27,7 @@ namespace UniCEC.Data.Models.DB
         public virtual University University { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }
         public virtual ICollection<ClubActivity> ClubActivities { get; set; }
-        public virtual ICollection<ClubPreviou> ClubPrevious { get; set; }
+        public virtual ICollection<ClubHistory> ClubHistories { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
     }
 }
