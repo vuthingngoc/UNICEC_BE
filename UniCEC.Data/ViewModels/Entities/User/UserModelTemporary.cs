@@ -12,5 +12,6 @@ namespace UniCEC.Data.ViewModels.Entities.User
         [JsonPropertyName("role_name")]
         public string RoleName { get; set; }
         public string Email { get; set; }
+        public string Avatar { get; set; }
     }
 }

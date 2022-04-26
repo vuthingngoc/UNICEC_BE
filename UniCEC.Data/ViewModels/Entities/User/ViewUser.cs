@@ -19,5 +19,6 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public bool Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
+        public string Avatar { get; set; }  
     }
 }
