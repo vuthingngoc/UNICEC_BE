@@ -22,7 +22,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<Club> Clubs { get; set; }
         public virtual DbSet<ClubActivity> ClubActivities { get; set; }
-        public virtual DbSet<ClubPreviou> ClubPrevious { get; set; }
+        public virtual DbSet<ClubHistory> ClubHistories { get; set; }
         public virtual DbSet<ClubRole> ClubRoles { get; set; }
         public virtual DbSet<Competition> Competitions { get; set; }
         public virtual DbSet<CompetitionEntity> CompetitionEntities { get; set; }
@@ -42,6 +42,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Sponsor> Sponsors { get; set; }
         public virtual DbSet<SponsorInCompetition> SponsorInCompetitions { get; set; }
         public virtual DbSet<Team> Teams { get; set; }
+        public virtual DbSet<Term> Terms { get; set; }
         public virtual DbSet<University> Universities { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
@@ -148,7 +149,7 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Founding).HasColumnType("datetime");
 
                 entity.Property(e => e.Image)
-                    .HasMaxLength(50)
+                    .HasMaxLength(500)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
@@ -197,8 +198,10 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__ClubActiv__ClubI__5812160E");
             });
 
-            modelBuilder.Entity<ClubPreviou>(entity =>
+            modelBuilder.Entity<ClubHistory>(entity =>
             {
+                entity.ToTable("ClubHistory");
+
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.ClubId).HasColumnName("ClubID");
@@ -211,28 +214,31 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
 
-                entity.Property(e => e.Year)
-                    .IsRequired()
-                    .HasMaxLength(4)
-                    .IsUnicode(false);
+                entity.Property(e => e.TermId).HasColumnName("TermID");
 
                 entity.HasOne(d => d.Club)
-                    .WithMany(p => p.ClubPrevious)
+                    .WithMany(p => p.ClubHistories)
                     .HasForeignKey(d => d.ClubId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ClubPrevi__ClubI__59063A47");
 
                 entity.HasOne(d => d.ClubRole)
-                    .WithMany(p => p.ClubPrevious)
+                    .WithMany(p => p.ClubHistories)
                     .HasForeignKey(d => d.ClubRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ClubPrevi__ClubR__59FA5E80");
 
                 entity.HasOne(d => d.Member)
-                    .WithMany(p => p.ClubPrevious)
+                    .WithMany(p => p.ClubHistories)
                     .HasForeignKey(d => d.MemberId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ClubPrevi__Membe__5AEE82B9");
+
+                entity.HasOne(d => d.Term)
+                    .WithMany(p => p.ClubHistories)
+                    .HasForeignKey(d => d.TermId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_TermID");
             });
 
             modelBuilder.Entity<ClubRole>(entity =>
@@ -671,6 +677,21 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__Team__Competitio__6FE99F9F");
             });
 
+            modelBuilder.Entity<Term>(entity =>
+            {
+                entity.ToTable("Term");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+
+                entity.Property(e => e.EndTime).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+
             modelBuilder.Entity<University>(entity =>
             {
                 entity.ToTable("University");
@@ -725,7 +746,7 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Avatar)
-                    .HasMaxLength(50)
+                    .HasMaxLength(500)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Description).HasMaxLength(500);

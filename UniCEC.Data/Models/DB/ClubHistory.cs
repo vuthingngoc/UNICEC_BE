@@ -5,7 +5,7 @@ using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class ClubPreviou
+    public partial class ClubHistory
     {
         public int Id { get; set; }
         public int ClubRoleId { get; set; }
@@ -13,11 +13,12 @@ namespace UniCEC.Data.Models.DB
         public int MemberId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public string Year { get; set; }
-        public ClubPreviousStatus Status { get; set; }
+        public ClubHistoryStatus Status { get; set; }
+        public int TermId { get; set; }
 
         public virtual Club Club { get; set; }
         public virtual ClubRole ClubRole { get; set; }
         public virtual Member Member { get; set; }
+        public virtual Term Term { get; set; }
     }
 }

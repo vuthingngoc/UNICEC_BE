@@ -6,29 +6,28 @@ using UniCEC.Data.ViewModels.Common;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System;
 
-namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
+namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
-    public class ClubPreviousRepo : Repository<ClubPreviou>, IClubPreviousRepo
+    public class ClubHistoryRepo : Repository<ClubHistory>, IClubHistoryRepo
     {
-        public ClubPreviousRepo(UniCECContext context) : base(context)
+        public ClubHistoryRepo(UniCECContext context) : base(context)
         {
 
         }
 
-        public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, string year)
+        public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId)
         {
-            ClubPreviou clubPrevious = await context.ClubPrevious.FirstOrDefaultAsync(x => x.ClubId.Equals(clubId)
+            ClubHistory clubHistory = await context.ClubHistories.FirstOrDefaultAsync(x => x.ClubId.Equals(clubId)
                                                                 && x.ClubRoleId.Equals(clubRoleId)
                                                                 && x.MemberId.Equals(memberId)
-                                                                && x.Year.Equals(year));
-            return (clubPrevious != null) ? clubPrevious.Id : 0;
+                                                                && x.TermId.Equals(termId));
+            return (clubHistory != null) ? clubHistory.Id : 0;
         }
 
-        public async Task<PagingResult<ClubPreviou>> GetByConditions(ClubPreviousRequestModel request)
+        public async Task<PagingResult<ClubHistory>> GetByConditions(ClubHistoryRequestModel request)
         {
-            var query = from cp in context.ClubPrevious
+            var query = from cp in context.ClubHistories
                         select new { cp };
             if (request.ClubId.HasValue) query = query.Where(x => x.cp.ClubId.Equals(request.ClubId));
 
@@ -40,33 +39,42 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubPreviousRepo
 
             if (request.EndTime.HasValue) query = query.Where(x => x.cp.EndTime.Equals(request.EndTime));
 
-            if (!string.IsNullOrEmpty(request.Year)) query = query.Where(x => x.cp.Year.Equals(request.Year));
+            if (request.TermId.HasValue) query = query.Where(x => x.cp.TermId.Equals(request.TermId));
 
             if (request.Status.HasValue) query = query.Where(x => x.cp.Status.Equals(request.Status));
 
             int totalCount = query.Count();
-            List<ClubPreviou> previousClubs = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ClubPreviou()
+            List<ClubHistory> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ClubHistory()
             {
                 Id = x.cp.Id,
                 ClubId = x.cp.ClubId,
                 MemberId = x.cp.MemberId,
+                TermId = x.cp.TermId,
                 StartTime = x.cp.StartTime,
                 EndTime = x.cp.EndTime,
-                Year = x.cp.Year,
                 Status = x.cp.Status
             }).ToListAsync();
 
-            return (previousClubs.Count > 0) ? new PagingResult<ClubPreviou>(previousClubs, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (items.Count > 0) ? new PagingResult<ClubHistory>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<List<int>> GetIdsByMember(int memberID)
         {
-            var query = from cp in context.ClubPrevious
+            var query = from cp in context.ClubHistories
                         where cp.MemberId == memberID
                         select new { cp };
             List<int> previousClubs = await query.Select(x => x.cp.Id).ToListAsync();
 
             return (previousClubs.Count > 0) ? previousClubs : null;
         }
+
+        //public Task<PagingResult<ViewClubMember>> GetMemberByClub(int clubId, int termId)
+        //{
+        //    var query = from cp in context.ClubPrevious
+        //                join m in context.Members on cp.MemberId equals m.Id
+        //                join u in context.Users on m.StudentId equals u.Id
+        //                where cp.ClubId == clubId &&;
+        //    throw new NotImplementedException();
+        //}
     }
 }

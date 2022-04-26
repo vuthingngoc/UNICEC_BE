@@ -9,7 +9,7 @@ namespace UniCEC.Data.Models.DB
     {
         public Member()
         {
-            ClubPrevious = new HashSet<ClubPreviou>();
+            ClubHistories = new HashSet<ClubHistory>();
             MemberTakesActivities = new HashSet<MemberTakesActivity>();
             Participants = new HashSet<Participant>();
         }
@@ -19,7 +19,7 @@ namespace UniCEC.Data.Models.DB
         public bool Status { get; set; }
 
         public virtual User Student { get; set; }
-        public virtual ICollection<ClubPreviou> ClubPrevious { get; set; }
+        public virtual ICollection<ClubHistory> ClubHistories { get; set; }
         public virtual ICollection<MemberTakesActivity> MemberTakesActivities { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
     }

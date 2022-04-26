@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Services\ClubPreviousSvc\ClubPreviousService.cs~RF8e031a.TMP" />
+    <None Remove="Services\ClubHistorySvc\ClubPreviousService.cs~RF8e031a.TMP" />
   </ItemGroup>
 
   <ItemGroup>

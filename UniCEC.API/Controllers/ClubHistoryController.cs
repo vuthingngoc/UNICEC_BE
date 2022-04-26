@@ -3,30 +3,30 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.ClubPreviousSvc;
+using UniCEC.Business.Services.ClubHistorySvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubPrevious;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClubPreviousController : ControllerBase
+    public class ClubHistoryController : ControllerBase
     {
-        private IClubPreviousService _clubPreviousService;
-        public ClubPreviousController(IClubPreviousService clubPreviousService)
+        private IClubHistoryService _clubHistoryService;
+        public ClubHistoryController(IClubHistoryService clubHistoryService)
         {
-            _clubPreviousService = clubPreviousService;
+            _clubHistoryService = clubHistoryService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClubPrevious([FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetAllClubHistory([FromQuery] PagingRequest request)
         {
             try
             {
-                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetAllPaging(request);
-                return Ok(previousClubs);
+                PagingResult<ViewClubHistory> clubHistories = await _clubHistoryService.GetAllPaging(request);
+                return Ok(clubHistories);
             }
             catch (NullReferenceException ex)
             {
@@ -39,12 +39,12 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetClubPreviousById(int id)
+        public async Task<IActionResult> GetClubHistoryById(int id)
         {
             try
             {
-                ViewClubPrevious clubPrevious = await _clubPreviousService.GetByClubPrevious(id);
-                return Ok(clubPrevious);
+                ViewClubHistory clubHistory = await _clubHistoryService.GetByClubHistory(id);
+                return Ok(clubHistory);
             }
             catch (SqlException)
             {
@@ -57,12 +57,12 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetClubPreviousByConditions([FromQuery] ClubPreviousRequestModel request)
+        public async Task<IActionResult> GetClubHistoryByConditions([FromQuery] ClubHistoryRequestModel request)
         {
             try
             {
-                PagingResult<ViewClubPrevious> previousClubs = await _clubPreviousService.GetByContitions(request);
-                return Ok(previousClubs);
+                PagingResult<ViewClubHistory> clubHistories = await _clubHistoryService.GetByContitions(request);
+                return Ok(clubHistories);
             }
             catch (SqlException)
             {
@@ -74,13 +74,19 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //[HttpGet("club/{id}/{year}")]
+        //public async Task<IActionResult> GetMemberByClub(int id, int termId)
+        //{
+
+        //}
+
         [HttpPost]
-        public async Task<IActionResult> InsertClubPrevious([FromBody] ClubPreviousInsertModel clubPrevious)
+        public async Task<IActionResult> InsertClubHistory([FromBody] ClubHistoryInsertModel clubHistory)
         {
             try
             {
-                ViewClubPrevious viewClubPrevious = await _clubPreviousService.Insert(clubPrevious);
-                return Created($"api/v1/[controller]/{viewClubPrevious.Id}", viewClubPrevious);
+                ViewClubHistory viewClubHistory = await _clubHistoryService.Insert(clubHistory);
+                return Created($"api/v1/[controller]/{viewClubHistory.Id}", viewClubHistory);
             }
             catch (ArgumentNullException ex)
             {
@@ -101,11 +107,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateClubPrevious([FromBody] ClubPreviousUpdateModel clubPrevious)
+        public async Task<IActionResult> UpdateClubHistory([FromBody] ClubHistoryUpdateModel clubHistory)
         {
             try
             {
-                await _clubPreviousService.Update(clubPrevious);
+                await _clubHistoryService.Update(clubHistory);
                 return Ok();
             }
             catch (NullReferenceException ex)
@@ -131,11 +137,11 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClubPrevious(int id)
+        public async Task<IActionResult> DeleteClubHistory(int id)
         {
             try
             {
-                await _clubPreviousService.Delete(id);
+                await _clubHistoryService.Delete(id);
                 return NoContent();
             }
             catch (NullReferenceException ex)

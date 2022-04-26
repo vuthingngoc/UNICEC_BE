@@ -78,7 +78,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("user/{id}")]
-        [Authorize(Roles = "System Admin")]
+        //[Authorize(Roles = "System Admin")]
         public async Task<IActionResult> GetClubByUser(int id)
         {
             try

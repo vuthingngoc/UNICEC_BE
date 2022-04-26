@@ -5,15 +5,17 @@ using System.Collections.Generic;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class ClubRole
+    public partial class Term
     {
-        public ClubRole()
+        public Term()
         {
             ClubHistories = new HashSet<ClubHistory>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         public virtual ICollection<ClubHistory> ClubHistories { get; set; }
     }
