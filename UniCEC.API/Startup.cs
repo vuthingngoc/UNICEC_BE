@@ -66,6 +66,7 @@ using UniCEC.Business.Services.SponsorInCompetitionSvc;
 using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using System.Text;
+using System.Collections.Generic;
 
 namespace UniCEC.API
 {
@@ -123,7 +124,7 @@ namespace UniCEC.API
             services.AddScoped<ISponsorService, SponsorService>();
             services.AddScoped<ISponsorInCompetitionService, SponsorInCompetitionService>();
             services.AddScoped<ITeamService, TeamService>();
-            services.AddScoped<IUniversityService, UniversityService>();      
+            services.AddScoped<IUniversityService, UniversityService>();
             services.AddScoped<IUserService, UserService>();
 
             // Repository
@@ -141,7 +142,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionTypeRepo, CompetitionTypeRepo>();
             services.AddTransient<IDepartmentInUniversityRepo, DepartmentInUniversityRepo>();
             services.AddTransient<IDepartmentRepo, DepartmentRepo>();
-            services.AddTransient<IEntityTypeRepo, EntityTypeRepo>();                        
+            services.AddTransient<IEntityTypeRepo, EntityTypeRepo>();
             services.AddTransient<IMajorRepo, MajorRepo>();
             services.AddTransient<IMemberRepo, MemberRepo>();
             services.AddTransient<IMemberRepo, MemberRepo>();
@@ -167,7 +168,7 @@ namespace UniCEC.API
 
             });
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
             {
                 //opt.Authority = Configuration["Jwt:Firebase:ValidIssuer"];
                 opt.TokenValidationParameters = new TokenValidationParameters
@@ -185,7 +186,8 @@ namespace UniCEC.API
             services.AddCors(opt =>
             {
                 opt.AddPolicy("AllowOrigin",
-                    builder => {
+                    builder =>
+                    {
                         builder
                         .AllowAnyOrigin()
                         .AllowAnyHeader()
@@ -200,6 +202,36 @@ namespace UniCEC.API
                     Title = "UniCEC.API",
                     Version = "v1"
                 });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. " +
+                                    "\n\nEnter 'Bearer' [space] and then your token in the text input below. " +
+                                      "\n\nExample: 'Bearer 12345abcde'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
+
             });
         }
 
@@ -221,7 +253,7 @@ namespace UniCEC.API
 
             app.UseAuthentication();
 
-            app.UseAuthorization();            
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -73,6 +74,25 @@ namespace UniCEC.API.Controllers
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
+        [HttpGet("user/{id}")]
+        [Authorize(Roles = "System Admin")]
+        public async Task<IActionResult> GetClubByUser(int id)
+        {
+            try
+            {
+                List<ViewClub> clubs = await _clubService.GetByUser(id);
+                return Ok(clubs);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
             }
         }
 
