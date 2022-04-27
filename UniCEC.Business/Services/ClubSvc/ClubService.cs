@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
@@ -28,6 +30,7 @@ namespace UniCEC.Business.Services.ClubSvc
                 TotalMember = club.TotalMember,
                 UniversityId = club.UniversityId,
                 Status = club.Status,
+                Image = club.Image
             };
         }
 
@@ -87,8 +90,13 @@ namespace UniCEC.Business.Services.ClubSvc
             return new PagingResult<ViewClub>(clubs, listClub.TotalCount, listClub.CurrentPage, listClub.PageSize);
         }
 
-        public async Task<List<ViewClub>> GetByUser(int userId)
+        public async Task<List<ViewClub>> GetByUser(int userId, string token)
         {
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+            int id = Int32.Parse(claim.Value);
+            if (id != userId) throw new NullReferenceException("Not Found");
+
             List<Club> listClub = await _clubRepo.GetByUser(userId);
             if (listClub == null) throw new NullReferenceException("This user is not a member of any clubs");
 
@@ -99,6 +107,25 @@ namespace UniCEC.Business.Services.ClubSvc
                 clubs.Add(club);
             });
             return clubs;           
+        }
+
+        public async Task<PagingResult<ViewClub>> GetByUniversity(string token, PagingRequest request)
+        {
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+            int universityId = Int32.Parse(claim.Value);
+
+            PagingResult<Club> clubs = await _clubRepo.GetByUniversity(universityId, request);
+            if (clubs == null) throw new NullReferenceException("This university have no any clubs");
+
+            List<ViewClub> items = new List<ViewClub>();
+            clubs.Items.ForEach(element =>
+            {
+                ViewClub club = TransformViewClub(element);
+                items.Add(club);
+            });
+
+            return new PagingResult<ViewClub>(items, clubs.TotalCount, request.CurrentPage, request.PageSize);
         }
 
         public async Task<ViewClub> Insert(ClubInsertModel club)

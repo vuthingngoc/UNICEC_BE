@@ -26,6 +26,7 @@ namespace UniCEC.Business.Services.UserSvc
                 Description = user.Description,
                 Dob = user.Dob,
                 Email = user.Email,
+                Avatar = user.Avatar,
                 Fullname = user.Fullname,
                 Gender = user.Gender,
                 MajorId = user.MajorId,
