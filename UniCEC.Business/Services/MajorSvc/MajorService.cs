@@ -88,7 +88,7 @@ namespace UniCEC.Business.Services.MajorSvc
         {
             if (major.DepartmentId == 0 || string.IsNullOrEmpty(major.MajorCode) ||
                 string.IsNullOrEmpty(major.Name) || string.IsNullOrEmpty(major.Description))
-                throw new ArgumentNullException("DepartmentId null || MajorCode null || Name null || Description null");
+                    throw new ArgumentNullException("DepartmentId null || MajorCode null || Name null || Description null");
 
             int majorId = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
             if (majorId > 0) throw new ArgumentException("Duplicated MajorCode");
@@ -129,7 +129,7 @@ namespace UniCEC.Business.Services.MajorSvc
             if (!string.IsNullOrEmpty(major.Description)) element.Description = major.Description;
             if (!string.IsNullOrEmpty(major.MajorCode)) element.MajorCode = major.MajorCode;
             if (!string.IsNullOrEmpty(major.Name)) element.Name = major.Name;
-            if (major.Status == true) element.Status = major.Status;
+            element.Status = major.Status;
 
             await _majorRepo.Update();
         }
