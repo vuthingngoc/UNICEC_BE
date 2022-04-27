@@ -28,32 +28,32 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
         public async Task<PagingResult<ClubHistory>> GetByConditions(ClubHistoryRequestModel request)
         {
-            var query = from cp in context.ClubHistories
-                        select new { cp };
-            if (request.ClubId.HasValue) query = query.Where(x => x.cp.ClubId.Equals(request.ClubId));
+            var query = from ch in context.ClubHistories
+                        select new { ch };
+            if (request.ClubId.HasValue) query = query.Where(x => x.ch.ClubId.Equals(request.ClubId));
 
-            if (request.ClubRoleId.HasValue) query = query.Where(x => x.cp.ClubRoleId.Equals(request.ClubRoleId));
+            if (request.ClubRoleId.HasValue) query = query.Where(x => x.ch.ClubRoleId.Equals(request.ClubRoleId));
 
-            if (request.MemberId.HasValue) query = query.Where(x => x.cp.MemberId.Equals(request.MemberId));
+            if (request.MemberId.HasValue) query = query.Where(x => x.ch.MemberId.Equals(request.MemberId));
 
-            if (request.StartTime.HasValue) query = query.Where(x => x.cp.StartTime.Equals(request.StartTime));
+            if (request.StartTime.HasValue) query = query.Where(x => x.ch.StartTime.Equals(request.StartTime));
 
-            if (request.EndTime.HasValue) query = query.Where(x => x.cp.EndTime.Equals(request.EndTime));
+            if (request.EndTime.HasValue) query = query.Where(x => x.ch.EndTime.Equals(request.EndTime));
 
-            if (request.TermId.HasValue) query = query.Where(x => x.cp.TermId.Equals(request.TermId));
+            if (request.TermId.HasValue) query = query.Where(x => x.ch.TermId.Equals(request.TermId));
 
-            if (request.Status.HasValue) query = query.Where(x => x.cp.Status.Equals(request.Status));
+            if (request.Status.HasValue) query = query.Where(x => x.ch.Status.Equals(request.Status));
 
             int totalCount = query.Count();
             List<ClubHistory> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ClubHistory()
             {
-                Id = x.cp.Id,
-                ClubId = x.cp.ClubId,
-                MemberId = x.cp.MemberId,
-                TermId = x.cp.TermId,
-                StartTime = x.cp.StartTime,
-                EndTime = x.cp.EndTime,
-                Status = x.cp.Status
+                Id = x.ch.Id,
+                ClubId = x.ch.ClubId,
+                MemberId = x.ch.MemberId,
+                TermId = x.ch.TermId,
+                StartTime = x.ch.StartTime,
+                EndTime = x.ch.EndTime,
+                Status = x.ch.Status
             }).ToListAsync();
 
             return (items.Count > 0) ? new PagingResult<ClubHistory>(items, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -61,27 +61,27 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
         public async Task<List<int>> GetIdsByMember(int memberID)
         {
-            var query = from cp in context.ClubHistories
-                        where cp.MemberId == memberID
-                        select new { cp };
-            List<int> previousClubs = await query.Select(x => x.cp.Id).ToListAsync();
+            var query = from ch in context.ClubHistories
+                        where ch.MemberId == memberID
+                        select new { ch };
+            List<int> previousClubs = await query.Select(x => x.ch.Id).ToListAsync();
 
             return (previousClubs.Count > 0) ? previousClubs : null;
         }
 
         public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
         {
-            var query = from cp in context.ClubHistories
-                        join m in context.Members on cp.MemberId equals m.Id
+            var query = from ch in context.ClubHistories
+                        join m in context.Members on ch.MemberId equals m.Id
                         join u in context.Users on m.StudentId equals u.Id
-                        join r in context.ClubRoles on cp.ClubRoleId equals r.Id
-                        where cp.ClubId.Equals(clubId) && cp.TermId.Equals(termId)
-                        select new { cp, u, r };
+                        join r in context.ClubRoles on ch.ClubRoleId equals r.Id
+                        where ch.ClubId.Equals(clubId) && ch.TermId.Equals(termId)
+                        select new { ch, u, r };
             
             int totalCount = query.Count();
             List<ViewClubMember> clubMembers = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewClubMember()
             {
-                MemberId = x.cp.MemberId,
+                MemberId = x.ch.MemberId,
                 ClubRoleName = x.r.Name,
                 Name = x.u.Fullname
             }).ToListAsync();
