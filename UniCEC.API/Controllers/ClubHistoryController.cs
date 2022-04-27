@@ -74,11 +74,23 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //[HttpGet("club/{id}/{year}")]
-        //public async Task<IActionResult> GetMemberByClub(int id, int termId)
-        //{
-
-        //}
+        [HttpGet("club/{id}/{termId}")]
+        public async Task<IActionResult> GetMembersByClub(int id, int termId, [FromQuery] PagingRequest request)
+        {
+            try
+            {
+                PagingResult<ViewClubMember> clubMembers = await _clubHistoryService.GetMembersByClub(id, termId, request);
+                return Ok(clubMembers);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> InsertClubHistory([FromBody] ClubHistoryInsertModel clubHistory)

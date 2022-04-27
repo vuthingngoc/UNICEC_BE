@@ -10,7 +10,7 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         public Task<PagingResult<ViewClubHistory>> GetAllPaging(PagingRequest request);
         public Task<ViewClubHistory> GetByClubHistory(int id);
         public Task<PagingResult<ViewClubHistory>> GetByContitions(ClubHistoryRequestModel request);
-        //public Task<ViewClubMember> GetMemberByClub(int clubId, int termId);
+        public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
         public Task<ViewClubHistory> Insert(ClubHistoryInsertModel clubHistory);
         public Task Update(ClubHistoryUpdateModel clubHistory);
         public Task Delete(int memberId);
