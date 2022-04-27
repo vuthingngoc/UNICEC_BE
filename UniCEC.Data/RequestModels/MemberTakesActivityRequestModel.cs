@@ -18,7 +18,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "club-id")]
         public int? ClubId { get; set; }
         //search by Status của task thuộc về member đó 
-        public MemberTakesActivityStatus Status { get; set; }
+        public MemberTakesActivityStatus? Status { get; set; }
 
     }
 }

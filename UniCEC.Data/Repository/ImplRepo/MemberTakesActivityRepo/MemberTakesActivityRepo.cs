@@ -27,6 +27,23 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             int check = query.Count();
             if (check > 0)
             {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public async Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId)
+        {
+            //
+            var query = from mta in context.MemberTakesActivities
+                        where mta.ClubActivityId == clubActivityId && mta.MemberId == memberId
+                        select mta;
+            int check = query.Count();
+            if (check > 0)
+            {
                 return true;
             }
             else
@@ -45,7 +62,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             //club id
             if (request.ClubId.HasValue) query = query.Where(mta => mta.ClubActivity.ClubId == request.ClubId);
             //status
-            if (!request.Status.ToString().Equals("")) query = query.Where(mta => mta.Status.Equals(request.Status));
+            if (request.Status.HasValue) query = query.Where(mta => mta.Status.Equals(request.Status));
             //
             int totalCount = query.Count();
 

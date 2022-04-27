@@ -78,6 +78,7 @@ namespace UniCEC.API.Controllers
                             userModelTemporary.Avatar = "";
                         }
                         //auto Role Student - Status True 
+                        //Database roleId 3 is Student
                         userModelTemporary.RoleId = 3;
                         //Add In DB [User]
                         ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);

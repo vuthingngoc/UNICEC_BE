@@ -70,41 +70,49 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
                 ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
                 DateTime deadline = clubActivity.Ending;
-                //------------------------------------check
+                //------------------------------------check-mem-in-club
                 int clubId = clubActivity.ClubId;
 
-                bool MemInClub = await _memberTakesActivityRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
+                bool MemInClub_Term = await _memberTakesActivityRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
-                if (MemInClub)
+                if (MemInClub_Term)
                 {
-                    MemberTakesActivity mta = new MemberTakesActivity()
+                    //------------------------------------check-mem-takes-club-activity
+                    bool MemTakesTask = await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, model.MemberId);
+                    if (MemTakesTask)
                     {
-                        //club activity id
-                        ClubActivityId = model.ClubActivityId,
-                        //member id
-                        MemberId = model.MemberId,
-                        //join mean now
-                        StartTime = DateTime.Now,
-                        //Submit time chưa có nên cho mặc định 
-                        EndTime = DefaultEndTime,
-                        //end date of club activity
-                        Deadline = deadline,
-                        //default status is Doing
-                        Status = Data.Enum.MemberTakesActivityStatus.Doing,
-                    };
+                        MemberTakesActivity mta = new MemberTakesActivity()
+                        {
+                            //club activity id
+                            ClubActivityId = model.ClubActivityId,
+                            //member id
+                            MemberId = model.MemberId,
+                            //join mean now 
+                            StartTime = DateTime.Now,
+                            //Submit time chưa có nên cho mặc định 
+                            EndTime = DefaultEndTime,
+                            //end date of club activity
+                            Deadline = deadline,
+                            //default status is Doing
+                            Status = Data.Enum.MemberTakesActivityStatus.Doing,
+                        };
 
-                    int result = await _memberTakesActivityRepo.Insert(mta);
-                    if (result > 0)
-                    {
-                        //
-                        MemberTakesActivity m = await _memberTakesActivityRepo.Get(result);
-                        return TransferViewModel(m);
+                        int result = await _memberTakesActivityRepo.Insert(mta);
+                        if (result > 0)
+                        {
+                            //
+                            MemberTakesActivity m = await _memberTakesActivityRepo.Get(result);
+                            return TransferViewModel(m);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                     else
                     {
                         return null;
                     }
-
                 }
                 else
                 {
@@ -128,7 +136,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 if (mta != null)
                 {
                     //check date
-                    int result = DateTime.Compare(DateTime.Now,mta.Deadline);
+                    int result = DateTime.Compare(DateTime.Now, mta.Deadline);
                     //1. earlier 
                     if (result < 0)
                     {

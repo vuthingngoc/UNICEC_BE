@@ -7,6 +7,7 @@ using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 {
@@ -34,16 +35,24 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
         ////Get List ClubActivity By Conditions
         public async Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions)
         {
-            var query = from ca in context.ClubActivities
+
+            //lấy tất cả các task của 1 trường      
+            var query = from u in context.Universities
+                        where u.Id == conditions.UniversityId
+                        from c in context.Clubs
+                        where c.UniversityId == u.Id
+                        join ca in context.ClubActivities on c.Id equals ca.ClubId
                         select ca;
+
             //Club-Id
             if (conditions.ClubId.HasValue) query = query.Where(ca => ca.ClubId.Equals(conditions.ClubId));
             //Seeds-Point
-            if (conditions.SeedsPoint.HasValue) query = query.Where(ca => ca.SeedsPoint >= conditions.SeedsPoint);
+            if (conditions.SeedsPoint.HasValue) query = query.Where(ca => ca.SeedsPoint == conditions.SeedsPoint);
             //Number-of-member
-            if (conditions.NumberOfMember.HasValue) query = query.Where(ca => ca.NumOfMember >= conditions.NumberOfMember);
+            if (conditions.NumberOfMember.HasValue) query = query.Where(ca => ca.NumOfMember == conditions.NumberOfMember);
+
             //Status
-            if (!conditions.Status.ToString().Equals("")) query = query.Where(ca => ca.Status >= conditions.Status);
+            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
             //-------------------------------------------------Time-------------------------------------------------
             //chỉ search theo ngày
             //Begin-Time

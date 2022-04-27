@@ -11,7 +11,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
     {
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
 
-
+        //check mem in club
         public Task<bool> CheckMemberInClub(int clubId, int memberId, int termId);
+
+        //check mem take task
+        public Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId);
+
     }
 }
