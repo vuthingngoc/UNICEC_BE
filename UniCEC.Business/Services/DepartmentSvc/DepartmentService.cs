@@ -80,7 +80,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
 
         public async Task<ViewDepartment> Insert(DepartmentInsertModel department)
         {
-            if (department == null) throw new ArgumentNullException("Null Argument");
+            if (string.IsNullOrEmpty(department.Name)) throw new ArgumentNullException("Name Null");
             // default inserted status is true
             bool status = true;
             Department element = new Department()
@@ -100,7 +100,6 @@ namespace UniCEC.Business.Services.DepartmentSvc
 
         public async Task Update(ViewDepartment department)
         {
-            if (department == null) throw new ArgumentNullException("Null Argument");
             Department element = await _departmentRepo.Get(department.Id);
             if(element == null) throw new NullReferenceException("Not found this element");
             if(department.Status != element.Status)
@@ -114,7 +113,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 await _majorRepo.Update();
             }
 
-            element.Name = department.Name;
+            if(!string.IsNullOrEmpty(department.Name)) element.Name = department.Name;
             element.Status = department.Status;
             await _departmentRepo.Update();
         }

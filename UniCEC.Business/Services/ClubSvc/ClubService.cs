@@ -130,11 +130,15 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<ViewClub> Insert(ClubInsertModel club)
         {
-            if (club == null) throw new ArgumentNullException("Null argument");
+            if (string.IsNullOrEmpty(club.Description) || club.UniversityId == 0 || club.TotalMember == 0 
+                || string.IsNullOrEmpty(club.Name) || club.Founding == DateTime.Parse("1/1/0001 12:00:00 AM")) 
+                    throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
 
             int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, club.Name);
             if (clubId > 0) throw new ArgumentException("Duplicated club name");
 
+            // default status when inserting
+            bool status = true;
             Club clubObject = new Club()
             {
                 Description = club.Description,
@@ -142,7 +146,8 @@ namespace UniCEC.Business.Services.ClubSvc
                 Name = club.Name,
                 TotalMember = club.TotalMember,
                 UniversityId = club.UniversityId,
-                Status = club.Status,
+                Status = status,
+                Image = club.Image,
             };
             int id = await _clubRepo.Insert(clubObject);
             if (id > 0)
@@ -156,18 +161,17 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task Update(ClubUpdateModel club)
         {
-            if (club == null) throw new ArgumentNullException("Null argument");
-
             Club clubObject = await _clubRepo.Get(club.Id);
             if (clubObject == null) throw new NullReferenceException("Not found this club");
             int clubId = await _clubRepo.CheckExistedClubName(clubObject.UniversityId, club.Name);
             if (clubId > 0 && clubId != clubObject.Id) throw new ArgumentException("Duplicated club name");
 
-            clubObject.Description = club.Description;
-            clubObject.Founding = club.Founding;
-            clubObject.Name = club.Name;
-            clubObject.TotalMember = club.TotalMember;
+            if(!string.IsNullOrEmpty(club.Description)) clubObject.Description = club.Description;
+            if(club.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) clubObject.Founding = club.Founding;
+            if(!string.IsNullOrEmpty(club.Name)) clubObject.Name = club.Name;
+            if(club.TotalMember != 0) clubObject.TotalMember = club.TotalMember;
             clubObject.Status = club.Status;
+            if(!string.IsNullOrEmpty(club.Image)) clubObject.Image = club.Image;
 
             await _clubRepo.Update();
         }

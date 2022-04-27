@@ -81,7 +81,10 @@ namespace UniCEC.Business.Services.ClubHistorySvc
 
         public async Task<ViewClubHistory> Insert(ClubHistoryInsertModel clubHistory)
         {
-            if (clubHistory == null) throw new ArgumentNullException("Null argument");
+            if (clubHistory.ClubRoleId == 0 || clubHistory.ClubId == 0 || clubHistory.TermId == 0 
+                || clubHistory.MemberId == 0 || clubHistory.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")) 
+                    throw new ArgumentNullException("ClubRoleId Null || ClubId Null || TermId Null || MemberId Null || StartTime Null");
+
             int checkId = await _clubHistoryRepo.CheckDuplicated(clubHistory.ClubId, clubHistory.ClubRoleId, clubHistory.MemberId, clubHistory.TermId);
             if (checkId > 0) throw new ArgumentException("Duplicated record");
 
@@ -102,8 +105,6 @@ namespace UniCEC.Business.Services.ClubHistorySvc
 
         public async Task Update(ClubHistoryUpdateModel clubHistory)
         {
-            if (clubHistory == null) throw new ArgumentNullException("Null argument");
-
             ClubHistory clubHistoryObject = await _clubHistoryRepo.Get(clubHistory.Id);
             if (clubHistoryObject == null) throw new NullReferenceException("Not found this club previous");
             // check duplicated record when change role member
@@ -113,11 +114,11 @@ namespace UniCEC.Business.Services.ClubHistorySvc
                 if (checkId > 0) throw new ArgumentException("Duplicated record");
             }
 
-            clubHistoryObject.ClubRoleId = clubHistory.ClubRoleId;
-            clubHistoryObject.StartTime = clubHistory.StartTime;
-            clubHistoryObject.EndTime = clubHistory.EndTime;
+            if(clubHistory.ClubRoleId != 0) clubHistoryObject.ClubRoleId = clubHistory.ClubRoleId;
+            if(clubHistory.StartTime != DateTime.Parse("1/1/0001 12:00:00 AM")) clubHistoryObject.StartTime = clubHistory.StartTime;
+            if(clubHistory.EndTime != null) clubHistoryObject.EndTime = clubHistory.EndTime;
             clubHistoryObject.Status = clubHistory.Status;
-            clubHistoryObject.TermId = clubHistory.TermId;            
+            if(clubHistory.TermId != 0) clubHistoryObject.TermId = clubHistory.TermId;            
 
             await _clubHistoryRepo.Update();
         }

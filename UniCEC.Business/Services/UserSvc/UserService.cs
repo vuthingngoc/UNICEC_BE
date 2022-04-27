@@ -115,7 +115,9 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<ViewUser> Insert(UserInsertModel user)
         {
-            if (user == null) throw new ArgumentNullException("Null Argument");
+            if (string.IsNullOrEmpty(user.Description) || string.IsNullOrEmpty(user.Dob) || string.IsNullOrEmpty(user.Fullname)
+                || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserId))
+                    throw new ArgumentNullException("Description Null || Dob Null || Fullname Null || Email Null || Gender Null || RoleId || UserId Null");
 
             bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
 
@@ -134,7 +136,8 @@ namespace UniCEC.Business.Services.UserSvc
                 RoleId = user.RoleId,
                 Status = status,
                 UniversityId = user.UniversityId,
-                UserId = user.UserId
+                UserId = user.UserId,
+                Avatar = user.Avatar
             };
 
             int id = await _userRepo.Insert(element);
@@ -149,24 +152,23 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<bool> Update(ViewUser user)
         {
-            if (user == null) throw new ArgumentNullException("Null Argument");
-
             User element = await _userRepo.Get(user.Id);
             if (element == null) throw new NullReferenceException("Not Found");
 
             //bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
             //if (isInvalid) return isInvalid;
 
-            element.Description = user.Description;
-            element.Dob = user.Dob;
-            element.Email = user.Email;
-            element.Fullname = user.Fullname;
-            element.Gender = user.Gender;
-            element.MajorId = user.MajorId;
-            element.RoleId = user.RoleId;
-            element.UserId = user.UserId;
-            element.UniversityId = user.UniversityId;
+            if (!string.IsNullOrEmpty(user.Description)) element.Description = user.Description;
+            if (!string.IsNullOrEmpty(user.Dob))  element.Dob = user.Dob;
+            if (!string.IsNullOrEmpty(user.Email)) element.Email = user.Email;
+            if (!string.IsNullOrEmpty(user.Fullname)) element.Fullname = user.Fullname;
+            if (!string.IsNullOrEmpty(user.Gender)) element.Gender = user.Gender;
+            if(user.MajorId != 0) element.MajorId = user.MajorId;
+            if(user.RoleId != 0) element.RoleId = user.RoleId;
+            if (!string.IsNullOrEmpty(user.UserId)) element.UserId = user.UserId;
+            if(user.UniversityId != 0) element.UniversityId = user.UniversityId;
             element.Status = user.Status;
+            if (!string.IsNullOrEmpty(user.Avatar)) element.Avatar = user.Avatar;
 
             await _userRepo.Update();
             return true;
@@ -214,7 +216,7 @@ namespace UniCEC.Business.Services.UserSvc
                     RoleId = userTem.RoleId,
                     Email = userTem.Email,
                     Status = true,
-                    Avatar = userTem.Avatar,    
+                    Avatar = userTem.Avatar,
                     //auto
                     Dob = "",
                     Fullname = "",
