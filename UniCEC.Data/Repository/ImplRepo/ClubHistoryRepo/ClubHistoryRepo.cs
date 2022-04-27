@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Common;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
@@ -68,13 +69,24 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             return (previousClubs.Count > 0) ? previousClubs : null;
         }
 
-        //public Task<PagingResult<ViewClubMember>> GetMemberByClub(int clubId, int termId)
-        //{
-        //    var query = from cp in context.ClubPrevious
-        //                join m in context.Members on cp.MemberId equals m.Id
-        //                join u in context.Users on m.StudentId equals u.Id
-        //                where cp.ClubId == clubId &&;
-        //    throw new NotImplementedException();
-        //}
+        public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
+        {
+            var query = from cp in context.ClubHistories
+                        join m in context.Members on cp.MemberId equals m.Id
+                        join u in context.Users on m.StudentId equals u.Id
+                        join r in context.ClubRoles on cp.ClubRoleId equals r.Id
+                        where cp.ClubId.Equals(clubId) && cp.TermId.Equals(termId)
+                        select new { cp, u, r };
+            
+            int totalCount = query.Count();
+            List<ViewClubMember> clubMembers = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewClubMember()
+            {
+                MemberId = x.cp.MemberId,
+                ClubRoleName = x.r.Name,
+                Name = x.u.Fullname
+            }).ToListAsync();
+
+            return (clubMembers.Count > 0) ? new PagingResult<ViewClubMember>(clubMembers, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
     }
 }

@@ -4,6 +4,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
@@ -11,7 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
     {
         Task<PagingResult<ClubHistory>> GetByConditions(ClubHistoryRequestModel request);
         Task<List<int>> GetIdsByMember(int memberID);
-        //Task<PagingResult<ViewClubMember>> GetMemberByClub(int clubId, int termId);
+        Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
         Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId);
 
     }

@@ -72,11 +72,12 @@ namespace UniCEC.Business.Services.ClubHistorySvc
             return new PagingResult<ViewClubHistory>(items, listClubHistory.TotalCount, listClubHistory.CurrentPage, listClubHistory.PageSize);            
         }
 
-        //public Task<ViewClubMember> GetMemberByClub(int clubId, int termId)
-        //{
-
-        //    throw new NotImplementedException();
-        //}
+        public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
+        {
+            PagingResult<ViewClubMember> clubMembers = await _clubHistoryRepo.GetMembersByClub(clubId, termId, request);
+            if (clubMembers == null) throw new NullReferenceException("This club has no any members in this term");
+            return clubMembers;
+        }
 
         public async Task<ViewClubHistory> Insert(ClubHistoryInsertModel clubHistory)
         {

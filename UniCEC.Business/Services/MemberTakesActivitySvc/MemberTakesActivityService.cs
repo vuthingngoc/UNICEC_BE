@@ -72,10 +72,8 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 DateTime deadline = clubActivity.Ending;
                 //------------------------------------check
                 int clubId = clubActivity.ClubId;
-                //year
-                string year = clubActivity.Beginning.Year.ToString();
 
-                bool MemInClub = await _memberTakesActivityRepo.CheckMemberInClub(clubId, model.MemberId, year);
+                bool MemInClub = await _memberTakesActivityRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
                 if (MemInClub)
                 {
