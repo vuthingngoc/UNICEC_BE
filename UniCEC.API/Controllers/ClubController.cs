@@ -78,13 +78,20 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("user/{id}")]
-        //[Authorize(Roles = "System Admin")]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> GetClubByUser(int id)
         {
             try
             {
-                List<ViewClub> clubs = await _clubService.GetByUser(id);
-                return Ok(clubs);
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    var token = header["Authorization"].ToString().Split(" ")[1];
+                    List<ViewClub> clubs = await _clubService.GetByUser(id, token);
+                    return Ok(clubs);
+                }
+
+                return Unauthorized();
             }
             catch(NullReferenceException ex)
             {
@@ -96,6 +103,31 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpGet("university")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetClubByUniversity([FromQuery] PagingRequest request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    var token = header["Authorization"].ToString().Split(" ")[1];
+                    PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, request);
+                    return Ok(clubs);
+                }
+
+                return Unauthorized();                
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
 
         [HttpGet("competition/{id}")]
         public async Task<IActionResult> GetClubByCompetition(int id, [FromQuery] PagingRequest request)

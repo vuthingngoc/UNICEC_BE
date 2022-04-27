@@ -65,9 +65,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
         public async Task<List<Club>> GetByUser(int userId)
         {
             var query = from m in context.Members
-                        join cp in context.ClubHistories on m.Id equals cp.MemberId
-                        join c in context.Clubs on cp.ClubId equals c.Id
-                        where m.StudentId == userId && cp.Status == ClubHistoryStatus.Active
+                        join ch in context.ClubHistories on m.Id equals ch.MemberId
+                        join c in context.Clubs on ch.ClubId equals c.Id
+                        where m.StudentId == userId && ch.Status == ClubHistoryStatus.Active
                         select new { c };
             int totalCount = query.Count();
             List<Club> clubs = await query.Select(x => new Club()
@@ -78,10 +78,33 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                 Founding = x.c.Founding,
                 Status = x.c.Status,
                 TotalMember = x.c.TotalMember,
-                UniversityId = x.c.UniversityId
+                UniversityId = x.c.UniversityId,
+                Image = x.c.Image
             }).ToListAsync();
 
-            return (clubs.Count > 0) ? clubs : null; 
+            return (clubs.Count > 0) ? clubs : null;
+        }
+
+        public async Task<PagingResult<Club>> GetByUniversity(int universityId, PagingRequest request)
+        {
+            var query = from c in context.Clubs
+                        where c.UniversityId.Equals(universityId)
+                        select new { c };
+
+            int totalCount = query.Count();
+            List<Club> clubs = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Club()
+            {
+                Id = x.c.Id,
+                Name = x.c.Name,
+                Description = x.c.Description,
+                Founding = x.c.Founding,
+                Status = x.c.Status,
+                TotalMember = x.c.TotalMember,
+                UniversityId = x.c.UniversityId,
+                Image = x.c.Image
+            }).ToListAsync();
+
+            return (clubs.Count > 0) ? new PagingResult<Club>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<int> CheckExistedClubName(int universityId, string name)

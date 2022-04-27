@@ -53,7 +53,7 @@ namespace UniCEC.Data.JWT
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256
                         )
-                ); ; ;
+                );
             return new JwtSecurityTokenHandler().WriteToken(tokenUser);
         }
 

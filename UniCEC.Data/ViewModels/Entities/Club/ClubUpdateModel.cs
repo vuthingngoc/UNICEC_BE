@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Club
 {
@@ -9,6 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.Club
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Image { get; set; }
         [JsonPropertyName("total_member")]
         public int TotalMember { get; set; }
         public DateTime Founding { get; set; }
