@@ -245,7 +245,6 @@ namespace UniCEC.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseSwagger();
 
