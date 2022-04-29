@@ -71,6 +71,12 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
 
         }
 
+        public async Task<string> GetNameUniversityById(int id)
+        {
+            var university = await context.Universities.FindAsync(id);
+            return (university != null) ? university.Name : null;
+        }
+
 
         //Get-Universities-By-Conditions
         public async Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request)
