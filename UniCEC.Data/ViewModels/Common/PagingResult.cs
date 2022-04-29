@@ -16,7 +16,9 @@ namespace UniCEC.Data.ViewModels.Common
         public int PageSize { get; set; }
         public List<T> Items { get; set; }
         //Front End
+        [JsonPropertyName("has_previous")]
         public bool HasPrevious => CurrentPage > 1;
+        [JsonPropertyName("has_next")]
         public bool HasNext => CurrentPage < TotalPages;
 
         public PagingResult(List<T> items, int count, int currentPage, int pageSize)
