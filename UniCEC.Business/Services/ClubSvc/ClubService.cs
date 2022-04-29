@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
+using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Club;
 
@@ -13,13 +14,15 @@ namespace UniCEC.Business.Services.ClubSvc
     public class ClubService : IClubService
     {
         private IClubRepo _clubRepo;
+        private IUniversityRepo _universityRepo;
 
-        public ClubService(IClubRepo clubRepo)
+        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo)
         {
             _clubRepo = clubRepo;
+            _universityRepo = universityRepo;
         }
 
-        private ViewClub TransformViewClub(Club club)
+        private ViewClub TransformViewClub(Club club, string universityName)
         {
             return new ViewClub()
             {
@@ -29,6 +32,7 @@ namespace UniCEC.Business.Services.ClubSvc
                 Name = club.Name,
                 TotalMember = club.TotalMember,
                 UniversityId = club.UniversityId,
+                UniversityName = universityName,
                 Status = club.Status,
                 Image = club.Image
             };
@@ -40,11 +44,12 @@ namespace UniCEC.Business.Services.ClubSvc
             if (clubs != null)
             {
                 List<ViewClub> items = new List<ViewClub>();
-                clubs.Items.ForEach(item =>
+                foreach (Club element in clubs.Items)
                 {
-                    ViewClub club = TransformViewClub(item);
+                    string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
+                    ViewClub club = TransformViewClub(element, universityName);
                     items.Add(club);
-                });
+                };
                 return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
             }
 
@@ -56,7 +61,8 @@ namespace UniCEC.Business.Services.ClubSvc
             Club club = await _clubRepo.Get(id);
             if (club != null)
             {
-                return TransformViewClub(club);
+                string universityName = await _universityRepo.GetNameUniversityById(club.UniversityId);
+                return TransformViewClub(club, universityName);
             }
 
             throw new NullReferenceException("Not found this club");
@@ -64,48 +70,50 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request)
         {
-            PagingResult<Club> listClub = await _clubRepo.GetByCompetition(competitionId, request);
-            if (listClub == null) throw new NullReferenceException("Not found any club with this competition id");
+            PagingResult<Club> clubs = await _clubRepo.GetByCompetition(competitionId, request);
+            if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
 
-            List<ViewClub> clubs = new List<ViewClub>();
-            listClub.Items.ForEach(element =>
+            List<ViewClub> items = new List<ViewClub>();
+            foreach (Club element in clubs.Items)
             {
-                ViewClub club = TransformViewClub(element);
-                clubs.Add(club);
-            });
-            return new PagingResult<ViewClub>(clubs, listClub.TotalCount, listClub.CurrentPage, listClub.PageSize);
+                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
+                ViewClub club = TransformViewClub(element, universityName);
+                items.Add(club);
+            };
+            return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
         }
 
         public async Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request)
         {
-            PagingResult<Club> listClub = await _clubRepo.GetByName(name, request);
-            if (listClub == null) throw new NullReferenceException("Not found any club with this name");
+            PagingResult<Club> clubs = await _clubRepo.GetByName(name, request);
+            if (clubs == null) throw new NullReferenceException("Not found any club with this name");
 
-            List<ViewClub> clubs = new List<ViewClub>();
-            listClub.Items.ForEach(element =>
+            List<ViewClub> items = new List<ViewClub>();
+            foreach (Club element in clubs.Items)
             {
-                ViewClub club = TransformViewClub(element);
-                clubs.Add(club);
-            });
-            return new PagingResult<ViewClub>(clubs, listClub.TotalCount, listClub.CurrentPage, listClub.PageSize);
+                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
+                ViewClub club = TransformViewClub(element, universityName);
+                items.Add(club);
+            };
+            return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
         }
 
-        public async Task<List<ViewClub>> GetByUser(int userId, string token)
+        public async Task<List<ViewClub>> GetByUser(string token)
         {
             var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
             var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            int id = Int32.Parse(claim.Value);
-            if (id != userId) throw new NullReferenceException("Not Found");
+            int userId = Int32.Parse(claim.Value);
 
             List<Club> listClub = await _clubRepo.GetByUser(userId);
             if (listClub == null) throw new NullReferenceException("This user is not a member of any clubs");
 
             List<ViewClub> clubs = new List<ViewClub>();
-            listClub.ForEach(element =>
+            foreach (Club element in listClub)
             {
-                ViewClub club = TransformViewClub(element);
+                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
+                ViewClub club = TransformViewClub(element, universityName);
                 clubs.Add(club);
-            });
+            };
             return clubs;           
         }
 
@@ -119,11 +127,12 @@ namespace UniCEC.Business.Services.ClubSvc
             if (clubs == null) throw new NullReferenceException("This university have no any clubs");
 
             List<ViewClub> items = new List<ViewClub>();
-            clubs.Items.ForEach(element =>
+            foreach(Club element in clubs.Items)
             {
-                ViewClub club = TransformViewClub(element);
+                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
+                ViewClub club = TransformViewClub(element, universityName);
                 items.Add(club);
-            });
+            };
 
             return new PagingResult<ViewClub>(items, clubs.TotalCount, request.CurrentPage, request.PageSize);
         }
@@ -153,7 +162,8 @@ namespace UniCEC.Business.Services.ClubSvc
             if (id > 0)
             {
                 clubObject.Id = id;
-                return TransformViewClub(clubObject);
+                string universityName = await _universityRepo.GetNameUniversityById(clubObject.UniversityId);
+                return TransformViewClub(clubObject, universityName);
             }
 
             return null;

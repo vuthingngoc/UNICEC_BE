@@ -67,6 +67,8 @@ using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using System.Text;
 using System.Collections.Generic;
+using UniCEC.Business.Services.TermSvc;
+using UniCEC.Data.Repository.ImplRepo.TermRepo;
 
 namespace UniCEC.API
 {
@@ -124,6 +126,7 @@ namespace UniCEC.API
             services.AddScoped<ISponsorService, SponsorService>();
             services.AddScoped<ISponsorInCompetitionService, SponsorInCompetitionService>();
             services.AddScoped<ITeamService, TeamService>();
+            services.AddScoped<ITermService, TermService>();
             services.AddScoped<IUniversityService, UniversityService>();
             services.AddScoped<IUserService, UserService>();
 
@@ -154,6 +157,7 @@ namespace UniCEC.API
             services.AddTransient<ISponsorRepo, SponsorRepo>();
             services.AddTransient<ISponsorInCompetitionRepo, SponsorInCompetitionRepo>();
             services.AddTransient<ITeamRepo, TeamRepo>();
+            services.AddTransient<ITermRepo, TermRepo>();
             services.AddTransient<IUniversityRepo, UniversityRepo>();
             services.AddTransient<IUserRepo, UserRepo>();
 

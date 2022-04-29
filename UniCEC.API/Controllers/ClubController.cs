@@ -77,9 +77,9 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("user/{id}")]
+        [HttpGet("user")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> GetClubByUser(int id)
+        public async Task<IActionResult> GetClubByUser()
         {
             try
             {
@@ -87,7 +87,7 @@ namespace UniCEC.API.Controllers
                 if (header.ContainsKey("Authorization"))
                 {
                     var token = header["Authorization"].ToString().Split(" ")[1];
-                    List<ViewClub> clubs = await _clubService.GetByUser(id, token);
+                    List<ViewClub> clubs = await _clubService.GetByUser(token);
                     return Ok(clubs);
                 }
 
