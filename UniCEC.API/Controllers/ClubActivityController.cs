@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.ClubActivity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/club-activity")]
     [ApiController]
     [ApiVersion("1.0")]
     public class ClubActivityController : ControllerBase

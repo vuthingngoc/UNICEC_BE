@@ -2,7 +2,6 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Data.RequestModels;
@@ -11,7 +10,7 @@ using UniCEC.Data.ViewModels.Entities.University;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/university")]
     [ApiController]
     [ApiVersion("1.0")]
     public class UniversityController : ControllerBase

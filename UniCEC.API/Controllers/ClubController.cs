@@ -11,7 +11,7 @@ using UniCEC.Data.ViewModels.Entities.Club;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/club")]
     [ApiController]
     [ApiVersion("1.0")]
     public class ClubController : ControllerBase

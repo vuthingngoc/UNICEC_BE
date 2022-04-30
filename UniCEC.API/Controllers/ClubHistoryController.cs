@@ -10,7 +10,7 @@ using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/club-history")]
     [ApiController]
     public class ClubHistoryController : ControllerBase
     {
@@ -74,8 +74,8 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("club/{id}/{termId}")]
-        public async Task<IActionResult> GetMembersByClub(int id, int termId, [FromQuery] PagingRequest request)
+        [HttpGet("club/{id}/term/{term-id}")]
+        public async Task<IActionResult> GetMembersByClub(int id, [FromRoute(Name = "term-id")] int termId, [FromQuery] PagingRequest request)
         {
             try
             {
