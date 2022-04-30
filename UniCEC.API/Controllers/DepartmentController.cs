@@ -9,7 +9,7 @@ using UniCEC.Data.ViewModels.Entities.Department;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/department")]
     [ApiController]
     [ApiVersion("1.0")]
     public class DepartmentController : ControllerBase

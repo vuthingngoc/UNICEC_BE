@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.Role;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/role")]
     [ApiController]
     [ApiVersion("1.0")]
     public class RoleController : ControllerBase
