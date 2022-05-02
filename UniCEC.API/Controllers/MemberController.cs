@@ -10,7 +10,7 @@ using UniCEC.Data.ViewModels.Entities.Member;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/member")]
     [ApiController]
     [ApiVersion("1.0")]
     public class MemberController : ControllerBase

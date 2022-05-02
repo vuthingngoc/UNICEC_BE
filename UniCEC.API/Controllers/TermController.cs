@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.TermSvc;
@@ -8,7 +11,7 @@ using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/term")]
     [ApiController]
     [ApiVersion("1.0")]
     public class TermController : ControllerBase
@@ -19,40 +22,131 @@ namespace UniCEC.API.Controllers
             _itermService = termService;
         }
 
-        [HttpGet]
-        public Task<IActionResult> GetAllTerm([FromQuery] PagingRequest request)
+        [HttpGet("/{id}/club/{club-id}")]
+        [SwaggerOperation(Summary = "Get term corresponding in a club")]
+        public async Task<IActionResult> GetTermById(int id, [FromRoute(Name = "club-id")] int clubId)
         {
+            try
+            {
+                ViewTerm term = await _itermService.GetById(clubId, id);
+                return Ok(term);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
             throw new NotImplementedException();
         }
 
-        [HttpGet("{id}")]
-        public Task<IActionResult> GetTermById(int id)
+        [HttpGet("club/{id}")]
+        [SwaggerOperation(Summary = "Get all terms in a club")]
+        public async Task<IActionResult> GetTermByClub(int id, [FromQuery] PagingRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PagingResult<ViewTerm> terms = await _itermService.GetByClub(id, request);
+                return Ok(terms);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
-        [HttpGet("{search}")]
-        public Task<IActionResult> GetTermByConditions(TermRequestModel request)
+        [HttpGet("club/{id}/{search}")]
+        [SwaggerOperation(Summary = "Searching term")]
+        public async Task<IActionResult> GetTermByConditions(int id, TermRequestModel request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PagingResult<ViewTerm> terms = await _itermService.GetByConditions(id, request);
+                return Ok(terms);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPost]
-        public Task<IActionResult> InsertTerm(TermInsertModel term)
+        [SwaggerOperation(Summary = "Add term")]
+        public async Task<IActionResult> InsertTerm(TermInsertModel term)
         {
-            throw new NotImplementedException();
+            try
+            {
+                ViewTerm viewTerm = await _itermService.Insert(term);
+                return Created($"api/v1/term/{viewTerm.Id}", viewTerm);
+            }
+            catch(ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPut]
-        public Task<IActionResult> UpdateTerm(ViewTerm term)
+        [SwaggerOperation(Summary = "Update term")]
+        public async Task<IActionResult> UpdateTerm(ViewTerm term)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _itermService.Update(term);
+                return Ok();
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpDelete("{id}")]
-        public Task<IActionResult> DeleteTerm(int id)
+        [SwaggerOperation(Summary = "Delete term")]
+        public async Task<IActionResult> DeleteTerm(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _itermService.Delete(id);
+                return NoContent();
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            };
         }
     }
 }

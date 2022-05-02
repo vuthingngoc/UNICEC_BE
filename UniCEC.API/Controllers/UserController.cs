@@ -14,7 +14,7 @@ using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/user")]
     [ApiController]
     [ApiVersion("1.0")]
     public class UserController : ControllerBase

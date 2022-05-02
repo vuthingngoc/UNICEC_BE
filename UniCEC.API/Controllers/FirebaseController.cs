@@ -16,7 +16,7 @@ using UniCEC.Data.ViewModels.Firebase.Auth;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/firebase")]
     [ApiController]
     [ApiVersion("1.0")]
     public class FirebaseController : ControllerBase
