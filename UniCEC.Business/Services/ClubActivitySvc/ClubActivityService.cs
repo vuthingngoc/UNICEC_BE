@@ -47,7 +47,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             //
             if (clubActivity != null)
             {
-                return transferViewModel(clubActivity);
+                return TransformView(clubActivity);
             }
             else
             {

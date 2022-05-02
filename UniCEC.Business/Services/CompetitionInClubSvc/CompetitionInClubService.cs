@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 
 namespace UniCEC.Business.Services.CompetitionInClubSvc
@@ -11,9 +15,19 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
     {
         private ICompetitionInClubRepo _competitionInClubRepo;
 
-        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo)
+        //check Infomation Member -> is Leader
+        private IClubHistoryRepo _clubHistoryRepo;
+
+        //change Status of Competition
+        private ICompetitionRepo _competitionRepo;
+
+        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, 
+                                        IClubHistoryRepo clubHistoryRepo,
+                                        ICompetitionRepo competitionRepo)
         {
             _competitionInClubRepo = competitionInClubRepo;
+            _clubHistoryRepo = clubHistoryRepo;
+            _competitionRepo = competitionRepo;
         }
 
         public Task<bool> Delete(int id)
@@ -35,18 +49,46 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
         {
             try
             {
-                CompetitionInClub competitionInClub = new CompetitionInClub();
-                competitionInClub.ClubId = model.ClubId;
-                competitionInClub.CompetitionId = model.CompetitionId;
-                //------------------------------------check-club-id-create-competition-duplicate
-                bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetition(model.ClubId, model.CompetitionId);
-                if (checkCreateCompetitionInClub)
+                bool roleLeader = false;
+                GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-
-                    int result = await _competitionInClubRepo.Insert(competitionInClub);
-                    if (result > 0)
+                    UserId = model.UserId,
+                    ClubId = model.ClubId,
+                    TermId = model.TermId
+                };
+                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                if (infoClubMem != null)
+                {
+                    if (infoClubMem.ClubRoleName.Equals("Leader"))
                     {
-                        return TransferView(competitionInClub);
+                        roleLeader = true;
+                    }
+                }
+                //------------ Check Role Member Is Leader 
+                if (roleLeader)
+                {
+                    //------------------------------------check-club-id-create-competition-duplicate
+                    bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetition(model.ClubId, model.CompetitionId);
+                    if (checkCreateCompetitionInClub)
+                    {
+                        CompetitionInClub competitionInClub = new CompetitionInClub();
+                        competitionInClub.ClubId = model.ClubId;
+                        competitionInClub.CompetitionId = model.CompetitionId;
+
+                        int result = await _competitionInClubRepo.Insert(competitionInClub);
+                        if (result > 0)
+                        {
+                            // đổi status của competition đó thành happening soon
+                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                            comp.Status = CompetitionStatus.HappenningSoon;
+                            await _competitionRepo.Update();
+                            //
+                            return TransferView(competitionInClub);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                     else
                     {

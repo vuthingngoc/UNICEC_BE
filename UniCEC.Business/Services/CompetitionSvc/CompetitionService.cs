@@ -17,7 +17,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //check Infomation Member -> is Leader
         private IClubHistoryRepo _clubHistoryRepo;
 
-        public CompetitionService(ICompetitionRepo competitionRepo, IClubHistoryRepo clubHistoryRepo)
+        public CompetitionService(ICompetitionRepo competitionRepo, 
+                                  IClubHistoryRepo clubHistoryRepo)
         {
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;

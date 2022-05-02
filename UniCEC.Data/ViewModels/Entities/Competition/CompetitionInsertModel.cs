@@ -26,8 +26,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public bool Public { get; set; }
         //public CompetitionStatus Status { get; set; }
         public string Address { get; set; }
-        [JsonPropertyName("seeds_code")]
-        public string SeedsCode { get; set; }
+        //[JsonPropertyName("seeds_code")]
+        //public string SeedsCode { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]

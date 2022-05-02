@@ -119,24 +119,38 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
                         from me in context.Members
                         where me.StudentId == us.Id
                         from ch in context.ClubHistories
-                        where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId   
-                        select ch;
+                        where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId
+                        select new { ch, us, me };
 
-            ClubHistory clubHistory = await query.FirstOrDefaultAsync();
-            if (clubHistory != null)
+
+            List<ViewClubMember> viewClubMembers = await query.Select(x => new ViewClubMember()
             {
-                return new ViewClubMember()
-                {
-                    Name = clubHistory.Member.Student.Fullname,
-                    ClubRoleName = clubHistory.ClubRole.Name,
-                    MemberId = clubHistory.MemberId,
-                    TermId = clubHistory.TermId
-                };
+                Name = x.us.Fullname,
+                ClubRoleName = x.ch.ClubRole.Name,
+                MemberId = x.me.Id,
+                TermId = x.ch.TermId
+
+            }).ToListAsync();
+
+            if (viewClubMembers.Count > 0)
+            {
+                return viewClubMembers[0];
             }
             else
             {
                 return null;
             }
+            //ClubHistory clubHistory = await query.FirstOrDefaultAsync();
+            //if (clubHistory != null)
+            //{
+            //    return new ViewClubMember()
+            //    {
+            //        Name = clubHistory.Member.Student.Fullname,
+            //        ClubRoleName = clubHistory.ClubRole.Name,
+            //        MemberId = clubHistory.MemberId,
+            //        TermId = clubHistory.TermId
+            //    };
+            //}
         }
     }
 }
