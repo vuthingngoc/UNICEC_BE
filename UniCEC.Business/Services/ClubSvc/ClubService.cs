@@ -16,14 +16,13 @@ namespace UniCEC.Business.Services.ClubSvc
     {
         private IClubRepo _clubRepo;
         private IUniversityRepo _universityRepo;
-        private IClubHistoryRepo _clubHistoryRepo;
+        
 
-        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo, IClubHistoryRepo clubHistoryRepo)
+        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo)
         {
             _clubRepo = clubRepo;
             _universityRepo = universityRepo;
-            // Check Mem-in-club
-            _clubHistoryRepo = clubHistoryRepo; 
+            
         }
 
         private ViewClub TransformViewClub(Club club, string universityName)
