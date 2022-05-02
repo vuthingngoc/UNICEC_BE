@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -7,7 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     {
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
-        public string Organizer { get; set; }
+        
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipations { get; set; }
         [JsonPropertyName("number_of_groups")]
@@ -23,7 +24,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("approved_time")]
         public DateTime ApprovedTime { get; set; }
         public bool Public { get; set; }
-        public int Status { get; set; }
+        //public CompetitionStatus Status { get; set; }
         public string Address { get; set; }
         [JsonPropertyName("seeds_code")]
         public string SeedsCode { get; set; }
@@ -31,6 +32,15 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
-        public int View { get; set; }
+        //public int View { get; set; }
+
+        //---------Author to check user is Leader of Club
+        [JsonPropertyName("user_id")]
+        public int UserId { get; set; }
+        [JsonPropertyName("club_id")]
+        public int ClubId { get; set; }
+        [JsonPropertyName("term_id")]
+        public int TermId { get; set; }
+
     }
 }

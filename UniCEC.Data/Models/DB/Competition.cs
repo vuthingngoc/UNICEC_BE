@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -31,7 +32,7 @@ namespace UniCEC.Data.Models.DB
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }
         public bool Public { get; set; }
-        public int Status { get; set; }
+        public CompetitionStatus Status { get; set; }
         public string Address { get; set; }
         public int View { get; set; }
 
