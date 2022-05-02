@@ -14,5 +14,6 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         public Task<ViewClubHistory> Insert(ClubHistoryInsertModel clubHistory);
         public Task Update(ClubHistoryUpdateModel clubHistory);
         public Task Delete(int memberId);
+        public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);
     }
 }

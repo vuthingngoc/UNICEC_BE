@@ -247,6 +247,7 @@ namespace UniCEC.API
             {
                 app.UseDeveloperExceptionPage();
 
+
                 app.UseSwagger();
 
                 app.UseSwaggerUI(c =>

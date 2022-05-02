@@ -17,24 +17,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         }
 
-        public async Task<bool> CheckMemberInClub(int clubId, int memberId, int termId)
-        {
-            //club thì phải có trong club id và kì luôn 
-            var query = from cp in context.ClubHistories
-                        where cp.MemberId == memberId && cp.ClubId == clubId && cp.TermId == termId
-                        select cp;
-            //
-            int check = query.Count();
-            if (check > 0)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
         public async Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId)
         {
             //

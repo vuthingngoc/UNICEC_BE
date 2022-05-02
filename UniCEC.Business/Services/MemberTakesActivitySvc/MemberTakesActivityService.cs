@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
+using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -16,10 +17,14 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         //lấy end date of Club Activity
         private IClubActivityRepo _clubActivityRepo;
 
-        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, IClubActivityRepo clubActivityRepo)
+        //check mem in club
+        private IClubHistoryRepo _clubHistoryRepo;
+
+        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, IClubActivityRepo clubActivityRepo, IClubHistoryRepo clubHistoryRepo )
         {
             _memberTakesActivityRepo = memberTakesActivityRepo;
             _clubActivityRepo = clubActivityRepo;
+            _clubHistoryRepo = clubHistoryRepo; 
         }
 
         //transfer View Model
@@ -73,7 +78,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 //------------------------------------check-mem-in-club
                 int clubId = clubActivity.ClubId;
 
-                bool MemInClub_Term = await _memberTakesActivityRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
+                bool MemInClub_Term = await _clubHistoryRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
                 if (MemInClub_Term)
                 {

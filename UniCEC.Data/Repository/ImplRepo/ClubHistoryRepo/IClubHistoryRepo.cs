@@ -15,5 +15,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
         Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId);
 
+        //check mem in club
+        public Task<bool> CheckMemberInClub(int clubId, int memberId, int termId);
+
+        //get infomation of mem in club
+        public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);
     }
 }

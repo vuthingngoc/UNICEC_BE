@@ -26,6 +26,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             return (clubHistory != null) ? clubHistory.Id : 0;
         }
 
+
+
         public async Task<PagingResult<ClubHistory>> GetByConditions(ClubHistoryRequestModel request)
         {
             var query = from ch in context.ClubHistories
@@ -69,6 +71,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             return (previousClubs.Count > 0) ? previousClubs : null;
         }
 
+
+
         public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
         {
             var query = from ch in context.ClubHistories
@@ -77,7 +81,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
                         join r in context.ClubRoles on ch.ClubRoleId equals r.Id
                         where ch.ClubId.Equals(clubId) && ch.TermId.Equals(termId)
                         select new { ch, u, r };
-            
+
             int totalCount = query.Count();
             List<ViewClubMember> clubMembers = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewClubMember()
             {
@@ -87,6 +91,52 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             }).ToListAsync();
 
             return (clubMembers.Count > 0) ? new PagingResult<ViewClubMember>(clubMembers, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
+
+        public async Task<bool> CheckMemberInClub(int clubId, int memberId, int termId)
+        {
+            //club thì phải có trong club id và kì luôn 
+            var query = from cp in context.ClubHistories
+                        where cp.MemberId == memberId && cp.ClubId == clubId && cp.TermId == termId
+                        select cp;
+            //
+            int check = query.Count();
+            if (check > 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        //user ID ở đây kh phải là MSSV
+        public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        {
+            var query = from us in context.Users
+                        where us.Id == model.UserId
+                        from me in context.Members
+                        where me.StudentId == us.Id
+                        from ch in context.ClubHistories
+                        where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId   
+                        select ch;
+
+            ClubHistory clubHistory = await query.FirstOrDefaultAsync();
+            if (clubHistory != null)
+            {
+                return new ViewClubMember()
+                {
+                    Name = clubHistory.Member.Student.Fullname,
+                    ClubRoleName = clubHistory.ClubRole.Name,
+                    MemberId = clubHistory.MemberId,
+                    TermId = clubHistory.TermId
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
