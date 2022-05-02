@@ -186,7 +186,7 @@ namespace UniCEC.API
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB"))
                 };
             });
-
+            //enable CORS
             services.AddCors(opt =>
             {
                 opt.AddPolicy("AllowOrigin",
@@ -195,7 +195,8 @@ namespace UniCEC.API
                         builder
                         .AllowAnyOrigin()
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .WithExposedHeaders(new string[] { "Authorization", "authorization" });
                     });
             });
 

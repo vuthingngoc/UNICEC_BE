@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -8,7 +9,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int Id { get; set; }
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
-        public string Organizer { get; set; }
+        
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipation { get; set; }
         [JsonPropertyName("number_of_groups")]
@@ -30,7 +31,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
         public bool Public { get; set; }
-        public int Status { get; set; }
+        public CompetitionStatus Status { get; set; }
         public string Address { get; set; }
         public int View { get; set; }
     }

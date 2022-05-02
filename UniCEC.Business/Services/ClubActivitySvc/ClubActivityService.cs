@@ -47,7 +47,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             //
             if (clubActivity != null)
             {
-                return transferViewModel(clubActivity);
+                return TransformView(clubActivity);
             }
             else
             {
@@ -78,7 +78,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 if (result > 0)
                 {
                     ClubActivity ca = await _clubActivityRepo.Get(result);
-                    ViewClubActivity viewClubActivity = transferViewModel(ca);
+                    ViewClubActivity viewClubActivity = TransformView(ca);
                     return viewClubActivity;
                 }
                 else
@@ -94,7 +94,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
 
         //transform View Model
-        public ViewClubActivity transferViewModel(ClubActivity clubActivity)
+        public ViewClubActivity TransformView(ClubActivity clubActivity)
         {
             return new ViewClubActivity()
             {
