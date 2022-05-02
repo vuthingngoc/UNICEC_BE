@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionType;
@@ -20,24 +22,86 @@ namespace UniCEC.Business.Services.CompetitionTypeSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewCompetitionType>> GetAllPaging(PagingRequest request)
+        public async Task<PagingResult<ViewCompetitionType>> GetAllPaging(PagingRequest request)
         {
-            throw new NotImplementedException();
+            PagingResult<CompetitionType> result = await _competitionTypeRepo.GetAllPaging(request);
+            if (result != null)
+            {
+                List<ViewCompetitionType> viewCompetitionTypes = new List<ViewCompetitionType>();
+                result.Items.ForEach(item =>
+                {
+                    ViewCompetitionType viewCompetitionType = TransformView(item);
+                    viewCompetitionTypes.Add(viewCompetitionType);
+                });
+                return new PagingResult<ViewCompetitionType>(viewCompetitionTypes, result.TotalCount, request.CurrentPage, request.PageSize);
+            }
+            return null;
         }
 
-        public Task<ViewCompetitionType> GetByCompetitionTypeId(int id)
+
+        public async Task<ViewCompetitionType> GetByCompetitionTypeId(int id)
         {
-            throw new NotImplementedException();
+            //
+            CompetitionType comt = await _competitionTypeRepo.Get(id);
+            if (comt != null)
+            {
+                return TransformView(comt);
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public Task<ViewCompetitionType> Insert(CompetitionTypeInsertModel competitionType)
+        public async Task<ViewCompetitionType> Insert(CompetitionTypeInsertModel competitionType)
         {
-            throw new NotImplementedException();
+            try
+            {
+                CompetitionType comt = new CompetitionType();
+                comt.TypeName = competitionType.TypeName;
+                int result = await _competitionTypeRepo.Insert(comt);
+                if (result > 0)
+                {
+                    return TransformView(comt);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<bool> Update(ViewCompetitionType competitionType)
+        public async Task<bool> Update(ViewCompetitionType competitionType)
         {
-            throw new NotImplementedException();
+            try
+            {
+                CompetitionType comp = await _competitionTypeRepo.Get(competitionType.Id);
+                if (comp != null)
+                {
+                    comp.TypeName = competitionType.TypeName;
+                    await _competitionTypeRepo.Update();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //
+        private ViewCompetitionType TransformView(CompetitionType comt)
+        {
+            return new ViewCompetitionType()
+            {
+                Id = comt.Id,
+                TypeName = comt.TypeName
+            };
         }
     }
 }
