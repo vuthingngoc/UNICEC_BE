@@ -17,10 +17,11 @@ namespace UniCEC.Business.Services.TermSvc
 
         public Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request)
         {
+
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
+        public Task<PagingResult<ViewTerm>> GetByName(int clubId, string name, PagingRequest request)
         {
             throw new NotImplementedException();
         }
@@ -30,7 +31,7 @@ namespace UniCEC.Business.Services.TermSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewTerm>> GetByName(int clubId, string name)
+        public Task<PagingResult<ViewTerm>> GetByTime(int clubId, TermRequestModel request)
         {
             throw new NotImplementedException();
         }

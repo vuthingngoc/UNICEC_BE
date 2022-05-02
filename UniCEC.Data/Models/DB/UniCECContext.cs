@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -8,16 +8,13 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-
         public UniCECContext()
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
+        public UniCECContext(DbContextOptions<UniCECContext> options)
             : base(options)
         {
-            _configuration = configuration;
         }
 
         public virtual DbSet<Blog> Blogs { get; set; }
@@ -53,11 +50,8 @@ namespace UniCEC.Data.Models.DB
         {
             if (!optionsBuilder.IsConfigured)
             {
-                
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
-                //
-                optionsBuilder.UseLazyLoadingProxies();
+                optionsBuilder.UseSqlServer("Server=.;Database=UniCEC;Trusted_Connection=True;");
             }
         }
 
@@ -273,10 +267,6 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.EndTime).HasColumnType("datetime");
 
                 entity.Property(e => e.EndTimeRegister).HasColumnType("datetime");
-
-                entity.Property(e => e.Organizer)
-                    .IsRequired()
-                    .HasMaxLength(100);
 
                 entity.Property(e => e.SeedsCode)
                     .IsRequired()

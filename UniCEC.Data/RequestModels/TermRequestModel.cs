@@ -6,11 +6,9 @@ namespace UniCEC.Data.RequestModels
 {
     public class TermRequestModel : PagingRequest
     {
-        [FromQuery(Name = "name")]
-        public string Name { get; set; }
-        [FromQuery(Name = "create-time")]
+        [FromQuery(Name = "createTime")]
         public DateTime? CreateTime { get; set; }
-        [FromQuery(Name = "end-time")]
+        [FromQuery(Name = "endTime")]
         public DateTime? EndTime { get; set; }
     }
 }

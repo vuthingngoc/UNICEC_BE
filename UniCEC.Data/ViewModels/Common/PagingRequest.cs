@@ -7,9 +7,9 @@ namespace UniCEC.Data.ViewModels.Common
         const int MAX_PAGE_SIZE = 50;
         private int _pageSize = 10;
         // change name of parameter
-        [FromQuery(Name = "current-page")]
+        [FromQuery(Name = "currentPage")]
         public int CurrentPage { get; set; } = 1;         
-        [FromQuery(Name = "page-size")]
+        [FromQuery(Name = "pageSize")]
         public int PageSize
         {
             get
