@@ -112,5 +112,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             Club club = await context.Clubs.FirstOrDefaultAsync(c => c.Name == name && c.UniversityId == universityId);
             return (club != null) ? club.Id : 0;
         }
+
     }
 }
+

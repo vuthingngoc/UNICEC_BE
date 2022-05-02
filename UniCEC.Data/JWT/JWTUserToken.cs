@@ -27,6 +27,7 @@ namespace UniCEC.Data.JWT
                 issuer: "https://securetoken.google.com/unics-e46a4",
                 audience: "unics-e46a4",
                 claims: new[] {
+                 //---------- STUDENT INFOMATION
                  //Id
                  new Claim("Id", user.Id.ToString()),
                  //email
@@ -46,7 +47,7 @@ namespace UniCEC.Data.JWT
                  //Role Id
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role
-                 new Claim(ClaimTypes.Role, roleName)
+                 new Claim(ClaimTypes.Role, roleName),
                 },
                 expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: new SigningCredentials(
@@ -137,7 +138,7 @@ namespace UniCEC.Data.JWT
                  //Role Id
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role
-                 new Claim(ClaimTypes.Role, user.RoleName)
+                 new Claim(ClaimTypes.Role, user.RoleName),
                 },
                 expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: new SigningCredentials(

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.ViewModels.Common;
@@ -15,11 +16,14 @@ namespace UniCEC.Business.Services.ClubSvc
     {
         private IClubRepo _clubRepo;
         private IUniversityRepo _universityRepo;
+        private IClubHistoryRepo _clubHistoryRepo;
 
-        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo)
+        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo, IClubHistoryRepo clubHistoryRepo)
         {
             _clubRepo = clubRepo;
             _universityRepo = universityRepo;
+            // Check Mem-in-club
+            _clubHistoryRepo = clubHistoryRepo; 
         }
 
         private ViewClub TransformViewClub(Club club, string universityName)
@@ -114,7 +118,7 @@ namespace UniCEC.Business.Services.ClubSvc
                 ViewClub club = TransformViewClub(element, universityName);
                 clubs.Add(club);
             };
-            return clubs;           
+            return clubs;
         }
 
         public async Task<PagingResult<ViewClub>> GetByUniversity(string token, PagingRequest request)
@@ -127,7 +131,7 @@ namespace UniCEC.Business.Services.ClubSvc
             if (clubs == null) throw new NullReferenceException("This university have no any clubs");
 
             List<ViewClub> items = new List<ViewClub>();
-            foreach(Club element in clubs.Items)
+            foreach (Club element in clubs.Items)
             {
                 string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
                 ViewClub club = TransformViewClub(element, universityName);
@@ -139,9 +143,9 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<ViewClub> Insert(ClubInsertModel club)
         {
-            if (string.IsNullOrEmpty(club.Description) || club.UniversityId == 0 || club.TotalMember == 0 
-                || string.IsNullOrEmpty(club.Name) || club.Founding == DateTime.Parse("1/1/0001 12:00:00 AM")) 
-                    throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
+            if (string.IsNullOrEmpty(club.Description) || club.UniversityId == 0 || club.TotalMember == 0
+                || string.IsNullOrEmpty(club.Name) || club.Founding == DateTime.Parse("1/1/0001 12:00:00 AM"))
+                throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
 
             int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, club.Name);
             if (clubId > 0) throw new ArgumentException("Duplicated club name");
@@ -176,12 +180,12 @@ namespace UniCEC.Business.Services.ClubSvc
             int clubId = await _clubRepo.CheckExistedClubName(clubObject.UniversityId, club.Name);
             if (clubId > 0 && clubId != clubObject.Id) throw new ArgumentException("Duplicated club name");
 
-            if(!string.IsNullOrEmpty(club.Description)) clubObject.Description = club.Description;
-            if(club.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) clubObject.Founding = club.Founding;
-            if(!string.IsNullOrEmpty(club.Name)) clubObject.Name = club.Name;
-            if(club.TotalMember != 0) clubObject.TotalMember = club.TotalMember;
+            if (!string.IsNullOrEmpty(club.Description)) clubObject.Description = club.Description;
+            if (club.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) clubObject.Founding = club.Founding;
+            if (!string.IsNullOrEmpty(club.Name)) clubObject.Name = club.Name;
+            if (club.TotalMember != 0) clubObject.TotalMember = club.TotalMember;
             clubObject.Status = club.Status;
-            if(!string.IsNullOrEmpty(club.Image)) clubObject.Image = club.Image;
+            if (!string.IsNullOrEmpty(club.Image)) clubObject.Image = club.Image;
 
             await _clubRepo.Update();
         }
@@ -189,9 +193,11 @@ namespace UniCEC.Business.Services.ClubSvc
         public async Task Delete(int id)
         {
             Club clubObject = await _clubRepo.Get(id);
-            if (clubObject == null) throw new NullReferenceException("Not found this club");            
+            if (clubObject == null) throw new NullReferenceException("Not found this club");
             clubObject.Status = false;
             await _clubRepo.Update();
         }
+
+       
     }
 }

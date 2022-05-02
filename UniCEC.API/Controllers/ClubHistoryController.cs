@@ -82,7 +82,7 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewClubMember> clubMembers = await _clubHistoryService.GetMembersByClub(id, termId, request);
                 return Ok(clubMembers);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -104,13 +104,13 @@ namespace UniCEC.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, "Internal Server Exception"); 
+                return StatusCode(500, "Internal Server Exception");
             }
             catch (SqlException)
             {
@@ -167,6 +167,32 @@ namespace UniCEC.API.Controllers
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        //
+        [HttpGet("get-mem-in-club")]
+        public async Task<IActionResult> GetMemberInClub([FromQuery] GetMemberInClubModel model)
+        {
+            try
+            {
+                ViewClubMember viewClubMember = await _clubHistoryService.GetMemberInCLub(model);
+                if (viewClubMember != null)
+                {
+                    return Ok(viewClubMember);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
             }
         }
 

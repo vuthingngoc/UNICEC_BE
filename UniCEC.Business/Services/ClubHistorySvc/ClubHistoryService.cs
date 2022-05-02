@@ -136,5 +136,11 @@ namespace UniCEC.Business.Services.ClubHistorySvc
 
             await _clubHistoryRepo.Update();
         }
+
+        public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        {
+            ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);
+            return result;
+        }
     }
 }
