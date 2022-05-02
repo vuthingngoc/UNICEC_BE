@@ -61,13 +61,32 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("club/{id}/{search}")]
-        [SwaggerOperation(Summary = "Searching term")]
-        public async Task<IActionResult> GetTermByConditions(int id, TermRequestModel request)
+        [HttpGet("club/{id}/name")]
+        [SwaggerOperation(Summary = "Searching term by name")]
+        public async Task<IActionResult> GetTermByName(int id, string name, PagingRequest request)
         {
             try
             {
-                PagingResult<ViewTerm> terms = await _itermService.GetByConditions(id, request);
+                PagingResult<ViewTerm> terms = await _itermService.GetByName(id, name, request);
+                return Ok(terms);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        [HttpGet("club/{id}/time")]
+        [SwaggerOperation(Summary = "Searching term by time")]
+        public async Task<IActionResult> GetTermByTime(int id, TermRequestModel request)
+        {
+            try
+            {
+                PagingResult<ViewTerm> terms = await _itermService.GetByTime(id, request);
                 return Ok(terms);
             }
             catch (NullReferenceException ex)

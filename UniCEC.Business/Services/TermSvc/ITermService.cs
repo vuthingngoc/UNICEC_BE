@@ -9,8 +9,8 @@ namespace UniCEC.Business.Services.TermSvc
     {
         public Task<ViewTerm> GetById(int clubId, int id);
         public Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request);        
-        public Task<PagingResult<ViewTerm>> GetByName(int clubId, string name);
-        public Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request);
+        public Task<PagingResult<ViewTerm>> GetByName(int clubId, string name, PagingRequest request);
+        public Task<PagingResult<ViewTerm>> GetByTime(int clubId, TermRequestModel request);
         public Task<ViewTerm> Insert(TermInsertModel term);
         public Task Update(ViewTerm term);
         public Task Delete(int id);
