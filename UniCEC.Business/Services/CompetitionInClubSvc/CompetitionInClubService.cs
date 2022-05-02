@@ -64,7 +64,7 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
             }
         }
 
-        public Task<bool> Update(ViewCompetitionInClub competitionInClub)
+        public Task<bool> Update(ViewCompetitionInClub model)
         {
             throw new NotImplementedException();
         }

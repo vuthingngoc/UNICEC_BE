@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionInClubSvc;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
@@ -56,10 +57,32 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //// PUT api/<CompetitionInClubController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
+        // PUT api/<CompetitionInClubController>/5
+        //[HttpPut]
+        //[SwaggerOperation(Summary = "Update competition in club ")]
+        //public async Task<IActionResult> Update([FromBody]ViewCompetitionInClub model)
         //{
+        //    try
+        //    {
+        //        Boolean check = false;
+        //        check = await _competitionInClubService.Update(model);
+        //        if (check)
+        //        {
+        //            return Ok();
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
         //}
 
         //// DELETE api/<CompetitionInClubController>/5
