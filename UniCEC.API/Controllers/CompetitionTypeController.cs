@@ -4,37 +4,32 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.RoleSvc;
-using UniCEC.Data.RequestModels;
+using UniCEC.Business.Services.CompetitionTypeSvc;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Role;
+using UniCEC.Data.ViewModels.Entities.CompetitionType;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/role")]
+    [Route("api/v1/competition-type")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class RoleController : ControllerBase
+    public class CompetitionTypeController : ControllerBase
     {
-        IRoleService _roleService;
-
-        public RoleController(IRoleService roleService)
+        private ICompetitionTypeService _competitionTypeService;
+        public CompetitionTypeController(ICompetitionTypeService competitionTypeService)
         {
-            _roleService = roleService;
+            _competitionTypeService = competitionTypeService;
         }
 
-
-
-        //Get List Roles
-        [HttpGet("roles")]
-        [SwaggerOperation(Summary = "Get list roles")]
-        public async Task<IActionResult> GetRoles([FromQuery] PagingRequest request)
+        [HttpGet("competition-types")]
+        [SwaggerOperation(Summary = "Get list competition types")]
+        public async Task<IActionResult> GetCompetitionTypes([FromQuery] PagingRequest request )
         {
             try
             {
-                PagingResult<ViewRole> result = await _roleService.GetAllPaging(request);
+                PagingResult<ViewCompetitionType> result = await _competitionTypeService.GetAllPaging(request);
 
                 if (result != null)
                 {
@@ -56,17 +51,18 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // GET api/<RoleController>/5
+
+        // GET api/<CompetitionTypeController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get role by Id")]
-        public async Task<IActionResult> GetRoleById(int id)
+        [SwaggerOperation(Summary = "Get competition type by id")]
+        public async Task<IActionResult> GetCompetitionTypeById(int id)
         {
             try
             {
-                ViewRole result = await _roleService.GetByRoleId(id);
+                ViewCompetitionType result = await _competitionTypeService.GetByCompetitionTypeId(id);
                 if (result == null)
                 {
-                    return NotFound("Not Found This Role in System");
+                    return NotFound("Not Found This Competition Type in System");
                 }
                 else
                 {
@@ -82,17 +78,16 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal server exception");
             }
-
         }
 
-        //InsertRoleModel
+        // POST api/<CompetitionTypeController>
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert role")]
-        public async Task<IActionResult> InsertRoleId([FromBody] RoleInsertModel model)
+        [SwaggerOperation(Summary = "Insert competition type")]
+        public async Task<IActionResult> Insert([FromBody] CompetitionTypeInsertModel model)
         {
             try
             {
-                ViewRole result = await _roleService.Insert(model);
+                ViewCompetitionType result = await _competitionTypeService.Insert(model);
                 if (result != null)
                 {
 
@@ -113,15 +108,15 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // PUT api/<RoleController>/5
+        // PUT api/<CompetitionTypeController>/5
         [HttpPut]
-        [SwaggerOperation(Summary = "Update role")]
-        public async Task<IActionResult> UpdateRole ([FromBody] ViewRole model)
+        [SwaggerOperation(Summary = "Update competition type")]
+        public async Task<IActionResult> Update([FromBody] ViewCompetitionType model)
         {
             try
             {
                 Boolean check = false;
-                check = await _roleService.Update(model);
+                check = await _competitionTypeService.Update(model);
                 if (check)
                 {
                     return Ok();
@@ -141,6 +136,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        
+
     }
 }

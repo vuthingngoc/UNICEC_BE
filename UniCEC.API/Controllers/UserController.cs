@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
@@ -121,7 +122,8 @@ namespace UniCEC.API.Controllers
 
         //-------------------LOGIN
         [Authorize(Roles = "Student")]
-        [HttpPut("UpdateUserHaveJWTToken")]
+        [HttpPut("jwttoken")]
+        [SwaggerOperation(Summary = "Update infomations student")]
         public async Task<IActionResult> UpdateUserWithJWT([FromBody] ViewUser request)
         {
             try

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CitySvc;
@@ -28,7 +29,8 @@ namespace UniCEC.API.Controllers
         }
 
         // Get-List-Cities
-        [HttpGet("GetListCities")]
+        [HttpGet("cities")]
+        [SwaggerOperation(Summary = "Get cities")]
         public async Task<IActionResult> GetListCity([FromQuery] CityRequestModel request)
         {
             try {
@@ -56,7 +58,8 @@ namespace UniCEC.API.Controllers
         }
 
         //GET CITY BY ID
-        [HttpGet("GetCityBy{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get city by id")]
         public async Task<IActionResult> GetCityById(int id)
         {
             try
@@ -79,7 +82,8 @@ namespace UniCEC.API.Controllers
         }
 
         //Post-Insert-City
-        [HttpPost("InsertCity")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert city")]
         public async Task<IActionResult> InsertCity ([FromBody] CityInsertModel model)
         {
             try
@@ -105,7 +109,8 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<CityController>/5
-        [HttpPut("UpdateCityById")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update city")]
         public async Task<IActionResult> UpdateCity([FromBody] ViewCity city)
         {
             try
@@ -129,11 +134,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
-        // DELETE api/<CityController>/5
-        [HttpDelete("NotYet{id}")]
-        public void Delete(int id)
-        {
-        }
+  
     }
 }

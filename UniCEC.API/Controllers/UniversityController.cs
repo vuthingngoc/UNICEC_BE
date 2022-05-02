@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.UniversitySvc;
@@ -27,7 +28,8 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet("get-university-by-conditions")]
+        [HttpGet("universities")]
+        [SwaggerOperation(Summary = "Get universities by conditions")]
         public async Task<IActionResult> GetUniversityByConditions([FromQuery] UniversityRequestModel request)
         {
             try
@@ -56,7 +58,8 @@ namespace UniCEC.API.Controllers
         }
 
         //Get 1 university by ID
-        [HttpGet("get-university-by-{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get university by id")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
             try {
@@ -83,7 +86,8 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<UniversityController>
-        [HttpPost("insert-university")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert university")]
         public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
             try
@@ -112,7 +116,8 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<UniversityController>/5
-        [HttpPut("update-university-by-id")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update university")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
             try {
@@ -137,7 +142,8 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<UniversityController>/5
-        [HttpDelete("delete-university-by-{id}")]
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete university")]
         public async Task<IActionResult> DeleteUniversityById(int id)
         {
             try

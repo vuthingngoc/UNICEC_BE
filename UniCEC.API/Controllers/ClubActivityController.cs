@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubActivitySvc;
@@ -25,8 +26,9 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet("find-list-club-activities-by-conditions")]
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] ClubActivityRequestModel conditions )
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get ClubActivities by conditions")]
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] ClubActivityRequestModel conditions)
         {
             try
             {
@@ -54,7 +56,8 @@ namespace UniCEC.API.Controllers
         }
 
         // GET api/<ClubActivityController>/5
-        [HttpGet("find-club-activity-by-{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get ClubActivity by id")]
         public async Task<IActionResult> GetClubActivityById(int id)
         {
             try
@@ -81,7 +84,8 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<ClubActivityController>
-        [HttpPost("insert-club-activity")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert ClubActivity")]
         public async Task<IActionResult> InsertClubActivity([FromBody] ClubActivityInsertModel model)
         {
             try
@@ -110,7 +114,8 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<ClubActivityController>/5
-        [HttpPut("update-club-activity-by-id")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update ClubActivity by Id")]
         public async Task<IActionResult> UpdateClubActivity([FromBody] ClubActivityUpdateModel model)
         {
             try
@@ -137,7 +142,8 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<ClubActivityController>/5
-        [HttpDelete("delete-club-activity-by-{id}")]
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete ClubActivity by id")]
         public async Task<IActionResult> DeleteClubAcitvityById(int id)
         {
             try
