@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
@@ -27,7 +28,8 @@ namespace UniCEC.API.Controllers
 
 
         //Get List Roles
-        [HttpGet("GetListRoles")]
+        [HttpGet("roles")]
+        [SwaggerOperation(Summary = "Get list roles")]
         public async Task<IActionResult> GetRoles([FromQuery] PagingRequest request)
         {
             try
@@ -55,7 +57,8 @@ namespace UniCEC.API.Controllers
         }
 
         // GET api/<RoleController>/5
-        [HttpGet("GetRoleBy{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get role by Id")]
         public async Task<IActionResult> GetRoleById(int id)
         {
             try
@@ -83,7 +86,8 @@ namespace UniCEC.API.Controllers
         }
 
         //InsertRoleModel
-        [HttpPost("InsertRole")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert role")]
         public async Task<IActionResult> InsertRoleId([FromBody] RoleInsertModel model)
         {
             try
@@ -110,7 +114,8 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<RoleController>/5
-        [HttpPut("UpdateUniversityById")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update role")]
         public async Task<IActionResult> UpdateRole ([FromBody] ViewRole model)
         {
             try
@@ -136,10 +141,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // DELETE api/<RoleController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberTakesActivitySvc;
@@ -25,7 +26,8 @@ namespace UniCEC.API.Controllers
         }
 
         // GET: api/<MemberTakesActivityController>
-        [HttpGet("get-task-by-conditions")]
+        [HttpGet("tasks")]
+        [SwaggerOperation(Summary = "Get tasks by conditions")]
         public async Task<IActionResult> GetTaskByConditions([FromQuery]MemberTakesActivityRequestModel request)
         {
             try
@@ -53,7 +55,8 @@ namespace UniCEC.API.Controllers
         }
 
         // GET api/<MemberTakesActivityController>/5
-        [HttpGet("get-task-by-{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get tasks by Id")]
         public async Task<IActionResult> GetTaskById(int id)
         {
             try
@@ -80,7 +83,8 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<MemberTakesActivityController>
-        [HttpPost("insert-member-takes-activity")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert member in task ")]
         public async Task<IActionResult> InsertMemberTakesActivity([FromBody] MemberTakesActivityInsertModel model)
         {
             try
@@ -108,7 +112,8 @@ namespace UniCEC.API.Controllers
 
 
         // PUT api/<MemberTakesActivityController>/5
-        [HttpPut("member-submit-task-by-{id}")]
+        [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Member submit task by Id")]
         public async Task<IActionResult> MemberSubmitTask(int id)
         {
             try

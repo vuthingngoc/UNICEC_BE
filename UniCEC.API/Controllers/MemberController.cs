@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
@@ -25,7 +26,8 @@ namespace UniCEC.API.Controllers
 
 
         // GET api/<MemberController>/5
-        [HttpGet("get-member-by-{id}")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get member by id")]
         public async Task<IActionResult> GetMemberById(int id)
         {
             try
@@ -53,7 +55,8 @@ namespace UniCEC.API.Controllers
         }
 
         // Add Member In Club
-        [HttpPost("insert-member")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert member ")]
         public async Task<IActionResult> InsertMember([FromBody] MemberInsertModel model)
         {
             try
@@ -80,7 +83,8 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<MemberController>/5
-        [HttpPut("update-member-by-id")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update member by id")]
         public async Task<IActionResult> UpdateMember ([FromBody] MemberUpdateModel member)
         {
             try
@@ -110,7 +114,8 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<MemberController>/5
-        [HttpDelete("delete-member-by-{id}")]
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete member by id")]
         public async Task<IActionResult> DeleteMember (int id)
         {
             try
