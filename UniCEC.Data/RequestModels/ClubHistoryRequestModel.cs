@@ -6,18 +6,19 @@ namespace UniCEC.Data.RequestModels
 {
     public  class ClubHistoryRequestModel : PagingRequest
     {
-        [FromQuery(Name = "club-role-id")]
+        [FromQuery(Name = "clubRoleId")]
         public int? ClubRoleId { get; set; }
-        [FromQuery(Name = "club-id")]
+        [FromQuery(Name = "clubId")]
         public int? ClubId { get; set; }
-        [FromQuery(Name = "member-id")]
+        [FromQuery(Name = "memberId")]
         public int? MemberId { get; set; }
-        [FromQuery(Name = "term-id")]
+        [FromQuery(Name = "termId")]
         public int? TermId { get; set; }
-        [FromQuery(Name = "start-time")]
+        [FromQuery(Name = "startTime")]
         public DateTime? StartTime { get; set; }
-        [FromQuery(Name = "end-time")]
+        [FromQuery(Name = "endTime")]
         public DateTime? EndTime { get; set; }
+        [FromQuery(Name = "status")]
         public int? Status { get; set; }
     }
 }

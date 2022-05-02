@@ -1,5 +1,11 @@
-﻿using UniCEC.Data.Models.DB;
+﻿using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 {
@@ -10,6 +16,64 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
         }
 
+        public async Task<PagingResult<Term>> GetByClub(int clubId, PagingRequest request)
+        {
+            var query = from ch in context.ClubHistories
+                        join t in context.Terms on ch.TermId equals t.Id
+                        where ch.ClubId.Equals(clubId)
+                        select new { t };
 
+            int totalCount = query.Count();
+            List<Term> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                            .Select(x => new Term()
+                                            {
+                                                Id = x.t.Id,
+                                                Name = x.t.Name,
+                                                CreateTime = x.t.CreateTime,
+                                                EndTime = x.t.EndTime
+                                            }).ToListAsync();
+
+            return new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize);
+        }
+
+        public async Task<PagingResult<Term>> GetByName(int clubId, string name, PagingRequest request)
+        {
+            var query = from ch in context.ClubHistories
+                        join t in context.Terms on ch.TermId equals t.Id
+                        where ch.ClubId.Equals(clubId)
+                        select new { t };
+
+            if (!string.IsNullOrEmpty(name)) query = query.Where(x => x.t.Name.Contains(name));
+            //if(request.CreateTime != null) 
+
+
+            int totalCount = query.Count();
+            List<Term> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                            .Select(x => new Term()
+                                            {
+                                                Id = x.t.Id,
+                                                Name = x.t.Name,
+                                                CreateTime = x.t.CreateTime,
+                                                EndTime = x.t.EndTime
+                                            }).ToListAsync();
+
+            return new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize);
+        }
+
+        public async Task<Term> GetById(int clubId, int id)
+        {
+            //Term term = from ch in context.ClubHistories
+            //            join t in context.Terms on ch.TermId equals t.Id
+            //            where ch.ClubId.Equals(clubId) && t.Id.Equals(id)
+            //            select new { t };
+
+            
+            throw new System.NotImplementedException();
+        }
+
+        public Task<Term> GetByTime(int clubId, TermRequestModel request)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
