@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubHistorySvc;
@@ -171,7 +172,8 @@ namespace UniCEC.API.Controllers
         }
 
         //
-        [HttpGet("get-mem-in-club")]
+        [HttpGet("member-in-club")]
+        [SwaggerOperation(Summary = "Get info member in club")]
         public async Task<IActionResult> GetMemberInClub([FromQuery] GetMemberInClubModel model)
         {
             try
