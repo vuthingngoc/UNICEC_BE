@@ -26,11 +26,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             int check = query.Count();
             if (check > 0)
             {
-                return true;
+                return false;
             }
             else
             {
-                return false;
+                return true;
             }
         }
 

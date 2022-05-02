@@ -82,7 +82,7 @@ namespace UniCEC.Business.Services.CompetitionTypeSvc
                 CompetitionType comp = await _competitionTypeRepo.Get(competitionType.Id);
                 if (comp != null)
                 {
-                    comp.TypeName = competitionType.TypeName;
+                    comp.TypeName = (!competitionType.TypeName.Equals(""))? competitionType.TypeName : comp.TypeName ;
                     await _competitionTypeRepo.Update();
                     return true;
                 }

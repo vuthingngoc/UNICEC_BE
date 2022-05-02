@@ -103,11 +103,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             int check = query.Count();
             if (check > 0)
             {
-                return false;
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
         }
 
