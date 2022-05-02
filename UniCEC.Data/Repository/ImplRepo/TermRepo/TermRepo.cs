@@ -31,20 +31,21 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                                                 Name = x.t.Name,
                                                 CreateTime = x.t.CreateTime,
                                                 EndTime = x.t.EndTime
-                                            }).ToListAsync();
+                                            }).Distinct().ToListAsync();
 
-            return new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize);
+            return (totalCount > 0) ? new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<Term>> GetByName(int clubId, string name, PagingRequest request)
+        public async Task<PagingResult<Term>> GetByConditions(int clubId, TermRequestModel request)
         {
             var query = from ch in context.ClubHistories
                         join t in context.Terms on ch.TermId equals t.Id
                         where ch.ClubId.Equals(clubId)
                         select new { t };
 
-            if (!string.IsNullOrEmpty(name)) query = query.Where(x => x.t.Name.Contains(name));
-            //if(request.CreateTime != null) 
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(x => x.t.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.CreateYear)) query = query.Where(x => x.t.CreateTime.Year.ToString().Equals(request.CreateYear));
+            if (!string.IsNullOrEmpty(request.EndYear)) query = query.Where(x => x.t.EndTime.Year.ToString().Equals(request.EndYear));
 
 
             int totalCount = query.Count();
@@ -55,25 +56,25 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                                                 Name = x.t.Name,
                                                 CreateTime = x.t.CreateTime,
                                                 EndTime = x.t.EndTime
-                                            }).ToListAsync();
+                                            }).Distinct().ToListAsync();
 
-            return new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize);
+            return (totalCount > 0) ? new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<Term> GetById(int clubId, int id)
         {
-            //Term term = from ch in context.ClubHistories
-            //            join t in context.Terms on ch.TermId equals t.Id
-            //            where ch.ClubId.Equals(clubId) && t.Id.Equals(id)
-            //            select new { t };
+            var query = from ch in context.ClubHistories
+                        join t in context.Terms on ch.TermId equals t.Id
+                        where ch.ClubId.Equals(clubId) && t.Id.Equals(id)
+                        select new Term()
+                        {
+                            Id = t.Id,
+                            Name = t.Name,
+                            CreateTime = t.CreateTime,
+                            EndTime = t.EndTime
+                        };
 
-            
-            throw new System.NotImplementedException();
-        }
-
-        public Task<Term> GetByTime(int clubId, TermRequestModel request)
-        {
-            throw new System.NotImplementedException();
+            return await query.FirstOrDefaultAsync();
         }
     }
 }

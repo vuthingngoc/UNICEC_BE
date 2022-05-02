@@ -5,6 +5,7 @@ namespace UniCEC.Data.ViewModels.Entities.Term
 {
     public class TermInsertModel
     {
+        [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }

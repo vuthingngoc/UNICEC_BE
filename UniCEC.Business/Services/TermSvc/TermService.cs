@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -15,25 +17,52 @@ namespace UniCEC.Business.Services.TermSvc
             _termRepo = termRepo;
         }
 
-        public Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request)
+        private ViewTerm TransformViewTerm(Term term)
         {
-
-            throw new NotImplementedException();
+            return new ViewTerm()
+            {
+                Id = term.Id,
+                Name = term.Name,
+                CreateTime = term.CreateTime,
+                EndTime = term.EndTime
+            };
         }
 
-        public Task<PagingResult<ViewTerm>> GetByName(int clubId, string name, PagingRequest request)
+        public async Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request)
         {
-            throw new NotImplementedException();
+            PagingResult<Term> terms = await _termRepo.GetByClub(clubId, request);
+            if (terms == null) throw new NullReferenceException("Not found any term");
+
+            List<ViewTerm> items = new List<ViewTerm>();
+            terms.Items.ForEach(element =>
+            {
+                ViewTerm term = TransformViewTerm(element);
+                items.Add(term);
+            });
+
+            return new PagingResult<ViewTerm>(items, terms.TotalCount, request.CurrentPage, request.PageSize);
         }
 
-        public Task<ViewTerm> GetById(int clubId, int id)
+        public async Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
         {
-            throw new NotImplementedException();
+            PagingResult<Term> terms = await _termRepo.GetByConditions(clubId, request);
+            if (terms == null) throw new NullReferenceException("Not found any term");
+
+            List<ViewTerm> items = new List<ViewTerm>();
+            terms.Items.ForEach(element =>
+            {
+                ViewTerm term = TransformViewTerm(element);
+                items.Add(term);
+            });
+
+            return new PagingResult<ViewTerm>(items, terms.TotalCount, request.CurrentPage, request.PageSize);
         }
 
-        public Task<PagingResult<ViewTerm>> GetByTime(int clubId, TermRequestModel request)
+        public async Task<ViewTerm> GetById(int clubId, int id)
         {
-            throw new NotImplementedException();
+            Term term = await _termRepo.GetById(clubId, id);
+            if (term == null) throw new NullReferenceException("Not found this term");
+            return TransformViewTerm(term);
         }
 
         public Task<ViewTerm> Insert(TermInsertModel term)
