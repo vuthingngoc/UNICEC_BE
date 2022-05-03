@@ -69,6 +69,7 @@ using System.Text;
 using System.Collections.Generic;
 using UniCEC.Business.Services.TermSvc;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Business.Services.FirebaseSvc;
 
 namespace UniCEC.API
 {
@@ -116,6 +117,7 @@ namespace UniCEC.API
             services.AddScoped<IDepartmentInUniversityService, DepartmentInUniversityService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEntityTypeService, EntityTypeService>();
+            services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IMajorService, MajorService>();
             services.AddScoped<IMemberService, MemberService>();
             services.AddScoped<IMemberTakesActivityService, MemberTakesActivityService>();
@@ -162,14 +164,13 @@ namespace UniCEC.API
             services.AddTransient<IUserRepo, UserRepo>();
 
             //----------------------------------------------FIREBASE-------------------------
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), Configuration["Jwt:Firebase:FileConfig"]);
             //add firebase admin sdk
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = GoogleCredential.FromFile(path),
-                ProjectId = "unics-e46a4",
-                ServiceAccountId = "firebase-adminsdk-td0dr@unics-e46a4.iam.gserviceaccount.com"
-
+                ProjectId = Configuration["Jwt:Firebase:ValidAudience"],
+                ServiceAccountId = Configuration["Jwt:Firebase:ServiceAccount"]
             });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
@@ -183,7 +184,7 @@ namespace UniCEC.API
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = Configuration["Jwt:Firebase:ValidIssuer"],
                     ValidAudience = Configuration["Jwt:Firebase:ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB"))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Firebase:PrivateKey"]))
                 };
             });
             //enable CORS

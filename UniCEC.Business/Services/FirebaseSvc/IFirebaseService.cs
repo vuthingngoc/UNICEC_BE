@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using UniCEC.Data.ViewModels.Entities.User;
+﻿using System.Threading.Tasks;
+using UniCEC.Data.ViewModels.Firebase.Auth;
 
 namespace UniCEC.Business.Services.FirebaseSvc
 {
     public interface IFirebaseService
     {
-        public Task<ViewUser> AuthenUser(HttpRequest request);
+        public Task<ViewUserInfo> Authentication(string token);
     }
 }
