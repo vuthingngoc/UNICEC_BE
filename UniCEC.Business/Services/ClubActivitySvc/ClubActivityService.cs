@@ -210,10 +210,10 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         }
 
         //Get Top 4 Club Activities depend on create time
-        public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId, DateTime createDate)
+        public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
         {
             //
-            List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId, createDate);
+            List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId);
             //
             return result;
         }

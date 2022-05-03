@@ -59,13 +59,13 @@ namespace UniCEC.API.Controllers
 
 
         [HttpGet("top4")]
-        [SwaggerOperation(Summary = "Get top 4 club activities by create date")]
+        [SwaggerOperation(Summary = "Get top 4 club activities by now")]
         //Lưu ý University Id dựa vào JWT
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int UniversityId, [FromQuery] int ClubId, [FromQuery] DateTime CreateDate)
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int UniversityId, [FromQuery] int ClubId)
         {
             try
             {
-                List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId, CreateDate);
+                List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId);
 
                 if (result != null)
                 {
