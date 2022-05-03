@@ -75,14 +75,17 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
                 ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
                 DateTime deadline = clubActivity.Ending;
-                //------------------------------------check-mem-in-club
+                //------------------------------------check mem in club
                 int clubId = clubActivity.ClubId;
 
                 bool MemInClub_Term = await _clubHistoryRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
-                if (MemInClub_Term)
+                //------------------------------------Check number of member join this clubActivity
+                bool NumOfMem_InTask = await _memberTakesActivityRepo.CheckNumOfMemInTask(model.ClubActivityId);
+
+                if (MemInClub_Term && NumOfMem_InTask)
                 {
-                    //------------------------------------check-mem-takes-club-activity
+                    //------------------------------------Check mem takes club activity
                     bool MemTakesTask = await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, model.MemberId);
                     if (MemTakesTask)
                     {
@@ -123,14 +126,12 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 {
                     return null;
                 }
-
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
 
         //update-task
         public async Task<bool> Update(int id)
@@ -148,7 +149,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         //date end time
                         mta.EndTime = DateTime.Now;
                         //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.DoneSoon;
+                        mta.Status = Data.Enum.MemberTakesActivityStatus.DoneOnTime;
                     }
                     //2. on time
                     if (result == 0)

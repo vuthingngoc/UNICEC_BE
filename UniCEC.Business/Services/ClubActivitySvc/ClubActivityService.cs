@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
@@ -13,10 +14,13 @@ namespace UniCEC.Business.Services.ClubActivitySvc
     public class ClubActivityService : IClubActivityService
     {
         private IClubActivityRepo _clubActivityRepo;
+        //
+        private IMemberTakesActivityRepo _memberTakesActivityRepo;
 
-        public ClubActivityService(IClubActivityRepo clubActivityRepo)
+        public ClubActivityService(IClubActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo)
         {
             _clubActivityRepo = clubActivityRepo;
+            _memberTakesActivityRepo = memberTakesActivityRepo;
         }
 
         //Delete-Club-Activity-By-Id
@@ -190,7 +194,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             {
                 return ClubActivityStatus.Happenning;
             }
-            return ClubActivityStatus.Error ;
+            return ClubActivityStatus.Error;
         }
 
 
@@ -213,5 +217,42 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             //
             return result;
         }
-    }   
+
+        //Get Process Club Activity
+        public async Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status)
+        {
+            ClubActivity ca = await _clubActivityRepo.Get(clubActivityId);
+            if (ca != null)
+            {
+                //get total num of member join
+                int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(clubActivityId);
+                //get number of member done task
+                int NumberOfeMemberJoin_Status = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(clubActivityId, status);
+                //
+                ViewClubActivity viewClubActivity = TransformView(ca);
+
+
+                return new ViewProcessClubActivity()
+                {
+                    ClubId = viewClubActivity.ClubId,
+                    Beginning = viewClubActivity.Beginning,
+                    Ending = viewClubActivity.Ending,
+                    CreateTime = viewClubActivity.CreateTime,
+                    Description = viewClubActivity.Description,
+                    Id = viewClubActivity.ClubId,
+                    Name = viewClubActivity.Name,
+                    NumOfMember = viewClubActivity.NumOfMember,
+                    SeedsCode = viewClubActivity.SeedsCode,
+                    SeedsPoint = viewClubActivity.SeedsPoint,
+                    Status = viewClubActivity.Status,
+                    NumOfMemberJoin = NumberOfMemberJoin,
+                    NumOfMemberTakesTaskStatus = NumberOfeMemberJoin_Status,
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
 }

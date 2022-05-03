@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubActivitySvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
@@ -27,8 +28,38 @@ namespace UniCEC.API.Controllers
         }
 
 
+        [HttpGet("process-club-activity")]
+        [SwaggerOperation(Summary = "Get process of club activity by Id")]
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int ClubActivityId , [FromQuery] MemberTakesActivityStatus status)
+        {
+            try
+            {
+                ViewProcessClubActivity result = await _clubActivityService.GetProcessClubActivity(ClubActivityId,status);
+
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+
+        }
+
+
         [HttpGet("top4")]
-        [SwaggerOperation(Summary = "Get top 4 club activities by create date  ")]
+        [SwaggerOperation(Summary = "Get top 4 club activities by create date")]
         //Lưu ý University Id dựa vào JWT
         public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int UniversityId, [FromQuery] int ClubId, [FromQuery] DateTime CreateDate)
         {

@@ -30,6 +30,5 @@ namespace UniCEC.Data.RequestModels
         //[FromQuery(Name = "create-time")]
         //public DateTime? CreateTime { get; set; }
 
-
     }
 }

@@ -22,7 +22,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
         //check exist code
         public async Task<bool> CheckExistCode(string code)
         {
-
             bool check = false;
             ClubActivity clubActivity = await context.ClubActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
             if (clubActivity != null)
@@ -85,7 +84,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             if (conditions.SeedsPoint.HasValue) query = query.Where(ca => ca.SeedsPoint == conditions.SeedsPoint);
             //Number-of-member
             if (conditions.NumberOfMember.HasValue) query = query.Where(ca => ca.NumOfMember == conditions.NumberOfMember);
-
             //Status
             if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
             //-------------------------------------------------Time-------------------------------------------------
@@ -117,5 +115,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 
             return (clubActivities.Count > 0) ? new PagingResult<ViewClubActivity>(clubActivities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
         }
+
     }
 }
