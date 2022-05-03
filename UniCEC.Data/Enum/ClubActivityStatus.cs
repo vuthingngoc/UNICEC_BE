@@ -8,7 +8,10 @@ namespace UniCEC.Data.Enum
 {
     public enum ClubActivityStatus
     {
-        Inactive,
-        Active
+        HappenningSoon,
+        Happenning,
+        Ended,
+        Canceled,
+        Error
     }
 }

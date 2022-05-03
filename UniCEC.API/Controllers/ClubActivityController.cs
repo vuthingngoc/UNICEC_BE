@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubActivitySvc;
 using UniCEC.Data.RequestModels;
@@ -23,6 +24,37 @@ namespace UniCEC.API.Controllers
         public ClubActivityController(IClubActivityService clubActivityService)
         {
             _clubActivityService = clubActivityService;
+        }
+
+
+        [HttpGet("top4")]
+        [SwaggerOperation(Summary = "Get top 4 club activities by create date  ")]
+        //Lưu ý University Id dựa vào JWT
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int UniversityId, [FromQuery] int ClubId, [FromQuery] DateTime CreateDate)
+        {
+            try
+            {
+                List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId, CreateDate);
+
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+
         }
 
 

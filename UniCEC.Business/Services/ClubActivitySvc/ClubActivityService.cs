@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -27,7 +28,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 if (clubActivity != null)
                 {
                     //
-                    clubActivity.Status = ClubActivityStatus.Inactive;
+                    clubActivity.Status = ClubActivityStatus.Canceled;
                     await _clubActivityRepo.Update();
                     return true;
                 }
@@ -64,15 +65,16 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 //
                 clubActivity.ClubId = model.ClubId;
                 clubActivity.NumOfMember = model.NumOfMember;
-                clubActivity.Status = model.Status;
                 clubActivity.Description = model.Description;
                 clubActivity.Name = model.Name;
                 clubActivity.SeedsPoint = model.SeedsPoint;
                 clubActivity.CreateTime = DateTime.Now;
                 clubActivity.Beginning = model.Beginning;
                 clubActivity.Ending = model.Ending;
+                //Check Status
+                clubActivity.Status = GetClubActivityStatus(model.Beginning);
+                //Check Code
                 clubActivity.SeedsCode = await checkExistCode();
-                //
 
                 int result = await _clubActivityRepo.Insert(clubActivity);
                 if (result > 0)
@@ -170,7 +172,31 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             return seedCode;
         }
 
+        //check status by date when insert
+        private ClubActivityStatus GetClubActivityStatus(DateTime BeginingTime)
+        {
+            DateTime now = DateTime.Now;
+            int result = DateTime.Compare(now, BeginingTime);
+            //Earlier
+            if (result < 0)
+            {
+                return ClubActivityStatus.HappenningSoon;
+            }
+            if (result > 0)
+            {
+                return ClubActivityStatus.Happenning;
+            }
+            if (result == 0)
+            {
+                return ClubActivityStatus.Happenning;
+            }
+            return ClubActivityStatus.Error ;
+        }
+
+
+
         //Get-List-Club-Activities-By-Conditions
+        //lấy tất cả các task của 1 trường - 1 câu lạc bộ - seed point - Number of member
         public async Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions)
         {
             //
@@ -178,5 +204,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             //
             return result;
         }
-    }
+
+        //Get Top 4 Club Activities depend on create time
+        public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId, DateTime createDate)
+        {
+            //
+            List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId, createDate);
+            //
+            return result;
+        }
+    }   
 }

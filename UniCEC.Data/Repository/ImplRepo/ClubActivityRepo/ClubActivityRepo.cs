@@ -8,6 +8,7 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
 using System.Collections.Generic;
 using UniCEC.Data.Enum;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 {
@@ -30,6 +31,40 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
                 return check;
             }
             return check;
+        }
+
+        //Get Top 4 Club Activities depend on create time
+        public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId, DateTime createDate)
+        {
+            //format date
+            createDate = createDate.AddHours(23).AddMinutes(59).AddSeconds(59).AddTicks(999);
+            //
+            var query = from u in context.Universities
+                        where u.Id == universityId
+                        from c in context.Clubs
+                        where c.UniversityId == u.Id
+                        from ca in context.ClubActivities
+                        where c.Id == clubId && ca.CreateTime <= createDate
+                        orderby ca.CreateTime descending
+                        select ca;
+
+            List<ViewClubActivity> clubActivities = await query.Take(4).Select(ca => new ViewClubActivity()
+            {
+                Id = ca.Id,
+                ClubId = ca.ClubId,
+                Beginning = ca.Beginning,
+                CreateTime = ca.CreateTime,
+                Description = ca.Description,
+                Ending = ca.Ending,
+                Name = ca.Name,
+                SeedsCode = ca.SeedsCode,
+                SeedsPoint = ca.SeedsPoint,
+                Status = ca.Status,
+                NumOfMember = ca.NumOfMember,
+
+            }).ToListAsync();
+
+            return (clubActivities.Count > 0) ? clubActivities : null;
         }
 
         ////Get List ClubActivity By Conditions
@@ -55,12 +90,12 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
             //-------------------------------------------------Time-------------------------------------------------
             //chỉ search theo ngày
-            //Begin-Time
-            if (conditions.BeginTime.HasValue) query = query.Where(ca => ca.Beginning.Date.Equals(conditions.BeginTime));
-            //End-Time
-            if (conditions.EndTime.HasValue) query = query.Where(ca => ca.Ending.Date.Equals(conditions.EndTime));
-            //Creatime
-            if (conditions.CreateTime.HasValue) query = query.Where(ca => ca.CreateTime.Date.Equals(conditions.CreateTime));
+            ////Begin-Time
+            //if (conditions.BeginTime.HasValue) query = query.Where(ca => ca.Beginning.Date.Equals(conditions.BeginTime));
+            ////End-Time
+            //if (conditions.EndTime.HasValue) query = query.Where(ca => ca.Ending.Date.Equals(conditions.EndTime));
+            ////Creatime
+            //if (conditions.CreateTime.HasValue) query = query.Where(ca => ca.CreateTime.Date.Equals(conditions.CreateTime));
 
             int totalCount = query.Count();
             List<ViewClubActivity> clubActivities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
