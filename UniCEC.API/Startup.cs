@@ -242,36 +242,36 @@ namespace UniCEC.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // Do not change existed code in this method, please ! You can ADD MORE code for your business !!!
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-
-
-                app.UseSwagger();
-
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCEC.API v1");
-                    c.RoutePrefix = "";
-                });
-
-                app.UseHttpsRedirection();
-
-                app.UseRouting();
-
-                app.UseCors("AllowOrigin");
-
-                app.UseAuthentication();
-
-                app.UseAuthorization();
-
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCEC.API v1");
+                c.RoutePrefix = "";
+            });
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseCors("AllowOrigin");
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
