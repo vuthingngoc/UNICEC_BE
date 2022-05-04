@@ -23,7 +23,6 @@ namespace UniCEC.Data.Models.DB
         public int CompetitionTypeId { get; set; }
         public int NumberOfParticipation { get; set; }
         public int NumberOfGroup { get; set; }
-        public DateTime ApprovedTime { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
