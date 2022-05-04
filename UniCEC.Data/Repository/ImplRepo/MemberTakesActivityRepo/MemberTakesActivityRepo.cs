@@ -100,7 +100,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             //club id
             if (request.ClubId.HasValue) query = query.Where(mta => mta.ClubActivity.ClubId == request.ClubId);
             //status
-            if (request.Status.HasValue) query = query.Where(mta => mta.Status.Equals(request.Status));
+            if (request.Status.HasValue) query = query.Where(mta => mta.Status == request.Status);
             //
             int totalCount = query.Count();
 

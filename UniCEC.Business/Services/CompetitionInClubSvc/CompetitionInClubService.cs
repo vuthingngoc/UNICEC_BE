@@ -57,6 +57,8 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
                     TermId = model.TermId
                 };
                 ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+
+                //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
                     if (infoClubMem.ClubRoleName.Equals("Leader"))
