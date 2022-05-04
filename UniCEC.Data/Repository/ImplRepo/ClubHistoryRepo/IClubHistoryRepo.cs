@@ -10,10 +10,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
     public interface IClubHistoryRepo : IRepository<ClubHistory>
     {
-        Task<PagingResult<ClubHistory>> GetByConditions(ClubHistoryRequestModel request);
-        Task<List<int>> GetIdsByMember(int memberID);
-        Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
-        Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId);
+        public Task<PagingResult<ViewClubHistory>> GetAll(int clubId, PagingRequest request);
+        public Task<ViewClubHistory> GetById(int id);
+        public Task<PagingResult<ViewClubHistory>> GetByConditions(ClubHistoryRequestModel request);
+        public Task<List<int>> GetIdsByMember(int memberID);
+
+        // Tien Anh 
+        public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
+        public Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId);
 
         //check mem in club
         public Task<bool> CheckMemberInClub(int clubId, int memberId, int termId);

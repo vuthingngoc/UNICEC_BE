@@ -1,75 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.Business.Services.ClubHistorySvc
 {
-    public class ClubHistoryService : IClubHistoryService
+    public class ClubHistoryService : IClubHistoryService // Test ...
     {
         private IClubHistoryRepo _clubHistoryRepo;
+        private IMemberRepo _memberRepo;
 
-        public ClubHistoryService(IClubHistoryRepo clubHistoryRepo)
+        public ClubHistoryService(IClubHistoryRepo clubHistoryRepo, IMemberRepo memberRepo)
         {
             _clubHistoryRepo = clubHistoryRepo;
+            _memberRepo = memberRepo;   
         }
 
-        private ViewClubHistory TransformViewClubHistory(ClubHistory clubHistory)
+        public async Task<PagingResult<ViewClubHistory>> GetAllPaging(int clubId, string token, PagingRequest request)
         {
-            return new ViewClubHistory()
-            {
-                Id = clubHistory.Id,
-                ClubId = clubHistory.ClubId,
-                ClubRoleId = clubHistory.ClubRoleId,
-                MemberId = clubHistory.MemberId,
-                TermId = clubHistory.TermId,
-                StartTime = clubHistory.StartTime,
-                EndTime = clubHistory.EndTime,
-                Status = clubHistory.Status
-            };
-        }
+            // Test ...
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Equals("Id"));
+            var userId = Int32.Parse(claim.Value);
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            if (isMember == false) return null;
 
-        public async Task<PagingResult<ViewClubHistory>> GetAllPaging(PagingRequest request)
-        {
-            PagingResult<ClubHistory> listClubHistory = await _clubHistoryRepo.GetAllPaging(request);
-            if (listClubHistory == null) throw new NullReferenceException("Not found any previous clubs");
-            
-            List<ViewClubHistory> items = new List<ViewClubHistory>();
-            listClubHistory.Items.ForEach(element =>
-            {
-                ViewClubHistory clubHistory = TransformViewClubHistory(element);
-                items.Add(clubHistory);
-            });
-
-            return new PagingResult<ViewClubHistory>(items, listClubHistory.TotalCount, listClubHistory.CurrentPage, listClubHistory.PageSize);
+            PagingResult<ViewClubHistory> clubHistories = await _clubHistoryRepo.GetAll(clubId, request);
+            if (clubHistories == null) throw new NullReferenceException("Not found any previous clubs");
+            return clubHistories;
         }
 
         public async Task<ViewClubHistory> GetByClubHistory(int id)
         {
-            ClubHistory clubHistory = await _clubHistoryRepo.Get(id);
+            ViewClubHistory clubHistory = await _clubHistoryRepo.GetById(id);
             if (clubHistory == null) throw new NullReferenceException("Not found this club history");
-            return TransformViewClubHistory(clubHistory);
-
+            return clubHistory;
         }
 
         public async Task<PagingResult<ViewClubHistory>> GetByContitions(ClubHistoryRequestModel request)
         {
-            PagingResult<ClubHistory> listClubHistory = await _clubHistoryRepo.GetByConditions(request);
-            if (listClubHistory == null) throw new NullReferenceException("Not found any previous clubs");
-
-            List<ViewClubHistory> items = new List<ViewClubHistory>();
-            listClubHistory.Items.ForEach(element =>
-            {
-                ViewClubHistory clubHistory = TransformViewClubHistory(element);
-                items.Add(clubHistory);
-            });
-
-            return new PagingResult<ViewClubHistory>(items, listClubHistory.TotalCount, listClubHistory.CurrentPage, listClubHistory.PageSize);            
+            PagingResult<ViewClubHistory> ClubHistories = await _clubHistoryRepo.GetByConditions(request);
+            if (ClubHistories == null) throw new NullReferenceException("Not found any previous clubs");
+            return ClubHistories;
         }
 
         public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
@@ -99,8 +79,7 @@ namespace UniCEC.Business.Services.ClubHistorySvc
                 Status = ClubHistoryStatus.Active
             };
             int id = await _clubHistoryRepo.Insert(clubHistoryObject);
-            clubHistoryObject.Id = id;
-            return TransformViewClubHistory(clubHistoryObject);
+            return await _clubHistoryRepo.GetById(id);
         }
 
         public async Task Update(ClubHistoryUpdateModel clubHistory)

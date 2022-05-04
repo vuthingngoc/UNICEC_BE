@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.UniversitySvc;
@@ -64,14 +62,15 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     //Database roleId 3 is Student
                     userModelTemporary.RoleId = 3;
                     //Add In DB [User]
-                    ViewUser userTem = await _userService.InsertUserTemporary(userModelTemporary);
+                    ViewUser userTemp = await _userService.InsertUserTemporary(userModelTemporary);
+                    await _userService.UpdateStatusOnline(userTemp.Id, true);
                     //
-                    userModelTemporary.Id = userTem.Id.ToString();
+                    userModelTemporary.Id = userTemp.Id.ToString();
                     //Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
                     //complete ViewUserInfo
                     //thông tin để trả ra cho BE để User Tiếp tục Update thông tin User
-                    ViewRole role = await _roleService.GetByRoleId(userTem.RoleId);
+                    ViewRole role = await _roleService.GetByRoleId(userTemp.RoleId);
                     userModelTemporary.RoleName = role.RoleName;
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
                     string clientTokenUserTemp = JWTUserToken.GenerateJWTTokenUserTemp(userModelTemporary);
@@ -85,6 +84,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 else
                 {
                     ViewUser user = await _userService.GetUserByEmail(email);
+                    await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     //2.1 FullFill Info
                     if (user.UniversityId != null)
@@ -107,6 +107,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         {
                             Id = user.Id.ToString(),
                             Email = user.Email,
+                            Fullname = user.Fullname,
                             RoleName = role.RoleName,
                             RoleId = user.RoleId,
                             Avatar = user.Avatar
@@ -130,6 +131,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 ViewUser user = await _userService.GetUserByEmail(email);
                 if (user != null)
                 {
+                    await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     //1.Admin
                     if (role.Id == 1)

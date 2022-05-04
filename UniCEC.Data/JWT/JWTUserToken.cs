@@ -128,6 +128,8 @@ namespace UniCEC.Data.JWT
                 claims: new[] {
                  //Id
                  new Claim("Id", user.Id.ToString()),
+                 //fullname
+                 new Claim("Fullname", user.Fullname),
                  //email
                  new Claim("Email", user.Email),
                  //Avatar

@@ -73,22 +73,6 @@ namespace UniCEC.Business.Services.ClubSvc
             return clubs;
         }
 
-        private ViewClub TransformViewClub(Club club, string universityName)
-        {
-            return new ViewClub()
-            {
-                Id = club.Id,
-                Description = club.Description,
-                Founding = club.Founding,
-                Name = club.Name,
-                TotalMember = club.TotalMember,
-                UniversityId = club.UniversityId,
-                UniversityName = universityName,
-                Status = club.Status,
-                Image = club.Image
-            };
-        }
-
         public async Task<ViewClub> Insert(ClubInsertModel club)
         {
             if (string.IsNullOrEmpty(club.Description) || club.UniversityId == 0 || club.TotalMember == 0
@@ -111,14 +95,7 @@ namespace UniCEC.Business.Services.ClubSvc
                 Image = club.Image,
             };
             int id = await _clubRepo.Insert(clubObject);
-            if (id > 0)
-            {
-                clubObject.Id = id;
-                string universityName = await _universityRepo.GetNameUniversityById(clubObject.UniversityId);
-                return TransformViewClub(clubObject, universityName);
-            }
-
-            return null;
+            return await _clubRepo.GetById(id);
         }
 
         public async Task Update(ClubUpdateModel club)

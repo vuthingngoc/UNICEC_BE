@@ -13,6 +13,7 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
         public Task<ViewUser> Insert(UserInsertModel user);
         public Task<bool> Update(ViewUser user);
+        public Task UpdateStatusOnline(int id, bool status);
         public Task<bool> Delete(int id);
 
         //Check-User-Exist

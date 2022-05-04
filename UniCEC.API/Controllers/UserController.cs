@@ -120,6 +120,25 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpPut("{id}/logout")]
+        [SwaggerOperation(Summary = "Log out account")]
+        public async Task<IActionResult> LogoutAccount(int id)
+        {
+            try
+            {
+                await _userService.UpdateStatusOnline(id, false);
+                return Ok();
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
         //-------------------LOGIN
         [Authorize(Roles = "Student")]
         [HttpPut("jwttoken")]
