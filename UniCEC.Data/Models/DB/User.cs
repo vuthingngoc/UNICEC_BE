@@ -27,7 +27,7 @@ namespace UniCEC.Data.Models.DB
         public string Dob { get; set; }
         public string Description { get; set; }
         public string Avatar { get; set; }
-        public bool? IsOnline { get; set; }
+        public bool IsOnline { get; set; }
 
         public virtual Major Major { get; set; }
         public virtual Role Role { get; set; }

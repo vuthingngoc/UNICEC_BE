@@ -10,5 +10,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
     {
         public Task<List<ViewMember>> GetLeadersByClub(int clubId);
         public Task<int> GetQuantityNewMembersByClub(int clubId);
+        public Task<bool> CheckExistedMemberInClub(int userId, int clubId);
     }
 }

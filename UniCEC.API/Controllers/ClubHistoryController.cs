@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -13,6 +14,7 @@ namespace UniCEC.API.Controllers
 {
     [Route("api/v1/club-history")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class ClubHistoryController : ControllerBase
     {
         private IClubHistoryService _clubHistoryService;
@@ -21,13 +23,18 @@ namespace UniCEC.API.Controllers
             _clubHistoryService = clubHistoryService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllClubHistory([FromQuery] PagingRequest request)
+        [HttpGet("club/{id}")]
+        [Authorize]
+        [SwaggerOperation(Summary = "Get all history member of a club")]
+        public async Task<IActionResult> GetAllHistoryByClub(int id, [FromQuery] PagingRequest request)
         {
             try
             {
-                PagingResult<ViewClubHistory> clubHistories = await _clubHistoryService.GetAllPaging(request);
-                return Ok(clubHistories);
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewClubHistory> clubHistories = await _clubHistoryService.GetAllPaging(id, token, request);
+                return (clubHistories != null) ? Ok(clubHistories) : BadRequest("You don't have permission to see history of the club");
             }
             catch (NullReferenceException ex)
             {

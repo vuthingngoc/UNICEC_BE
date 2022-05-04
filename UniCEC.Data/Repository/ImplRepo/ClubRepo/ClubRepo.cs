@@ -38,7 +38,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                                             Image = x.c.Image
                                         }).ToListAsync();
 
-            return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (clubs.Count() > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<ViewClub> GetById(int id)

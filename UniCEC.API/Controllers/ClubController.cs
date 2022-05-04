@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(Summary = "Get all club")]
         public async Task<IActionResult> GetAllClub([FromQuery] PagingRequest request)
         {
             try
@@ -42,6 +44,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get club by id")]
         public async Task<IActionResult> GetClubById(int id)
         {
             try
@@ -60,6 +63,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("name")]
+        [SwaggerOperation(Summary = "Get club by name")]
         public async Task<IActionResult> GetClubByName(string name, [FromQuery] PagingRequest request)
         {
             try
@@ -79,6 +83,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("user")]
         [Authorize(Roles = "Student")]
+        [SwaggerOperation(Summary = "Get club by user")]
         public async Task<IActionResult> GetClubByUser()
         {
             try
@@ -105,6 +110,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("university")]
         [Authorize(Roles = "Student")]
+        [SwaggerOperation(Summary = "Get club by university of user")]
         public async Task<IActionResult> GetClubByUniversity([FromQuery] PagingRequest request)
         {
             try
@@ -130,6 +136,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
+        [SwaggerOperation(Summary = "Get club by competition")]
         public async Task<IActionResult> GetClubByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
@@ -149,6 +156,7 @@ namespace UniCEC.API.Controllers
 
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Insert club")]
         public async Task<IActionResult> InsertClub([FromBody] ClubInsertModel club)
         {
             try
@@ -175,6 +183,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
+        [SwaggerOperation(Summary = "Update club")]
         public async Task<IActionResult> UpdateClub([FromBody] ClubUpdateModel club)
         {
             try
@@ -205,6 +214,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete club")]
         public async Task<IActionResult> DeleteClub(int id)
         {
             try

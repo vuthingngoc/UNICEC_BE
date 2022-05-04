@@ -16,6 +16,20 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         }
 
+        public async Task<bool> CheckExistedMemberInClub(int userId, int clubId)
+        {
+            var query = from m in context.Members
+                        join u in context.Users on m.StudentId equals u.Id
+                        join ch in context.ClubHistories on m.Id equals ch.MemberId
+                        join t in context.Terms on ch.TermId equals t.Id
+                        where ch.ClubId.Equals(clubId) && u.UserId.Equals(userId)
+                                && t.CreateTime.Date <= DateTime.Today && t.EndTime.Date >= DateTime.Today
+                        select m.Id;
+
+            int memberId = await query.FirstOrDefaultAsync();
+            return (memberId > 0) ? true : false;
+        }
+
         public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
         {
             var query = from ch in context.ClubHistories

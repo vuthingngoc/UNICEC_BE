@@ -137,7 +137,8 @@ namespace UniCEC.Business.Services.UserSvc
                 Status = status,
                 UniversityId = user.UniversityId,
                 UserId = user.UserId,
-                Avatar = user.Avatar
+                Avatar = user.Avatar,
+                IsOnline = true // default status when log in
             };
 
             int id = await _userRepo.Insert(element);
@@ -153,7 +154,7 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<bool> Update(ViewUser user)
         {
             User element = await _userRepo.Get(user.Id);
-            if (element == null) throw new NullReferenceException("Not Found");
+            if (element == null) throw new NullReferenceException("Not found this user");
 
             //bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
             //if (isInvalid) return isInvalid;
@@ -172,7 +173,15 @@ namespace UniCEC.Business.Services.UserSvc
 
             await _userRepo.Update();
             return true;
+        }
 
+        public async Task UpdateStatusOnline(int id, bool status)
+        {
+            User element = await _userRepo.Get(id);
+            if (element == null) throw new NullReferenceException("Not found this user");
+
+            element.IsOnline = status;
+            await _userRepo.Update();
         }
 
         public async Task<bool> Delete(int id)
@@ -222,7 +231,8 @@ namespace UniCEC.Business.Services.UserSvc
                     Fullname = "",
                     Gender = "",
                     UserId = "",
-                    Description = ""
+                    Description = "",
+                    IsOnline = true // default status when log in
                 };
                 int id = await _userRepo.Insert(user);
                 if (id > 0)
