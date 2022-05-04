@@ -24,6 +24,55 @@ namespace UniCEC.Business.Services.ClubSvc
             
         }
 
+        public async Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request)
+        {
+            PagingResult<ViewClub> clubs = await _clubRepo.GetAll(request);
+            return (clubs != null) ? clubs : throw new NullReferenceException("Not found any club");
+        }   
+
+        public async Task<ViewClub> GetByClub(int id)
+        {
+            ViewClub club = await _clubRepo.GetById(id);
+            if (club == null) throw new NullReferenceException("Not found this club");
+            return club;
+        }
+
+        public async Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request)
+        {
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByCompetition(competitionId, request);
+            if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
+            return clubs;
+        }
+
+        public async Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request)
+        {
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByName(name, request);
+            if (clubs == null) throw new NullReferenceException("Not found any club with this name");
+            return clubs;
+        }
+
+        public async Task<List<ViewClub>> GetByUser(string token)
+        {
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+            int userId = Int32.Parse(claim.Value);
+
+            List<ViewClub> clubs = await _clubRepo.GetByUser(userId);
+            if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
+            return clubs;
+        }
+
+        public async Task<PagingResult<ViewClub>> GetByUniversity(string token, PagingRequest request)
+        {
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+            int universityId = Int32.Parse(claim.Value);
+
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(universityId, request);
+            if (clubs == null) throw new NullReferenceException("This university have no any clubs");
+            return clubs;
+        }
+
         private ViewClub TransformViewClub(Club club, string universityName)
         {
             return new ViewClub()
@@ -38,105 +87,6 @@ namespace UniCEC.Business.Services.ClubSvc
                 Status = club.Status,
                 Image = club.Image
             };
-        }
-
-        public async Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request)
-        {
-            PagingResult<Club> clubs = await _clubRepo.GetAllPaging(request);
-            if (clubs != null)
-            {
-                List<ViewClub> items = new List<ViewClub>();
-                foreach (Club element in clubs.Items)
-                {
-                    string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
-                    ViewClub club = TransformViewClub(element, universityName);
-                    items.Add(club);
-                };
-                return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
-            }
-
-            throw new NullReferenceException("Not found any club");
-        }
-
-        public async Task<ViewClub> GetByClub(int id)
-        {
-            Club club = await _clubRepo.Get(id);
-            if (club != null)
-            {
-                string universityName = await _universityRepo.GetNameUniversityById(club.UniversityId);
-                return TransformViewClub(club, universityName);
-            }
-
-            throw new NullReferenceException("Not found this club");
-        }
-
-        public async Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request)
-        {
-            PagingResult<Club> clubs = await _clubRepo.GetByCompetition(competitionId, request);
-            if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
-
-            List<ViewClub> items = new List<ViewClub>();
-            foreach (Club element in clubs.Items)
-            {
-                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
-                ViewClub club = TransformViewClub(element, universityName);
-                items.Add(club);
-            };
-            return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
-        }
-
-        public async Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request)
-        {
-            PagingResult<Club> clubs = await _clubRepo.GetByName(name, request);
-            if (clubs == null) throw new NullReferenceException("Not found any club with this name");
-
-            List<ViewClub> items = new List<ViewClub>();
-            foreach (Club element in clubs.Items)
-            {
-                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
-                ViewClub club = TransformViewClub(element, universityName);
-                items.Add(club);
-            };
-            return new PagingResult<ViewClub>(items, clubs.TotalCount, clubs.CurrentPage, clubs.PageSize);
-        }
-
-        public async Task<List<ViewClub>> GetByUser(string token)
-        {
-            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            int userId = Int32.Parse(claim.Value);
-
-            List<Club> listClub = await _clubRepo.GetByUser(userId);
-            if (listClub == null) throw new NullReferenceException("This user is not a member of any clubs");
-
-            List<ViewClub> clubs = new List<ViewClub>();
-            foreach (Club element in listClub)
-            {
-                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
-                ViewClub club = TransformViewClub(element, universityName);
-                clubs.Add(club);
-            };
-            return clubs;
-        }
-
-        public async Task<PagingResult<ViewClub>> GetByUniversity(string token, PagingRequest request)
-        {
-            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            int universityId = Int32.Parse(claim.Value);
-
-            PagingResult<Club> clubs = await _clubRepo.GetByUniversity(universityId, request);
-            if (clubs == null) throw new NullReferenceException("This university have no any clubs");
-
-            List<ViewClub> items = new List<ViewClub>();
-            foreach (Club element in clubs.Items)
-            {
-                string universityName = await _universityRepo.GetNameUniversityById(element.UniversityId);
-                ViewClub club = TransformViewClub(element, universityName);
-                items.Add(club);
-            };
-
-            return new PagingResult<ViewClub>(items, clubs.TotalCount, request.CurrentPage, request.PageSize);
         }
 
         public async Task<ViewClub> Insert(ClubInsertModel club)
@@ -195,7 +145,5 @@ namespace UniCEC.Business.Services.ClubSvc
             clubObject.Status = false;
             await _clubRepo.Update();
         }
-
-       
     }
 }
