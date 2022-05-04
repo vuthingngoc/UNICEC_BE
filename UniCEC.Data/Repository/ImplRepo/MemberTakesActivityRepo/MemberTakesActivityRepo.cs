@@ -7,6 +7,7 @@ using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 {
@@ -15,6 +16,35 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public MemberTakesActivityRepo(UniCECContext context) : base(context)
         {
 
+        }
+
+        public async Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status)
+        {
+            var query = from mta in context.MemberTakesActivities
+                        where mta.ClubActivityId == ClubActivityId
+                        select mta;
+
+            query = query.Where(m => m.Status == Status);
+
+            List<MemberTakesActivity> list = await query.ToListAsync();
+
+            int totalMemTakesTask_Status = list.Count();
+
+            return totalMemTakesTask_Status;
+        }
+
+        public async Task<int> GetNumOfMemInTask(int ClubActivityId)
+        {
+            //
+            var query = from mta in context.MemberTakesActivities
+                        where mta.ClubActivityId == ClubActivityId
+                        select mta;
+
+            List<MemberTakesActivity> list = await query.ToListAsync();
+            
+            int totalMemTakesTask = list.Count();
+
+            return totalMemTakesTask;
         }
 
         public async Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId)
@@ -34,6 +64,32 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             }
         }
 
+        public async Task<bool> CheckNumOfMemInTask(int ClubActivityId)
+        {
+            var query1 = from ca in context.ClubActivities
+                         where ca.Id == ClubActivityId
+                         select ca;
+
+            int totalAllow = query1.FirstOrDefaultAsync().Result.NumOfMember;
+
+
+            var query2 = from mta in context.MemberTakesActivities
+                         where mta.ClubActivityId == ClubActivityId
+                         select mta;
+
+            int totalMemTakesTask = query2.Count();
+
+            if (totalMemTakesTask < totalAllow)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
         //Get-All-Taskes-By-Conditions
         public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request)
         {
@@ -44,7 +100,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             //club id
             if (request.ClubId.HasValue) query = query.Where(mta => mta.ClubActivity.ClubId == request.ClubId);
             //status
-            if (request.Status.HasValue) query = query.Where(mta => mta.Status.Equals(request.Status));
+            if (request.Status.HasValue) query = query.Where(mta => mta.Status == request.Status);
             //
             int totalCount = query.Count();
 
@@ -62,5 +118,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             //
             return (memberTakesActivities.Count != 0) ? new PagingResult<ViewMemberTakesActivity>(memberTakesActivities, totalCount, request.CurrentPage, request.PageSize) : null;
         }
+
+       
     }
 }

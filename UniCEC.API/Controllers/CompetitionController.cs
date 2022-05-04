@@ -3,8 +3,12 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionSvc;
+using UniCEC.Data.Enum;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,16 +27,94 @@ namespace UniCEC.API.Controllers
             _competitionService = competitionService;   
         }
 
+        // GET: api/<MemberTakesActivityController>
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions")]
+        public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
+        {
+            try
+            {
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    //
+                    return NotFound();
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        // GET: api/<MemberTakesActivityController>
+        [HttpGet("top3")]
+        [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION")]
+        public async Task<IActionResult> GetTop3CompOrEve([FromQuery] bool? Event, [FromQuery] CompetitionStatus? Status, [FromQuery] bool? Public)
+        {
+            try
+            {
+                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve_Status(Event, Status, Public);
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    //
+                    return NotFound();
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
         // GET api/<CompetitionController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        [SwaggerOperation(Summary = "Get detail of EVENT or COMPETITON by id")]
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            try
+            {
+                ViewCompetition result = await _competitionService.GetById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(result);
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         // POST api/<CompetitionController>
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert competition")]
+        [SwaggerOperation(Summary = "Insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
         public async Task<IActionResult> Insert([FromBody] CompetitionInsertModel model)
         {

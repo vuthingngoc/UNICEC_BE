@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -12,6 +13,12 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
         //check mem take task
         public Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId);
+        //Check number of member in task
+        public Task<bool> CheckNumOfMemInTask(int ClubActivityId);
+        //Get number of member in task
+        public Task<int> GetNumOfMemInTask(int ClubActivityId);
+        //Get number of member in task with status
+        public Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status);
 
     }
 }

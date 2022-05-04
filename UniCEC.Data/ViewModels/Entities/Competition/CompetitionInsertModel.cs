@@ -21,8 +21,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
         public DateTime EndTimeRegister { get; set; }
-        [JsonPropertyName("approved_time")]
-        public DateTime ApprovedTime { get; set; }
+        //[JsonPropertyName("approved_time")]
+        //public DateTime ApprovedTime { get; set; }
         public bool Public { get; set; }
         //public CompetitionStatus Status { get; set; }
         public string Address { get; set; }

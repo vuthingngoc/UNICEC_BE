@@ -23,13 +23,12 @@ namespace UniCEC.Data.RequestModels
         public int? SeedsPoint { get; set; }
         [FromQuery(Name = "number-of-member")]
         public int? NumberOfMember { get; set; }
-        [FromQuery(Name = "begin-time")]
-        public DateTime? BeginTime { get; set; }
-        [FromQuery(Name = "end-time")]
-        public DateTime? EndTime { get; set; }
-        [FromQuery(Name = "create-time")]
-        public DateTime? CreateTime { get; set; }
-
+        //[FromQuery(Name = "begin-time")]
+        //public DateTime? BeginTime { get; set; }
+        //[FromQuery(Name = "end-time")]
+        //public DateTime? EndTime { get; set; }
+        //[FromQuery(Name = "create-time")]
+        //public DateTime? CreateTime { get; set; }
 
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.Competition;
@@ -34,16 +36,45 @@ namespace UniCEC.Business.Services.CompetitionSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewCompetition> GetById(int id)
+        public async Task<ViewCompetition> GetById(int id)
         {
-            throw new NotImplementedException();
+            //
+            Competition comp = await _competitionRepo.Get(id);
+
+            //
+            if (comp != null)
+            {
+                comp.View += 1;
+                await _competitionRepo.Update();
+
+                return TransformViewModel(comp);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //Get top 3 EVENT or COMPETITION by Status
+        public async Task<List<ViewCompetition>> GetTop3CompOrEve_Status(bool? Event, CompetitionStatus? Status, bool? Public)
+        {
+            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve_Status(Event, Status, Public);
+            return result;
+        }
+
+
+        //Get EVENT or COMPETITION by conditions
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
+        {
+            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
+            return result;  
         }
 
         public async Task<ViewCompetition> Insert(CompetitionInsertModel model)
         {
             try
             {
-                //------------ Check Role Member Is Leader 
+
                 bool roleLeader = false;
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
@@ -52,6 +83,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     TermId = model.TermId
                 };
                 ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
                     if (infoClubMem.ClubRoleName.Equals("Leader"))
@@ -59,14 +91,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         roleLeader = true;
                     }
                 }
-                //
+                //------------ Check Role Member Is Leader 
                 if (roleLeader)
                 {
+                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
                     Competition competition = new Competition();
-                    //
+  
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
-                    competition.NumberOfGroup = model.NumberOfGroups;
+                    // Nếu NumberOfGroup có giá trị là = 0 => đó là đang create EVENT
+                    competition.NumberOfGroup = model.NumberOfGroups;       
                     competition.NumberOfParticipation = model.NumberOfParticipations;
                     competition.StartTime = model.StartTime;
                     competition.EndTime = model.EndTime;
@@ -87,7 +122,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (result > 0)
                     {
                         Competition comp = await _competitionRepo.Get(result);
-                        ViewCompetition viewCompetition = TransformView(comp);
+                        ViewCompetition viewCompetition = TransformViewModel(comp);
                         return viewCompetition;
                     }
                     else
@@ -111,7 +146,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             throw new NotImplementedException();
         }
 
-        public ViewCompetition TransformView(Competition competition)
+        public ViewCompetition TransformViewModel(Competition competition)
         {
             return new ViewCompetition()
             {
@@ -170,5 +205,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return seedCode;
         }
+
+       
     }
 }
