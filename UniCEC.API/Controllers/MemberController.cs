@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Data.ViewModels.Entities.Member;
@@ -23,8 +24,6 @@ namespace UniCEC.API.Controllers
             _ImemberService = ImemberService; 
         }
 
-
-
         // GET api/<MemberController>/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get member by id")]
@@ -43,6 +42,46 @@ namespace UniCEC.API.Controllers
                     //
                     return Ok(member);
                 }
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [HttpGet("leaders/club/{id}")]
+        [SwaggerOperation(Summary = "Get top leader in a club")]
+        public async Task<IActionResult> GetLeaders(int id)
+        {
+            try
+            {
+
+                List< ViewMember> members = await _ImemberService.GetLeadersByClub(id);
+                return Ok(members);
+            }
+            catch (NullReferenceException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [HttpGet("new/quantity/club/{id}")]
+        [SwaggerOperation(Summary = "Get new members in a club")]
+        public async Task<IActionResult> GetQuantityNewMembers(int id)
+        {
+            try
+            {
+
+                int quantity = await _ImemberService.GetQuantityNewMembersByClub(id);
+                return Ok(quantity);
             }
             catch (NullReferenceException e)
             {

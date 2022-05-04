@@ -23,6 +23,8 @@ namespace UniCEC.Data.Models.DB
         public DateTime Founding { get; set; }
         public bool Status { get; set; }
         public string Image { get; set; }
+        public string ClubFanpage { get; set; }
+        public string ClubContact { get; set; }
 
         public virtual University University { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }

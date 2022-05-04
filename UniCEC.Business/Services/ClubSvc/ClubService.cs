@@ -4,7 +4,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.ViewModels.Common;
