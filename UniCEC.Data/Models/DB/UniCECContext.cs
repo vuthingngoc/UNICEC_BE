@@ -141,6 +141,14 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.ClubContact)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ClubFanpage)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Description)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -260,8 +268,6 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Address)
                     .IsRequired()
                     .HasMaxLength(255);
-
-                entity.Property(e => e.ApprovedTime).HasColumnType("datetime");
 
                 entity.Property(e => e.CompetitionTypeId).HasColumnName("CompetitionTypeID");
 

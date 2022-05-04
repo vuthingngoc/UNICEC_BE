@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
@@ -22,7 +23,6 @@ namespace UniCEC.Business.Services.MemberSvc
             return new ViewMember()
             {
                 Id = member.Id,
-                StudentId = member.StudentId,
                 Status = member.Status,
             };
 
@@ -63,7 +63,6 @@ namespace UniCEC.Business.Services.MemberSvc
                 return new ViewMember()
                 {
                     Id = mem.Id,
-                    StudentId = mem.StudentId,
                     Status = mem.Status
                 };
             }
@@ -74,7 +73,19 @@ namespace UniCEC.Business.Services.MemberSvc
 
         }
 
+        public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
+        {
+            List<ViewMember> members = await _memberRepo.GetLeadersByClub(clubId);
+            if (members == null) throw new NullReferenceException("Not found any Leaders");
+            return members;
+        }
 
+        public async Task<int> GetQuantityNewMembersByClub(int clubId)
+        {
+            int quantity = await _memberRepo.GetQuantityNewMembersByClub(clubId);
+            if (quantity < 0) throw new NullReferenceException("Not found this club");
+            return quantity;
+        }
 
         //Insert-Member
         public async Task<ViewMember> Insert(MemberInsertModel model)

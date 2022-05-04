@@ -5,11 +5,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.RoleRepo;
 using UniCEC.Data.ViewModels.Entities.User;
-using UniCEC.Data.ViewModels.Firebase.Auth;
 
 namespace UniCEC.Data.JWT
 {
@@ -49,7 +45,7 @@ namespace UniCEC.Data.JWT
                  //Role
                  new Claim(ClaimTypes.Role, roleName),
                 },
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: new SigningCredentials(
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256
@@ -81,7 +77,7 @@ namespace UniCEC.Data.JWT
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
                 },
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: new SigningCredentials(
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256
@@ -112,7 +108,7 @@ namespace UniCEC.Data.JWT
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
                 },
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: new SigningCredentials(
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256
@@ -141,7 +137,7 @@ namespace UniCEC.Data.JWT
                  //Role
                  new Claim(ClaimTypes.Role, user.RoleName),
                 },
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: new SigningCredentials(
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256

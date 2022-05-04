@@ -107,10 +107,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     competition.EndTime = model.EndTime;
                     competition.StartTimeRegister = model.StartTimeRegister;
                     competition.EndTimeRegister = model.EndTimeRegister;
-
-                    //LƯU Ý ĐÃ BỎ TRƯỜNG ApprovedTime  
-                    competition.ApprovedTime = DateTime.Now;
-
                     competition.SeedsPoint = model.SeedsPoint;
                     competition.SeedsDeposited = model.SeedsDeposited;
                     competition.SeedsCode = await checkExistCode();
@@ -167,7 +163,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 EndTime = competition.EndTime,
                 StartTimeRegister = competition.StartTimeRegister,
                 EndTimeRegister = competition.EndTimeRegister,
-                //ApprovedTime = competition.ApprovedTime,
                 //Seed code - point
                 SeedsPoint = competition.SeedsPoint,
                 SeedsDeposited = competition.SeedsDeposited,
