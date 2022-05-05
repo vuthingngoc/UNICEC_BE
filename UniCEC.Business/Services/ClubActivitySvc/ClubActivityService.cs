@@ -109,7 +109,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 Ending = clubActivity.Ending,
                 CreateTime = clubActivity.CreateTime,
                 Description = clubActivity.Description,
-                Id = clubActivity.ClubId,
+                Id = clubActivity.Id,
                 Name = clubActivity.Name,
                 NumOfMember = clubActivity.NumOfMember,
                 SeedsCode = clubActivity.SeedsCode,
