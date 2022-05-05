@@ -72,7 +72,12 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 clubActivity.Description = model.Description;
                 clubActivity.Name = model.Name;
                 clubActivity.SeedsPoint = model.SeedsPoint;
-                clubActivity.CreateTime = DateTime.Now;
+                //LocalTime
+                var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTimeOffset localServerTime = DateTimeOffset.Now;
+                DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+                clubActivity.CreateTime = localTime.DateTime;
+                //
                 clubActivity.Beginning = model.Beginning;
                 clubActivity.Ending = model.Ending;
                 //Check Status
