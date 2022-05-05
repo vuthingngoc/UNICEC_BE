@@ -5,11 +5,11 @@ namespace UniCEC.Data.RequestModels
 {
     public class UserRequestModel : PagingRequest
     {
-        [FromQuery(Name = "university-id")] 
+        [FromQuery(Name = "universityId")] 
         public int? UniversityId { get; set; }
-        [FromQuery(Name = "major-id")]
+        [FromQuery(Name = "majorId")]
         public int? MajorId { get; set; }
-        [FromQuery(Name = "fullname")]
+        [FromQuery(Name = "fullName")]
         public string Fullname { get; set; }
         [FromQuery(Name = "status")]
         public bool? Status { get; set; }

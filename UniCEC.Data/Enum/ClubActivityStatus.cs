@@ -10,8 +10,8 @@ namespace UniCEC.Data.Enum
     {
         HappenningSoon,
         Happenning,
-        Ended,
-        Canceled,
+        Ending,
+        Canceling,
         Error
     }
 }

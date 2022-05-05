@@ -29,8 +29,8 @@ namespace UniCEC.API.Controllers
 
 
         [HttpGet("process-club-activity")]
-        [SwaggerOperation(Summary = "Get process of club activity by Id")]
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int ClubActivityId , [FromQuery] MemberTakesActivityStatus status)
+        [SwaggerOperation(Summary = "Get process of club activity by Id ,  0.HappenningSoon, 1.Happenning , 2.Ending , 3.Canceling , 4.Eror")]
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="clubActivityId")] int ClubActivityId , [FromQuery(Name ="status")] MemberTakesActivityStatus status)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace UniCEC.API.Controllers
         [HttpGet("top4")]
         [SwaggerOperation(Summary = "Get top 4 club activities by now")]
         //Lưu ý University Id dựa vào JWT
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] int UniversityId, [FromQuery] int ClubId)
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="universityId")] int UniversityId, [FromQuery(Name ="clubId")] int ClubId)
         {
             try
             {
