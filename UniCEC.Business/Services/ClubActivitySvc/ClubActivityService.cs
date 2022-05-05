@@ -240,7 +240,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     Ending = viewClubActivity.Ending,
                     CreateTime = viewClubActivity.CreateTime,
                     Description = viewClubActivity.Description,
-                    Id = viewClubActivity.ClubId,
+                    Id = viewClubActivity.Id,
                     Name = viewClubActivity.Name,
                     NumOfMember = viewClubActivity.NumOfMember,
                     SeedsCode = viewClubActivity.SeedsCode,
