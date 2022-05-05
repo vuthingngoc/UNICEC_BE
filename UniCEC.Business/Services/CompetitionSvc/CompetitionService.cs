@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -15,21 +16,21 @@ namespace UniCEC.Business.Services.CompetitionSvc
     public class CompetitionService : ICompetitionService
     {
         private ICompetitionRepo _competitionRepo;
-
         //check Infomation Member -> is Leader
         private IClubHistoryRepo _clubHistoryRepo;
+        // check Club Has Competition 
+        private ICompetitionInClubRepo _competitionInClubRepo;
 
-        public CompetitionService(ICompetitionRepo competitionRepo, 
-                                  IClubHistoryRepo clubHistoryRepo)
+        public CompetitionService(ICompetitionRepo competitionRepo,
+                                  IClubHistoryRepo clubHistoryRepo,
+                                  ICompetitionInClubRepo competitionInClubRepo)
         {
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
+            _competitionInClubRepo = competitionInClubRepo;
         }
 
-        public Task<bool> Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request)
         {
@@ -67,14 +68,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
         {
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
-            return result;  
+            return result;
         }
 
         public async Task<ViewCompetition> Insert(CompetitionInsertModel model)
         {
             try
             {
-
                 bool roleLeader = false;
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
@@ -86,22 +86,22 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
+                    //------------ Check Role Member Is Leader 
                     if (infoClubMem.ClubRoleName.Equals("Leader"))
                     {
                         roleLeader = true;
                     }
                 }
-                //------------ Check Role Member Is Leader 
                 if (roleLeader)
                 {
                     //ở trong trường hợp này phân biệt EVENT - COMPETITION
                     //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
                     Competition competition = new Competition();
-  
+
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
                     // Nếu NumberOfGroup có giá trị là = 0 => đó là đang create EVENT
-                    competition.NumberOfGroup = model.NumberOfGroups;       
+                    competition.NumberOfGroup = model.NumberOfGroups;
                     competition.NumberOfParticipation = model.NumberOfParticipations;
                     competition.StartTime = model.StartTime;
                     competition.EndTime = model.EndTime;
@@ -141,9 +141,117 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public Task<bool> Update(ViewCompetition competition)
+        public async Task<bool> Update(CompetitionUpdateModel competition)
         {
-            throw new NotImplementedException();
+            try
+            {
+                bool roleLeader = false;
+                bool clubHasCreateCompetition = false;
+
+                //Use method check
+                //-> if FALSE mean it's created -> Can Update
+                //-> if TRUE mean it isn't created -> Can't Update
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                //------------ Check Club Has Create Competition
+                if (clubHasCreateCompetition == false)
+                {
+                    GetMemberInClubModel conditions = new GetMemberInClubModel()
+                    {
+                        UserId = competition.UserId,
+                        ClubId = competition.ClubId,
+                        TermId = competition.TermId
+                    };
+                    ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                    //------------ Check Mem in that club
+                    if (infoClubMem != null)
+                    {
+                        //------------ Check Role Member Is Leader 
+                        if (infoClubMem.ClubRoleName.Equals("Leader"))
+                        {
+                            roleLeader = true;
+                        }
+                    }
+                    if (roleLeader)
+                    {
+                        //
+                        Competition comp = await _competitionRepo.Get(competition.Id);
+                        comp.SeedsPoint = (competition.SeedsPoint != 0) ? competition.SeedsPoint : comp.SeedsPoint;
+                        comp.SeedsDeposited = (competition.SeedsDeposited != 0) ? competition.SeedsDeposited : comp.SeedsDeposited;
+                        comp.Address = (competition.Address.Length > 0) ? competition.Address : comp.Address;
+                        //
+                        await _competitionRepo.Update();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> Delete(CompetitionDeleteModel competition)
+        {
+            try
+            {
+                bool roleLeader = false;
+                bool clubHasCreateCompetition = false;
+
+                //Use method check
+                //-> if FALSE mean it's created -> Can Update
+                //-> if TRUE mean it isn't created -> Can't Update
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                //------------ Check Club Has Create Competition
+                if (clubHasCreateCompetition == false)
+                {
+                    GetMemberInClubModel conditions = new GetMemberInClubModel()
+                    {
+                        UserId = competition.UserId,
+                        ClubId = competition.ClubId,
+                        TermId = competition.TermId
+                    };
+                    ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                    //------------ Check Mem in that club
+                    if (infoClubMem != null)
+                    {
+                        //------------ Check Role Member Is Leader 
+                        if (infoClubMem.ClubRoleName.Equals("Leader"))
+                        {
+                            roleLeader = true;
+                        }
+                    }
+                    if (roleLeader)
+                    {
+                        //
+                        Competition comp = await _competitionRepo.Get(competition.Id);
+                        comp.Status = CompetitionStatus.Canceling;
+                        //
+                        await _competitionRepo.Update();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ViewCompetition TransformViewModel(Competition competition)
@@ -206,6 +314,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return seedCode;
         }
 
-       
+
     }
 }

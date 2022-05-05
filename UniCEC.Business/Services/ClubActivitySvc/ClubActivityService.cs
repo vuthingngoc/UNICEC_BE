@@ -128,13 +128,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 if (clubActivity != null)
                 {
                     //update name-des-seedpoint-beginning-ending-numOfmem-status
-                    clubActivity.Name = (!model.Name.Equals("")) ? model.Name : clubActivity.Name;
-                    clubActivity.Description = (!model.Description.Equals("")) ? model.Description : clubActivity.Description;
-                    clubActivity.SeedsPoint = (!model.SeedsPoint.Equals("")) ? model.SeedsPoint : clubActivity.SeedsPoint;
-                    clubActivity.Beginning = model.Beginning;
-                    clubActivity.Ending = model.Ending;
-                    clubActivity.NumOfMember = (!model.NumOfMember.ToString().Equals("")) ? model.NumOfMember : clubActivity.NumOfMember;
-                    clubActivity.Status = (!model.Status.ToString().Equals("")) ? model.Status : clubActivity.Status;
+                    clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
+                    clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
+                    clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
+                    clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
+                    clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
+                    clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
+                    clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
+
                     await _clubActivityRepo.Update();
                     return true;
                 }
