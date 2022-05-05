@@ -15,7 +15,7 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/competition")]
     [ApiController]
     [ApiVersion("1.0")]
     public class CompetitionController : ControllerBase
@@ -29,7 +29,7 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet]
-        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.HappenningSoon, 1.Registering , 2.Happening , 3.Ending , 4.Canceling , 5.NotAssigned")]
         public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
         {
             try
@@ -59,7 +59,7 @@ namespace UniCEC.API.Controllers
         // GET: api/<MemberTakesActivityController>
         [HttpGet("top3")]
         [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION")]
-        public async Task<IActionResult> GetTop3CompOrEve([FromQuery] bool? Event, [FromQuery] CompetitionStatus? Status, [FromQuery] bool? Public)
+        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "public")] bool? Public)
         {
             try
             {

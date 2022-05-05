@@ -12,16 +12,16 @@ namespace UniCEC.Data.RequestModels
     public class ClubActivityRequestModel : PagingRequest
     {
 
-        [FromQuery(Name = "university-id")]
+        [FromQuery(Name = "universityId")]
         public int UniversityId { get; set; }
 
-        [FromQuery(Name = "club-id")]
+        [FromQuery(Name = "clubId")]
         public int? ClubId { get; set; }
-
+        [FromQuery(Name = "status")]
         public ClubActivityStatus? Status { get; set; }
-        [FromQuery(Name = "seeds-point")]
+        [FromQuery(Name = "seedsPoint")]
         public int? SeedsPoint { get; set; }
-        [FromQuery(Name = "number-of-member")]
+        [FromQuery(Name = "numberOfMember")]
         public int? NumberOfMember { get; set; }
         //[FromQuery(Name = "begin-time")]
         //public DateTime? BeginTime { get; set; }

@@ -32,7 +32,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 if (clubActivity != null)
                 {
                     //
-                    clubActivity.Status = ClubActivityStatus.Canceled;
+                    clubActivity.Status = ClubActivityStatus.Canceling;
                     await _clubActivityRepo.Update();
                     return true;
                 }
