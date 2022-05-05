@@ -8,5 +8,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
     {
         //check-club-id-create-competition-duplicate
         public Task<bool> CheckDuplicateCreateCompetition(int clubId, int competitionId);
+        //
     }
 }

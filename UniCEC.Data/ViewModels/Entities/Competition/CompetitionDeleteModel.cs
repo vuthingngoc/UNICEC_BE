@@ -1,17 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
-    public class CompetitionUpdateModel
+    public class CompetitionDeleteModel
     {
-        public int Id { get; set; }
-        [JsonPropertyName("seeds_point")]
-        public double SeedsPoint { get; set; }
-        [JsonPropertyName("seeds_deposited")]
-        public double SeedsDeposited { get; set; } 
-        public string? Address { get; set; }
 
+        public int Id { get; set; }
         //---------Author to check user is Leader of Club and Collaborate in Copetition
         [JsonPropertyName("user_id")]
         public int UserId { get; set; }

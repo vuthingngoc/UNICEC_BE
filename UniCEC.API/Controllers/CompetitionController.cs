@@ -142,15 +142,59 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<CompetitionController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
+        public async Task<IActionResult> Update ([FromBody] CompetitionUpdateModel model)
         {
+            try
+            {
+                Boolean check = false;
+                check = await _competitionService.Update(model);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         // DELETE api/<CompetitionController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Canceling EVENT or COMPETITION")]
+        public async Task<IActionResult> Delete([FromBody] CompetitionDeleteModel model)
         {
+            try
+            {
+                Boolean check = false;
+                check = await _competitionService.Delete(model);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
     }
 }
