@@ -12,8 +12,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request);
         public Task<ViewCompetition> GetById(int id);
         public Task<ViewCompetition> Insert(CompetitionInsertModel competition);
-        public Task<bool> Update(ViewCompetition competition);
-        public Task<bool> Delete(int id);
+        public Task<bool> Update(CompetitionUpdateModel competition);
+        public Task<bool> Delete(CompetitionDeleteModel model);
 
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
