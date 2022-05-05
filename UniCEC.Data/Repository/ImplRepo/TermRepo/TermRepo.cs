@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Common;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 {
@@ -16,7 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
         }
 
-        public async Task<PagingResult<Term>> GetByClub(int clubId, PagingRequest request)
+        public async Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request)
         {
             var query = from ch in context.ClubHistories
                         join t in context.Terms on ch.TermId equals t.Id
@@ -24,8 +25,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                         select new { t };
 
             int totalCount = query.Count();
-            List<Term> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                            .Select(x => new Term()
+            List<ViewTerm> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                            .Select(x => new ViewTerm()
                                             {
                                                 Id = x.t.Id,
                                                 Name = x.t.Name,
@@ -33,10 +34,10 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                                                 EndTime = x.t.EndTime
                                             }).Distinct().ToListAsync();
 
-            return (totalCount > 0) ? new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (totalCount > 0) ? new PagingResult<ViewTerm>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<Term>> GetByConditions(int clubId, TermRequestModel request)
+        public async Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
         {
             var query = from ch in context.ClubHistories
                         join t in context.Terms on ch.TermId equals t.Id
@@ -49,8 +50,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
 
             int totalCount = query.Count();
-            List<Term> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                            .Select(x => new Term()
+            List<ViewTerm> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                            .Select(x => new ViewTerm()
                                             {
                                                 Id = x.t.Id,
                                                 Name = x.t.Name,
@@ -58,15 +59,15 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                                                 EndTime = x.t.EndTime
                                             }).Distinct().ToListAsync();
 
-            return (totalCount > 0) ? new PagingResult<Term>(items, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (totalCount > 0) ? new PagingResult<ViewTerm>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<Term> GetById(int clubId, int id)
+        public async Task<ViewTerm> GetById(int clubId, int id)
         {
             var query = from ch in context.ClubHistories
                         join t in context.Terms on ch.TermId equals t.Id
                         where ch.ClubId.Equals(clubId) && t.Id.Equals(id)
-                        select new Term()
+                        select new ViewTerm()
                         {
                             Id = t.Id,
                             Name = t.Name,

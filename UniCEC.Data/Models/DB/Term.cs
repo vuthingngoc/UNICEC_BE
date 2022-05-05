@@ -16,6 +16,7 @@ namespace UniCEC.Data.Models.DB
         public string Name { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime EndTime { get; set; }
+        public bool Status { get; set; }
 
         public virtual ICollection<ClubHistory> ClubHistories { get; set; }
     }

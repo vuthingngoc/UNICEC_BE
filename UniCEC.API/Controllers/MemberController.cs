@@ -60,7 +60,7 @@ namespace UniCEC.API.Controllers
             try
             {
 
-                List< ViewMember> members = await _ImemberService.GetLeadersByClub(id);
+                List<ViewMember> members = await _ImemberService.GetLeadersByClub(id);
                 return Ok(members);
             }
             catch (NullReferenceException e)

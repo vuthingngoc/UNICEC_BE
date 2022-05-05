@@ -28,26 +28,6 @@ namespace UniCEC.Business.Services.MemberSvc
 
         }
 
-        public async Task<bool> Delete(int id)
-        {
-            try
-            {
-                Member member = await _memberRepo.Get(id);
-                if (member != null)
-                {
-                    //
-                    member.Status = false;
-                    await _memberRepo.Update();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public Task<PagingResult<ViewMember>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
@@ -128,6 +108,26 @@ namespace UniCEC.Business.Services.MemberSvc
                 if (member != null)
                 {
                     member.Status = (model.Status != null) ? model.Status : member.Status;
+                    await _memberRepo.Update();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            try
+            {
+                Member member = await _memberRepo.Get(id);
+                if (member != null)
+                {
+                    //
+                    member.Status = false;
                     await _memberRepo.Update();
                     return true;
                 }

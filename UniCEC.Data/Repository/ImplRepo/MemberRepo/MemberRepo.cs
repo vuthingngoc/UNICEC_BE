@@ -47,7 +47,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = x.ch.ClubRoleId,
                 ClubRoleName = x.cr.Name,
                 Avatar = x.u.Avatar,
-                Status = x.u.Status
+                Status = x.u.IsOnline             
             }).ToListAsync();
             
             return (members.Count > 0) ? members : null;
