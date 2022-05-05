@@ -105,7 +105,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPut]
         [SwaggerOperation(Summary = "Update term")]
-        public async Task<IActionResult> UpdateTerm(ViewTerm term)
+        public async Task<IActionResult> UpdateTerm(TermUpdateModel term)
         {
             try
             {
