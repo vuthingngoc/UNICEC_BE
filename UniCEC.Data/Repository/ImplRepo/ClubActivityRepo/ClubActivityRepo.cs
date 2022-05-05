@@ -35,15 +35,18 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
         //Get Top 4 Club Activities depend on create time
         public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
         {
-            //format date
-            DateTime now = DateTime.Now; //.AddHours(23).AddMinutes(59).AddSeconds(59).AddTicks(999);
+            
+            //LocalTime
+            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTimeOffset localServerTime = DateTimeOffset.Now;
+            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info); //.AddHours(23).AddMinutes(59).AddSeconds(59).AddTicks(999);
             //
             var query = from u in context.Universities
                         where u.Id == universityId
                         from c in context.Clubs
                         where c.UniversityId == u.Id
                         from ca in context.ClubActivities
-                        where c.Id == clubId && ca.CreateTime <= now
+                        where c.Id == clubId && ca.CreateTime <= localTime.DateTime
                         orderby ca.CreateTime descending
                         select ca;
 

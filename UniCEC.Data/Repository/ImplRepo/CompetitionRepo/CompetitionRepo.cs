@@ -80,11 +80,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //gần ngày hiện tại
         public async Task<List<ViewCompetition>> GetTop3CompOrEve_Status(bool? Event, CompetitionStatus? Status, bool? Public)
         {
-            //format date
-            DateTime now = DateTime.Now;
+            //LocalTime
+            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTimeOffset localServerTime = DateTimeOffset.Now;
+            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
 
             var query = from comp in context.Competitions
-                        where comp.StartTime >= now
+                        where comp.StartTime >= localTime.DateTime
                         orderby comp.StartTime 
                         select comp;
 
