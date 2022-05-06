@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
@@ -20,11 +21,11 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         //check mem in club
         private IClubHistoryRepo _clubHistoryRepo;
 
-        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, IClubActivityRepo clubActivityRepo, IClubHistoryRepo clubHistoryRepo )
+        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, IClubActivityRepo clubActivityRepo, IClubHistoryRepo clubHistoryRepo)
         {
             _memberTakesActivityRepo = memberTakesActivityRepo;
             _clubActivityRepo = clubActivityRepo;
-            _clubHistoryRepo = clubHistoryRepo; 
+            _clubHistoryRepo = clubHistoryRepo;
         }
 
         //transfer View Model
@@ -89,39 +90,54 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     bool MemTakesTask = await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, model.MemberId);
                     if (MemTakesTask)
                     {
-                        MemberTakesActivity mta = new MemberTakesActivity()
+                        //------------------------------------Check Club Activity is Happenning Status can add                       
+                        bool checkStatusClubActivity = await CheckStatusClubActivity(model.ClubActivityId);
+                        if (checkStatusClubActivity)
                         {
-                            //club activity id
-                            ClubActivityId = model.ClubActivityId,
-                            //member id
-                            MemberId = model.MemberId,
-                            //join mean now 
-                            StartTime = DateTime.Now,
-                            //Submit time chưa có nên cho mặc định 
-                            EndTime = DefaultEndTime,
-                            //end date of club activity
-                            Deadline = deadline,
-                            //default status is Doing
-                            Status = Data.Enum.MemberTakesActivityStatus.Doing,
-                        };
 
-                        int result = await _memberTakesActivityRepo.Insert(mta);
-                        if (result > 0)
-                        {
-                            //
-                            MemberTakesActivity m = await _memberTakesActivityRepo.Get(result);
-                            return TransferViewModel(m);
-                        }
+                            //LocalTime
+                            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                            DateTimeOffset localServerTime = DateTimeOffset.Now;
+                            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+
+                            MemberTakesActivity mta = new MemberTakesActivity()
+                            {
+                                //club activity id
+                                ClubActivityId = model.ClubActivityId,
+                                //member id
+                                MemberId = model.MemberId,
+                                //join mean now
+                                StartTime = localTime.DateTime,
+                                //Submit time chưa có nên cho mặc định 
+                                EndTime = DefaultEndTime,
+                                //end date of club activity
+                                Deadline = deadline,
+                                //default status is Doing
+                                Status = Data.Enum.MemberTakesActivityStatus.Doing,
+                            };
+
+                            int result = await _memberTakesActivityRepo.Insert(mta);
+                            if (result > 0)
+                            {
+                                //
+                                MemberTakesActivity m = await _memberTakesActivityRepo.Get(result);
+                                return TransferViewModel(m);
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        } // end if checkStatusClubActivity
                         else
                         {
                             return null;
                         }
-                    }
+                    }// end if MemTakesTask
                     else
                     {
                         return null;
                     }
-                }
+                }// end if MemInClub_Term && NumOfMem_InTask
                 else
                 {
                     return null;
@@ -142,7 +158,12 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 if (mta != null)
                 {
                     //check date
-                    int result = DateTime.Compare(DateTime.Now, mta.Deadline);
+                    //LocalTime
+                    var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    DateTimeOffset localServerTime = DateTimeOffset.Now;
+                    DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+                    //
+                    int result = DateTime.Compare(localTime.DateTime, mta.Deadline);
                     //1. earlier 
                     if (result < 0)
                     {
@@ -189,6 +210,36 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             else
             {
                 return null;
+            }
+        }
+
+        //Check Status Club Activity
+        private async Task<bool> CheckStatusClubActivity(int clubActivityId)
+        {
+            try
+            {
+                //
+                ClubActivity ca = await _clubActivityRepo.Get(clubActivityId);
+                //
+                if (ca != null)
+                {
+                    if (ca.Status == ClubActivityStatus.Happenning)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

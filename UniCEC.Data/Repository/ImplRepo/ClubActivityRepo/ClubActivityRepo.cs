@@ -39,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             //LocalTime
             var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             DateTimeOffset localServerTime = DateTimeOffset.Now;
-            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info); //.AddHours(23).AddMinutes(59).AddSeconds(59).AddTicks(999);
+            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info); 
             //
             var query = from u in context.Universities
                         where u.Id == universityId

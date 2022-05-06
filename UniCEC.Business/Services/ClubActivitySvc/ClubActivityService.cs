@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
+using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.Business.Services.ClubActivitySvc
 {
@@ -17,10 +19,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         //
         private IMemberTakesActivityRepo _memberTakesActivityRepo;
 
-        public ClubActivityService(IClubActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo)
+        //check Infomation Member -> is Leader
+        private IClubHistoryRepo _clubHistoryRepo;
+
+        public ClubActivityService(IClubActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo, IClubHistoryRepo clubHistoryRepo)
         {
             _clubActivityRepo = clubActivityRepo;
             _memberTakesActivityRepo = memberTakesActivityRepo;
+            _clubHistoryRepo = clubHistoryRepo;
         }
 
         //Delete-Club-Activity-By-Id
@@ -65,32 +71,56 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         {
             try
             {
-                ClubActivity clubActivity = new ClubActivity();
-                //
-                clubActivity.ClubId = model.ClubId;
-                clubActivity.NumOfMember = model.NumOfMember;
-                clubActivity.Description = model.Description;
-                clubActivity.Name = model.Name;
-                clubActivity.SeedsPoint = model.SeedsPoint;
-                //LocalTime
-                var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                DateTimeOffset localServerTime = DateTimeOffset.Now;
-                DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
-                clubActivity.CreateTime = localTime.DateTime;
-                //
-                clubActivity.Beginning = model.Beginning;
-                clubActivity.Ending = model.Ending;
-                //Check Status
-                clubActivity.Status = GetClubActivityStatus(model.Beginning);
-                //Check Code
-                clubActivity.SeedsCode = await checkExistCode();
-
-                int result = await _clubActivityRepo.Insert(clubActivity);
-                if (result > 0)
+                bool roleLeader = false;
+                GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    ClubActivity ca = await _clubActivityRepo.Get(result);
-                    ViewClubActivity viewClubActivity = TransformView(ca);
-                    return viewClubActivity;
+                    UserId = model.UserId,
+                    ClubId = model.ClubId,
+                    TermId = model.TermId
+                };
+                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //------------ Check Mem in that club
+                if (infoClubMem != null)
+                {
+                    //------------ Check Role Member Is Leader 
+                    if (infoClubMem.ClubRoleName.Equals("Leader"))
+                    {
+                        roleLeader = true;
+                    }
+                }
+                if (roleLeader)
+                {
+                    ClubActivity clubActivity = new ClubActivity();
+                    //
+                    clubActivity.ClubId = model.ClubId;
+                    clubActivity.NumOfMember = model.NumOfMember;
+                    clubActivity.Description = model.Description;
+                    clubActivity.Name = model.Name;
+                    clubActivity.SeedsPoint = model.SeedsPoint;
+                    //LocalTime
+                    var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    DateTimeOffset localServerTime = DateTimeOffset.Now;
+                    DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+                    clubActivity.CreateTime = localTime.DateTime;
+                    //
+                    clubActivity.Beginning = model.Beginning;
+                    clubActivity.Ending = model.Ending;
+                    //Check Status
+                    clubActivity.Status = GetClubActivityStatus(model.Beginning);
+                    //Check Code
+                    clubActivity.SeedsCode = await checkExistCode();
+
+                    int result = await _clubActivityRepo.Insert(clubActivity);
+                    if (result > 0)
+                    {
+                        ClubActivity ca = await _clubActivityRepo.Get(result);
+                        ViewClubActivity viewClubActivity = TransformView(ca);
+                        return viewClubActivity;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 else
                 {
@@ -127,24 +157,49 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         {
             try
             {
-                //get club Activity
-                ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
                 bool check = false;
-                if (clubActivity != null)
+                bool roleLeader = false;
+                GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    //update name-des-seedpoint-beginning-ending-numOfmem-status
-                    clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
-                    clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
-                    clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
-                    clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
-                    clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
-                    clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
-                    clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
-
-                    await _clubActivityRepo.Update();
-                    return true;
+                    UserId = model.UserId,
+                    ClubId = model.ClubId,
+                    TermId = model.TermId
+                };
+                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //------------ Check Mem in that club
+                if (infoClubMem != null)
+                {
+                    //------------ Check Role Member Is Leader 
+                    if (infoClubMem.ClubRoleName.Equals("Leader"))
+                    {
+                        roleLeader = true;
+                    }
                 }
-                return check;
+                if (roleLeader)
+                {
+                    //get club Activity
+                    ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
+                    
+                    if (clubActivity != null)
+                    {
+                        //update name-des-seedpoint-beginning-ending-numOfmem-status
+                        clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
+                        clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
+                        clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
+                        clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
+                        clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
+                        clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
+                        clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
+
+                        await _clubActivityRepo.Update();
+                        return true;
+                    }
+                    return check;
+                }
+                else
+                {
+                    return check;
+                }
             }
             catch (Exception)
             {

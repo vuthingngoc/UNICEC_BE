@@ -10,8 +10,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int CompetitionTypeId { get; set; }
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipations { get; set; }
-        [JsonPropertyName("number_of_groups")]
-        public int NumberOfGroups { get; set; }
+        [JsonPropertyName("number_of_team")]
+        public int NumberOfTeam { get; set; }
         [JsonPropertyName("start_time")]
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
