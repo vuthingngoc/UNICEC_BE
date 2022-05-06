@@ -100,8 +100,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
-                    // Nếu NumberOfGroup có giá trị là = 0 => đó là đang create EVENT
-                    competition.NumberOfGroup = model.NumberOfGroups;
+                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                    competition.NumberOfTeam = model.NumberOfTeam;
                     competition.NumberOfParticipation = model.NumberOfParticipations;
                     competition.StartTime = model.StartTime;
                     competition.EndTime = model.EndTime;
@@ -265,7 +265,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Address = competition.Address,
                 //Group member
                 NumberOfParticipation = competition.NumberOfParticipation,
-                NumberOfGroup = competition.NumberOfGroup,
+                NumberOfTeam = competition.NumberOfTeam,
                 //Time
                 StartTime = competition.StartTime,
                 EndTime = competition.EndTime,

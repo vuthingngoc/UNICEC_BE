@@ -48,7 +48,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Serach Event
             if (request.Event.HasValue)
             {
-                if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfGroup == 0);
+                if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
             }
             //
             int totalCount = query.Count();
@@ -58,7 +58,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 Id = x.Id,
                 CompetitionTypeId = x.CompetitionTypeId,
                 Address = x.Address,
-                NumberOfGroup = x.NumberOfGroup,
+                NumberOfTeam = x.NumberOfTeam,
                 NumberOfParticipation = x.NumberOfParticipation,
                 StartTime = x.StartTime,
                 EndTime = x.EndTime,
@@ -93,7 +93,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Serach Event
             if (Event.HasValue)
             {
-                if (Event.Value == true) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.NumberOfGroup == 0);
+                if (Event.Value == true) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.NumberOfTeam == 0);
             }
             //Public
             if (Public.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Public == Public);
@@ -105,7 +105,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 Id = x.Id,
                 CompetitionTypeId = x.CompetitionTypeId,
                 Address = x.Address,
-                NumberOfGroup = x.NumberOfGroup,
+                NumberOfTeam = x.NumberOfTeam,
                 NumberOfParticipation = x.NumberOfParticipation,
                 StartTime = x.StartTime,
                 EndTime = x.EndTime,
