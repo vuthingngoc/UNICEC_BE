@@ -43,7 +43,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -67,7 +68,8 @@ namespace UniCEC.API.Controllers
                 ViewUniversity result = await _universityService.GetUniversityById(id);
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else 
                 {

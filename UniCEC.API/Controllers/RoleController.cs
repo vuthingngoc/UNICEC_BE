@@ -43,7 +43,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -66,7 +67,8 @@ namespace UniCEC.API.Controllers
                 ViewRole result = await _roleService.GetByRoleId(id);
                 if (result == null)
                 {
-                    return NotFound("Not Found This Role in System");
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {
