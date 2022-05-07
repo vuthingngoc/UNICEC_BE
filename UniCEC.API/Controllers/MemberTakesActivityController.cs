@@ -36,7 +36,8 @@ namespace UniCEC.API.Controllers
 
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {
@@ -64,7 +65,8 @@ namespace UniCEC.API.Controllers
                 ViewMemberTakesActivity result = await _memberTakesActivityService.GetByMemberTakesActivityId(id);
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {

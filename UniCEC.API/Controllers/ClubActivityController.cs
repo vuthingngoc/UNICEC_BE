@@ -43,7 +43,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -74,7 +75,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -104,7 +106,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -128,7 +131,8 @@ namespace UniCEC.API.Controllers
                 ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {
