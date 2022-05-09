@@ -11,6 +11,6 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         [JsonPropertyName("club_role_name")]
         public string ClubRoleName { get; set; }
         public string Avatar { get; set; }
-        public bool Status { get; set; }
+        public bool IsOnline { get; set; }
     }
 }

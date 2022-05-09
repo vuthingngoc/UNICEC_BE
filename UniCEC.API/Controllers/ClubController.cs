@@ -35,7 +35,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -45,6 +45,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get club by id")]
+        
         public async Task<IActionResult> GetClubById(int id)
         {
             try
@@ -54,7 +55,7 @@ namespace UniCEC.API.Controllers
             }
             catch(NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -73,7 +74,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -100,7 +101,7 @@ namespace UniCEC.API.Controllers
             }
             catch(NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -127,7 +128,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -146,7 +147,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -193,7 +194,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (ArgumentNullException ex)
             {
@@ -224,7 +225,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {

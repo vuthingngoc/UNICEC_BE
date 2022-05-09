@@ -16,7 +16,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int StudentId { get; set; }
-        public bool Status { get; set; }
+        public DateTime JoinDate { get; set; }
 
         public virtual User Student { get; set; }
         public virtual ICollection<ClubHistory> ClubHistories { get; set; }

@@ -22,8 +22,8 @@ namespace UniCEC.Business.Services.MemberSvc
         {
             return new ViewMember()
             {
-                Id = member.Id,
-                Status = member.Status,
+                Id = member.Id,                
+                //Status = member.Status,
             };
 
         }
@@ -35,22 +35,9 @@ namespace UniCEC.Business.Services.MemberSvc
 
         public async Task<ViewMember> GetByMemberId(int id)
         {
-            //
-            Member mem = await _memberRepo.Get(id);
-            //
-            if (mem != null)
-            {
-                return new ViewMember()
-                {
-                    Id = mem.Id,
-                    Status = mem.Status
-                };
-            }
-            else
-            {
-                return null;
-            }
-
+            ViewMember member = await _memberRepo.GetById(id);
+            if (member == null) throw new NullReferenceException("Not found this member");
+            return member;
         }
 
         public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
@@ -70,12 +57,14 @@ namespace UniCEC.Business.Services.MemberSvc
         //Insert-Member
         public async Task<ViewMember> Insert(MemberInsertModel model)
         {
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(model.StudentId, model.ClubId);
+            if (isMember) throw new ArgumentException("The user has already in this club");
             try
             {
                 Member member = new Member()
                 {
                     StudentId = model.StudentId,
-                    Status = model.Status,
+                    //Status = ,
                 };
                 //
                 int result = await _memberRepo.Insert(member);
@@ -107,7 +96,7 @@ namespace UniCEC.Business.Services.MemberSvc
 
                 if (member != null)
                 {
-                    member.Status = (model.Status != null) ? model.Status : member.Status;
+                    //member.Status = (model.Status != null) ? model.Status : member.Status;
                     await _memberRepo.Update();
                     return true;
                 }
@@ -127,7 +116,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 if (member != null)
                 {
                     //
-                    member.Status = false;
+                    //member.Status = false;
                     await _memberRepo.Update();
                     return true;
                 }

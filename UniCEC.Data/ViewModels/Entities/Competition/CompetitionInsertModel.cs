@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {

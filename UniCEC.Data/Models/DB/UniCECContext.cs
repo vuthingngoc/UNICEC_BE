@@ -469,6 +469,8 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.JoinDate).HasColumnType("datetime");
+
                 entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
                 entity.HasOne(d => d.Student)

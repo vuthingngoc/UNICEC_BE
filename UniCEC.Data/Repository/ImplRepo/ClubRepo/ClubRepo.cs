@@ -45,6 +45,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
+                        where c.Id.Equals(id)
                         select new { c, u };
 
             ViewClub club = await query.Select(x => new ViewClub()
