@@ -5,9 +5,9 @@ namespace UniCEC.Data.RequestModels
 {
     public class MajorRequestModel : PagingRequest
     {
-        [FromQuery(Name = "department-id")]
+        [FromQuery(Name = "departmentId")]
         public int? DepartmentId { get; set; }
-        [FromQuery(Name = "major-code")]
+        [FromQuery(Name = "majorCode")]
         public string MajorCode { get; set; }
         [FromQuery(Name = "name")]
         public string Name { get; set; }

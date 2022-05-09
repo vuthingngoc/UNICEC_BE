@@ -78,15 +78,35 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         //Get top 3 EVENT or COMPETITION by Status
         //gần ngày hiện tại
-        public async Task<List<ViewCompetition>> GetTop3CompOrEve_Status(bool? Event, CompetitionStatus? Status, bool? Public)
+        //Thuộc Club
+        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
-            //format date
-            DateTime now = DateTime.Now;
+            //LocalTime
+            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTimeOffset localServerTime = DateTimeOffset.Now;
+            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+            //
+            IQueryable<Competition> query;
 
-            var query = from comp in context.Competitions
-                        where comp.StartTime >= now
-                        orderby comp.StartTime 
+            //Status khác 5 (Not Assigned)
+            if (ClubId.HasValue)
+            {
+                query = from cic in context.CompetitionInClubs
+                        where cic.ClubId == ClubId
+                        join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                        where comp.StartTime >= localTime.DateTime    
+                        orderby comp.StartTime
                         select comp;
+
+               
+            }
+            else
+            {
+                query = from comp in context.Competitions
+                        where comp.StartTime >= localTime.DateTime 
+                        orderby comp.StartTime
+                        select comp;
+            }
 
             //Serach Event
             if (Event.HasValue)
@@ -98,6 +118,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Status
             if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
 
+
+            //
             List<ViewCompetition> competitions = await query.Take(3).Select(x => new ViewCompetition()
             {
                 Id = x.Id,
@@ -116,7 +138,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 Status = x.Status,
                 View = x.View
             }).ToListAsync();
-
             return (competitions.Count > 0) ? competitions : null;
         }
     }

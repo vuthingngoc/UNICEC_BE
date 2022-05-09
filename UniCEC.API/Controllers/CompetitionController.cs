@@ -24,12 +24,12 @@ namespace UniCEC.API.Controllers
 
         public CompetitionController(ICompetitionService competitionService)
         {
-            _competitionService = competitionService;   
+            _competitionService = competitionService;
         }
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet]
-        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.HappenningSoon, 1.Registering , 2.Happening , 3.Ending , 4.Canceling , 5.NotAssigned")]
         public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
         {
             try
@@ -42,8 +42,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    //
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -58,12 +58,12 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet("top3")]
-        [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION")]
-        public async Task<IActionResult> GetTop3CompOrEve([FromQuery] bool? Event, [FromQuery] CompetitionStatus? Status, [FromQuery] bool? Public)
+        [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status, public")]
+        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "public")] bool? Public)
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve_Status(Event, Status, Public);
+                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, Status, Public);
 
                 if (result != null)
                 {
@@ -71,8 +71,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    //
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -95,7 +95,8 @@ namespace UniCEC.API.Controllers
                 ViewCompetition result = await _competitionService.GetById(id);
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {
@@ -144,7 +145,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<CompetitionController>/5
         [HttpPut]
         [SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
-        public async Task<IActionResult> Update ([FromBody] CompetitionUpdateModel model)
+        public async Task<IActionResult> Update([FromBody] CompetitionUpdateModel model)
         {
             try
             {

@@ -16,5 +16,13 @@ namespace UniCEC.Data.ViewModels.Entities.ClubActivity
         [JsonPropertyName("num_of_member")]
         public int NumOfMember { get; set; }
         public ClubActivityStatus? Status { get; set; }
+
+        //---------Author to check user is Leader of Club and Collaborate in Copetition
+        [JsonPropertyName("user_id")]
+        public int UserId { get; set; }
+        [JsonPropertyName("club_id")]
+        public int ClubId { get; set; }
+        [JsonPropertyName("term_id")]
+        public int TermId { get; set; }
     }
 }

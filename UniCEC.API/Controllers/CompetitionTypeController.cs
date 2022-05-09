@@ -38,7 +38,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -62,7 +63,8 @@ namespace UniCEC.API.Controllers
                 ViewCompetitionType result = await _competitionTypeService.GetByCompetitionTypeId(id);
                 if (result == null)
                 {
-                    return NotFound("Not Found This Competition Type in System");
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {

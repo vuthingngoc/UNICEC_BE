@@ -12,14 +12,16 @@ namespace UniCEC.Data.RequestModels
     public class CompetitionRequestModel : PagingRequest
     {
         //Club Id
-        [FromQuery(Name = "club-id")]
+        [FromQuery(Name = "clubId")]
         public int ClubId { get; set; }
         //Serach Event
-        [FromQuery(Name = "search_event")]
+        [FromQuery(Name = "event")]
         public bool? Event { get; set; }
         //Public
-        public bool? Public { get; set; }   
+        [FromQuery(Name = "public")]
+        public bool? Public { get; set; }
         //Status
+        [FromQuery(Name = "status")]
         public CompetitionStatus? Status { get; set; }
     }
 }

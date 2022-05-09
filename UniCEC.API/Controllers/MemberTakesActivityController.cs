@@ -27,7 +27,7 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet("tasks")]
-        [SwaggerOperation(Summary = "Get tasks by conditions")]
+        [SwaggerOperation(Summary = "Get tasks by conditions, 0.Doing , 1.DoneOnTime , 2.Late")]
         public async Task<IActionResult> GetTaskByConditions([FromQuery]MemberTakesActivityRequestModel request)
         {
             try
@@ -36,7 +36,8 @@ namespace UniCEC.API.Controllers
 
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {
@@ -64,7 +65,8 @@ namespace UniCEC.API.Controllers
                 ViewMemberTakesActivity result = await _memberTakesActivityService.GetByMemberTakesActivityId(id);
                 if (result == null)
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
                 else
                 {

@@ -57,9 +57,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get top 3 EVENT or COMPETITION by Status
-        public async Task<List<ViewCompetition>> GetTop3CompOrEve_Status(bool? Event, CompetitionStatus? Status, bool? Public)
+        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
-            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve_Status(Event, Status, Public);
+            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId , Event, Status, Public);
             return result;
         }
 
@@ -100,7 +100,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
-                    // Nếu NumberOfGroup có giá trị là = 0 => đó là đang create EVENT
+                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
                     competition.NumberOfTeam = model.NumberOfTeam;
                     competition.NumberOfParticipation = model.NumberOfParticipations;
                     competition.StartTime = model.StartTime;

@@ -42,7 +42,8 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (NullReferenceException e)
@@ -122,7 +123,8 @@ namespace UniCEC.API.Controllers
                     return Ok();
                 }
                 else {
-                    return NotFound("Not found this City");
+                    //Not has data
+                    return Ok("{}");
                 }
             }
             catch (DbUpdateException)
