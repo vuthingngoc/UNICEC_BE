@@ -78,8 +78,10 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
                         int result = await _competitionInClubRepo.Insert(competitionInClub);
                         if (result > 0)
                         {
-                            // đổi status của competition đó thành happening soon
+                            // đổi status của competition 
                             Competition comp = await _competitionRepo.Get(model.CompetitionId);
+
+
                             comp.Status = CompetitionStatus.HappenningSoon;
                             await _competitionRepo.Update();
                             //

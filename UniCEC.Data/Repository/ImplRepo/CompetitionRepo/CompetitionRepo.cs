@@ -94,11 +94,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        where comp.StartTime >= localTime.DateTime    
+                        where comp.StartTime >= localTime.DateTime
                         orderby comp.StartTime
                         select comp;
 
-               
+                //query = from comp in context.Competitions
+                //        join cic in context.CompetitionInClubs on comp.Id equals cic.CompetitionId
+                //        where cic.ClubId == ClubId && comp.StartTime > localTime.DateTime
+                //        orderby comp.StartTime
+                //        select comp;
             }
             else
             {
