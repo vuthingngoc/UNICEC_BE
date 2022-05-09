@@ -79,7 +79,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             if (club == null) return -1;
 
             var query = from ch in context.ClubHistories
-                        where ch.ClubId.Equals(clubId)
+                        where ch.ClubId.Equals(clubId) && ch.Status.Equals(ClubHistoryStatus.Active)
                                 && ch.StartTime.Month.Equals(DateTime.Now.Month)
                                 && ch.StartTime.Year.Equals(DateTime.Now.Year)
                         select new { ch };
