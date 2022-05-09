@@ -249,19 +249,19 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             return await Insert(newRecord) > 0;
         }
 
-        public async Task<bool> DeleteMember(int memberId)
+        public async Task<int> DeleteMember(int memberId)
         {
             ClubHistory record = await(from ch in context.ClubHistories
                                        where ch.MemberId.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
                                        select ch).FirstOrDefaultAsync();
 
-            if (record == null) return false;
+            if (record == null) return 0;
 
             record.EndTime = DateTime.Now;
             record.Status = ClubHistoryStatus.Inactive;
             await Update();
 
-            return true;
+            return record.ClubId;
         }
     }
 }
