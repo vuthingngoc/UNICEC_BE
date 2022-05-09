@@ -21,9 +21,7 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
         //change Status of Competition
         private ICompetitionRepo _competitionRepo;
 
-        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, 
-                                        IClubHistoryRepo clubHistoryRepo,
-                                        ICompetitionRepo competitionRepo)
+        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, ICompetitionRepo competitionRepo, IClubHistoryRepo clubHistoryRepo)                               
         {
             _competitionInClubRepo = competitionInClubRepo;
             _clubHistoryRepo = clubHistoryRepo;
