@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
@@ -96,9 +97,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         {
 
                             //LocalTime
-                            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                            DateTimeOffset localServerTime = DateTimeOffset.Now;
-                            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+                            DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
                             MemberTakesActivity mta = new MemberTakesActivity()
                             {
@@ -159,9 +158,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 {
                     //check date
                     //LocalTime
-                    var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                    DateTimeOffset localServerTime = DateTimeOffset.Now;
-                    DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+                    DateTimeOffset localTime = new LocalTime().GetLocalTime();
                     //
                     int result = DateTime.Compare(localTime.DateTime, mta.Deadline);
                     //1. earlier 

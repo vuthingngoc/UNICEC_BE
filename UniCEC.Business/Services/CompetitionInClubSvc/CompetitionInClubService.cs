@@ -21,9 +21,7 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
         //change Status of Competition
         private ICompetitionRepo _competitionRepo;
 
-        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, 
-                                        IClubHistoryRepo clubHistoryRepo,
-                                        ICompetitionRepo competitionRepo)
+        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, ICompetitionRepo competitionRepo, IClubHistoryRepo clubHistoryRepo)                               
         {
             _competitionInClubRepo = competitionInClubRepo;
             _clubHistoryRepo = clubHistoryRepo;
@@ -80,8 +78,8 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
                         int result = await _competitionInClubRepo.Insert(competitionInClub);
                         if (result > 0)
                         {
-                            // đổi status của competition đó thành happening soon
-                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                            //đổi status của competition 
+                            Competition comp = await _competitionRepo.Get(model.CompetitionId);                          
                             comp.Status = CompetitionStatus.HappenningSoon;
                             await _competitionRepo.Update();
                             //

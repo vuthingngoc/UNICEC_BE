@@ -168,7 +168,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         {
             //club thì phải có trong club id và kì luôn 
             var query = from cp in context.ClubHistories
-                        where cp.MemberId == memberId && cp.ClubId == clubId && cp.TermId == termId
+                        where cp.MemberId == memberId && cp.ClubId == clubId && cp.TermId == termId && cp.Status == ClubHistoryStatus.Active
                         select cp;
             //
             int check = query.Count();
@@ -190,7 +190,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
                         from me in context.Members
                         where me.StudentId == us.Id
                         from ch in context.ClubHistories
-                        where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId
+                        where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId && ch.Status == ClubHistoryStatus.Active
                         select new { ch, us, me };
 
 
