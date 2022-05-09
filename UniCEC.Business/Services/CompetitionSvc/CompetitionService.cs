@@ -18,7 +18,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionRepo _competitionRepo;
         //check Infomation Member -> is Leader
         private IClubHistoryRepo _clubHistoryRepo;
-        // check Club Has Competition 
+        // check Club Has Competition   
         private ICompetitionInClubRepo _competitionInClubRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
@@ -28,9 +28,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
+            
         }
 
-       
+
 
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request)
         {
@@ -59,7 +60,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get top 3 EVENT or COMPETITION by Status
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
-            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId , Event, Status, Public);
+            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Public);
             return result;
         }
 
@@ -97,7 +98,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //ở trong trường hợp này phân biệt EVENT - COMPETITION
                     //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
                     Competition competition = new Competition();
-
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
                     // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
@@ -124,12 +124,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Competition comp = await _competitionRepo.Get(result);
                         ViewCompetition viewCompetition = TransformViewModel(comp);
                         return viewCompetition;
-                    }
+                    }//end if result != 0
                     else
                     {
                         return null;
                     }
-                }
+                }//end if role leader
                 else
                 {
                     return null;
