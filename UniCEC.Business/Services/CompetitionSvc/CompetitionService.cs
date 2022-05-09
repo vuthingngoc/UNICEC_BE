@@ -265,7 +265,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Address = competition.Address,
                 //Group member
                 NumberOfParticipation = competition.NumberOfParticipation,
-                NumberOfGroup = competition.NumberOfTeam,
+                NumberOfTeam = competition.NumberOfTeam,
                 //Time
                 StartTime = competition.StartTime,
                 EndTime = competition.EndTime,
