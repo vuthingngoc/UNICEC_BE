@@ -12,7 +12,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipation { get; set; }
-        [JsonPropertyName("number_of_groups")]
+        [JsonPropertyName("number_of_team")]
         public int NumberOfTeam { get; set; }
         //[JsonPropertyName("approved_time")]
         //public DateTime ApprovedTime { get; set; }
