@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
@@ -98,10 +99,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     clubActivity.Name = model.Name;
                     clubActivity.SeedsPoint = model.SeedsPoint;
                     //LocalTime
-                    var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                    DateTimeOffset localServerTime = DateTimeOffset.Now;
-                    DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
-                    clubActivity.CreateTime = localTime.DateTime;
+                    clubActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
                     //
                     clubActivity.Beginning = model.Beginning;
                     clubActivity.Ending = model.Ending;

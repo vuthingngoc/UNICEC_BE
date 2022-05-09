@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using UniCEC.Data.Models.DB;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using UniCEC.Data.Common;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubActivity;
-using System.Collections.Generic;
-using UniCEC.Data.Enum;
-using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 {
@@ -35,11 +35,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
         //Get Top 4 Club Activities depend on create time
         public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
         {
-            
+
             //LocalTime
-            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            DateTimeOffset localServerTime = DateTimeOffset.Now;
-            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info); 
+            DateTimeOffset localTime = new LocalTime().GetLocalTime();
             //
             var query = from u in context.Universities
                         where u.Id == universityId
@@ -114,7 +112,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
                                                         Status = ca.Status,
                                                         NumOfMember = ca.NumOfMember,
                                                     }).ToListAsync();
-            //
 
             return (clubActivities.Count > 0) ? new PagingResult<ViewClubActivity>(clubActivities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
         }

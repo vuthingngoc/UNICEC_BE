@@ -9,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UniCEC.Data.Enum;
 using System;
+using UniCEC.Data.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 {
@@ -82,9 +83,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
             //LocalTime
-            var info = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            DateTimeOffset localServerTime = DateTimeOffset.Now;
-            DateTimeOffset localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
+            DateTimeOffset localTime = new LocalTime().GetLocalTime();
             //
             IQueryable<Competition> query;
 

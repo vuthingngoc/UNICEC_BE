@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
@@ -28,7 +29,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
-            
+
         }
 
 
@@ -313,7 +314,5 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return seedCode;
         }
-
-
     }
 }
