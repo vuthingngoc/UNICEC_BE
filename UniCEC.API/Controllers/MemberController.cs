@@ -21,7 +21,7 @@ namespace UniCEC.API.Controllers
         private IMemberService _ImemberService;
         public MemberController(IMemberService ImemberService)
         {
-            _ImemberService = ImemberService; 
+            _ImemberService = ImemberService;
         }
 
         // GET api/<MemberController>/5
@@ -31,21 +31,12 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-
                 ViewMember member = await _ImemberService.GetByMemberId(id);
-                if (member == null)
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    //
-                    return Ok(member);
-                }
+                return Ok(member);
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException ex)
             {
-                return NotFound(e.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -59,7 +50,6 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-
                 List<ViewMember> members = await _ImemberService.GetLeadersByClub(id);
                 return Ok(members);
             }
@@ -79,7 +69,6 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-
                 int quantity = await _ImemberService.GetQuantityNewMembersByClub(id);
                 return Ok(quantity);
             }
@@ -124,13 +113,11 @@ namespace UniCEC.API.Controllers
         // PUT api/<MemberController>/5
         [HttpPut]
         [SwaggerOperation(Summary = "Update member by id")]
-        public async Task<IActionResult> UpdateMember ([FromBody] MemberUpdateModel member)
+        public async Task<IActionResult> UpdateMember([FromBody] MemberUpdateModel model)
         {
             try
             {
-                Boolean check = false;
-                //
-                check = await _ImemberService.Update(member);
+                bool check = await _ImemberService.Update(model);
                 if (check)
                 {
 
@@ -138,7 +125,7 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return NotFound("Not found this City");
+                    return Ok("Not found this City");
                 }
             }
             catch (DbUpdateException)
@@ -155,7 +142,7 @@ namespace UniCEC.API.Controllers
         // DELETE api/<MemberController>/5
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete member by id")]
-        public async Task<IActionResult> DeleteMember (int id)
+        public async Task<IActionResult> DeleteMember(int id)
         {
             try
             {

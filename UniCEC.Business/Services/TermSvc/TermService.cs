@@ -62,9 +62,6 @@ namespace UniCEC.Business.Services.TermSvc
 
         public async Task Update(TermUpdateModel term)
         {
-            if (string.IsNullOrEmpty(term.Name) || term.CreateTime == DateTime.MinValue
-                || term.EndTime == DateTime.MinValue) throw new ArgumentNullException("Name Null || CreateTime Null || EndTime Null");
-
             Term termObject = await _termRepo.Get(term.Id);
             if (termObject == null) throw new NullReferenceException("Not found this term");
 

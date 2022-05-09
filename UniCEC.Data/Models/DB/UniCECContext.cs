@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
 #nullable disable
@@ -12,12 +14,10 @@ namespace UniCEC.Data.Models.DB
         {
         }
 
-        
-
         public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
             : base(options)
         {
-            _configuration = configuration; 
+            _configuration = configuration;
         }
 
         public virtual DbSet<Blog> Blogs { get; set; }
@@ -467,6 +467,8 @@ namespace UniCEC.Data.Models.DB
                 entity.ToTable("Member");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.JoinDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
