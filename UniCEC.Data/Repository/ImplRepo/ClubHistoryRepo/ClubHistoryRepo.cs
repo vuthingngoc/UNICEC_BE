@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.Enum;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
@@ -72,6 +73,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             }).FirstOrDefaultAsync();
 
             return (totalCount > 0) ? clubHistory : null;
+        }
+
+        public async Task<int> GetCurrentTermByClub(int clubId)
+        {
+            return await (from ch in context.ClubHistories
+                          where ch.ClubId.Equals(clubId) && ch.Status == Enum.ClubHistoryStatus.Active
+                          select ch.TermId).FirstOrDefaultAsync();
         }
 
         public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId)
@@ -214,6 +222,46 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             //        TermId = clubHistory.TermId
             //    };
             //}
+        }
+
+        public async Task<bool> UpdateMemberRole(int memberId, int clubRoleId)
+        {
+            ClubHistory record = await (from ch in context.ClubHistories
+                                        where ch.MemberId.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                                        select ch).FirstOrDefaultAsync();
+
+            if (record == null) return false;
+            
+            record.EndTime = DateTime.Now;
+            record.Status = ClubHistoryStatus.Inactive;
+            await Update();
+
+            ClubHistory newRecord = new ClubHistory()
+            {
+                ClubId = record.ClubId,
+                ClubRoleId = clubRoleId, // new role
+                MemberId = memberId,
+                StartTime = DateTime.Now,
+                Status = ClubHistoryStatus.Active, // default status
+                TermId = record.TermId
+            };
+
+            return await Insert(newRecord) > 0;
+        }
+
+        public async Task<bool> DeleteMember(int memberId)
+        {
+            ClubHistory record = await(from ch in context.ClubHistories
+                                       where ch.MemberId.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                                       select ch).FirstOrDefaultAsync();
+
+            if (record == null) return false;
+
+            record.EndTime = DateTime.Now;
+            record.Status = ClubHistoryStatus.Inactive;
+            await Update();
+
+            return true;
         }
     }
 }
