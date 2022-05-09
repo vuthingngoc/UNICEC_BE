@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,6 +16,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/member")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
     public class MemberController : ControllerBase
     {
         //
@@ -84,49 +86,45 @@ namespace UniCEC.API.Controllers
 
         // Add Member In Club
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert member ")]
+        [SwaggerOperation(Summary = "Insert member")]
         public async Task<IActionResult> InsertMember([FromBody] MemberInsertModel model)
         {
             try
             {
                 ViewMember result = await _ImemberService.Insert(model);
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                return Ok(result);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
             catch (SqlException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
         }
 
         // PUT api/<MemberController>/5
         [HttpPut]
-        [SwaggerOperation(Summary = "Update member by id")]
+        [SwaggerOperation(Summary = "Update member")]
         public async Task<IActionResult> UpdateMember([FromBody] MemberUpdateModel model)
         {
             try
             {
-                bool check = await _ImemberService.Update(model);
-                if (check)
-                {
-
-                    return Ok();
-                }
-                else
-                {
-                    return Ok("Not found this City");
-                }
+                await _ImemberService.Update(model);
+                return Ok();
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {
@@ -141,21 +139,21 @@ namespace UniCEC.API.Controllers
 
         // DELETE api/<MemberController>/5
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete member by id")]
+        [SwaggerOperation(Summary = "Delete member")]
         public async Task<IActionResult> DeleteMember(int id)
         {
             try
             {
-                bool result = false;
-                result = await _ImemberService.Delete(id);
-                if (result)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                await _ImemberService.Delete(id);
+                return Ok();
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
             catch (SqlException)
             {

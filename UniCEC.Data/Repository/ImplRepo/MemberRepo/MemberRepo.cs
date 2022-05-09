@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Entities.Member;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 {
@@ -22,9 +23,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         join u in context.Users on m.StudentId equals u.Id
                         join ch in context.ClubHistories on m.Id equals ch.MemberId
                         join cr in context.ClubRoles on ch.ClubRoleId equals cr.Id
-                        join t in context.Terms on ch.TermId equals t.Id
-                        where m.Id.Equals(memberId) && ch.Status.Equals(true)
-                                && t.CreateTime.Date <= DateTime.Today && t.EndTime >= DateTime.Today
+                        where m.Id.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
                         select new { m, u, cr, ch };
 
             ViewMember member = await query.Select(x => new ViewMember()
@@ -43,12 +42,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public async Task<bool> CheckExistedMemberInClub(int userId, int clubId)
         {
             var query = from m in context.Members
-                        join u in context.Users on m.StudentId equals u.Id
                         join ch in context.ClubHistories on m.Id equals ch.MemberId
-                        join t in context.Terms on ch.TermId equals t.Id
-                        where ch.ClubId.Equals(clubId) && u.UserId.Equals(userId) && ch.Status.Equals(true)
-                              && t.CreateTime.Date <= DateTime.Today && t.EndTime.Date >= DateTime.Today
-                        select m.Id;
+                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId)
+                        select ch.MemberId;
 
             int memberId = await query.FirstOrDefaultAsync();
             return (memberId > 0) ? true : false;
