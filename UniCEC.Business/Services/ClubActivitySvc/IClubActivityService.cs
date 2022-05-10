@@ -17,9 +17,11 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         //Get List ClubActivity By Conditions
         public Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions);
         //Get Top 4 club activity dựa trên ngày gần với hiện tại
-        public Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
+        //public Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
         //Get Process club Activity by clubActivity
-        public Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status);
+        //public Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status);
+
+        public Task<List<ViewProcessClubActivity>> GetTop4_Process(int universityId, int clubId);
 
     }
 }

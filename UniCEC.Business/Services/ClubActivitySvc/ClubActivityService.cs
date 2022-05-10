@@ -153,7 +153,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         }
 
 
-       
+
 
 
         //Update
@@ -274,29 +274,72 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             return result;
         }
 
-        //Get Top 4 Club Activities depend on create time
-        public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
-        {
-            //
-            List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId);
-            //
-            return result;
-        }
+        ////Get Top 4 Club Activities depend on create time
+        //public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
+        //{
+        //    //
+        //    List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId);
+        //    //
+        //    return result;
+        //}
 
         //Get Process Club Activity
-        public async Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status)
-        {
-            ClubActivity ca = await _clubActivityRepo.Get(clubActivityId);
-            if (ca != null)
-            {
-                //get total num of member join
-                int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(clubActivityId);
-                //get number of member done task
-                int NumberOfeMemberJoin_Status = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(clubActivityId, status);
-                //
-                ViewClubActivity viewClubActivity = TransformView(ca);
+        //public async Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status)
+        //{
+        //    ClubActivity ca = await _clubActivityRepo.Get(clubActivityId);
+        //    if (ca != null)
+        //    {
+        //        //get total num of member join
+        //        int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(clubActivityId);
+        //        //get number of member done task
+        //        int NumberOfeMemberJoin_Status = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(clubActivityId, status);
+        //        //
+        //        ViewClubActivity viewClubActivity = TransformView(ca);
 
-                return new ViewProcessClubActivity()
+        //        return new ViewProcessClubActivity()
+        //        {
+        //            ClubId = viewClubActivity.ClubId,
+        //            Beginning = viewClubActivity.Beginning,
+        //            Ending = viewClubActivity.Ending,
+        //            CreateTime = viewClubActivity.CreateTime,
+        //            Description = viewClubActivity.Description,
+        //            Id = viewClubActivity.Id,
+        //            Name = viewClubActivity.Name,
+        //            NumOfMember = viewClubActivity.NumOfMember,
+        //            SeedsCode = viewClubActivity.SeedsCode,
+        //            SeedsPoint = viewClubActivity.SeedsPoint,
+        //            Status = viewClubActivity.Status,
+        //            NumOfMemberJoin = NumberOfMemberJoin,
+        //            NumMemberDoingTask = NumberOfeMemberJoin_Status,
+        //        };
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        //Get Process + Top 4
+        public async Task<List<ViewProcessClubActivity>> GetTop4_Process(int universityId, int clubId)
+        {
+            //
+            List<ViewProcessClubActivity> viewProcessClubActivities = new List<ViewProcessClubActivity>();
+            //top 4 activity by ClubId
+            List<ViewClubActivity> ListViewClubActivity = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId);
+
+            foreach (ViewClubActivity viewClubActivity in ListViewClubActivity)
+            {
+                //Get Process
+                //get total num of member join
+                int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(viewClubActivity.Id);
+                //get number of member doing task
+                int NumMemberDoingTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Doing);
+                //get number of member done task
+                int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.DoneOnTime);
+                //get number of member late task
+                int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Late);
+
+                ViewProcessClubActivity vpca = new ViewProcessClubActivity()
                 {
                     ClubId = viewClubActivity.ClubId,
                     Beginning = viewClubActivity.Beginning,
@@ -310,13 +353,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     SeedsPoint = viewClubActivity.SeedsPoint,
                     Status = viewClubActivity.Status,
                     NumOfMemberJoin = NumberOfMemberJoin,
-                    NumOfMemberTakesTaskStatus = NumberOfeMemberJoin_Status,
+                    NumMemberDoingTask = NumMemberDoingTask,
+                    NumMemberDoneTask = NumMemberDoneTask,
+                    NumMemberLateTask = NumMemberLateTask,
                 };
+                viewProcessClubActivities.Add(vpca);
             }
-            else
-            {
-                return null;
-            }
+            return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : null;    
+
         }
     }
 }

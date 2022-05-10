@@ -17,6 +17,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
         public Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions);
         //
         public Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
+
+        
         
     }
 }

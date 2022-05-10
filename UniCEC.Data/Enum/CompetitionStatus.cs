@@ -8,7 +8,7 @@ namespace UniCEC.Data.Enum
 {
     public enum CompetitionStatus
     {
-        HappenningSoon,
+        HappeningSoon,
         Registering,
         Happening,
         Ending,
