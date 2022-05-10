@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -14,11 +13,11 @@ namespace UniCEC.Data.Models.DB
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options)
+        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
             : base(options)
         {
+            _configuration = configuration;
         }
-
 
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
