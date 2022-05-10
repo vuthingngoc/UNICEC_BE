@@ -1,6 +1,4 @@
 ﻿using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
@@ -48,32 +46,24 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 if (isExistedStudent == false)
                 {
                     //Create UserModelTemporary
-                    UserModelTemporary userModelTemporary = new UserModelTemporary();
-                    userModelTemporary.Email = email;
-                    if (userInfo.PhotoUrl != null)
+                    UserModelTemporary userModelTemporary = new UserModelTemporary()
                     {
-                        userModelTemporary.Avatar = userInfo.PhotoUrl.ToString();
-                    }
-                    else
-                    {
-                        userModelTemporary.Avatar = "";
-                    }
-                    //auto Role Student - Status True 
-                    //Database roleId 3 is Student
-                    userModelTemporary.RoleId = 3;
+                        Email = email,
+                        Fullname = userInfo.DisplayName,
+                        Avatar = (string.IsNullOrEmpty(userInfo.PhotoUrl)) ? "" : userInfo.PhotoUrl,
+                        RoleId = 3 // role student
+                    };
                     //Add In DB [User]
                     ViewUser userTemp = await _userService.InsertUserTemporary(userModelTemporary);
                     await _userService.UpdateStatusOnline(userTemp.Id, true);
-                    //
                     userModelTemporary.Id = userTemp.Id.ToString();
-                    //Get List University Belong To Email
-                    List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
-                    //complete ViewUserInfo
-                    //thông tin để trả ra cho BE để User Tiếp tục Update thông tin User
                     ViewRole role = await _roleService.GetByRoleId(userTemp.RoleId);
                     userModelTemporary.RoleName = role.RoleName;
+
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
                     string clientTokenUserTemp = JWTUserToken.GenerateJWTTokenUserTemp(userModelTemporary);
+                    // Get List University Belong To Email
+                    List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
                     return new ViewUserInfo
                     {
                         Token = clientTokenUserTemp,

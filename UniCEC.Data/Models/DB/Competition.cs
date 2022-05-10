@@ -20,6 +20,7 @@ namespace UniCEC.Data.Models.DB
         }
 
         public int Id { get; set; }
+        public string Name { get; set; }
         public int CompetitionTypeId { get; set; }
         public int NumberOfParticipation { get; set; }
         public int NumberOfTeam { get; set; }
