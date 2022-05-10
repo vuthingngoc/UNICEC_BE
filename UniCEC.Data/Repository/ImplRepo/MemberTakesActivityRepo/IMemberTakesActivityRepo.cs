@@ -14,7 +14,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         //check mem take task
         public Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId);
         //Check number of member in task
-        public Task<bool> CheckNumOfMemInTask(int ClubActivityId);
+        //public Task<bool> AddNumOfMemInTask(int ClubActivityId);
         //Get number of member in task
         public Task<int> GetNumOfMemInTask(int ClubActivityId);
         //Get number of member in task with status

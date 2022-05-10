@@ -94,7 +94,8 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     ClubActivity clubActivity = new ClubActivity();
                     //
                     clubActivity.ClubId = model.ClubId;
-                    clubActivity.NumOfMember = model.NumOfMember;
+                    //When Member Take Activity will +1
+                    clubActivity.NumOfMember = 0;
                     clubActivity.Description = model.Description;
                     clubActivity.Name = model.Name;
                     clubActivity.SeedsPoint = model.SeedsPoint;
@@ -150,6 +151,11 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 Status = clubActivity.Status
             };
         }
+
+
+       
+
+
         //Update
         public async Task<bool> Update(ClubActivityUpdateModel model)
         {
@@ -177,17 +183,17 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 {
                     //get club Activity
                     ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
-                    
+
                     if (clubActivity != null)
                     {
-                        //update name-des-seedpoint-beginning-ending-numOfmem-status
+                        //update name-des-seedpoint-beginning-ending
                         clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
                         clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
                         clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
                         clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
                         clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
-                        clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
-                        clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
+                        //clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
+                        //clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
 
                         await _clubActivityRepo.Update();
                         return true;
