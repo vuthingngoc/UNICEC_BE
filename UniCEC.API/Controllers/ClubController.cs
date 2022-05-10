@@ -33,9 +33,9 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewClub> clubs = await _clubService.GetAllPaging(request);
                 return Ok(clubs);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -53,9 +53,9 @@ namespace UniCEC.API.Controllers
                 ViewClub club = await _clubService.GetByClub(id);
                 return Ok(club);
             }
-            catch(NullReferenceException ex)
+            catch(NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {

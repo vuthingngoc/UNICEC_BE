@@ -25,8 +25,9 @@ namespace UniCEC.Business.Services.MemberSvc
             _clubHistoryRepo = clubHistoryRepo;
         }
 
-        public Task<PagingResult<ViewMember>> GetAllPaging(PagingRequest request)
+        public Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request)
         {
+
             throw new NotImplementedException();
         }
 

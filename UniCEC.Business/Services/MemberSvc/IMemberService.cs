@@ -7,7 +7,7 @@ namespace UniCEC.Business.Services.MemberSvc
 {
     public interface IMemberService
     {
-        public Task<PagingResult<ViewMember>> GetAllPaging(PagingRequest request);
+        public Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request);
         public Task<ViewMember> GetByMemberId(int id);
         public Task<List<ViewMember>> GetLeadersByClub(int clubId);
         public Task<int> GetQuantityNewMembersByClub(int clubId);

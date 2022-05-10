@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -26,6 +27,25 @@ namespace UniCEC.API.Controllers
             _ImemberService = ImemberService;
         }
 
+        [HttpGet("club/{id}")]
+        [SwaggerOperation(Summary = "Get all members in a club")]
+        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] PagingRequest request)
+        {
+            try
+            {
+                PagingResult<ViewMember> members = await _ImemberService.GetAllPaging(id, request);
+                return Ok(members);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
         // GET api/<MemberController>/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get member by id")]
@@ -36,9 +56,9 @@ namespace UniCEC.API.Controllers
                 ViewMember member = await _ImemberService.GetByMemberId(id);
                 return Ok(member);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {
@@ -57,7 +77,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException e)
             {
-                return NotFound(e.Message);
+                return Ok(e.Message);
             }
             catch (SqlException)
             {
@@ -76,7 +96,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException e)
             {
-                return NotFound(e.Message);
+                return Ok(e.Message);
             }
             catch (SqlException)
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -9,17 +8,15 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
-       
-
         private readonly IConfiguration _configuration;
+
         public UniCECContext()
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
-           : base(options)
+        public UniCECContext(DbContextOptions<UniCECContext> options)
+            : base(options)
         {
-            _configuration = configuration;
         }
 
 
@@ -59,7 +56,6 @@ namespace UniCEC.Data.Models.DB
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
                 optionsBuilder.UseLazyLoadingProxies();
-
             }
         }
 
@@ -355,6 +351,12 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.ClubId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__ClubI__6383C8BA");
+
+                entity.HasOne(d => d.Competition)
+                    .WithMany(p => p.CompetitionInClubs)
+                    .HasForeignKey(d => d.CompetitionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Compe__6477ECF3");
             });
 
             modelBuilder.Entity<CompetitionInDepartment>(entity =>
