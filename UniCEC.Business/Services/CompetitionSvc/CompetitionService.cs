@@ -101,6 +101,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     Competition competition = new Competition();
                     competition.CompetitionTypeId = model.CompetitionTypeId;
                     competition.Address = model.Address;
+                    competition.Name = model.Name;  
                     // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
                     competition.NumberOfTeam = model.NumberOfTeam;
                     competition.NumberOfParticipation = model.NumberOfParticipations;
@@ -179,6 +180,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         comp.SeedsPoint = (competition.SeedsPoint != 0) ? competition.SeedsPoint : comp.SeedsPoint;
                         comp.SeedsDeposited = (competition.SeedsDeposited != 0) ? competition.SeedsDeposited : comp.SeedsDeposited;
                         comp.Address = (competition.Address.Length > 0) ? competition.Address : comp.Address;
+                        comp.Name = (competition.Name.Length > 0) ? competition.Name : comp.Name;   
                         //
                         await _competitionRepo.Update();
                         return true;
@@ -260,6 +262,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return new ViewCompetition()
             {
                 Id = competition.Id,
+                Name = competition.Name,
                 CompetitionTypeId = competition.CompetitionTypeId,
 
                 //address

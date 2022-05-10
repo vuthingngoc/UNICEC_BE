@@ -5,6 +5,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 {
     public class CompetitionInsertModel
     {
+        public string Name { get; set; }    
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
         [JsonPropertyName("number_of_participations")]
