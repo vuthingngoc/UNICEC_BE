@@ -296,7 +296,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 //
                 ViewClubActivity viewClubActivity = TransformView(ca);
 
-
                 return new ViewProcessClubActivity()
                 {
                     ClubId = viewClubActivity.ClubId,

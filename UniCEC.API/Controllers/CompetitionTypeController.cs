@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionTypeSvc;
 using UniCEC.Data.ViewModels.Common;
@@ -39,7 +40,7 @@ namespace UniCEC.API.Controllers
                 else
                 {
                     //Not has data
-                    return Ok("{}");
+                    return Ok(new List<object>());
                 }
             }
             catch (NullReferenceException e)
@@ -64,7 +65,7 @@ namespace UniCEC.API.Controllers
                 if (result == null)
                 {
                     //Not has data
-                    return Ok("{}");
+                    return Ok(new object());
                 }
                 else
                 {
