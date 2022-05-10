@@ -82,9 +82,16 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
                 bool MemInClub_Term = await _clubHistoryRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
-                //------------------------------------Check number of member join this clubActivity
-                bool NumOfMem_InTask = await _memberTakesActivityRepo.CheckNumOfMemInTask(model.ClubActivityId);
-
+                //------------------------------------Add number of member join this clubActivity     
+                bool NumOfMem_InTask = false;
+                //get club Activity
+                ClubActivity ca = await _clubActivityRepo.Get(model.ClubActivityId);
+                if (ca != null)
+                {
+                    ca.NumOfMember = ca.NumOfMember + 1;
+                    await _clubActivityRepo.Update();
+                    NumOfMem_InTask = true;
+                }
                 if (MemInClub_Term && NumOfMem_InTask)
                 {
                     //------------------------------------Check mem takes club activity
