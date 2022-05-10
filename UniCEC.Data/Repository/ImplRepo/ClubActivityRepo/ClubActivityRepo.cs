@@ -67,6 +67,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             return (clubActivities.Count > 0) ? clubActivities : null;
         }
 
+        
+
+
+
         ////Get List ClubActivity By Conditions
         public async Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions)
         {
@@ -115,6 +119,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 
             return (clubActivities.Count > 0) ? new PagingResult<ViewClubActivity>(clubActivities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
         }
+
 
     }
 }

@@ -80,7 +80,7 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
                         {
                             //đổi status của competition 
                             Competition comp = await _competitionRepo.Get(model.CompetitionId);                          
-                            comp.Status = CompetitionStatus.HappenningSoon;
+                            comp.Status = CompetitionStatus.HappeningSoon;
                             await _competitionRepo.Update();
                             //
                             return TransferView(competitionInClub);
