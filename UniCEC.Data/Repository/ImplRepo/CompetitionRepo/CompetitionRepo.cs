@@ -57,6 +57,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<ViewCompetition> Competitions = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewCompetition()
             {
                 Id = x.Id,
+                Name = x.Name,
                 CompetitionTypeId = x.CompetitionTypeId,
                 Address = x.Address,
                 NumberOfTeam = x.NumberOfTeam,
@@ -106,7 +107,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             else
             {
                 query = from comp in context.Competitions
-                        where comp.StartTime >= localTime.DateTime 
+                        where comp.StartTime >= localTime.DateTime
                         orderby comp.StartTime
                         select comp;
             }
@@ -127,6 +128,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             {
                 Id = x.Id,
                 CompetitionTypeId = x.CompetitionTypeId,
+                Name = x.Name,
                 Address = x.Address,
                 NumberOfTeam = x.NumberOfTeam,
                 NumberOfParticipation = x.NumberOfParticipation,

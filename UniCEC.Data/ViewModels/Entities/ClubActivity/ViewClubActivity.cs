@@ -19,6 +19,7 @@ namespace UniCEC.Data.ViewModels.Entities.ClubActivity
         public DateTime Ending { get; set; }
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }
+        [JsonPropertyName("club_activity_status")]
         public ClubActivityStatus Status { get; set; }
         [JsonPropertyName("num_of_member")]
         public int NumOfMember { get; set; }
