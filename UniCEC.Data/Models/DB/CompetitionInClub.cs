@@ -12,6 +12,5 @@ namespace UniCEC.Data.Models.DB
         public int CompetitionId { get; set; }
 
         public virtual Club Club { get; set; }
-        public virtual Competition Competition { get; set; }
     }
 }

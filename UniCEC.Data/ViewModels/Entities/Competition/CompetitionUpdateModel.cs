@@ -6,6 +6,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     public class CompetitionUpdateModel
     {
         public int Id { get; set; }
+        public string Name { get; set; }    
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
