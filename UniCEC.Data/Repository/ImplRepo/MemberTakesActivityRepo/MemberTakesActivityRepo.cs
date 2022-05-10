@@ -64,31 +64,33 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             }
         }
 
-        public async Task<bool> CheckNumOfMemInTask(int ClubActivityId)
-        {
-            var query1 = from ca in context.ClubActivities
-                         where ca.Id == ClubActivityId
-                         select ca;
+        //public async Task<bool> AddNumOfMemInTask(int ClubActivityId)
+        //{
+        //    var query1 = from ca in context.ClubActivities
+        //                 where ca.Id == ClubActivityId
+        //                 select ca;
 
-            int totalAllow = query1.FirstOrDefaultAsync().Result.NumOfMember;
+        //    int CurrentTotal = query1.FirstOrDefaultAsync().Result.NumOfMember;
+
+        //    ////đếm bn member task activity đó
+        //    //var query2 = from mta in context.MemberTakesActivities
+        //    //             where mta.ClubActivityId == ClubActivityId
+        //    //             select mta;
+
+        //    //int totalMemTakesTask = query2.Count();
 
 
-            var query2 = from mta in context.MemberTakesActivities
-                         where mta.ClubActivityId == ClubActivityId
-                         select mta;
 
-            int totalMemTakesTask = query2.Count();
+        //    if ()
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
 
-            if (totalMemTakesTask < totalAllow)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-        }
+        //}
 
         //Get-All-Taskes-By-Conditions
         public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request)
