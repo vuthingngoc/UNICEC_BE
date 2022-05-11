@@ -44,7 +44,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
                         from c in context.Clubs
                         where c.UniversityId == u.Id
                         from ca in context.ClubActivities
-                        where c.Id == clubId && ca.CreateTime <= localTime.DateTime
+                        where c.Id == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
                         orderby ca.CreateTime descending
                         select ca;
 
