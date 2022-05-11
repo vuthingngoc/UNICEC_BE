@@ -28,45 +28,45 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet("process-club-activity")]
-        [SwaggerOperation(Summary = "Get process of club activity by Id ,  0.HappenningSoon, 1.Happenning , 2.Ending , 3.Canceling , 4.Eror")]
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="clubActivityId")] int ClubActivityId , [FromQuery(Name ="status")] MemberTakesActivityStatus status)
-        {
-            try
-            {
-                ViewProcessClubActivity result = await _clubActivityService.GetProcessClubActivity(ClubActivityId,status);
+        //[HttpGet("process-club-activity")]
+        //[SwaggerOperation(Summary = "Get process of club activity by Id ,  0.HappenningSoon, 1.Happenning , 2.Ending , 3.Canceling , 4.Eror")]
+        //public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="clubActivityId")] int ClubActivityId , [FromQuery(Name ="status")] MemberTakesActivityStatus status)
+        //{
+        //    try
+        //    {
+        //        ViewProcessClubActivity result = await _clubActivityService.GetProcessClubActivity(ClubActivityId,status);
 
-                if (result != null)
-                {
+        //        if (result != null)
+        //        {
 
-                    return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-            }
-            catch (NullReferenceException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            //Not has data
+        //            return Ok(new object());
+        //        }
+        //    }
+        //    catch (NullReferenceException e)
+        //    {
+        //        return NotFound(e.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
 
-        }
+        //}
 
 
-        [HttpGet("top4")]
-        [SwaggerOperation(Summary = "Get top 4 club activities by now")]
+        [HttpGet("top4-process")]
+        [SwaggerOperation(Summary = "Get top 4 club activities by now and process")]
         //Lưu ý University Id dựa vào JWT
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="universityId")] int UniversityId, [FromQuery(Name ="clubId")] int ClubId)
+        public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "universityId")] int UniversityId, [FromQuery(Name = "clubId")] int ClubId)
         {
             try
             {
-                List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId);
+                List<ViewProcessClubActivity> result = await _clubActivityService.GetTop4_Process(UniversityId, ClubId);
 
                 if (result != null)
                 {
@@ -89,6 +89,38 @@ namespace UniCEC.API.Controllers
             }
 
         }
+
+
+        //[HttpGet("top4")]
+        //[SwaggerOperation(Summary = "Get top 4 club activities by now")]
+        ////Lưu ý University Id dựa vào JWT
+        //public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="universityId")] int UniversityId, [FromQuery(Name ="clubId")] int ClubId)
+        //{
+        //    try
+        //    {
+        //        List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId);
+
+        //        if (result != null)
+        //        {
+
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            //Not has data
+        //            return Ok(new List<object>());
+        //        }
+        //    }
+        //    catch (NullReferenceException e)
+        //    {
+        //        return NotFound(e.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+
+        //}
 
 
         [HttpGet]

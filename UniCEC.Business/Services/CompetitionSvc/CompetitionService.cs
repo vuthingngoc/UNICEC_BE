@@ -263,8 +263,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 Id = competition.Id,
                 Name = competition.Name,
-                CompetitionTypeId = competition.CompetitionTypeId,
-
+                CompetitionTypeId = competition.CompetitionTypeId,                
                 //address
                 Address = competition.Address,
                 //Group member

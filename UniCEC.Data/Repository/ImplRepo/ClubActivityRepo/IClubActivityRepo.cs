@@ -20,6 +20,5 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
 
         // Nhat
         public Task<int> GetTotalActivityByClub(int clubId);
-        
     }
 }
