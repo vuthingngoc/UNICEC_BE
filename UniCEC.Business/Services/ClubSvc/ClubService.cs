@@ -4,8 +4,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
-using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Club;
 
@@ -14,40 +16,58 @@ namespace UniCEC.Business.Services.ClubSvc
     public class ClubService : IClubService
     {
         private IClubRepo _clubRepo;
-        private IUniversityRepo _universityRepo;
-        
+        private IClubActivityRepo _clubActivityRepo;
+        private IMemberRepo _memberRepo;
+        private ICompetitionInClubRepo _competitionInClubRepo;
 
-        public ClubService(IClubRepo clubRepo, IUniversityRepo universityRepo)
+        public ClubService(IClubRepo clubRepo, IClubActivityRepo clubActivityRepo
+                            , IMemberRepo memberRepo, ICompetitionInClubRepo competitionInClubRepo)
         {
             _clubRepo = clubRepo;
-            _universityRepo = universityRepo;
-            
+            _clubActivityRepo = clubActivityRepo;
+            _memberRepo = memberRepo;
+            _competitionInClubRepo = competitionInClubRepo;
         }
 
-        public async Task<PagingResult<ViewClub>> GetAllPaging(PagingRequest request)
+        public async Task<ViewClub> GetByClub(string token, int id)
         {
-            PagingResult<ViewClub> clubs = await _clubRepo.GetAll(request);
-            return (clubs != null) ? clubs : throw new NullReferenceException("Not found any club");
-        }   
+            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var roleClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
+            var universityClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+            int roleId = Int32.Parse(roleClaim.Value);
+            int universityId = Int32.Parse(universityClaim.Value);
 
-        public async Task<ViewClub> GetByClub(int id)
-        {
-            ViewClub club = await _clubRepo.GetById(id);
+            ViewClub club = await _clubRepo.GetById(id, roleId, universityId);
             if (club == null) throw new NullReferenceException("Not found this club");
+
+            // add more info
+            club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(id);
+            club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(id) + club.TotalActivity;
+            club.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(id);
+
             return club;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request)
         {
             PagingResult<ViewClub> clubs = await _clubRepo.GetByCompetition(competitionId, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
             return clubs;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByName(string token, int universityId, string name, PagingRequest request)
         {
-            PagingResult<ViewClub> clubs = await _clubRepo.GetByName(name, request);
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByName(universityId, name, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this name");
+
+            // add more info
+            foreach(ViewClub element in clubs.Items)
+            {
+                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
+            }
+
             return clubs;
         }
 
@@ -59,58 +79,78 @@ namespace UniCEC.Business.Services.ClubSvc
 
             List<ViewClub> clubs = await _clubRepo.GetByUser(userId);
             if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
+
+            // add more info
+            foreach (ViewClub element in clubs)
+            {
+                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
+            }
+
             return clubs;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByUniversity(string token, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request)
+        {
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(id, request);
+            if (clubs == null) throw new NullReferenceException("This university have no any clubs");
+
+            // add more info
+            foreach (ViewClub element in clubs.Items)
+            {
+                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
+            }
+
+            return clubs;
+        }
+
+        public async Task<ViewClub> Insert(string token, ClubInsertModel model)
         {
             var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            int universityId = Int32.Parse(claim.Value);
+            var claim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoldId"));
+            int roleId = Int32.Parse(claim.Value);
+            if (roleId == 2) throw new UnauthorizedAccessException();
 
-            PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(universityId, request);
-            if (clubs == null) throw new NullReferenceException("This university have no any clubs");
-            return clubs;
-        }
-
-        public async Task<ViewClub> Insert(ClubInsertModel club)
-        {
-            if (string.IsNullOrEmpty(club.Description) || club.UniversityId == 0 || club.TotalMember == 0
-                || string.IsNullOrEmpty(club.Name) || club.Founding == DateTime.Parse("1/1/0001 12:00:00 AM"))
+            if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 || model.TotalMember == 0
+                || string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.Parse("1/1/0001 12:00:00 AM"))
                 throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
 
-            int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, club.Name);
+            int clubId = await _clubRepo.CheckExistedClubName(model.UniversityId, model.Name);
             if (clubId > 0) throw new ArgumentException("Duplicated club name");
 
             // default status when inserting
             bool status = true;
-            Club clubObject = new Club()
+            Club club = new Club()
             {
-                Description = club.Description,
-                Founding = club.Founding,
-                Name = club.Name,
-                TotalMember = club.TotalMember,
-                UniversityId = club.UniversityId,
+                Description = model.Description,
+                Founding = model.Founding,
+                Name = model.Name,
+                TotalMember = model.TotalMember,
+                UniversityId = model.UniversityId,
                 Status = status,
-                Image = club.Image,
+                Image = model.Image,
             };
-            int id = await _clubRepo.Insert(clubObject);
-            return await _clubRepo.GetById(id);
+
+            int id = await _clubRepo.Insert(club);
+            return await _clubRepo.GetById(id, roleId, model.UniversityId);
         }
 
-        public async Task Update(ClubUpdateModel club)
+        public async Task Update(ClubUpdateModel model)
         {
-            Club clubObject = await _clubRepo.Get(club.Id);
-            if (clubObject == null) throw new NullReferenceException("Not found this club");
-            int clubId = await _clubRepo.CheckExistedClubName(clubObject.UniversityId, club.Name);
-            if (clubId > 0 && clubId != clubObject.Id) throw new ArgumentException("Duplicated club name");
+            Club club = await _clubRepo.Get(model.Id);
+            if (club == null) throw new NullReferenceException("Not found this club");
+            int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, model.Name);
+            if (clubId > 0 && clubId != club.Id) throw new ArgumentException("Duplicated club name");
 
-            if (!string.IsNullOrEmpty(club.Description)) clubObject.Description = club.Description;
-            if (club.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) clubObject.Founding = club.Founding;
-            if (!string.IsNullOrEmpty(club.Name)) clubObject.Name = club.Name;
-            if (club.TotalMember != 0) clubObject.TotalMember = club.TotalMember;
-            clubObject.Status = club.Status;
-            if (!string.IsNullOrEmpty(club.Image)) clubObject.Image = club.Image;
+            if (!string.IsNullOrEmpty(model.Description)) club.Description = model.Description;
+            if (model.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) club.Founding = model.Founding;
+            if (!string.IsNullOrEmpty(model.Name)) club.Name = model.Name;
+            if (model.TotalMember != 0) club.TotalMember = model.TotalMember;
+            club.Status = model.Status;
+            if (!string.IsNullOrEmpty(model.Image)) club.Image = model.Image;
 
             await _clubRepo.Update();
         }

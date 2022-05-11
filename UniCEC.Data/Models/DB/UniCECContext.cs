@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
 #nullable disable
@@ -780,6 +782,10 @@ namespace UniCEC.Data.Models.DB
                     .HasMaxLength(15);
 
                 entity.Property(e => e.MajorId).HasColumnName("MajorID");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.RoleId).HasColumnName("RoleID");
 

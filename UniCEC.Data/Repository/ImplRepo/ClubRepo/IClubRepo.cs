@@ -9,10 +9,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
     public interface IClubRepo : IRepository<Club>
     {
-        public Task<PagingResult<ViewClub>> GetAll(PagingRequest request);
-        public Task<ViewClub> GetById(int id);
+        public Task<ViewClub> GetById(int id, int roleId, int universityId);
         public Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request);
-        public Task<PagingResult<ViewClub>> GetByName(string name, PagingRequest request);
+        public Task<PagingResult<ViewClub>> GetByName(int universityId, string name, PagingRequest request);
         public Task<List<ViewClub>> GetByUser(int userId);
         public Task<PagingResult<ViewClub>> GetByUniversity(int universityId, PagingRequest request);
         public Task<int> CheckExistedClubName(int universityId, string name);

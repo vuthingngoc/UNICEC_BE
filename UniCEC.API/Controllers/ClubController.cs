@@ -15,45 +15,34 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/club")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
     public class ClubController : ControllerBase
     {
         private IClubService _clubService;
 
         public ClubController(IClubService clubService)
         {
-            _clubService = clubService; 
-        }
-
-        [HttpGet]
-        [SwaggerOperation(Summary = "Get all club")]
-        public async Task<IActionResult> GetAllClub([FromQuery] PagingRequest request)
-        {
-            try
-            {
-                PagingResult<ViewClub> clubs = await _clubService.GetAllPaging(request);
-                return Ok(clubs);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exeption");
-            }            
+            _clubService = clubService;
         }
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get club by id")]
-        
+
         public async Task<IActionResult> GetClubById(int id)
         {
             try
             {
-                ViewClub club = await _clubService.GetByClub(id);
-                return Ok(club);
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    string token = header["Authorization"].ToString().Split(" ")[1];
+                    ViewClub club = await _clubService.GetByClub(token, id);
+                    return Ok(club);
+                }
+
+                return Unauthorized();
             }
-            catch(NullReferenceException)
+            catch (NullReferenceException)
             {
                 return Ok(new object());
             }
@@ -63,18 +52,25 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("name")]
+        [HttpGet("university/{id}/search")]
         [SwaggerOperation(Summary = "Get club by name")]
-        public async Task<IActionResult> GetClubByName(string name, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetClubByName(int id, [FromQuery] string name, [FromQuery] PagingRequest request)
         {
             try
             {
-                PagingResult<ViewClub> clubs = await _clubService.GetByName(name, request);
-                return Ok(clubs);
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    string token = header["Authorization"].ToString().Split(" ")[1];
+                    PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, name, request);
+                    return Ok(clubs);
+                }
+
+                return Unauthorized();
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -83,7 +79,6 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("user")]
-        [Authorize(Roles = "Student")]
         [SwaggerOperation(Summary = "Get club by user")]
         public async Task<IActionResult> GetClubByUser()
         {
@@ -99,9 +94,9 @@ namespace UniCEC.API.Controllers
 
                 return Unauthorized();
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -109,22 +104,21 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("university")]
-        [Authorize(Roles = "Student")]
+        [HttpGet("university/{id}")]
         [SwaggerOperation(Summary = "Get club by university of user")]
-        public async Task<IActionResult> GetClubByUniversity([FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetClubByUniversity(int id, [FromQuery] PagingRequest request)
         {
             try
             {
                 var header = Request.Headers;
                 if (header.ContainsKey("Authorization"))
                 {
-                    var token = header["Authorization"].ToString().Split(" ")[1];
-                    PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, request);
+                    string token = header["Authorization"].ToString().Split(" ")[1];
+                    PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, id, request);
                     return Ok(clubs);
                 }
 
-                return Unauthorized();                
+                return Unauthorized();
             }
             catch (NullReferenceException ex)
             {
@@ -142,8 +136,15 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(id, request);
-                return Ok(clubs);
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    string token = header["Authorization"].ToString().Split(" ")[1];
+                    PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(token, id, request);
+                    return Ok(clubs);
+                }
+
+                return Unauthorized();
             }
             catch (NullReferenceException ex)
             {
@@ -155,15 +156,25 @@ namespace UniCEC.API.Controllers
             }
         }
 
-
         [HttpPost]
         [SwaggerOperation(Summary = "Insert club")]
         public async Task<IActionResult> InsertClub([FromBody] ClubInsertModel club)
         {
             try
             {
-                ViewClub viewClub = await _clubService.Insert(club);
-                return Created("api/v1/[controller]", club); 
+                var header = Request.Headers;
+                if (header.ContainsKey("Authorization"))
+                {
+                    string token = header["Authorization"].ToString().Split(" ")[1];
+                    ViewClub viewClub = await _clubService.Insert(token, club);
+                    return Ok(club);
+                }
+
+                return Unauthorized();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
             }
             catch (ArgumentNullException ex)
             {

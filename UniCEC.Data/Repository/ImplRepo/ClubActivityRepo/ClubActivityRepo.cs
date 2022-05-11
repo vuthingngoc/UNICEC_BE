@@ -120,6 +120,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             return (clubActivities.Count > 0) ? new PagingResult<ViewClubActivity>(clubActivities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
         }
 
+        // Nhat
+        public async Task<int> GetTotalActivityByClub(int clubId)
+        {
+            var query = from ca in context.ClubActivities
+                        where ca.ClubId.Equals(clubId) && ca.Ending.Date >= new LocalTime().GetLocalTime().DateTime  
+                        select new { ca };
 
+            return await query.CountAsync();
+        }
     }
 }
