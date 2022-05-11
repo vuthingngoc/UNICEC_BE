@@ -29,6 +29,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
+                 //phone
+                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
                  //City-id
@@ -67,6 +69,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
+                 //phone
+                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
                  //Dob
@@ -98,6 +102,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Id", user.Id.ToString()),
                  //email
                  new Claim("Email", user.Email),
+                 //phone
+                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
                  //Dob
@@ -133,6 +139,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Fullname", user.Fullname),
                  //email
                  new Claim("Email", user.Email),
+                 //phone
+                 new Claim("PhoneNumber", user.PhoneNumber),
                  //Avatar
                  new Claim ("Avatar", user.Avatar),
                  //Role Id
