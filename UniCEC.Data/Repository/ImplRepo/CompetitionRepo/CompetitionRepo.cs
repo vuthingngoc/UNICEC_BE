@@ -88,7 +88,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //
             IQueryable<Competition> query;
 
-            //Status khác 5 (Not Assigned)
+            
             if (ClubId.HasValue)
             {
                 query = from cic in context.CompetitionInClubs
