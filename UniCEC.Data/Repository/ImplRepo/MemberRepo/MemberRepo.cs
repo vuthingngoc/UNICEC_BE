@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System;
 using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 {
@@ -15,6 +16,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public MemberRepo(UniCECContext context) : base(context)
         {
 
+        }
+
+        public Task<PagingResult<ViewMember>> GetAllMemberByClub(int clubId, PagingRequest request)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ViewMember> GetById(int memberId)

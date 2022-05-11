@@ -24,7 +24,7 @@ namespace UniCEC.Data.ViewModels.Common
         public PagingResult(List<T> items, int count, int currentPage, int pageSize)
         {
             TotalCount = count;
-            PageSize = pageSize;
+            PageSize = (count < pageSize) ? count: pageSize;
             CurrentPage = currentPage;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             this.Items = items;

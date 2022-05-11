@@ -25,10 +25,11 @@ namespace UniCEC.Business.Services.MemberSvc
             _clubHistoryRepo = clubHistoryRepo;
         }
 
-        public Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request)
+        public async Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request)
         {
-
-            throw new NotImplementedException();
+            PagingResult<ViewMember> members = await _memberRepo.GetAllMemberByClub(clubId, request);
+            if (members == null) throw new NullReferenceException("Not found any member in this club");
+            return members;
         }
 
         public async Task<ViewMember> GetByMemberId(int id)

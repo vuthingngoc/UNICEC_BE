@@ -18,13 +18,13 @@ namespace UniCEC.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
-    public class MemberController : ControllerBase
+    public class MemberController : ControllerBase // not authorize role in club yet !!!
     {
         //
-        private IMemberService _ImemberService;
+        private IMemberService _memberService;
         public MemberController(IMemberService ImemberService)
         {
-            _ImemberService = ImemberService;
+            _memberService = ImemberService;
         }
 
         [HttpGet("club/{id}")]
@@ -33,7 +33,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewMember> members = await _ImemberService.GetAllPaging(id, request);
+                PagingResult<ViewMember> members = await _memberService.GetAllPaging(id, request);
                 return Ok(members);
             }
             catch (NullReferenceException)
@@ -53,7 +53,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewMember member = await _ImemberService.GetByMemberId(id);
+                ViewMember member = await _memberService.GetByMemberId(id);
                 return Ok(member);
             }
             catch (NullReferenceException)
@@ -72,7 +72,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                List<ViewMember> members = await _ImemberService.GetLeadersByClub(id);
+                List<ViewMember> members = await _memberService.GetLeadersByClub(id);
                 return Ok(members);
             }
             catch (NullReferenceException e)
@@ -91,7 +91,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                int quantity = await _ImemberService.GetQuantityNewMembersByClub(id);
+                int quantity = await _memberService.GetQuantityNewMembersByClub(id);
                 return Ok(quantity);
             }
             catch (NullReferenceException e)
@@ -111,7 +111,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewMember result = await _ImemberService.Insert(model);
+                ViewMember result = await _memberService.Insert(model);
                 return Ok(result);
             }
             catch (NullReferenceException ex)
@@ -139,7 +139,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _ImemberService.Update(model);
+                await _memberService.Update(model);
                 return Ok();
             }
             catch (NullReferenceException ex)
@@ -164,7 +164,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _ImemberService.Delete(id);
+                await _memberService.Delete(id);
                 return Ok();
             }
             catch (NullReferenceException ex)
