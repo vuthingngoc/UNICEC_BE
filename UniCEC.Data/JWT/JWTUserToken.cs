@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -39,7 +40,7 @@ namespace UniCEC.Data.JWT
                  //Dob
                  new Claim("DOB", user.Dob),
                  //Avatar
-                 new Claim ("Avatar", user.Avatar),
+                 new Claim("Avatar", user.Avatar),
                  //Role Id
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role

@@ -18,9 +18,28 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         }
 
-        public Task<PagingResult<ViewMember>> GetAllMemberByClub(int clubId, PagingRequest request)
+        public async Task<PagingResult<ViewMember>> GetAllMemberByClub(int clubId, PagingRequest request)
         {
-            throw new NotImplementedException();
+            var query = from ch in context.ClubHistories
+                        join cr in context.ClubRoles on ch.ClubRoleId equals cr.Id
+                        join m in context.Members on ch.MemberId equals m.Id
+                        join u in context.Users on m.StudentId equals u.Id
+                        where ch.ClubId.Equals(clubId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                        select new { ch, cr, m, u };
+
+            int totalCount = query.Count();
+            List<ViewMember> members = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                    .Select(x => new ViewMember()
+                                                    {
+                                                        Id = x.m.Id,
+                                                        Name = x.u.Fullname,
+                                                        Avatar = x.u.Avatar,
+                                                        ClubRoleId = x.cr.Id,
+                                                        ClubRoleName = x.cr.Name,
+                                                        IsOnline = x.u.IsOnline
+                                                    }).ToListAsync();
+
+            return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<ViewMember> GetById(int memberId)
