@@ -30,6 +30,7 @@ namespace UniCEC.API.Controllers
         //}
 
         // POST api/<CompetitionInClubController>
+        //[Authorize(Roles = "Student")]
         [HttpPost]
         [SwaggerOperation(Summary = "club creates competition")]
         public async Task<IActionResult> Insert([FromBody] CompetitionInClubInsertModel model )
