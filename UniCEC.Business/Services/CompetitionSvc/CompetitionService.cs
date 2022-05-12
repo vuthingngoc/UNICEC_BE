@@ -73,16 +73,73 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<ViewCompetition> Insert(CompetitionInsertModel model)
+        //Sponsor Insert
+        public async Task<ViewCompetition> SponsorInsert(CompetitionInsertModel model)
+        {
+            //Check Authorize Sponsor in controller
+            try
+            {
+                //------------ Check Date
+                bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                if (checkDate)
+                {
+                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                    Competition competition = new Competition();
+                    competition.CompetitionTypeId = model.CompetitionTypeId;
+                    competition.Address = model.Address;
+                    competition.Name = model.Name;
+                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                    competition.NumberOfTeam = model.NumberOfTeam;
+                    competition.NumberOfParticipation = model.NumberOfParticipations;
+                    competition.StartTime = model.StartTime;
+                    competition.EndTime = model.EndTime;
+                    competition.StartTimeRegister = model.StartTimeRegister;
+                    competition.EndTimeRegister = model.EndTimeRegister;
+                    competition.SeedsPoint = model.SeedsPoint;
+                    competition.SeedsDeposited = model.SeedsDeposited;
+                    competition.SeedsCode = await checkExistCode();
+                    competition.IsSponsor = true;
+                    //auto status = NotAssigned 
+                    //-> tạo thành công nhưng chưa đc assigned cho 1 Sponsor or các Sponsor
+                    competition.Status = CompetitionStatus.NotAssigned;
+                    competition.Public = model.Public;
+                    //auto = 0
+                    competition.View = 0;
+                    int result = await _competitionRepo.Insert(competition);
+                    if (result > 0)
+                    {
+                        Competition comp = await _competitionRepo.Get(result);
+                        ViewCompetition viewCompetition = TransformViewModel(comp);
+                        return viewCompetition;
+                    }//end if result != 0
+                    else
+                    {
+                        return null;
+                    }
+                }//end if check date
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Leader Insert
+        public async Task<ViewCompetition> LeaderInsert(CompetitionInsertModel model)
         {
             try
             {
                 bool roleLeader = false;
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = model.UserId,
-                    ClubId = model.ClubId,
-                    TermId = model.TermId
+                    UserId = (int)model.UserId,
+                    ClubId = (int)model.ClubId,
+                    TermId = (int)model.TermId
                 };
                 ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
@@ -96,37 +153,46 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
                 if (roleLeader)
                 {
-                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
-                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-                    Competition competition = new Competition();
-                    competition.CompetitionTypeId = model.CompetitionTypeId;
-                    competition.Address = model.Address;
-                    competition.Name = model.Name;  
-                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-                    competition.NumberOfTeam = model.NumberOfTeam;
-                    competition.NumberOfParticipation = model.NumberOfParticipations;
-                    competition.StartTime = model.StartTime;
-                    competition.EndTime = model.EndTime;
-                    competition.StartTimeRegister = model.StartTimeRegister;
-                    competition.EndTimeRegister = model.EndTimeRegister;
-                    competition.SeedsPoint = model.SeedsPoint;
-                    competition.SeedsDeposited = model.SeedsDeposited;
-                    competition.SeedsCode = await checkExistCode();
-                    //auto status = NotAssigned 
-                    //-> tạo thành công nhưng chưa đc assigned cho 1 or các clb
-                    competition.Status = CompetitionStatus.NotAssigned;
-                    //
-                    competition.Public = model.Public;
-                    //auto = 0
-                    competition.View = 0;
-                    //
-                    int result = await _competitionRepo.Insert(competition);
-                    if (result > 0)
+                    //------------ Check Date
+                    bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                    if (checkDate)
                     {
-                        Competition comp = await _competitionRepo.Get(result);
-                        ViewCompetition viewCompetition = TransformViewModel(comp);
-                        return viewCompetition;
-                    }//end if result != 0
+                        //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                        //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                        Competition competition = new Competition();
+                        competition.CompetitionTypeId = model.CompetitionTypeId;
+                        competition.Address = model.Address;
+                        competition.Name = model.Name;
+                        // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                        competition.NumberOfTeam = model.NumberOfTeam;
+                        competition.NumberOfParticipation = model.NumberOfParticipations;
+                        competition.StartTime = model.StartTime;
+                        competition.EndTime = model.EndTime;
+                        competition.StartTimeRegister = model.StartTimeRegister;
+                        competition.EndTimeRegister = model.EndTimeRegister;
+                        competition.SeedsPoint = model.SeedsPoint;
+                        competition.SeedsDeposited = model.SeedsDeposited;
+                        competition.SeedsCode = await checkExistCode();
+                        //nếu là leader -> IsSponsor == false
+                        competition.IsSponsor = false;
+                        //auto status = NotAssigned 
+                        //-> tạo thành công nhưng chưa đc assigned cho 1 or các clb
+                        competition.Status = CompetitionStatus.NotAssigned;
+                        competition.Public = model.Public;
+                        //auto = 0
+                        competition.View = 0;
+                        int result = await _competitionRepo.Insert(competition);
+                        if (result > 0)
+                        {
+                            Competition comp = await _competitionRepo.Get(result);
+                            ViewCompetition viewCompetition = TransformViewModel(comp);
+                            return viewCompetition;
+                        }//end if result != 0
+                        else
+                        {
+                            return null;
+                        }
+                    }//end if check date
                     else
                     {
                         return null;
@@ -153,7 +219,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
                 //------------ Check Club Has Create Competition
                 if (clubHasCreateCompetition == false)
                 {
@@ -180,7 +246,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         comp.SeedsPoint = (competition.SeedsPoint != 0) ? competition.SeedsPoint : comp.SeedsPoint;
                         comp.SeedsDeposited = (competition.SeedsDeposited != 0) ? competition.SeedsDeposited : comp.SeedsDeposited;
                         comp.Address = (competition.Address.Length > 0) ? competition.Address : comp.Address;
-                        comp.Name = (competition.Name.Length > 0) ? competition.Name : comp.Name;   
+                        comp.Name = (competition.Name.Length > 0) ? competition.Name : comp.Name;
                         //
                         await _competitionRepo.Update();
                         return true;
@@ -209,10 +275,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool roleLeader = false;
                 bool clubHasCreateCompetition = false;
 
-                //Use method check
+                //Use method check  
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
                 //------------ Check Club Has Create Competition
                 if (clubHasCreateCompetition == false)
                 {
@@ -236,16 +302,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         //
                         Competition comp = await _competitionRepo.Get(competition.Id);
-                        comp.Status = CompetitionStatus.Canceling;
-                        //
-                        await _competitionRepo.Update();
-                        return true;
-                    }
+                        if (comp != null)
+                        {
+                            comp.Status = CompetitionStatus.Canceling;
+                            //
+                            await _competitionRepo.Update();
+                            return true;
+                        }//end if comp != null
+                        else
+                        {
+                            return false;
+                        }
+                    }//end check role leader
                     else
                     {
                         return false;
                     }
-                }
+                }//end clubHasCreateCompetition
                 else
                 {
                     return false;
@@ -263,7 +336,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 Id = competition.Id,
                 Name = competition.Name,
-                CompetitionTypeId = competition.CompetitionTypeId,                
+                CompetitionTypeId = competition.CompetitionTypeId,
                 //address
                 Address = competition.Address,
                 //Group member
@@ -316,5 +389,74 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return seedCode;
         }
+
+        //Check Date Insert
+        private bool CheckDateInsert(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime)
+        {
+
+            //condition
+            bool round1 = false;
+            bool round2 = false;
+            bool round3 = false;
+            bool result = false;
+
+            //ROUND 1
+            //STR < ETR < ST < ET -> STR true
+
+            //kq 1 < 0 -> STR < ETR (sớm hơn)
+            int kq1 = DateTime.Compare(StartTimeRegister, EndTimeRegister);
+            if (kq1 < 0)
+            {
+                //kq 2 < 0 -> STR < ST (sớm hơn)
+                int kq2 = DateTime.Compare(StartTimeRegister, StartTime);
+                if (kq2 < 0)
+                {
+                    //kq 3 < 0 -> STR < ET (sớm hơn)
+                    int kq3 = DateTime.Compare(StartTimeRegister, EndTime);
+                    if (kq3 < 0)
+                    {
+                        round1 = true;
+                    }
+                }//end kq2
+            }//end kq1
+
+            //ROUND2
+            //ETR < ST < ET -> ETR true
+            if (round1)
+            {
+                //kq 4 < 0 -> ETR < ST (sớm hơn)
+                int kq4 = DateTime.Compare(EndTimeRegister, StartTime);
+                if (kq4 < 0)
+                {
+                    //kq 5 < 0 -> ETR < ET (sớm hơn)
+                    int kq5 = DateTime.Compare(EndTimeRegister, EndTime);
+                    if (kq5 < 0)
+                    {
+                        round2 = true;
+                    }
+                }
+            }
+
+            //ROUND 3
+            //ST  < ET - > ST true
+            if (round1 && round2)
+            {
+                //kq 6 < 0 -> ST < ET (sớm hơn)
+                int kq6 = DateTime.Compare(StartTime, EndTime);
+                if (kq6 < 0)
+                {
+                    round3 = true;
+                }
+            }
+
+            if (round1 && round2 && round3)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+
     }
 }

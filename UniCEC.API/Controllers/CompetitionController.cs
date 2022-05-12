@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -113,15 +114,48 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //ClubLeader
         // POST api/<CompetitionController>
-        [HttpPost]
+        //[Authorize(Roles = "Student")]
+        [HttpPost("leader")]
         [SwaggerOperation(Summary = "Insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
-        public async Task<IActionResult> Insert([FromBody] CompetitionInsertModel model)
+        public async Task<IActionResult> InsertByLeader([FromBody] CompetitionInsertModel model)
         {
             try
             {
-                ViewCompetition viewCompetition = await _competitionService.Insert(model);
+                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model);
+                if (viewCompetition != null)
+                {
+
+                    return Ok(viewCompetition);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        //Sponsor
+        // POST api/<CompetitionController>
+        [Authorize(Roles = "Sponsor")]
+        [HttpPost("sponsor")]
+        [SwaggerOperation(Summary = "Insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
+        //phải có author student
+        public async Task<IActionResult> InsertBySposor([FromBody] CompetitionInsertModel model)
+        {
+            try
+            {
+                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model);
                 if (viewCompetition != null)
                 {
 

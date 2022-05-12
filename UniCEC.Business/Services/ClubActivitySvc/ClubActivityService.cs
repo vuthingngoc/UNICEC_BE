@@ -244,7 +244,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         //check status by date when insert
         private ClubActivityStatus GetClubActivityStatus(DateTime BeginingTime)
         {
-            DateTime now = DateTime.Now;
+            DateTime now = new LocalTime().GetLocalTime().DateTime;
             int result = DateTime.Compare(now, BeginingTime);
             //Earlier
             if (result < 0)

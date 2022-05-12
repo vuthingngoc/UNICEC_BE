@@ -6,8 +6,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 {
     public interface ICompetitionInClubRepo : IRepository<CompetitionInClub>
     {
-        //check-club-id-create-competition-duplicate
-        public Task<bool> CheckDuplicateCreateCompetition(int clubId, int competitionId);
+        //check-club-id-create-competition-or-event-duplicate
+        public Task<bool> CheckDuplicateCreateCompetitionOrEvent(int clubId, int competitionId);
 
         // Nhat
         public Task<int> GetTotalEventOrganizedByClub(int clubId);

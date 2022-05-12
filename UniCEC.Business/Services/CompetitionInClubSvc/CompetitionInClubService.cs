@@ -67,8 +67,8 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
                 //------------ Check Role Member Is Leader 
                 if (roleLeader)
                 {
-                    //------------------------------------check-club-id-create-competition-duplicate
-                    bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetition(model.ClubId, model.CompetitionId);
+                    //------------------------------------check-club-id-create-competition-or-event-duplicate
+                    bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(model.ClubId, model.CompetitionId);
                     if (checkCreateCompetitionInClub)
                     {
                         CompetitionInClub competitionInClub = new CompetitionInClub();

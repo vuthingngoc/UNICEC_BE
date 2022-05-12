@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
+using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.JWT;
 using UniCEC.Data.ViewModels.Entities.Role;
+using UniCEC.Data.ViewModels.Entities.Sponsor;
 using UniCEC.Data.ViewModels.Entities.University;
 using UniCEC.Data.ViewModels.Entities.User;
 using UniCEC.Data.ViewModels.Firebase.Auth;
@@ -17,12 +19,14 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUserService _userService;
         private IUniversityService _universityService;
         private IRoleService _roleService;
+        private ISponsorService _sponsorService;
 
-        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService)
+        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
+            _sponsorService = sponsorService;
         }
 
         public async Task<ViewUserInfo> Authentication(string token)
@@ -138,14 +142,35 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     //2.Sponsor
                     if (role.Id == 2)
                     {
+                        string clientTokenUser = null;
                         //----------------Generate JWT Token Sponsor
-                        string clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName);
+                        //Add [Sponsor] DB
+                        //1.Check that Sponsor in [Sponsor] DB 
+                        bool SponsorIsCreated = await _sponsorService.CheckSponsorIsCreated(user.Id);
+                        //2.If SponsorIsCreated == true notInsert
+                        //3.If SponsorIsCreated == false Insert
+                        if (SponsorIsCreated == false)
+                        {
+                            SponsorInsertModel sponsorInsertModel = new SponsorInsertModel()
+                            {
+                                UserId = user.Id,
+                                Email = user.Email,
+                                Name = user.Fullname,
+                                Phone = user.PhoneNumber,
+                                Status = user.Status,
+                                Description = user.Description,
+                                
+                            };
+                            //Should be update Address , Logo
+                            ViewSponsor viewSponsor = await _sponsorService.Insert(sponsorInsertModel);                          
+                        }
+                        clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName);
                         return new ViewUserInfo()
                         {
                             Token = clientTokenUser
                         };
                     }
-                }                
+                }
             }
 
             // NOT IN SYSTEM && INVALID EMAIL
