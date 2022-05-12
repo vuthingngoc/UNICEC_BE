@@ -219,7 +219,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
                 //------------ Check Club Has Create Competition
                 if (clubHasCreateCompetition == false)
                 {
@@ -278,7 +278,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetition(competition.ClubId, competition.Id);
+                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
                 //------------ Check Club Has Create Competition
                 if (clubHasCreateCompetition == false)
                 {
