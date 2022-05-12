@@ -137,6 +137,8 @@ namespace UniCEC.Data.JWT
                  new Claim("Id", user.Id.ToString()),
                  //fullname
                  new Claim("Fullname", user.Fullname),
+                 //University
+                 new Claim("UniversityId", user.UniversityId.ToString()),
                  //email
                  new Claim("Email", user.Email),
                  //phone

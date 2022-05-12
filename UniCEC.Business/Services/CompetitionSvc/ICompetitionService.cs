@@ -11,12 +11,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
     {
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request);
         public Task<ViewCompetition> GetById(int id);
-        //Leader Insert
+        //-----------------------------------------------------Leader 
         public Task<ViewCompetition> LeaderInsert(CompetitionInsertModel competition);
-        //Sponsor Insert
+        public Task<bool> LeaderUpdate(CompetitionUpdateModel competition);
+        public Task<bool> LeaderDelete(CompetitionDeleteModel model);
+
+        //-----------------------------------------------------Sponsor 
         public Task<ViewCompetition> SponsorInsert(CompetitionInsertModel competition);
-        public Task<bool> Update(CompetitionUpdateModel competition);
-        public Task<bool> Delete(CompetitionDeleteModel model);
+        public Task<bool> SponsorUpdate(CompetitionUpdateModel competition);
+        public Task<bool> SponsorDelete(CompetitionDeleteModel model);
 
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
