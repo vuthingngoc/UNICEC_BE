@@ -32,7 +32,7 @@ namespace UniCEC.API.Controllers
         // POST api/<CompetitionInClubController>
         //[Authorize(Roles = "Student")]
         [HttpPost]
-        [SwaggerOperation(Summary = "club creates competition")]
+        [SwaggerOperation(Summary = "club leader creates competition")]
         public async Task<IActionResult> Insert([FromBody] CompetitionInClubInsertModel model )
         {
             try

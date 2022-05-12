@@ -275,7 +275,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool roleLeader = false;
                 bool clubHasCreateCompetition = false;
 
-                //Use method check
+                //Use method check  
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
                 clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
@@ -302,16 +302,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         //
                         Competition comp = await _competitionRepo.Get(competition.Id);
-                        comp.Status = CompetitionStatus.Canceling;
-                        //
-                        await _competitionRepo.Update();
-                        return true;
-                    }
+                        if (comp != null)
+                        {
+                            comp.Status = CompetitionStatus.Canceling;
+                            //
+                            await _competitionRepo.Update();
+                            return true;
+                        }//end if comp != null
+                        else
+                        {
+                            return false;
+                        }
+                    }//end check role leader
                     else
                     {
                         return false;
                     }
-                }
+                }//end clubHasCreateCompetition
                 else
                 {
                     return false;
