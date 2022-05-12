@@ -13,5 +13,6 @@ namespace UniCEC.Business.Services.MajorSvc
         public Task<ViewMajor> Insert(MajorInsertModel major);
         public Task Update(ViewMajor major);
         public Task Delete(int id);
+        public Task<ViewMajor> GetMajorById(int id);
     }
 }

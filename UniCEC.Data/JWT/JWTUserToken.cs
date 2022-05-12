@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.Data.JWT
@@ -13,12 +14,14 @@ namespace UniCEC.Data.JWT
     public class JWTUserToken
     {
         public IConfiguration Configuration { get; }
+        
         public JWTUserToken(IConfiguration configuration)
         {
             Configuration = configuration;
+            
         }
 
-        public static string GenerateJWTTokenStudent(ViewUser user, string roleName)
+        public static string GenerateJWTTokenStudent(ViewUser user, string roleName, string majorName)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
                 issuer: "https://securetoken.google.com/unics-e46a4",
@@ -33,8 +36,10 @@ namespace UniCEC.Data.JWT
                  new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
-                 //City-id
+                 //Major-id
                  new Claim("MajorId", user.MajorId.ToString()),
+                 //Major-Name
+                 new Claim("MajorName", majorName),
                  //University
                  new Claim("UniversityId", user.UniversityId.ToString()),
                  //UserId(MSSV)
@@ -87,7 +92,7 @@ namespace UniCEC.Data.JWT
                         key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
                         algorithm: SecurityAlgorithms.HmacSha256
                         )
-                ); 
+                );
 
             return new JwtSecurityTokenHandler().WriteToken(tokenUser);
         }

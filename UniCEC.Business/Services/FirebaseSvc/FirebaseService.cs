@@ -1,11 +1,13 @@
 ﻿using FirebaseAdmin.Auth;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.JWT;
+using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.Sponsor;
 using UniCEC.Data.ViewModels.Entities.University;
@@ -20,13 +22,15 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUniversityService _universityService;
         private IRoleService _roleService;
         private ISponsorService _sponsorService;
+        private IMajorService _majorService; 
 
-        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService)
+        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService, IMajorService majorService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
             _sponsorService = sponsorService;
+            _majorService = majorService;
         }
 
         public async Task<ViewUserInfo> Authentication(string token)
@@ -81,6 +85,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     ViewUser user = await _userService.GetUserByEmail(email);
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
+                    ViewMajor major = await _majorService.GetMajorById((int)user.MajorId);
                     //2.1 FullFill Info
                     if (user.UniversityId != null)
                     {
@@ -88,7 +93,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         if (role.Id == 3)
                         {
                             //----------------Generate JWT Token Student
-                            string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, role.RoleName);
+                            string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, role.RoleName, major.Name);
                             return new ViewUserInfo()
                             {
                                 Token = clientTokenUser
