@@ -73,61 +73,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        //Sponsor Insert
-        public async Task<ViewCompetition> SponsorInsert(CompetitionInsertModel model)
-        {
-            //Check Authorize Sponsor in controller
-            try
-            {
-                //------------ Check Date
-                bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
-                if (checkDate)
-                {
-                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
-                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-                    Competition competition = new Competition();
-                    competition.CompetitionTypeId = model.CompetitionTypeId;
-                    competition.Address = model.Address;
-                    competition.Name = model.Name;
-                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-                    competition.NumberOfTeam = model.NumberOfTeam;
-                    competition.NumberOfParticipation = model.NumberOfParticipations;
-                    competition.StartTime = model.StartTime;
-                    competition.EndTime = model.EndTime;
-                    competition.StartTimeRegister = model.StartTimeRegister;
-                    competition.EndTimeRegister = model.EndTimeRegister;
-                    competition.SeedsPoint = model.SeedsPoint;
-                    competition.SeedsDeposited = model.SeedsDeposited;
-                    competition.SeedsCode = await checkExistCode();
-                    competition.IsSponsor = true;
-                    //auto status = NotAssigned 
-                    //-> tạo thành công nhưng chưa đc assigned cho 1 Sponsor or các Sponsor
-                    competition.Status = CompetitionStatus.NotAssigned;
-                    competition.Public = model.Public;
-                    //auto = 0
-                    competition.View = 0;
-                    int result = await _competitionRepo.Insert(competition);
-                    if (result > 0)
-                    {
-                        Competition comp = await _competitionRepo.Get(result);
-                        ViewCompetition viewCompetition = TransformViewModel(comp);
-                        return viewCompetition;
-                    }//end if result != 0
-                    else
-                    {
-                        return null;
-                    }
-                }//end if check date
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        
 
         //Leader Insert
         public async Task<ViewCompetition> LeaderInsert(CompetitionInsertModel model)
@@ -209,7 +155,64 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<bool> Update(CompetitionUpdateModel competition)
+        //Sponsor Insert
+        public async Task<ViewCompetition> SponsorInsert(CompetitionInsertModel model)
+        {
+            //Check Authorize Sponsor in controller
+            try
+            {
+                //------------ Check Date
+                bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                if (checkDate)
+                {
+                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                    Competition competition = new Competition();
+                    competition.CompetitionTypeId = model.CompetitionTypeId;
+                    competition.Address = model.Address;
+                    competition.Name = model.Name;
+                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                    competition.NumberOfTeam = model.NumberOfTeam;
+                    competition.NumberOfParticipation = model.NumberOfParticipations;
+                    competition.StartTime = model.StartTime;
+                    competition.EndTime = model.EndTime;
+                    competition.StartTimeRegister = model.StartTimeRegister;
+                    competition.EndTimeRegister = model.EndTimeRegister;
+                    competition.SeedsPoint = model.SeedsPoint;
+                    competition.SeedsDeposited = model.SeedsDeposited;
+                    competition.SeedsCode = await checkExistCode();
+                    competition.IsSponsor = true;
+                    //auto status = NotAssigned 
+                    //-> tạo thành công nhưng chưa đc assigned cho 1 Sponsor or các Sponsor
+                    competition.Status = CompetitionStatus.NotAssigned;
+                    competition.Public = model.Public;
+                    //auto = 0
+                    competition.View = 0;
+                    int result = await _competitionRepo.Insert(competition);
+                    if (result > 0)
+                    {
+                        Competition comp = await _competitionRepo.Get(result);
+                        ViewCompetition viewCompetition = TransformViewModel(comp);
+                        return viewCompetition;
+                    }//end if result != 0
+                    else
+                    {
+                        return null;
+                    }
+                }//end if check date
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> LeaderUpdate(CompetitionUpdateModel competition)
         {
             try
             {
@@ -268,7 +271,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<bool> Delete(CompetitionDeleteModel competition)
+        public Task<bool> SponsorUpdate(CompetitionUpdateModel competition)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public async Task<bool> LeaderDelete(CompetitionDeleteModel competition)
         {
             try
             {
@@ -328,6 +337,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 throw;
             }
+        }
+
+        public Task<bool> SponsorDelete(CompetitionDeleteModel model)
+        {
+            throw new NotImplementedException();
         }
 
         public ViewCompetition TransformViewModel(Competition competition)
@@ -457,6 +471,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-
+      
     }
 }

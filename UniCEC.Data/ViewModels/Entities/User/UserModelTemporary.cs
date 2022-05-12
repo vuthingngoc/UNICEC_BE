@@ -9,6 +9,8 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public string Id { get; set; }
         [JsonPropertyName("name")]
         public string Fullname { get; set; }
+        [JsonPropertyName("university_id")]
+        public int UniversityId { get; set; }
         [JsonPropertyName("role_id")]
         public int RoleId { get; set; }
         [JsonPropertyName("role_name")]

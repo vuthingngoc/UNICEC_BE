@@ -229,7 +229,7 @@ namespace UniCEC.Business.Services.UserSvc
                     Avatar = userTem.Avatar,
                     //auto
                     Dob = "",
-                    Fullname = "",
+                    Fullname = userTem.Fullname,
                     Gender = "",
                     UserId = "",
                     Description = "",
