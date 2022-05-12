@@ -15,6 +15,8 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public string UserId { get; set; }
         public string Fullname { get; set; }
         public string Email { get; set; }
+        [JsonPropertyName("phone_number")]
+        public string PhoneNumber { get; set; }
         public string Gender { get; set; }
         public bool Status { get; set; }
         public string Dob { get; set; }

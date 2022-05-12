@@ -49,6 +49,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     UserModelTemporary userModelTemporary = new UserModelTemporary()
                     {
                         Email = email,
+                        PhoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber,
                         Fullname = userInfo.DisplayName,
                         Avatar = (string.IsNullOrEmpty(userInfo.PhotoUrl)) ? "" : userInfo.PhotoUrl,
                         RoleId = 3 // role student
@@ -97,6 +98,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         {
                             Id = user.Id.ToString(),
                             Email = user.Email,
+                            PhoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber,
                             Fullname = user.Fullname,
                             RoleName = role.RoleName,
                             RoleId = user.RoleId,
