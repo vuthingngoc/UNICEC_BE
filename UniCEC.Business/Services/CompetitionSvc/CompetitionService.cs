@@ -436,31 +436,60 @@ namespace UniCEC.Business.Services.CompetitionSvc
             bool round1 = false;
             bool round2 = false;
             bool round3 = false;
+            bool round4 = false;
             bool result = false;
 
-            //ROUND 1
-            //STR < ETR < ST < ET -> STR true
-
-            //kq 1 < 0 -> STR < ETR (sớm hơn)
-            int kq1 = DateTime.Compare(StartTimeRegister, EndTimeRegister);
-            if (kq1 < 0)
+            //ROUND 1 
+            //CHECK LOCALTIME < STR < ETR < ST < ET -> LocalTime
+            DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+            // resultLT1 < STR (sớm hơn)
+            int resultLT1 = DateTime.Compare(localTime, StartTimeRegister);
+            if (resultLT1 < 0)
             {
-                //kq 2 < 0 -> STR < ST (sớm hơn)
-                int kq2 = DateTime.Compare(StartTimeRegister, StartTime);
-                if (kq2 < 0)
+                //resultLT2 < ETR (sớm hơn)
+                int resultLT2 = DateTime.Compare(localTime, EndTimeRegister);
+                if (resultLT2 < 0)
                 {
-                    //kq 3 < 0 -> STR < ET (sớm hơn)
-                    int kq3 = DateTime.Compare(StartTimeRegister, EndTime);
-                    if (kq3 < 0)
+                    //resultLT3 < ST (sớm hơn)
+                    int resultLT3 = DateTime.Compare(localTime, StartTime);
+                    if (resultLT3 < 0)
                     {
-                        round1 = true;
+                        //resultLT4 < ET (sớm hơn)
+                        int resultLT4 = DateTime.Compare(localTime, EndTime);
+                        if (resultLT4 < 0)
+                        {
+                            round1 = true;
+                        }
                     }
-                }//end kq2
-            }//end kq1
+                }
+            }
 
-            //ROUND2
-            //ETR < ST < ET -> ETR true
+            //ROUND 2
             if (round1)
+            {               
+                //STR < ETR < ST < ET -> STR true
+                //kq 1 < 0 -> STR < ETR (sớm hơn)
+                int kq1 = DateTime.Compare(StartTimeRegister, EndTimeRegister);
+                if (kq1 < 0)
+                {
+                    //kq 2 < 0 -> STR < ST (sớm hơn)
+                    int kq2 = DateTime.Compare(StartTimeRegister, StartTime);
+                    if (kq2 < 0)
+                    {
+                        //kq 3 < 0 -> STR < ET (sớm hơn)
+                        int kq3 = DateTime.Compare(StartTimeRegister, EndTime);
+                        if (kq3 < 0)
+                        {
+                            round2 = true;
+                        }
+                    }//end kq2
+                }//end kq1
+            }
+
+
+            //ROUND 3
+            //ETR < ST < ET -> ETR true
+            if (round1 && round2)
             {
                 //kq 4 < 0 -> ETR < ST (sớm hơn)
                 int kq4 = DateTime.Compare(EndTimeRegister, StartTime);
@@ -470,24 +499,25 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     int kq5 = DateTime.Compare(EndTimeRegister, EndTime);
                     if (kq5 < 0)
                     {
-                        round2 = true;
+                        round3 = true;
                     }
                 }
             }
 
-            //ROUND 3
+            //ROUND 4
             //ST  < ET - > ST true
-            if (round1 && round2)
+            if (round1 && round2 && round3)
             {
                 //kq 6 < 0 -> ST < ET (sớm hơn)
                 int kq6 = DateTime.Compare(StartTime, EndTime);
                 if (kq6 < 0)
                 {
-                    round3 = true;
+                    round4 = true;
                 }
             }
 
-            if (round1 && round2 && round3)
+            //
+            if (round1 && round2 && round3 && round4)
             {
                 result = true;
             }
