@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
-    public class CompetitionInsertModel
+    public class SponsorInsertCompOrEventModel
     {
-        public string Name { get; set; }    
+        public string Name { get; set; }
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
         [JsonPropertyName("number_of_participations")]
@@ -26,14 +30,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
-
-        //---------Author to check user is Leader of Club
-        [JsonPropertyName("user_id")]
-        public int? UserId { get; set; }
-        [JsonPropertyName("club_id")]
-        public int? ClubId { get; set; }
-        [JsonPropertyName("term_id")]
-        public int? TermId { get; set; }
-
+        //
+        [JsonPropertyName("sponsor_id")]
+        public int SponsorId { get; set; }
     }
 }

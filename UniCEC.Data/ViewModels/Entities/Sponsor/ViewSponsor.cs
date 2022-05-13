@@ -5,8 +5,6 @@ namespace UniCEC.Data.ViewModels.Entities.Sponsor
     public class ViewSponsor
     {
         public int Id { get; set; }
-        [JsonPropertyName("user_id")]
-        public int UserId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Logo { get; set; }

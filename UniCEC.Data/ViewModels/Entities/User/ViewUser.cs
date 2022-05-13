@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.User
 {
@@ -7,6 +8,8 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public int Id { get; set; }
         [JsonPropertyName("role_id")]
         public int RoleId { get; set; }
+        [JsonPropertyName("sponsor_id")]
+        public int SponsorId { get; set; }
         [JsonPropertyName("university_id")]
         public int? UniversityId { get; set; }
         [JsonPropertyName("major_id")]
@@ -18,7 +21,7 @@ namespace UniCEC.Data.ViewModels.Entities.User
         [JsonPropertyName("phone_number")]
         public string PhoneNumber { get; set; }
         public string Gender { get; set; }
-        public bool Status { get; set; }
+        public UserStatus Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
         public string Avatar { get; set; }

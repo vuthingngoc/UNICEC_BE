@@ -88,7 +88,7 @@ namespace UniCEC.Business.Services.MajorSvc
         {
             if (major.DepartmentId == 0 || string.IsNullOrEmpty(major.MajorCode) ||
                 string.IsNullOrEmpty(major.Name) || string.IsNullOrEmpty(major.Description))
-                    throw new ArgumentNullException("DepartmentId null || MajorCode null || Name null || Description null");
+                throw new ArgumentNullException("DepartmentId null || MajorCode null || Name null || Description null");
 
             int majorId = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
             if (majorId > 0) throw new ArgumentException("Duplicated MajorCode");
@@ -140,6 +140,27 @@ namespace UniCEC.Business.Services.MajorSvc
             if (major == null) throw new NullReferenceException($"Not found this id: {id}");
             major.Status = false;
             await _majorRepo.Update();
+        }
+
+
+        public async Task<ViewMajor> GetMajorById(int id)
+        {
+            try
+            {
+                Major major = await _majorRepo.Get(id);
+                if (major != null)
+                {
+                    return TransformViewMajor(major);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

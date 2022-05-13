@@ -1,10 +1,13 @@
-﻿using UniCEC.Data.Models.DB;
+﻿using System.Threading.Tasks;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorRepo
 {
     public interface ISponsorRepo : IRepository<Sponsor>
     {
-        // To be continued ...
+
+        public Task<bool> CheckSponsorIsCreated(string Email);
+
     }
 }

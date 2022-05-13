@@ -25,10 +25,10 @@ namespace UniCEC.Data.Models.DB
         public string Address { get; set; }
         public int NumberOfParticipation { get; set; }
         public int NumberOfTeam { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
         public DateTime EndTimeRegister { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public string SeedsCode { get; set; }
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }

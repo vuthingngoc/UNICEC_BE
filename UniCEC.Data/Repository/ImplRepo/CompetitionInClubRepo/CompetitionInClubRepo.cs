@@ -16,7 +16,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
         }
 
         //
-        public async Task<bool> CheckDuplicateCreateCompetition(int clubId, int competitionId)
+        public async Task<bool> CheckDuplicateCreateCompetitionOrEvent(int clubId, int competitionId)
         {
             var query = from cic in context.CompetitionInClubs
                         where cic.ClubId == clubId && cic.CompetitionId == competitionId

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -12,11 +13,11 @@ namespace UniCEC.Data.Models.DB
             Members = new HashSet<Member>();
             Participants = new HashSet<Participant>();
             SeedsWallets = new HashSet<SeedsWallet>();
-            Sponsors = new HashSet<Sponsor>();
         }
 
         public int Id { get; set; }
         public int RoleId { get; set; }
+        public int? SponsorId { get; set; }
         public int? UniversityId { get; set; }
         public int? MajorId { get; set; }
         public string Fullname { get; set; }
@@ -24,18 +25,18 @@ namespace UniCEC.Data.Models.DB
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string Gender { get; set; }
-        public bool Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
         public string Avatar { get; set; }
+        public UserStatus Status { get; set; }
         public bool IsOnline { get; set; }
 
         public virtual Major Major { get; set; }
         public virtual Role Role { get; set; }
+        public virtual Sponsor Sponsor { get; set; }
         public virtual University University { get; set; }
         public virtual ICollection<Member> Members { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<SeedsWallet> SeedsWallets { get; set; }
-        public virtual ICollection<Sponsor> Sponsors { get; set; }
     }
 }

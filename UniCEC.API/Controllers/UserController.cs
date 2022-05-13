@@ -5,11 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.JWT;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.User;
 
@@ -22,11 +24,13 @@ namespace UniCEC.API.Controllers
     {
         private IUserService _userService;
         private IRoleService _roleService;
+        private IMajorService _majorService;
 
-        public UserController(IUserService userService, IRoleService roleService)
+        public UserController(IUserService userService, IRoleService roleService, IMajorService majorService)
         {
             _userService = userService;
             _roleService = roleService;
+            _majorService = majorService;
         }
 
         [HttpGet]
@@ -155,7 +159,10 @@ namespace UniCEC.API.Controllers
                     //get RoleName
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     string roleName = role.RoleName;
-                    string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName);
+                    //get MajorName
+                    ViewMajor major = await _majorService.GetMajorById((int)request.MajorId);
+                    string majorName = major.Name;
+                    string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName, majorName);
                     return Ok(clientTokenUser);
                 }
                 else

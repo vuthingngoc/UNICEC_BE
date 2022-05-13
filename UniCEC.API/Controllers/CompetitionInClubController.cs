@@ -24,51 +24,25 @@ namespace UniCEC.API.Controllers
 
         // GET api/<CompetitionInClubController>/5
         //[HttpGet("{id}")]
+        //[SwaggerOperation(Summary = "club leader creates competition")]
         //public string Get(int id)
         //{
         //    return "value";
         //}
 
         // POST api/<CompetitionInClubController>
-        [HttpPost]
-        [SwaggerOperation(Summary = "club creates competition")]
-        public async Task<IActionResult> Insert([FromBody] CompetitionInClubInsertModel model )
-        {
-            try
-            {
-                ViewCompetitionInClub result = await _competitionInClubService.Insert(model);
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
-
-        // PUT api/<CompetitionInClubController>/5
-        //[HttpPut]
-        //[SwaggerOperation(Summary = "Update competition in club ")]
-        //public async Task<IActionResult> Update([FromBody]ViewCompetitionInClub model)
+        //[Authorize(Roles = "Student")]
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "club leader creates competition")]
+        //public async Task<IActionResult> Insert([FromBody] CompetitionInClubInsertModel model )
         //{
         //    try
         //    {
-        //        Boolean check = false;
-        //        check = await _competitionInClubService.Update(model);
-        //        if (check)
+        //        ViewCompetitionInClub result = await _competitionInClubService.Insert(model);
+        //        if (result != null)
         //        {
-        //            return Ok();
+
+        //            return Ok(result);
         //        }
         //        else
         //        {
@@ -84,6 +58,34 @@ namespace UniCEC.API.Controllers
         //        return StatusCode(500, "Internal server exception");
         //    }
         //}
+
+        //PUT api/<CompetitionInClubController>/5
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update competition in club ")]
+        public async Task<IActionResult> Update([FromBody] ViewCompetitionInClub model)
+        {
+            try
+            {
+                Boolean check = false;
+                check = await _competitionInClubService.Update(model);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
         //// DELETE api/<CompetitionInClubController>/5
         //[HttpDelete("{id}")]

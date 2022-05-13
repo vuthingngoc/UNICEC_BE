@@ -16,6 +16,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         }
 
+        //UserCode
         public async Task<User> GetByUserId(string userId)
         {
             return await context.Users.FirstOrDefaultAsync(u => u.UserCode.Equals(userId));

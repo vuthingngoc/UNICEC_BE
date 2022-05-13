@@ -8,14 +8,18 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
+
+        private readonly IConfiguration _configuration;
+        
         public UniCECContext()
         {
         }
-
-        public UniCECContext(DbContextOptions<UniCECContext> options)
-            : base(options)
+        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
+           : base(options)
         {
+        
         }
+
 
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
@@ -623,14 +627,6 @@ namespace UniCEC.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(15)
                     .IsUnicode(false);
-
-                entity.Property(e => e.UserId).HasColumnName("UserID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Sponsors)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Sponsor__UserID__72C60C4A");
             });
 
             modelBuilder.Entity<SponsorInCompetition>(entity =>
@@ -784,6 +780,8 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.RoleId).HasColumnName("RoleID");
 
+                entity.Property(e => e.SponsorId).HasColumnName("SponsorID");
+
                 entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
                 entity.Property(e => e.UserCode)
@@ -800,6 +798,11 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__User__RoleID__787EE5A0");
+
+                entity.HasOne(d => d.Sponsor)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.SponsorId)
+                    .HasConstraintName("FK__User__SponsorID__72C60C4A");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Users)

@@ -21,12 +21,14 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
         //change Status of Competition
         private ICompetitionRepo _competitionRepo;
 
-        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, ICompetitionRepo competitionRepo, IClubHistoryRepo clubHistoryRepo)                               
+        public CompetitionInClubService(ICompetitionInClubRepo competitionInClubRepo, ICompetitionRepo competitionRepo, IClubHistoryRepo clubHistoryRepo)
         {
             _competitionInClubRepo = competitionInClubRepo;
             _clubHistoryRepo = clubHistoryRepo;
             _competitionRepo = competitionRepo;
         }
+
+
 
         public Task<bool> Delete(int id)
         {
@@ -47,64 +49,67 @@ namespace UniCEC.Business.Services.CompetitionInClubSvc
         {
             try
             {
-                bool roleLeader = false;
-                GetMemberInClubModel conditions = new GetMemberInClubModel()
-                {
-                    UserId = model.UserId,
-                    ClubId = model.ClubId,
-                    TermId = model.TermId
-                };
-                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //bool roleLeader = false;
+                //GetMemberInClubModel conditions = new GetMemberInClubModel()
+                //{
+                //    UserId = model.UserId,
+                //    ClubId = model.ClubId,
+                //    TermId = model.TermId
+                //};
+                //ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
 
-                //------------ Check Mem in that club
-                if (infoClubMem != null)
-                {
-                    if (infoClubMem.ClubRoleName.Equals("Leader"))
-                    {
-                        roleLeader = true;
-                    }
-                }
-                //------------ Check Role Member Is Leader 
-                if (roleLeader)
-                {
-                    //------------------------------------check-club-id-create-competition-duplicate
-                    bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetition(model.ClubId, model.CompetitionId);
-                    if (checkCreateCompetitionInClub)
-                    {
-                        CompetitionInClub competitionInClub = new CompetitionInClub();
-                        competitionInClub.ClubId = model.ClubId;
-                        competitionInClub.CompetitionId = model.CompetitionId;
+                ////------------ Check Mem in that club
+                //if (infoClubMem != null)
+                //{
+                //    if (infoClubMem.ClubRoleName.Equals("Leader"))
+                //    {
+                //        roleLeader = true;
+                //    }
+                //}
+                ////------------ Check Role Member Is Leader 
+                //if (roleLeader)
+                //{
+                //    //------------------------------------check-club-id-create-competition-or-event-duplicate
+                //    bool checkCreateCompetitionInClub = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(model.ClubId, model.CompetitionId);
+                //    if (checkCreateCompetitionInClub)
+                //    {
+                //        CompetitionInClub competitionInClub = new CompetitionInClub();
+                //        competitionInClub.ClubId = model.ClubId;
+                //        competitionInClub.CompetitionId = model.CompetitionId;
 
-                        int result = await _competitionInClubRepo.Insert(competitionInClub);
-                        if (result > 0)
-                        {
-                            //đổi status của competition 
-                            Competition comp = await _competitionRepo.Get(model.CompetitionId);                          
-                            comp.Status = CompetitionStatus.Launching;
-                            await _competitionRepo.Update();
-                            //
-                            return TransferView(competitionInClub);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                //        int result = await _competitionInClubRepo.Insert(competitionInClub);
+                //        if (result > 0)
+                //        {
+                //            //đổi status của competition 
+                //            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                //            comp.Status = CompetitionStatus.Launching;
+                //            await _competitionRepo.Update();
+                //            //
+                //            return TransferView(competitionInClub);
+                //        }
+                //        else
+                //        {
+                //            return null;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        return null;
+                //    }
+                //}
+                //else
+                //{
+                //    return null;
+                //}
+                throw new NotImplementedException();
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+       
 
         public Task<bool> Update(ViewCompetitionInClub model)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -113,15 +114,17 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //ClubLeader
         // POST api/<CompetitionController>
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
+        //[Authorize(Roles = "Student")]
+        [HttpPost("leader")]
+        [SwaggerOperation(Summary = "Leader insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
-        public async Task<IActionResult> Insert([FromBody] CompetitionInsertModel model)
+        public async Task<IActionResult> InsertByLeader([FromBody] LeaderInsertCompOrEventModel model)
         {
             try
             {
-                ViewCompetition viewCompetition = await _competitionService.Insert(model);
+                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model);
                 if (viewCompetition != null)
                 {
 
@@ -142,15 +145,57 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //Sponsor
+        // POST api/<CompetitionController>
+        //[Authorize(Roles = "Sponsor")]
+        [HttpPost("sponsor")]
+        [SwaggerOperation(Summary = "Sponsor insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
+        //phải có author student
+        public async Task<IActionResult> InsertBySposor([FromBody] SponsorInsertCompOrEventModel model)
+        {
+            try
+            {
+                //var header = Request.Headers;
+                //if (!header.ContainsKey("Authorization")) return Unauthorized();
+                //string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model);//,token);
+                if (viewCompetition != null)
+                {
+
+                    return Ok(viewCompetition);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+
+
+
+
+
+
         // PUT api/<CompetitionController>/5
-        [HttpPut]
-        [SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
+        //[Authorize(Roles = "Student")]
+        [HttpPut("leader")]
+        [SwaggerOperation(Summary = "Leader update detail EVENT or COMPETITON")]
         public async Task<IActionResult> Update([FromBody] CompetitionUpdateModel model)
         {
             try
             {
                 Boolean check = false;
-                check = await _competitionService.Update(model);
+                check = await _competitionService.LeaderUpdate(model);
                 if (check)
                 {
                     return Ok();
@@ -171,14 +216,15 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<CompetitionController>/5
-        [HttpDelete]
-        [SwaggerOperation(Summary = "Canceling EVENT or COMPETITION")]
+        //[Authorize(Roles = "Student")]
+        [HttpDelete("leader")]
+        [SwaggerOperation(Summary = "Leader canceling EVENT or COMPETITION")]
         public async Task<IActionResult> Delete([FromBody] CompetitionDeleteModel model)
         {
             try
             {
                 Boolean check = false;
-                check = await _competitionService.Delete(model);
+                check = await _competitionService.LeaderDelete(model);
                 if (check)
                 {
                     return Ok();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -125,7 +126,7 @@ namespace UniCEC.Business.Services.UserSvc
             if (isInvalid) return null;
 
             // default status when insert is true
-            bool status = true;
+            UserStatus status = UserStatus.Active;
             User element = new User()
             {
                 Description = user.Description,
@@ -190,7 +191,7 @@ namespace UniCEC.Business.Services.UserSvc
             User user = await _userRepo.Get(id);
             if (user == null) throw new NullReferenceException("Not found");
 
-            user.Status = false;
+            user.Status = UserStatus.InActive;
             await _userRepo.Update();
             return true;
         }
@@ -225,11 +226,11 @@ namespace UniCEC.Business.Services.UserSvc
                 {
                     RoleId = userTem.RoleId,
                     Email = userTem.Email,
-                    Status = true,
+                    Status = UserStatus.Active,
                     Avatar = userTem.Avatar,
                     //auto
                     Dob = "",
-                    Fullname = "",
+                    Fullname = userTem.Fullname,
                     Gender = "",
                     UserCode = "",
                     Description = "",
@@ -244,7 +245,7 @@ namespace UniCEC.Business.Services.UserSvc
                         RoleId = userTem.RoleId,
                         Email = userTem.Email,
                         Avatar = userTem.Avatar,
-                        Status = true
+                        Status = UserStatus.Active
                     };
                 }
                 return null;
