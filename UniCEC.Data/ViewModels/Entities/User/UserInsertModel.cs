@@ -11,7 +11,7 @@ namespace UniCEC.Data.ViewModels.Entities.User
         [JsonPropertyName("major_id")]
         public int? MajorId { get; set; }
         [JsonPropertyName("user_id")]
-        public string UserId { get; set; }
+        public string UserCode { get; set; }
         public string Avatar { get; set; }
         public string Fullname { get; set; }
         public string Email { get; set; }

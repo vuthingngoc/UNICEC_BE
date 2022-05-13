@@ -111,5 +111,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             return await query.CountAsync();
         }
+
+        public async Task<int> GetRoleMemberInClub(int userId, int clubId)
+        {
+            var query = from ch in context.ClubHistories
+                        join m in context.Members on ch.MemberId equals m.Id
+                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId) 
+                                && ch.Status.Equals(ClubHistoryStatus.Active)
+                        select ch.ClubRoleId;
+
+            return await query.FirstOrDefaultAsync();
+        }
     }
 }

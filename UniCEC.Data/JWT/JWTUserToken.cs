@@ -43,7 +43,7 @@ namespace UniCEC.Data.JWT
                  //University
                  new Claim("UniversityId", user.UniversityId.ToString()),
                  //UserId(MSSV)
-                 new Claim("UserId", user.UserId),
+                 new Claim("UserCode", user.UserCode),
                  //Dob
                  new Claim("DOB", user.Dob),
                  //Avatar

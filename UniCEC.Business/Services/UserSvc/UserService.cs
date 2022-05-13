@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.UserSvc
                 MajorId = user.MajorId,
                 RoleId = user.RoleId,
                 UniversityId = user.UniversityId,
-                UserId = user.UserCode,
+                UserCode = user.UserCode,
                 Status = user.Status
             };
         }
@@ -118,10 +118,10 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<ViewUser> Insert(UserInsertModel user)
         {
             if (string.IsNullOrEmpty(user.Description) || string.IsNullOrEmpty(user.Dob) || string.IsNullOrEmpty(user.Fullname)
-                || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserId))
+                || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserCode))
                     throw new ArgumentNullException("Description Null || Dob Null || Fullname Null || Email Null || Gender Null || RoleId || UserId Null");
 
-            bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
+            bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserCode);
 
             if (isInvalid) return null;
 
@@ -138,7 +138,7 @@ namespace UniCEC.Business.Services.UserSvc
                 RoleId = user.RoleId,
                 Status = status,
                 UniversityId = user.UniversityId,
-                UserCode = user.UserId,
+                UserCode = user.UserCode,
                 Avatar = user.Avatar,
                 IsOnline = true // default status when log in
             };
@@ -168,7 +168,7 @@ namespace UniCEC.Business.Services.UserSvc
             if (!string.IsNullOrEmpty(user.Gender)) element.Gender = user.Gender;
             if(user.MajorId != 0) element.MajorId = user.MajorId;
             if(user.RoleId != 0) element.RoleId = user.RoleId;
-            if (!string.IsNullOrEmpty(user.UserId)) element.UserCode = user.UserId;
+            if (!string.IsNullOrEmpty(user.UserCode)) element.UserCode = user.UserCode;
             if(user.UniversityId != 0) element.UniversityId = user.UniversityId;
             element.Status = user.Status;
             if (!string.IsNullOrEmpty(user.Avatar)) element.Avatar = user.Avatar;

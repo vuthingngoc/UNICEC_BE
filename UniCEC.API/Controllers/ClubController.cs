@@ -27,20 +27,13 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get club by id")]
-
         public async Task<IActionResult> GetClubById(int id)
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    string token = header["Authorization"].ToString().Split(" ")[1];
-                    ViewClub club = await _clubService.GetByClub(token, id);
-                    return Ok(club);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewClub club = await _clubService.GetByClub(token, id);
+                return Ok(club);
             }
             catch (NullReferenceException)
             {
@@ -58,19 +51,17 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    string token = header["Authorization"].ToString().Split(" ")[1];
-                    PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, name, request);
-                    return Ok(clubs);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, name, request);
+                return Ok(clubs);
             }
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (SqlException)
             {
@@ -84,15 +75,9 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    var token = header["Authorization"].ToString().Split(" ")[1];
-                    List<ViewClub> clubs = await _clubService.GetByUser(token);
-                    return Ok(clubs);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewClub> clubs = await _clubService.GetByUser(token);
+                return Ok(clubs);
             }
             catch (NullReferenceException)
             {
@@ -110,15 +95,9 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    string token = header["Authorization"].ToString().Split(" ")[1];
-                    PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, id, request);
-                    return Ok(clubs);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, id, request);
+                return Ok(clubs);
             }
             catch (NullReferenceException ex)
             {
@@ -136,15 +115,9 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    string token = header["Authorization"].ToString().Split(" ")[1];
-                    PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(token, id, request);
-                    return Ok(clubs);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(token, id, request);
+                return Ok(clubs);
             }
             catch (NullReferenceException ex)
             {
@@ -162,15 +135,9 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                var header = Request.Headers;
-                if (header.ContainsKey("Authorization"))
-                {
-                    string token = header["Authorization"].ToString().Split(" ")[1];
-                    ViewClub viewClub = await _clubService.Insert(token, club);
-                    return Ok(club);
-                }
-
-                return Unauthorized();
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewClub viewClub = await _clubService.Insert(token, club);
+                return Ok(club);
             }
             catch (UnauthorizedAccessException)
             {
@@ -200,8 +167,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _clubService.Update(club);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _clubService.Update(token, club);
                 return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
             }
             catch (NullReferenceException ex)
             {
@@ -231,7 +203,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _clubService.Delete(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _clubService.Delete(token, id);
                 return NoContent();
             }
             catch (NullReferenceException ex)
