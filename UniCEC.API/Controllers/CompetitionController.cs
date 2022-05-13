@@ -120,7 +120,7 @@ namespace UniCEC.API.Controllers
         [HttpPost("leader")]
         [SwaggerOperation(Summary = "Leader insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
-        public async Task<IActionResult> InsertByLeader([FromBody] CompetitionInsertModel model)
+        public async Task<IActionResult> InsertByLeader([FromBody] LeaderInsertCompOrEventModel model)
         {
             try
             {
@@ -151,7 +151,7 @@ namespace UniCEC.API.Controllers
         [HttpPost("sponsor")]
         [SwaggerOperation(Summary = "Sponsor insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
-        public async Task<IActionResult> InsertBySposor([FromBody] CompetitionInsertModel model)
+        public async Task<IActionResult> InsertBySposor([FromBody] SponsorInsertCompOrEventModel model)
         {
             try
             {

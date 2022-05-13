@@ -7,6 +7,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubHistory;
@@ -19,16 +20,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionRepo _competitionRepo;
         //check Infomation Member -> is Leader
         private IClubHistoryRepo _clubHistoryRepo;
-        // check Club Has Competition   
+        // check Club Has Competition - Insert   
         private ICompetitionInClubRepo _competitionInClubRepo;
+        // Insert
+        private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
-                                  ICompetitionInClubRepo competitionInClubRepo)
+                                  ICompetitionInClubRepo competitionInClubRepo,
+                                  ISponsorInCompetitionRepo sponsorInCompetitionRepo)
         {
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
+            _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
 
         }
 
@@ -73,19 +78,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        
+
 
         //Leader Insert
-        public async Task<ViewCompetition> LeaderInsert(CompetitionInsertModel model)
+        public async Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel model)
         {
             try
             {
                 bool roleLeader = false;
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = (int)model.UserId,
-                    ClubId = (int)model.ClubId,
-                    TermId = (int)model.TermId
+                    UserId = model.UserId,
+                    ClubId = model.ClubId,
+                    TermId = model.TermId
                 };
                 ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
@@ -103,6 +108,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
                     if (checkDate)
                     {
+                        //------------ Insert Competition
                         //ở trong trường hợp này phân biệt EVENT - COMPETITION
                         //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
                         Competition competition = new Competition();
@@ -127,13 +133,26 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         competition.Public = model.Public;
                         //auto = 0
                         competition.View = 0;
-                        int result = await _competitionRepo.Insert(competition);
-                        if (result > 0)
+                        int competition_Id = await _competitionRepo.Insert(competition);
+                        if (competition_Id > 0)
                         {
-                            Competition comp = await _competitionRepo.Get(result);
-                            ViewCompetition viewCompetition = TransformViewModel(comp);
-                            return viewCompetition;
-                        }//end if result != 0
+                            Competition comp = await _competitionRepo.Get(competition_Id);
+
+                            //------------ Insert Competition-In-Club
+                            CompetitionInClub competitionInClub = new CompetitionInClub();
+                            competitionInClub.ClubId = model.ClubId;
+                            competitionInClub.CompetitionId = competition_Id;
+                            int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
+                            if (compInClub_Id > 0)
+                            {
+                                ViewCompetition viewCompetition = TransformViewModel(comp);
+                                return viewCompetition;
+                            }
+                            else
+                            {
+                                return null;
+                            }//end compInClub_Id > 0
+                        }//end if competition_Id > 0
                         else
                         {
                             return null;
@@ -156,9 +175,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Sponsor Insert
-        public async Task<ViewCompetition> SponsorInsert(CompetitionInsertModel model)
-        {
-            //Check Authorize Sponsor in controller
+        //Check Authorize Sponsor in controller
+        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model)
+        {           
             try
             {
                 //------------ Check Date
@@ -188,10 +207,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     competition.Public = model.Public;
                     //auto = 0
                     competition.View = 0;
-                    int result = await _competitionRepo.Insert(competition);
-                    if (result > 0)
+                    int competition_Id = await _competitionRepo.Insert(competition);
+                    if (competition_Id > 0)
                     {
-                        Competition comp = await _competitionRepo.Get(result);
+                        Competition comp = await _competitionRepo.Get(competition_Id);
+                        //------------ Sponsor-In-Competition
+                        SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
+                        sponsorInCompetition.SponsorId = model.SponsorId;
+                        sponsorInCompetition.CompetitionId = competition_Id;
+
                         ViewCompetition viewCompetition = TransformViewModel(comp);
                         return viewCompetition;
                     }//end if result != 0
@@ -471,6 +495,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-      
+
     }
 }
