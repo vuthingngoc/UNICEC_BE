@@ -18,7 +18,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         public async Task<User> GetByUserId(string userId)
         {
-            return await context.Users.FirstOrDefaultAsync(u => u.UserId.Equals(userId));
+            return await context.Users.FirstOrDefaultAsync(u => u.UserCode.Equals(userId));
         }
 
         public async Task<User> GetByEmail(string email)
@@ -50,7 +50,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                                   MajorId = x.u.MajorId,
                                                   RoleId = x.u.RoleId,
                                                   UniversityId = x.u.UniversityId,
-                                                  UserId = x.u.UserId,
+                                                  UserCode = x.u.UserCode,
                                                   Status = x.u.Status
                                               }
                                           ).ToListAsync();
@@ -67,13 +67,13 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         public async Task<bool> CheckExistedUser(int universityId, string userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.UserId.Equals(userId));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.UserCode.Equals(userId));
             return (user != null) ? true : false;
         }
 
         public async Task<bool> CheckExistedUser(string userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.UserId.Equals(userId));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.UserCode.Equals(userId));
             return (user != null) ? true : false;
         }
     }

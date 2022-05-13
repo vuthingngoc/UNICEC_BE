@@ -151,7 +151,7 @@ namespace UniCEC.API.Controllers
                 if (result)
                 {
                     //get ViewUser
-                    ViewUser user = await _userService.GetUserByUserId(request.UserId);
+                    ViewUser user = await _userService.GetUserByUserId(request.UserCode);
                     //get RoleName
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     string roleName = role.RoleName;

@@ -13,7 +13,7 @@ namespace UniCEC.Business.Services.ClubSvc
         public Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request);
         public Task<List<ViewClub>> GetByUser(string token);
         public Task<ViewClub> Insert(string token, ClubInsertModel model);
-        public Task Update(ClubUpdateModel model);
-        public Task Delete(int id);
+        public Task Update(string token, ClubUpdateModel model);
+        public Task Delete(string token, int id);
     }
 }

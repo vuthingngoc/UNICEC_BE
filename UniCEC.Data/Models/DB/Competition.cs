@@ -20,8 +20,9 @@ namespace UniCEC.Data.Models.DB
         }
 
         public int Id { get; set; }
-        public string Name { get; set; }
         public int CompetitionTypeId { get; set; }
+        public string Name { get; set; }
+        public string Address { get; set; }
         public int NumberOfParticipation { get; set; }
         public int NumberOfTeam { get; set; }
         public DateTime StartTime { get; set; }
@@ -31,10 +32,10 @@ namespace UniCEC.Data.Models.DB
         public string SeedsCode { get; set; }
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }
-        public bool Public { get; set; }
-        public CompetitionStatus Status { get; set; }
-        public string Address { get; set; }
         public int View { get; set; }
+        public bool Public { get; set; }
+        public bool IsSponsor { get; set; }
+        public CompetitionStatus Status { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
         public virtual ICollection<Blog> Blogs { get; set; }

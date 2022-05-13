@@ -88,7 +88,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //
             IQueryable<Competition> query;
 
-            
+
             if (ClubId.HasValue)
             {
                 query = from cic in context.CompetitionInClubs
@@ -144,6 +144,28 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 View = x.View
             }).ToListAsync();
             return (competitions.Count > 0) ? competitions : null;
+        }
+
+        // Nhat
+        public async Task<bool> CheckIsPublic(int id)
+        {
+            var query = from c in context.Competitions
+                        where c.Id.Equals(id)
+                        select c.Public;
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<List<int>> GetUniversityByCompetition(int id)
+        {
+            var query = from cic in context.CompetitionInClubs
+                        join c in context.Clubs on cic.ClubId equals c.Id
+                        where cic.CompetitionId.Equals(id)
+                        select new { c };
+
+            List<int> universityIds = await query.Select(x => x.c.UniversityId).ToListAsync();
+
+            return (universityIds.Count() > 0) ? universityIds : null;
         }
     }
 }

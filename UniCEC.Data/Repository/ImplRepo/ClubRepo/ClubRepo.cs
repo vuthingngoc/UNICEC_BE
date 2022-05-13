@@ -24,6 +24,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                         where c.Id.Equals(id) && c.UniversityId.Equals(universityId)
                         select new { c, u };
 
+            // student and sponsor role
             if (roleId != 1) query = query.Where(x => x.c.Status.Equals(true));
 
             ViewClub club = await query.Select(x => new ViewClub()
@@ -70,12 +71,16 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByName(int universityId, string name, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByName(int universityId, int roleId, string name, PagingRequest request)
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
                         where c.Name.Contains(name) && c.UniversityId.Equals(universityId)
                         select new { c, u };
+
+            // student and sponsor role
+            if (roleId != 1) query = query.Where(x => x.c.Status.Equals(true));
+
             int totalCount = query.Count();
 
             List<ViewClub> clubs = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x =>
