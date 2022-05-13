@@ -10,10 +10,10 @@ namespace UniCEC.Data.Models.DB
         public Sponsor()
         {
             SponsorInCompetitions = new HashSet<SponsorInCompetition>();
+            Users = new HashSet<User>();
         }
 
         public int Id { get; set; }
-        public int UserId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Logo { get; set; }
@@ -22,7 +22,7 @@ namespace UniCEC.Data.Models.DB
         public string Address { get; set; }
         public bool Status { get; set; }
 
-        public virtual User User { get; set; }
         public virtual ICollection<SponsorInCompetition> SponsorInCompetitions { get; set; }
+        public virtual ICollection<User> Users { get; set; }
     }
 }

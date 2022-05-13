@@ -9,6 +9,7 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
+
         private readonly IConfiguration _configuration;
         public UniCECContext()
         {
@@ -19,6 +20,7 @@ namespace UniCEC.Data.Models.DB
         {
             _configuration = configuration;
         }
+
 
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
@@ -56,7 +58,6 @@ namespace UniCEC.Data.Models.DB
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
                 optionsBuilder.UseLazyLoadingProxies();
-
             }
         }
 
@@ -628,14 +629,6 @@ namespace UniCEC.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(15)
                     .IsUnicode(false);
-
-                entity.Property(e => e.UserId).HasColumnName("UserID");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Sponsors)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Sponsor__UserID__72C60C4A");
             });
 
             modelBuilder.Entity<SponsorInCompetition>(entity =>
@@ -789,12 +782,13 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.RoleId).HasColumnName("RoleID");
 
+                entity.Property(e => e.SponsorId).HasColumnName("SponsorID");
+
                 entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
 
-                entity.Property(e => e.UserId)
+                entity.Property(e => e.UserCode)
                     .IsRequired()
-                    .HasMaxLength(20)
-                    .HasColumnName("UserID");
+                    .HasMaxLength(20);
 
                 entity.HasOne(d => d.Major)
                     .WithMany(p => p.Users)
@@ -806,6 +800,11 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__User__RoleID__787EE5A0");
+
+                entity.HasOne(d => d.Sponsor)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.SponsorId)
+                    .HasConstraintName("FK__User__SponsorID__72C60C4A");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Users)

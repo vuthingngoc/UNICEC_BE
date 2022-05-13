@@ -70,25 +70,23 @@ namespace UniCEC.Business.Services.SponsorSvc
             }
         }
 
-        //System auto generate when Login
+        //Admin Insert
         public async Task<ViewSponsor> Insert(SponsorInsertModel sponsor)
         {
             try
             {
-                bool checkSponsorIsCreated = await CheckSponsorIsCreated(sponsor.UserId);
+                bool checkSponsorIsCreated = await _sponsorRepo.CheckSponsorIsCreated(sponsor.Email);
                 if (checkSponsorIsCreated == false)
                 {
                     Sponsor sp = new Sponsor()
                     {
-                        //defautl Address
-                        Address = "default Address",
+                        
+                        Address = sponsor.Address,
                         Description = sponsor.Description,
-                        Email = sponsor.Email,
-                        //default Logo
-                        Logo = "default Logo",
+                        Email = sponsor.Email,                  
+                        Logo = sponsor.Logo,
                         Name = sponsor.Name,
-                        Phone = sponsor.Phone,
-                        UserId = sponsor.UserId,
+                        Phone = sponsor.Phone,                      
                         Status = sponsor.Status,
                     };
 
@@ -145,19 +143,7 @@ namespace UniCEC.Business.Services.SponsorSvc
             }
         }
 
-        public async Task<bool> CheckSponsorIsCreated(int userId)
-        {
-            try
-            {
-
-                bool result = await _sponsorRepo.CheckSponsorIsCreated(userId);
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+       
         private ViewSponsor TransformViewModel(Sponsor sponsor)
         {
             return new ViewSponsor()
@@ -169,8 +155,7 @@ namespace UniCEC.Business.Services.SponsorSvc
                 Logo = sponsor.Logo,
                 Phone = sponsor.Phone,
                 Name = sponsor.Name,
-                Status = sponsor.Status,
-                UserId = sponsor.UserId,
+                Status = sponsor.Status,            
             };
         }
     }

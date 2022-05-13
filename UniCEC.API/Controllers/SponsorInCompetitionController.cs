@@ -25,40 +25,40 @@ namespace UniCEC.API.Controllers
 
 
         //// GET api/<SponsorInCompetitionController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            return "value";
+        }
 
         // POST api/<SponsorInCompetitionController>
         //[Authorize(Roles = "Sponsor")]
-        [HttpPost]
-        [SwaggerOperation(Summary = "sponsor creates competition")]
-        public async Task<IActionResult> Insert([FromBody] SponsorInCompetitionInsertModel model)
-        {
-            try
-            {
-                ViewSponsorInCompetition result = await _sponsorInCompetitionService.Insert(model);
-                if (result != null)
-                {
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "sponsor creates competition")]
+        //public async Task<IActionResult> Insert([FromBody] SponsorInCompetitionInsertModel model)
+        //{
+        //    try
+        //    {
+        //        ViewSponsorInCompetition result = await _sponsorInCompetitionService.Insert(model);
+        //        if (result != null)
+        //        {
 
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
         //// PUT api/<SponsorInCompetitionController>/5
         //[HttpPut("{id}")]

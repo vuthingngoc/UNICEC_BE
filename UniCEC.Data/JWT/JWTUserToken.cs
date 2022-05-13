@@ -64,7 +64,7 @@ namespace UniCEC.Data.JWT
 
 
 
-        public static string GenerateJWTTokenSponsor(ViewUser user, string roleName)
+        public static string GenerateJWTTokenSponsor(ViewUser user, string roleName, string sponsorId, string sponsorName)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
                 issuer: "https://securetoken.google.com/unics-e46a4",
@@ -82,6 +82,10 @@ namespace UniCEC.Data.JWT
                  new Claim("DOB", user.Dob),
                  //Avatar
                  new Claim ("Avatar", user.Avatar),
+                 //SponsorId
+                 new Claim ("SponsorId", sponsorId),
+                 //SponsorName
+                 new Claim ("SponsorName", sponsorName),
                  //Role Id
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role

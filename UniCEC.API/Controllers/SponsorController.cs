@@ -83,7 +83,7 @@ namespace UniCEC.API.Controllers
         //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Ban sponsor by Admin")]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {

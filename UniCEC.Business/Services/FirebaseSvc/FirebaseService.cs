@@ -7,6 +7,7 @@ using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.JWT;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.Sponsor;
@@ -22,7 +23,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUniversityService _universityService;
         private IRoleService _roleService;
         private ISponsorService _sponsorService;
-        private IMajorService _majorService; 
+        private IMajorService _majorService;
 
         public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService, IMajorService majorService)
         {
@@ -43,9 +44,8 @@ namespace UniCEC.Business.Services.FirebaseSvc
             //-----------University
             string email = userInfo.Email;
             string emailUni = email.Split('@')[1];
-            bool isStudent = await _universityService.CheckEmailUniversity(emailUni);
-
             // check email university in system or not
+            bool isStudent = await _universityService.CheckEmailUniversity(emailUni);
             if (isStudent)
             {
                 //-------Check student
@@ -124,7 +124,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         };
                     }
                 }
-            }
+            }         
             //Not In University => Sponsor or Admin
             else
             {
@@ -147,29 +147,11 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     //2.Sponsor
                     if (role.Id == 2)
                     {
-                        string clientTokenUser = null;
                         //----------------Generate JWT Token Sponsor
-                        //Add [Sponsor] DB
-                        //1.Check that Sponsor in [Sponsor] DB 
-                        bool SponsorIsCreated = await _sponsorService.CheckSponsorIsCreated(user.Id);
-                        //2.If SponsorIsCreated == true notInsert
-                        //3.If SponsorIsCreated == false Insert
-                        if (SponsorIsCreated == false)
-                        {
-                            SponsorInsertModel sponsorInsertModel = new SponsorInsertModel()
-                            {
-                                UserId = user.Id,
-                                Email = user.Email,
-                                Name = user.Fullname,
-                                Phone = user.PhoneNumber,
-                                Status = user.Status,
-                                Description = user.Description,
-                                
-                            };
-                            //Should be update Address , Logo
-                            ViewSponsor viewSponsor = await _sponsorService.Insert(sponsorInsertModel);                          
-                        }
-                        clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName);
+                        ViewSponsor sponsor = await _sponsorService.GetBySponsorId(user.SponsorId);
+                        //get SponsorId
+                        //get SponsorName
+                        string clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName, sponsor.Id.ToString(), sponsor.Name);
                         return new ViewUserInfo()
                         {
                             Token = clientTokenUser
