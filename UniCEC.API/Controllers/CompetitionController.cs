@@ -155,7 +155,11 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model);
+                //var header = Request.Headers;
+                //if (!header.ContainsKey("Authorization")) return Unauthorized();
+                //string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model);//,token);
                 if (viewCompetition != null)
                 {
 

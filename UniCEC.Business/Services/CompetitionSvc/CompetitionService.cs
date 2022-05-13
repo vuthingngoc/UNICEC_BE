@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -25,6 +27,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         // Insert
         private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
 
+
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
@@ -34,6 +37,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
+
 
         }
 
@@ -145,6 +149,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
                             if (compInClub_Id > 0)
                             {
+                                //---------Update Status Competition
+                                Competition comp_Update = await _competitionRepo.Get(competition_Id);
+                                comp_Update.Status = CompetitionStatus.Launching;
+                                await _competitionRepo.Update();
                                 ViewCompetition viewCompetition = TransformViewModel(comp);
                                 return viewCompetition;
                             }
@@ -176,10 +184,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //Sponsor Insert
         //Check Authorize Sponsor in controller
-        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model)
-        {           
+        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model)//, string Token)
+        {
             try
             {
+                //var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(Token);
+                //var spId = jsonToken.Claims.FirstOrDefault(x => x.Equals("SponsorId"));
+
+                //int SponsorId = Int32.Parse(spId.Value);
+
+
                 //------------ Check Date
                 bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
                 if (checkDate)
@@ -216,9 +230,21 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         sponsorInCompetition.SponsorId = model.SponsorId;
                         sponsorInCompetition.CompetitionId = competition_Id;
 
-                        ViewCompetition viewCompetition = TransformViewModel(comp);
-                        return viewCompetition;
-                    }//end if result != 0
+                        int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+                        if (spoInCom_Id > 0)
+                        {
+                            //---------Update Status Competition
+                            Competition comp_Update = await _competitionRepo.Get(competition_Id);
+                            comp_Update.Status = CompetitionStatus.Launching;
+                            await _competitionRepo.Update();
+                            ViewCompetition viewCompetition = TransformViewModel(comp);
+                            return viewCompetition;
+                        }
+                        else
+                        {
+                            return null;
+                        }//end if spoInCom_Id > 0
+                    }//end if competition_Id > 0
                     else
                     {
                         return null;
@@ -466,7 +492,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             //ROUND 2
             if (round1)
-            {               
+            {
                 //STR < ETR < ST < ET -> STR true
                 //kq 1 < 0 -> STR < ETR (sớm hơn)
                 int kq1 = DateTime.Compare(StartTimeRegister, EndTimeRegister);

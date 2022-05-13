@@ -6,6 +6,8 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorRepo
 {
     public interface ISponsorRepo : IRepository<Sponsor>
     {
-        public Task<bool> CheckSponsorIsCreated(int UserId);
+
+        public Task<bool> CheckSponsorIsCreated(string Email);
+
     }
 }

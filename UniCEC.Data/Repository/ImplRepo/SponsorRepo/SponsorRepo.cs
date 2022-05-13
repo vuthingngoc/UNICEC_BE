@@ -13,20 +13,21 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorRepo
 
         }
 
-        public async Task<bool> CheckSponsorIsCreated(int UserId)
+        public async Task<bool> CheckSponsorIsCreated(string Email)
         {
-            bool result = false;
-            var query = from sponsor in context.Sponsors
-                        where sponsor.UserId == UserId
-                        select sponsor;
+            var query = from sp in context.Sponsors
+                        where sp.Email == Email
+                        select sp;
 
-            Sponsor sp = await query.FirstOrDefaultAsync();
-            if (sp != null)
+            Sponsor sponsor = await query.FirstOrDefaultAsync();
+            if (sponsor == null)
             {
-                result = true;
-                
+                return true;
             }
-            return result;
+            else
+            {
+                return false;
+            }
         }
     }
 }

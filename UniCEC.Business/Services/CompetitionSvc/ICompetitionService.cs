@@ -17,7 +17,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<bool> LeaderDelete(CompetitionDeleteModel model);
 
         //-----------------------------------------------------Sponsor 
-        public Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition);
+        public Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition);//string Token);
         public Task<bool> SponsorUpdate(CompetitionUpdateModel competition);
         public Task<bool> SponsorDelete(CompetitionDeleteModel model);
 

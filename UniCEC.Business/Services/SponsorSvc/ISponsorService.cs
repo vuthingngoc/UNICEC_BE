@@ -11,6 +11,6 @@ namespace UniCEC.Business.Services.SponsorSvc
         public Task<ViewSponsor> Insert(SponsorInsertModel sponsor);
         public Task<bool> Update(SponsorUpdateModel sponsor);
         public Task<bool> Delete(int id);
-        public Task<bool> CheckSponsorIsCreated(int userId);
+        
     }
 }
