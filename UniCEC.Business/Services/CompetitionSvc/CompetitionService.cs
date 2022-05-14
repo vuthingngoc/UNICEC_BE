@@ -85,14 +85,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //Leader Insert
-        public async Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel model)
+        public async Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
             {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
                 bool roleLeader = false;
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = model.UserId,
+                    UserId = UserId,
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
@@ -184,14 +189,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //Sponsor Insert
         //Check Authorize Sponsor in controller
-        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model)//, string Token)
+        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model, string token)
         {
             try
             {
-                //var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(Token);
-                //var spId = jsonToken.Claims.FirstOrDefault(x => x.Equals("SponsorId"));
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
 
-                //int SponsorId = Int32.Parse(spId.Value);
+                int SponsorId = Int32.Parse(spIdClaim.Value);
 
 
                 //------------ Check Date
@@ -227,7 +232,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Competition comp = await _competitionRepo.Get(competition_Id);
                         //------------ Sponsor-In-Competition
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                        sponsorInCompetition.SponsorId = model.SponsorId;
+                        sponsorInCompetition.SponsorId = SponsorId;
                         sponsorInCompetition.CompetitionId = competition_Id;
 
                         int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
@@ -327,10 +332,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<bool> LeaderDelete(CompetitionDeleteModel competition)
+        public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel competition, string token)
         {
             try
             {
+
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
                 bool roleLeader = false;
                 bool clubHasCreateCompetition = false;
 
@@ -343,7 +354,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     GetMemberInClubModel conditions = new GetMemberInClubModel()
                     {
-                        UserId = competition.UserId,
+                        UserId = UserId,
                         ClubId = competition.ClubId,
                         TermId = competition.TermId
                     };
@@ -389,9 +400,27 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public Task<bool> SponsorDelete(CompetitionDeleteModel model)
+        public async Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
+
+                int SponsorId = Int32.Parse(spIdClaim.Value);
+
+
+                //Use method check  
+                //-> if FALSE mean it's created -> Can Update
+                //-> if TRUE mean it isn't created -> Can't Update
+                bool sponsorHasCreateCompetition = false;
+
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ViewCompetition TransformViewModel(Competition competition)

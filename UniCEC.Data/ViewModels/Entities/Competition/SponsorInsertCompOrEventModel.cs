@@ -30,8 +30,6 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
-        //
-        [JsonPropertyName("sponsor_id")]
-        public int SponsorId { get; set; }
+        
     }
 }

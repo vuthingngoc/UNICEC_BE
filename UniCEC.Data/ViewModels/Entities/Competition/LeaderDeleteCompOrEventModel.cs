@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
-    public class CompetitionDeleteModel
+    public class LeaderDeleteCompOrEventModel
     {
-        [JsonPropertyName("competition_id")]
-        public int CompetitionId { get; set; }
+        public int Id { get; set; }
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }

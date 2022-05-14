@@ -31,9 +31,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
 
-        //---------Author to check user is Leader of Club
-        [JsonPropertyName("user_id")]
-        public int UserId { get; set; }
+        //---------Author to check user is Leader of Club   
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }
         [JsonPropertyName("term_id")]

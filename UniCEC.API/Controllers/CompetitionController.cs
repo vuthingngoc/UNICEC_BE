@@ -116,7 +116,7 @@ namespace UniCEC.API.Controllers
 
         //ClubLeader
         // POST api/<CompetitionController>
-        //[Authorize(Roles = "Student")]
+        [Authorize(Roles = "Student")]
         [HttpPost("leader")]
         [SwaggerOperation(Summary = "Leader insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
@@ -124,7 +124,11 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model);
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
                 if (viewCompetition != null)
                 {
 
@@ -147,7 +151,7 @@ namespace UniCEC.API.Controllers
 
         //Sponsor
         // POST api/<CompetitionController>
-        //[Authorize(Roles = "Sponsor")]
+        [Authorize(Roles = "Sponsor")]
         [HttpPost("sponsor")]
         [SwaggerOperation(Summary = "Sponsor insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
@@ -155,11 +159,11 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                //var header = Request.Headers;
-                //if (!header.ContainsKey("Authorization")) return Unauthorized();
-                //string token = header["Authorization"].ToString().Split(" ")[1];
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model);//,token);
+                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model, token);
                 if (viewCompetition != null)
                 {
 
@@ -179,11 +183,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
-
-
-
-
-
 
 
         // PUT api/<CompetitionController>/5
@@ -216,15 +215,18 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<CompetitionController>/5
-        //[Authorize(Roles = "Student")]
+        [Authorize(Roles = "Student")]
         [HttpDelete("leader")]
         [SwaggerOperation(Summary = "Leader canceling EVENT or COMPETITION")]
-        public async Task<IActionResult> Delete([FromBody] CompetitionDeleteModel model)
+        public async Task<IActionResult> Delete([FromBody] LeaderDeleteCompOrEventModel model)
         {
             try
             {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _competitionService.LeaderDelete(model);
+                check = await _competitionService.LeaderDelete(model, token);
                 if (check)
                 {
                     return Ok();
