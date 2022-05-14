@@ -50,7 +50,7 @@ namespace UniCEC.Business.Services.ClubSvc
             int uniId = Int32.Parse(universityClaim.Value);
 
             // is student role
-            if (roleId.Equals(3) && !uniId.Equals(universityId)) throw new ArgumentException("You do not have permission to access this club");  
+            if (roleId.Equals(3) && !uniId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");  
 
             ViewClub club = await _clubRepo.GetById(id, roleId, universityId);
             if (club == null) throw new NullReferenceException("Not found this club");
@@ -89,7 +89,7 @@ namespace UniCEC.Business.Services.ClubSvc
                         }
                     }
 
-                    if (isSameUni == false) throw new ArgumentException("You do not have permission to access this competition");
+                    if (isSameUni == false) throw new UnauthorizedAccessException("You do not have permission to access this competition");
                 }
             }
 
@@ -108,7 +108,7 @@ namespace UniCEC.Business.Services.ClubSvc
             int roleId = Int32.Parse(roleClaim.Value);
 
             // student and sponsor
-            if (roleId != 1 && !uniId.Equals(universityId)) throw new ArgumentException("You do not have permission to access this club");
+            if (roleId != 1 && !uniId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByName(universityId, roleId, name, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this name");
@@ -153,7 +153,7 @@ namespace UniCEC.Business.Services.ClubSvc
             int roleId = Int32.Parse((roleClaim.Value).ToString());
 
             // student role
-            if (roleId == 3 && !universityId.Equals(id)) throw new ArgumentException("You do not have permission to access this club");
+            if (roleId == 3 && !universityId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this club");
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(id, request);
             if (clubs == null) throw new NullReferenceException("This university have no any clubs");
@@ -177,7 +177,7 @@ namespace UniCEC.Business.Services.ClubSvc
             if (roleClaim == null || userIdClaim == null) throw new ArgumentException();
             int roleId = Int32.Parse(roleClaim.Value);
             int userId = Int32.Parse(userIdClaim.Value);
-            if (roleId == 2) throw new UnauthorizedAccessException();
+            if (roleId == 2) throw new UnauthorizedAccessException("You do not have permission to add new club");
 
             if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 || model.TotalMember == 0
                 || string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.Parse("1/1/0001 12:00:00 AM"))
@@ -236,7 +236,7 @@ namespace UniCEC.Business.Services.ClubSvc
             int userId = Int32.Parse(claim.Value);
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.Id);
             // if role is not leader or vice president
-            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException();
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to update this club");
 
             Club club = await _clubRepo.Get(model.Id);
             if (club == null) throw new NullReferenceException("Not found this club");
@@ -255,7 +255,12 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task Delete(string token, int id)
         {
+            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var userIdClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+            int userId = Int32.Parse(userIdClaim.Value);
 
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, id);
+            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to delete this club");
 
             Club clubObject = await _clubRepo.Get(id);
             if (clubObject == null) throw new NullReferenceException("Not found this club");
