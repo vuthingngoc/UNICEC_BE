@@ -41,13 +41,16 @@ namespace UniCEC.Business.Services.ClubSvc
             _clubHistoryRepo = clubHistoryRepo;
         }
 
-        public async Task<ViewClub> GetByClub(string token, int id)
+        public async Task<ViewClub> GetByClub(string token, int id, int universityId)
         {
             var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
             var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
             var universityClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
             int roleId = Int32.Parse(roleClaim.Value);
-            int universityId = Int32.Parse(universityClaim.Value);
+            int uniId = Int32.Parse(universityClaim.Value);
+
+            // is student role
+            if (roleId.Equals(3) && !uniId.Equals(universityId)) throw new ArgumentException("You do not have permission to access this club");  
 
             ViewClub club = await _clubRepo.GetById(id, roleId, universityId);
             if (club == null) throw new NullReferenceException("Not found this club");
