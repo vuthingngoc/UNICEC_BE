@@ -36,9 +36,9 @@ namespace UniCEC.API.Controllers
                 ViewClub club = await _clubService.GetByClub(token, id, universityId);
                 return Ok(club);
             }
-            catch(ArgumentException ex)
+            catch(UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
@@ -64,9 +64,9 @@ namespace UniCEC.API.Controllers
             {
                 return Ok(new List<object>());
             }
-            catch(ArgumentException ex)
+            catch(UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch (SqlException)
             {
@@ -104,6 +104,10 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, id, request);
                 return Ok(clubs);
             }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (NullReferenceException ex)
             {
                 return Ok(ex.Message);
@@ -123,6 +127,10 @@ namespace UniCEC.API.Controllers
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 PagingResult<ViewClub> clubs = await _clubService.GetByCompetition(token, id, request);
                 return Ok(clubs);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
@@ -144,9 +152,9 @@ namespace UniCEC.API.Controllers
                 ViewClub viewClub = await _clubService.Insert(token, club);
                 return Ok(club);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(ex.Message);
             }
             catch (ArgumentNullException ex)
             {
@@ -176,9 +184,9 @@ namespace UniCEC.API.Controllers
                 await _clubService.Update(token, club);
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
@@ -223,6 +231,10 @@ namespace UniCEC.API.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal Server Exception");
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
         }
     }
