@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,13 +28,17 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get club by id")]
-        public async Task<IActionResult> GetClubById(int id)
+        public async Task<IActionResult> GetClubById(int id, [FromQuery, BindRequired] int universityId)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewClub club = await _clubService.GetByClub(token, id);
+                ViewClub club = await _clubService.GetByClub(token, id, universityId);
                 return Ok(club);
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NullReferenceException)
             {
