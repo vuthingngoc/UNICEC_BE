@@ -13,12 +13,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewCompetition> GetById(int id);
         //-----------------------------------------------------Leader 
         public Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
-        public Task<bool> LeaderUpdate(CompetitionUpdateModel competition);
+        public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
 
         //-----------------------------------------------------Sponsor 
         public Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
-        public Task<bool> SponsorUpdate(CompetitionUpdateModel competition);
+        public Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent competition, string token);
         public Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token);
 
         //Get EVENT or COMPETITION by conditions

@@ -9,7 +9,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 {
     public class LeaderDeleteCompOrEventModel
     {
-        public int Id { get; set; }
+        [JsonPropertyName("competition_id")]
+        public int CompetitionId { get; set; }
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }
