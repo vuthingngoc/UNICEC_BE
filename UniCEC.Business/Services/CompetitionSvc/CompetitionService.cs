@@ -24,7 +24,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IClubHistoryRepo _clubHistoryRepo;
         // check Club Has Competition - Insert   
         private ICompetitionInClubRepo _competitionInClubRepo;
-        // Insert
+        // check Sponsor create Competition- Insert
         private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
 
 
@@ -85,14 +85,35 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //Leader Insert
-        public async Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel model)
+        public async Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
             {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
                 bool roleLeader = false;
+
+
+                if (string.IsNullOrEmpty(model.Name)
+                    || model.CompetitionTypeId == 0
+                    || model.NumberOfParticipations == 0
+                    || model.NumberOfTeam == 0
+                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.SeedsPoint == 0
+                    || model.SeedsDeposited == 0
+                    || model.ClubId == 0
+                    || model.TermId == 0)
+                    throw new ArgumentNullException("Name Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
+                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
+
+
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = model.UserId,
+                    UserId = UserId,
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
@@ -109,7 +130,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (roleLeader)
                 {
                     //------------ Check Date
-                    bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                    bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
                     if (checkDate)
                     {
                         //------------ Insert Competition
@@ -168,12 +189,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }//end if check date
                     else
                     {
-                        return null;
+                        throw new ArgumentException("Date not suitable");
                     }
                 }//end if role leader
                 else
                 {
-                    return null;
+                    throw new UnauthorizedAccessException("You do not a role Leader to insert this Competititon");
                 }
             }
             catch (Exception)
@@ -184,18 +205,31 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //Sponsor Insert
         //Check Authorize Sponsor in controller
-        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model)//, string Token)
+        public async Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel model, string token)
         {
             try
             {
-                //var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(Token);
-                //var spId = jsonToken.Claims.FirstOrDefault(x => x.Equals("SponsorId"));
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
+                int SponsorId = Int32.Parse(spIdClaim.Value);
 
-                //int SponsorId = Int32.Parse(spId.Value);
+                if (string.IsNullOrEmpty(model.Name)
+                    || model.CompetitionTypeId == 0
+                    || model.NumberOfParticipations == 0
+                    || model.NumberOfTeam == 0
+                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.SeedsPoint == 0
+                    || model.SeedsDeposited == 0)
+                    throw new ArgumentNullException("Name Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
+                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null ");
+
 
 
                 //------------ Check Date
-                bool checkDate = CheckDateInsert(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
                 if (checkDate)
                 {
                     //ở trong trường hợp này phân biệt EVENT - COMPETITION
@@ -227,7 +261,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Competition comp = await _competitionRepo.Get(competition_Id);
                         //------------ Sponsor-In-Competition
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                        sponsorInCompetition.SponsorId = model.SponsorId;
+                        sponsorInCompetition.SponsorId = SponsorId;
                         sponsorInCompetition.CompetitionId = competition_Id;
 
                         int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
@@ -252,7 +286,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }//end if check date
                 else
                 {
-                    return null;
+                    throw new ArgumentException("Date not suitable");
                 }
             }
             catch (Exception)
@@ -262,25 +296,44 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<bool> LeaderUpdate(CompetitionUpdateModel competition)
+        public async Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel model, string token)
         {
             try
             {
-                bool roleLeader = false;
-                bool clubHasCreateCompetition = false;
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
 
+                bool roleLeader = false;
+                //check date
+                bool checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
+                bool CompOrEventNotCreated = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(model.ClubId, model.CompetitionId);
+
+                if (model.CompetitionId == 0
+                    || string.IsNullOrEmpty(model.Name)
+                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.SeedsPoint == 0
+                    || model.SeedsDeposited == 0
+                    || model.ClubId == 0
+                    || model.TermId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null  || Name Null || StartTimeRegister Null " +
+                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
+
+
                 //------------ Check Club Has Create Competition
-                if (clubHasCreateCompetition == false)
+                if (CompOrEventNotCreated == false)
                 {
                     GetMemberInClubModel conditions = new GetMemberInClubModel()
                     {
-                        UserId = competition.UserId,
-                        ClubId = competition.ClubId,
-                        TermId = competition.TermId
+                        UserId = UserId,
+                        ClubId = model.ClubId,
+                        TermId = model.TermId
                     };
                     ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
                     //------------ Check Mem in that club
@@ -294,24 +347,36 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }
                     if (roleLeader)
                     {
-                        //
-                        Competition comp = await _competitionRepo.Get(competition.Id);
-                        comp.SeedsPoint = (competition.SeedsPoint != 0) ? competition.SeedsPoint : comp.SeedsPoint;
-                        comp.SeedsDeposited = (competition.SeedsDeposited != 0) ? competition.SeedsDeposited : comp.SeedsDeposited;
-                        comp.Address = (competition.Address.Length > 0) ? competition.Address : comp.Address;
-                        comp.Name = (competition.Name.Length > 0) ? competition.Name : comp.Name;
-                        //
-                        await _competitionRepo.Update();
-                        return true;
-                    }
+                        //------------ Check Date
+                        if (checkDate)
+                        {
+                            //
+                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                            comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
+                            comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
+                            comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
+                            comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
+                            comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                            comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                            comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                            comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                            //
+                            await _competitionRepo.Update();
+                            return true;
+                        }//end check date
+                        else
+                        {
+                            throw new ArgumentException("Date not suitable");
+                        }
+                    }//end check leader 
                     else
                     {
-                        return false;
+                        throw new UnauthorizedAccessException("You do not a role Leader to update this Competition");
                     }
-                }
+                }// competition is not created
                 else
                 {
-                    return false;
+                    throw new ArgumentException("Competition not found to update");
                 }
             }
             catch (Exception)
@@ -321,31 +386,99 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public Task<bool> SponsorUpdate(CompetitionUpdateModel competition)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public async Task<bool> LeaderDelete(CompetitionDeleteModel competition)
+        public async Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent model, string token)
         {
             try
             {
-                bool roleLeader = false;
-                bool clubHasCreateCompetition = false;
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
+                int SponsorId = Int32.Parse(spIdClaim.Value);
 
+                //check date
+                bool checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                //Use method check
+                //-> if FALSE mean it's created -> Can Update
+                //-> if TRUE mean it isn't created -> Can't Update
+                bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
+
+                if (model.CompetitionId == 0
+                    || string.IsNullOrEmpty(model.Name)
+                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.SeedsPoint == 0
+                    || model.SeedsDeposited == 0)
+                    throw new ArgumentNullException("|| Competition Id Null  || Name Null || StartTimeRegister Null " +
+                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null");
+
+                //------------ Check Sponsor Has Create Competition
+                if (CompOrEventNotCreated == false)
+                {
+                    //------------ Check date              
+                    if (checkDate)
+                    {
+                        //
+                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                        comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
+                        comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
+                        comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
+                        comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
+                        comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                        comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                        comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                        comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                        //
+                        await _competitionRepo.Update();
+                        return true;
+                    }//end check date
+                    else
+                    {
+                        throw new ArgumentException("Date not suitable");
+                    }
+                }//end check CompOrEventNotCreated
+                else
+                {
+                    throw new ArgumentException("Competition not found to update");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token)
+        {
+            try
+            {
+
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                bool roleLeader = false;
                 //Use method check  
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
-                clubHasCreateCompetition = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(competition.ClubId, competition.Id);
+                bool CompOrEventNotCreated = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(model.ClubId, model.CompetitionId);
+
+                if (model.CompetitionId == 0
+                    || model.ClubId == 0
+                    || model.TermId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null" +
+                                                     " ClubId Null || TermId Null ");
+
+
                 //------------ Check Club Has Create Competition
-                if (clubHasCreateCompetition == false)
+                if (CompOrEventNotCreated == false)
                 {
                     GetMemberInClubModel conditions = new GetMemberInClubModel()
                     {
-                        UserId = competition.UserId,
-                        ClubId = competition.ClubId,
-                        TermId = competition.TermId
+                        UserId = UserId,
+                        ClubId = model.ClubId,
+                        TermId = model.TermId
                     };
                     ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
                     //------------ Check Mem in that club
@@ -360,7 +493,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (roleLeader)
                     {
                         //
-                        Competition comp = await _competitionRepo.Get(competition.Id);
+                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
                         if (comp != null)
                         {
                             comp.Status = CompetitionStatus.Canceling;
@@ -375,12 +508,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }//end check role leader
                     else
                     {
-                        return false;
+                        throw new UnauthorizedAccessException("You do not a role Leader to Delete this Competition");
                     }
                 }//end clubHasCreateCompetition
                 else
                 {
-                    return false;
+                    throw new ArgumentException("Competition not found to Delete");
                 }
             }
             catch (Exception)
@@ -389,16 +522,53 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public Task<bool> SponsorDelete(CompetitionDeleteModel model)
+        public async Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
+                int SponsorId = Int32.Parse(spIdClaim.Value);
+                //Use method check  
+                //-> if FALSE mean it's created -> Can Update
+                //-> if TRUE mean it isn't created -> Can't Update
+                bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
+
+                if (model.CompetitionId == 0 )
+                    throw new ArgumentNullException("|| Competition Id Null" );
+
+                if (CompOrEventNotCreated == false)
+                {
+                    //
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp != null)
+                    {
+                        comp.Status = CompetitionStatus.Canceling;
+                        //
+                        await _competitionRepo.Update();
+                        return true;
+                    }//end if comp != null
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition not found to Delete");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ViewCompetition TransformViewModel(Competition competition)
         {
             return new ViewCompetition()
             {
-                Id = competition.Id,
+                CompetitionId = competition.Id,
                 Name = competition.Name,
                 CompetitionTypeId = competition.CompetitionTypeId,
                 //address
@@ -454,8 +624,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return seedCode;
         }
 
-        //Check Date Insert
-        private bool CheckDateInsert(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime)
+        //Check Date Insert - Update
+        private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime)
         {
 
             //condition
@@ -541,7 +711,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     round4 = true;
                 }
             }
-
             //
             if (round1 && round2 && round3 && round4)
             {

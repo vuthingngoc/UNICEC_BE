@@ -56,7 +56,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //
             List<ViewCompetition> Competitions = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewCompetition()
             {
-                Id = x.Id,
+                CompetitionId = x.Id,
                 Name = x.Name,
                 CompetitionTypeId = x.CompetitionTypeId,
                 Address = x.Address,
@@ -126,7 +126,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //
             List<ViewCompetition> competitions = await query.Take(3).Select(x => new ViewCompetition()
             {
-                Id = x.Id,
+                CompetitionId = x.Id,
                 CompetitionTypeId = x.CompetitionTypeId,
                 Name = x.Name,
                 Address = x.Address,

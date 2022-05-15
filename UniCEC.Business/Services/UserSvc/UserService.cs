@@ -24,6 +24,7 @@ namespace UniCEC.Business.Services.UserSvc
             return new ViewUser()
             {
                 Id = user.Id,
+                SponsorId = (int)user.SponsorId,
                 Description = user.Description,
                 Dob = user.Dob,
                 Email = user.Email,
