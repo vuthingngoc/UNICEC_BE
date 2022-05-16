@@ -118,16 +118,17 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 int UserId = Int32.Parse(UserIdClaim.Value);
 
                 if (string.IsNullOrEmpty(model.Name)
+                    || model.TermId == 0
                     || model.ClubId == 0
                     || model.SeedsPoint < 0
                     || string.IsNullOrEmpty(model.Description)
                     || model.Beginning == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.Ending == DateTime.Parse("1/1/0001 12:00:00 AM"))
                     throw new ArgumentNullException("Name Null || ClubId Null || SeedsPoint Null || Description Null || Beginning Null " +
-                                                     " Ending Null");
+                                                     " Ending Null || TermId Null");
 
                 bool roleLeader = false;
-                bool checkDate = CheckDate(model.Beginning, model.Ending);
+                bool checkDate = CheckDate(model.Beginning, model.Ending, false);
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
                     UserId = UserId,
@@ -262,19 +263,19 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         {
                             //------------ Check date update
                             //th1
-                            if (model.Beginning.HasValue)
+                            if (model.Beginning.HasValue && !model.Ending.HasValue)
                             {
-                                checkDateUpdate = CheckDate((DateTime)model.Beginning, clubActivity.Ending);
+                                checkDateUpdate = CheckDate((DateTime)model.Beginning, clubActivity.Ending, true);
                             }
                             //th2
-                            if (model.Ending.HasValue)
+                            if (model.Ending.HasValue && !model.Beginning.HasValue)
                             {
-                                checkDateUpdate = CheckDate(clubActivity.Beginning, (DateTime)model.Ending);
+                                checkDateUpdate = CheckDate(clubActivity.Beginning, (DateTime)model.Ending, true);
                             }
                             //th3
                             if (model.Beginning.HasValue && model.Ending.HasValue)
                             {
-                                checkDateUpdate = CheckDate((DateTime)model.Beginning, (DateTime)model.Ending);
+                                checkDateUpdate = CheckDate((DateTime)model.Beginning, (DateTime)model.Ending, true);
                             }
                             if (checkDateUpdate)
                             {
@@ -286,16 +287,10 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                                 clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
 
                                 //Update DEADLINE day of member takes activity
-                                bool updateDeadline = await _memberTakesActivityRepo.UpdateDeadlineDate(clubActivity.Id, clubActivity.Ending);
-                                if (updateDeadline)
-                                {
-                                    await _clubActivityRepo.Update();
-                                    return true;
-                                }
-                                else
-                                {
-                                    throw new ArgumentException("Cant update deadline for all MemberTakesActivity");
-                                }
+                                await _memberTakesActivityRepo.UpdateDeadlineDate(clubActivity.Id, clubActivity.Ending);
+                                await _clubActivityRepo.Update();
+                                return true;
+
                             }
                             else
                             {
@@ -359,23 +354,32 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
         //Check date Insert
         // LCT < ST < ET
-        private bool CheckDate(DateTime Beginning, DateTime Ending)
+        private bool CheckDate(DateTime Beginning, DateTime Ending, bool Update)
         {
             bool round1 = false;
             bool result = false;
             DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-            //LcTime < StartTime , EndTime
-            int rs1 = DateTime.Compare(localTime, Beginning);
-            if (rs1 < 0)
+            //Use when API UPDATE
+            if (Update)
             {
-                int rs2 = DateTime.Compare(localTime, Ending);
-                if (rs2 < 0)
+                round1 = true;
+            }
+            else
+            //Use for INSERT
+            {
+                //LcTime < StartTime , EndTime
+                int rs1 = DateTime.Compare(localTime, Beginning);
+                if (rs1 < 0)
                 {
-                    round1 = true;
+                    int rs2 = DateTime.Compare(localTime, Ending);
+                    if (rs2 < 0)
+                    {
+                        round1 = true;
+                    }
                 }
             }
-
+  
             //ST < ET
             if (round1)
             {
@@ -388,6 +392,11 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
             return result;
         }
+
+
+        ////Check Update 
+        ////th1 Check Beginnin
+        //private bool CheckDateBeginning()
 
 
         //Get-List-Club-Activities-By-Conditions

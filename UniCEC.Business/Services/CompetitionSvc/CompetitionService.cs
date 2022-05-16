@@ -37,8 +37,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
-
-
         }
 
 
@@ -130,7 +128,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (roleLeader)
                 {
                     //------------ Check Date
-                    bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                    bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                     if (checkDate)
                     {
                         //------------ Insert Competition
@@ -229,7 +227,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 //------------ Check Date
-                bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime);
+                bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                 if (checkDate)
                 {
                     //ở trong trường hợp này phân biệt EVENT - COMPETITION
@@ -347,28 +345,28 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         //TH1 STR
                         if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime);
+                            checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                         }
                         //TH2 ETR
                         if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime);
+                            checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                         }
                         //TH3 ST
                         if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime);
+                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
                         }
 
                         //TH4 ET
                         if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime);
+                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
                         }
                         //TH5 new STR ETR ST ET
                         if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                            checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
                         }
 
                         if (checkDate)
@@ -434,27 +432,27 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //TH1 STR
                     if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime);
+                        checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                     }
                     //TH2 ETR
                     if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime);
+                        checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                     }
                     //TH3 ST
                     if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime);
+                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
                     }
                     //TH4 ET
                     if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime);
+                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
                     }
                     //TH5 new STR ETR ST ET
                     if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                        checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
                     }
                     if (checkDate)
                     {
@@ -664,7 +662,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Check Date Insert - Update
-        private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime)
+        private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime, bool Update)
         {
 
             //condition
@@ -674,31 +672,41 @@ namespace UniCEC.Business.Services.CompetitionSvc
             bool round4 = false;
             bool result = false;
 
-            //ROUND 1 
-            //CHECK LOCALTIME < STR < ETR < ST < ET -> LocalTime
-            DateTime localTime = new LocalTime().GetLocalTime().DateTime;
-            // resultLT1 < STR (sớm hơn)
-            int resultLT1 = DateTime.Compare(localTime, StartTimeRegister);
-            if (resultLT1 < 0)
+
+            //Use when API UPDATE
+            //Can't update StartTime when Competition is happenning
+            if (Update)
             {
-                //resultLT2 < ETR (sớm hơn)
-                int resultLT2 = DateTime.Compare(localTime, EndTimeRegister);
-                if (resultLT2 < 0)
+                round1 = true;
+            }
+            else
+            {
+                //ROUND 1 
+                //CHECK LOCALTIME < STR < ETR < ST < ET -> LocalTime
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+                // resultLT1 < STR (sớm hơn)
+                int resultLT1 = DateTime.Compare(localTime, StartTimeRegister);
+                if (resultLT1 < 0)
                 {
-                    //resultLT3 < ST (sớm hơn)
-                    int resultLT3 = DateTime.Compare(localTime, StartTime);
-                    if (resultLT3 < 0)
+                    //resultLT2 < ETR (sớm hơn)
+                    int resultLT2 = DateTime.Compare(localTime, EndTimeRegister);
+                    if (resultLT2 < 0)
                     {
-                        //resultLT4 < ET (sớm hơn)
-                        int resultLT4 = DateTime.Compare(localTime, EndTime);
-                        if (resultLT4 < 0)
+                        //resultLT3 < ST (sớm hơn)
+                        int resultLT3 = DateTime.Compare(localTime, StartTime);
+                        if (resultLT3 < 0)
                         {
-                            round1 = true;
+                            //resultLT4 < ET (sớm hơn)
+                            int resultLT4 = DateTime.Compare(localTime, EndTime);
+                            if (resultLT4 < 0)
+                            {
+                                round1 = true;
+                            }
                         }
                     }
                 }
             }
-
+           
             //ROUND 2
             if (round1)
             {

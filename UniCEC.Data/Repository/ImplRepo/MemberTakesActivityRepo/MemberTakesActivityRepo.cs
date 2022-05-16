@@ -96,25 +96,22 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return (memberTakesActivities.Count != 0) ? new PagingResult<ViewMemberTakesActivity>(memberTakesActivities, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<bool> UpdateDeadlineDate(int ClubActivityId, DateTime deadline)
+        public async Task UpdateDeadlineDate(int ClubActivityId, DateTime deadline)
         {
             List<MemberTakesActivity> memberTakesActivities = await (from mta in context.MemberTakesActivities
                                                                      where mta.ClubActivityId == ClubActivityId
                                                                      select mta).ToListAsync();
-            if (memberTakesActivities.Count > 0)
+
+            if (memberTakesActivities.Count != 0)
             {
                 foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
                 {
                     memberTakesActivity.Deadline = deadline;
                 }
+            }
                 context.SaveChanges();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
+                
+            
         }
     }
 }

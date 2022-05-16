@@ -139,7 +139,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         } // end if checkStatusClubActivity
                         else
                         {
-                            throw new ArgumentException("This task is Ending");
+                            throw new ArgumentException("This task is not openning now");
                         }
                     }// end if MemTakesTask
                     else

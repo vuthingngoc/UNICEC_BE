@@ -22,6 +22,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status);
 
         //Update DeadLine Date 
-        public Task<bool> UpdateDeadlineDate(int ClubActivityId, DateTime deadline);
+        public Task UpdateDeadlineDate(int ClubActivityId, DateTime deadline);
     }
 }
