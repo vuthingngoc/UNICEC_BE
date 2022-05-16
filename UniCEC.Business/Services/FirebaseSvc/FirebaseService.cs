@@ -7,8 +7,6 @@ using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.JWT;
-using UniCEC.Data.Models.DB;
-using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.Sponsor;
 using UniCEC.Data.ViewModels.Entities.University;
@@ -85,7 +83,6 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     ViewUser user = await _userService.GetUserByEmail(email);
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
-                    ViewMajor major = await _majorService.GetMajorById((int)user.MajorId);
                     //2.1 FullFill Info
                     if (user.UniversityId != null)
                     {
@@ -93,7 +90,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         if (role.Id == 3)
                         {
                             //----------------Generate JWT Token Student
-                            string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, role.RoleName, major.Name);
+                            string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, role.RoleName);
                             return new ViewUserInfo()
                             {
                                 Token = clientTokenUser
@@ -149,9 +146,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     {
                         //----------------Generate JWT Token Sponsor
                         ViewSponsor sponsor = await _sponsorService.GetBySponsorId(user.SponsorId);
-                        //get SponsorId
-                        //get SponsorName
-                        string clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName, sponsor.Id.ToString(), sponsor.Name);
+                        string clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName, sponsor.Id.ToString());
                         return new ViewUserInfo()
                         {
                             Token = clientTokenUser

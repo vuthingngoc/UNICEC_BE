@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -17,6 +19,12 @@ namespace UniCEC.Business.Services.UserSvc
         public UserService(IUserRepo userRepo)
         {
             _userRepo = userRepo;
+        }
+
+        public async Task<ViewUser> GetUserById(int id)
+        {
+            ViewUser user = await _userRepo.GetById(id);
+            return (user == null) ? throw new NullReferenceException() : user;
         }
 
         private ViewUser TransformViewModel(User user)
