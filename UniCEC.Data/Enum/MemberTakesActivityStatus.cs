@@ -9,7 +9,9 @@ namespace UniCEC.Data.Enum
     public enum MemberTakesActivityStatus
     {
         Doing,
-        DoneOnTime,
-        Late
+        LateTime,
+        SubmitOnTime,
+        SubmitOnLate,
+        OutActivity,
     }
 }

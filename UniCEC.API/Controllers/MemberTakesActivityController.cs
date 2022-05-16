@@ -87,11 +87,16 @@ namespace UniCEC.API.Controllers
 
         // POST api/<MemberTakesActivityController>
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert member in task ")]
+        [SwaggerOperation(Summary = "Insert member in task - Student ")]
         public async Task<IActionResult> InsertMemberTakesActivity([FromBody] MemberTakesActivityInsertModel model)
         {
             try
             {
+                //JWT
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
                 ViewMemberTakesActivity result = await _memberTakesActivityService.Insert(model);
                 if (result != null)
                 {
@@ -102,6 +107,18 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (DbUpdateException)
             {
@@ -116,11 +133,16 @@ namespace UniCEC.API.Controllers
 
         // PUT api/<MemberTakesActivityController>/5
         [HttpPut("{id}")]
-        [SwaggerOperation(Summary = "Member submit task by Id")]
+        [SwaggerOperation(Summary = "Member submit task by Id - Student")]
         public async Task<IActionResult> MemberSubmitTask(int id)
         {
             try
             {
+                //JWT
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
                 Boolean check = false;
                 check = await _memberTakesActivityService.Update(id);
                 if (check)

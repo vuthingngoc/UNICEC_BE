@@ -51,6 +51,11 @@ namespace UniCEC.Business.Services.CitySvc
         public async Task<ViewCity> Insert(CityInsertModel model)
         {
             try {
+
+
+                if (string.IsNullOrEmpty(model.Name)|| string.IsNullOrEmpty(model.Description))
+                    throw new ArgumentNullException(" Name Null || Description Null ");
+
                 City city = new City();
 
                 city.Name = model.Name;
@@ -81,6 +86,8 @@ namespace UniCEC.Business.Services.CitySvc
         public async Task<bool> Update(ViewCity city)
         {
             try{
+                if (string.IsNullOrEmpty(city.Name) || string.IsNullOrEmpty(city.Description) || city.Id == 0 )
+                    throw new ArgumentNullException(" Name Null || Description Null || City Id Null");
                 //get city
                 City c = await _cityRepo.Get(city.Id);
                 //
@@ -91,6 +98,10 @@ namespace UniCEC.Business.Services.CitySvc
 
                     await _cityRepo.Update();
                     return true;
+                }
+                else
+                {
+                    throw new ArgumentException("City not find to update");
                 }
                 return false;
             }
@@ -105,10 +116,6 @@ namespace UniCEC.Business.Services.CitySvc
             throw new NotImplementedException();
         }
 
-        
-
       
-
-       
     }
 }

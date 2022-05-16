@@ -305,25 +305,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int UserId = Int32.Parse(UserIdClaim.Value);
 
                 bool roleLeader = false;
-                //check date
-                bool checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
                 bool CompOrEventNotCreated = await _competitionInClubRepo.CheckDuplicateCreateCompetitionOrEvent(model.ClubId, model.CompetitionId);
 
                 if (model.CompetitionId == 0
-                    || string.IsNullOrEmpty(model.Name)
-                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.SeedsPoint == 0
-                    || model.SeedsDeposited == 0
                     || model.ClubId == 0
                     || model.TermId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null  || Name Null || StartTimeRegister Null " +
-                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
+                    throw new ArgumentNullException("|| Competition Id Null  " +
+                                                     " ClubId Null || TermId Null ");
 
 
                 //------------ Check Club Has Create Competition
@@ -347,11 +339,41 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }
                     if (roleLeader)
                     {
-                        //------------ Check Date
+                        //check date
+                        bool checkDate = false;
+
+                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                        //------------ Check Date Update
+                        //TH1 STR
+                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime);
+                        }
+                        //TH2 ETR
+                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime);
+                        }
+                        //TH3 ST
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime);
+                        }
+
+                        //TH4 ET
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime);
+                        }
+                        //TH5 new STR ETR ST ET
+                        if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                        }
+
                         if (checkDate)
                         {
-                            //
-                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+
                             comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
                             comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
                             comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
@@ -395,31 +417,48 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int SponsorId = Int32.Parse(spIdClaim.Value);
 
                 //check date
-                bool checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                bool checkDate = false;
                 //Use method check
                 //-> if FALSE mean it's created -> Can Update
                 //-> if TRUE mean it isn't created -> Can't Update
                 bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
 
-                if (model.CompetitionId == 0
-                    || string.IsNullOrEmpty(model.Name)
-                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.SeedsPoint == 0
-                    || model.SeedsDeposited == 0)
-                    throw new ArgumentNullException("|| Competition Id Null  || Name Null || StartTimeRegister Null " +
-                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null");
+                if (model.CompetitionId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null");
 
                 //------------ Check Sponsor Has Create Competition
                 if (CompOrEventNotCreated == false)
                 {
-                    //------------ Check date              
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    //------------ Check Date Update
+                    //TH1 STR
+                    if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime);
+                    }
+                    //TH2 ETR
+                    if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime);
+                    }
+                    //TH3 ST
+                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime);
+                    }
+                    //TH4 ET
+                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime);
+                    }
+                    //TH5 new STR ETR ST ET
+                    if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime);
+                    }
                     if (checkDate)
                     {
-                        //
-                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
+
                         comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
                         comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
                         comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
@@ -534,8 +573,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //-> if TRUE mean it isn't created -> Can't Update
                 bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
 
-                if (model.CompetitionId == 0 )
-                    throw new ArgumentNullException("|| Competition Id Null" );
+                if (model.CompetitionId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null");
 
                 if (CompOrEventNotCreated == false)
                 {

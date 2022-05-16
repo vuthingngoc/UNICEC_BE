@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections.Generic;
 using UniCEC.Data.Enum;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 {
@@ -41,7 +42,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                         select mta;
 
             List<MemberTakesActivity> list = await query.ToListAsync();
-            
+
             int totalMemTakesTask = list.Count();
 
             return totalMemTakesTask;
@@ -64,33 +65,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             }
         }
 
-        //public async Task<bool> AddNumOfMemInTask(int ClubActivityId)
-        //{
-        //    var query1 = from ca in context.ClubActivities
-        //                 where ca.Id == ClubActivityId
-        //                 select ca;
 
-        //    int CurrentTotal = query1.FirstOrDefaultAsync().Result.NumOfMember;
-
-        //    ////đếm bn member task activity đó
-        //    //var query2 = from mta in context.MemberTakesActivities
-        //    //             where mta.ClubActivityId == ClubActivityId
-        //    //             select mta;
-
-        //    //int totalMemTakesTask = query2.Count();
-
-
-
-        //    if ()
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-
-        //}
 
         //Get-All-Taskes-By-Conditions
         public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request)
@@ -121,6 +96,25 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return (memberTakesActivities.Count != 0) ? new PagingResult<ViewMemberTakesActivity>(memberTakesActivities, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-       
+        public async Task<bool> UpdateDeadlineDate(int ClubActivityId, DateTime deadline)
+        {
+            List<MemberTakesActivity> memberTakesActivities = await (from mta in context.MemberTakesActivities
+                                                                     where mta.ClubActivityId == ClubActivityId
+                                                                     select mta).ToListAsync();
+            if (memberTakesActivities.Count > 0)
+            {
+                foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
+                {
+                    memberTakesActivity.Deadline = deadline;
+                }
+                context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
     }
 }

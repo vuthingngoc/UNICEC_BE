@@ -19,7 +19,13 @@ namespace UniCEC.Data.ViewModels.Entities.ClubActivity
         [JsonPropertyName("num_member_done_task")]
         public int NumMemberDoneTask { get; set; }
 
+        [JsonPropertyName("num_member_done_late_task")]
+        public int NumMemberDoneLateTask { get; set; }
+
         [JsonPropertyName("num_member_late_task")]
         public int NumMemberLateTask { get; set; }
+
+        [JsonPropertyName("num_member_out_task")]
+        public int NumMemberOutTask { get; set; }
     }
 }
