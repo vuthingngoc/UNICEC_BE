@@ -28,6 +28,7 @@ namespace UniCEC.Business.Services.SponsorSvc
         {
             try
             {
+
                 Sponsor sp = await _sponsorRepo.Get(id);
                 if (sp != null)
                 {
@@ -35,7 +36,7 @@ namespace UniCEC.Business.Services.SponsorSvc
                 }
                 else
                 {
-                    return null;
+                    throw new ArgumentException(" Sponsor not found");
                 }
             }
             catch (Exception)
@@ -48,7 +49,7 @@ namespace UniCEC.Business.Services.SponsorSvc
         public async Task<bool> Delete(int id)
         {
             try
-            {
+            {                    
                 //
                 Sponsor sp = await _sponsorRepo.Get(id);
                 //
@@ -58,10 +59,10 @@ namespace UniCEC.Business.Services.SponsorSvc
 
                     await _sponsorRepo.Update();
                     return true;
-                }
+                }            
                 else
                 {
-                    return false;
+                    throw new ArgumentException(" Sponsor not found");
                 }
             }
             catch (Exception)
@@ -80,13 +81,13 @@ namespace UniCEC.Business.Services.SponsorSvc
                 {
                     Sponsor sp = new Sponsor()
                     {
-                        
+
                         Address = sponsor.Address,
                         Description = sponsor.Description,
-                        Email = sponsor.Email,                  
+                        Email = sponsor.Email,
                         Logo = sponsor.Logo,
                         Name = sponsor.Name,
-                        Phone = sponsor.Phone,                      
+                        Phone = sponsor.Phone,
                         Status = sponsor.Status,
                     };
 
@@ -112,11 +113,14 @@ namespace UniCEC.Business.Services.SponsorSvc
             }
         }
 
-        //Role Sponsor
+        //Role Admin
         public async Task<bool> Update(SponsorUpdateModel sponsor)
         {
             try
             {
+                if (sponsor.Id == 0)
+                    throw new ArgumentNullException("Sponsor Id Null");
+
                 //
                 Sponsor sp = await _sponsorRepo.Get(sponsor.Id);
                 //
@@ -133,9 +137,9 @@ namespace UniCEC.Business.Services.SponsorSvc
                 }
                 else
                 {
-                    return false;
+                    throw new ArgumentException(" Sponsor not found");
                 }
-
+              
             }
             catch (Exception)
             {
@@ -143,7 +147,7 @@ namespace UniCEC.Business.Services.SponsorSvc
             }
         }
 
-       
+
         private ViewSponsor TransformViewModel(Sponsor sponsor)
         {
             return new ViewSponsor()
@@ -155,7 +159,7 @@ namespace UniCEC.Business.Services.SponsorSvc
                 Logo = sponsor.Logo,
                 Phone = sponsor.Phone,
                 Name = sponsor.Name,
-                Status = sponsor.Status,            
+                Status = sponsor.Status,
             };
         }
     }

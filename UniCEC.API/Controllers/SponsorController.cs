@@ -14,6 +14,7 @@ namespace UniCEC.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class SponsorController : ControllerBase
     {
 
@@ -25,9 +26,8 @@ namespace UniCEC.API.Controllers
         }
 
         // GET api/<SponsorController>/5
-        //[Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get sponsor by id")]
+        [SwaggerOperation(Summary = "Get sponsor by id - Admin")]
         public async Task<IActionResult> Get(int id)
         {
             try
@@ -43,6 +43,10 @@ namespace UniCEC.API.Controllers
                     return Ok(result);
                 }
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (NullReferenceException e)
             {
                 return NotFound(e.Message);
@@ -56,9 +60,8 @@ namespace UniCEC.API.Controllers
 
 
         // PUT api/<SponsorController>/5
-        //[Authorize(Roles = "Sponsor")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update infomations sponsor")]
+        [SwaggerOperation(Summary = "Update infomations sponsor - Admin")]
         public async Task<IActionResult> Update([FromBody] SponsorUpdateModel sponsorUpdateModel)
         {
             try
@@ -73,14 +76,25 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
-            catch (Exception e)
+            catch (ArgumentNullException ex)
             {
-                return BadRequest(e.Message);
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
         }
 
         // DELETE api/<SponsorController>/5
-        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Ban sponsor by Admin")]
         public async Task<IActionResult> Delete(int id)
@@ -97,6 +111,10 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {

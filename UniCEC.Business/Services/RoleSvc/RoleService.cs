@@ -70,6 +70,10 @@ namespace UniCEC.Business.Services.RoleSvc
         {
             try
             {
+
+                if (string.IsNullOrEmpty(model.RoleName))
+                    throw new ArgumentNullException(" RoleName Null");
+
                 Role role = new Role();
                 role.RoleName = model.RoleName;
                 int result = await _roleRepo.Insert(role);
@@ -94,14 +98,21 @@ namespace UniCEC.Business.Services.RoleSvc
         {
             try
             {
+                if (string.IsNullOrEmpty(role.RoleName) || role.Id == 0)
+                    throw new ArgumentNullException(" RoleName Null || Role Id Null");
+
                 //get Role
-                Role getRole = await _roleRepo.Get(role.Id);                
+                Role getRole = await _roleRepo.Get(role.Id);
                 if (getRole != null)
                 {
                     //Update Role Name
                     getRole.RoleName = (!role.RoleName.Equals("")) ? role.RoleName : getRole.RoleName;
                     await _roleRepo.Update();
                     return true;
+                }
+                else
+                {
+                    throw new ArgumentException(" Role not found");
                 }
                 return false;
             }

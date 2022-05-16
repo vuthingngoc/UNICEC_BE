@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -31,19 +33,58 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         }
 
         //Delete-Club-Activity-By-Id
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(ClubActivityDeleteModel model, string token)
         {
             try
             {
-                ClubActivity clubActivity = await _clubActivityRepo.Get(id);
-                if (clubActivity != null)
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+
+                bool roleLeader = false;
+
+                GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    //
-                    clubActivity.Status = ClubActivityStatus.Canceling;
-                    await _clubActivityRepo.Update();
-                    return true;
+                    UserId = UserId,
+                    ClubId = model.ClubId,
+                    TermId = model.TermId
+                };
+
+                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //------------ Check Mem in that club
+                if (infoClubMem != null)
+                {
+                    //------------ Check Role Member Is Leader 
+                    if (infoClubMem.ClubRoleName.Equals("Leader"))
+                    {
+                        roleLeader = true;
+                    }
+
+                    if (roleLeader)
+                    {
+                        ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
+                        if (clubActivity != null)
+                        {
+                            //
+                            clubActivity.Status = ClubActivityStatus.Canceling;
+                            await _clubActivityRepo.Update();
+                            return true;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Club Activity not found to update");
+                        }
+                    }//end check role Leader
+                    else
+                    {
+                        throw new UnauthorizedAccessException("You do not a role Leader to delete this Club Activity");
+                    }
+                }//end member
+                else
+                {
+                    throw new UnauthorizedAccessException("You aren't member in Club");
                 }
-                return false;
             }
             catch (Exception)
             {
@@ -68,14 +109,28 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         }
 
         //Insert
-        public async Task<ViewClubActivity> Insert(ClubActivityInsertModel model)
+        public async Task<ViewClubActivity> Insert(ClubActivityInsertModel model, string token)
         {
             try
             {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                if (string.IsNullOrEmpty(model.Name)
+                    || model.ClubId == 0
+                    || model.SeedsPoint < 0
+                    || string.IsNullOrEmpty(model.Description)
+                    || model.Beginning == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.Ending == DateTime.Parse("1/1/0001 12:00:00 AM"))
+                    throw new ArgumentNullException("Name Null || ClubId Null || SeedsPoint Null || Description Null || Beginning Null " +
+                                                     " Ending Null");
+
                 bool roleLeader = false;
+                bool checkDate = CheckDate(model.Beginning, model.Ending);
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = model.UserId,
+                    UserId = UserId,
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
@@ -88,43 +143,57 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     {
                         roleLeader = true;
                     }
-                }
-                if (roleLeader)
-                {
-                    ClubActivity clubActivity = new ClubActivity();
-                    //
-                    clubActivity.ClubId = model.ClubId;
-                    //When Member Take Activity will +1
-                    clubActivity.NumOfMember = 0;
-                    clubActivity.Description = model.Description;
-                    clubActivity.Name = model.Name;
-                    clubActivity.SeedsPoint = model.SeedsPoint;
-                    //LocalTime
-                    clubActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                    //
-                    clubActivity.Beginning = model.Beginning;
-                    clubActivity.Ending = model.Ending;
-                    //Check Status
-                    clubActivity.Status = GetClubActivityStatus(model.Beginning);
-                    //Check Code
-                    clubActivity.SeedsCode = await checkExistCode();
-
-                    int result = await _clubActivityRepo.Insert(clubActivity);
-                    if (result > 0)
+                    if (roleLeader)
                     {
-                        ClubActivity ca = await _clubActivityRepo.Get(result);
-                        ViewClubActivity viewClubActivity = TransformView(ca);
-                        return viewClubActivity;
-                    }
+                        //------------ Check Date
+                        if (checkDate)
+                        {
+                            //
+                            ClubActivity clubActivity = new ClubActivity();
+                            //
+                            clubActivity.ClubId = model.ClubId;
+                            //When Member Take Activity will +1
+                            clubActivity.NumOfMember = 0;
+                            clubActivity.Description = model.Description;
+                            clubActivity.Name = model.Name;
+                            clubActivity.SeedsPoint = model.SeedsPoint;
+                            //LocalTime
+                            clubActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                            //
+                            clubActivity.Beginning = model.Beginning;
+                            clubActivity.Ending = model.Ending;
+                            //Check Status
+                            clubActivity.Status = ClubActivityStatus.HappenningSoon;
+                            //Check Code
+                            clubActivity.SeedsCode = await checkExistCode();
+
+                            int result = await _clubActivityRepo.Insert(clubActivity);
+                            if (result > 0)
+                            {
+                                ClubActivity ca = await _clubActivityRepo.Get(result);
+                                ViewClubActivity viewClubActivity = TransformView(ca);
+                                return viewClubActivity;
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }//end check date
+                        else
+                        {
+                            throw new ArgumentException("Date not suitable");
+                        }
+                    }//end role leader
                     else
                     {
-                        return null;
+                        throw new UnauthorizedAccessException("You do not a role Leader to insert this Club Activity");
                     }
                 }
                 else
                 {
-                    return null;
+                    throw new UnauthorizedAccessException("You aren't member in Club");
                 }
+
             }
             catch (Exception)
             {
@@ -157,15 +226,22 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
 
         //Update
-        public async Task<bool> Update(ClubActivityUpdateModel model)
+        public async Task<bool> Update(ClubActivityUpdateModel model, string token)
         {
             try
             {
-                bool check = false;
+
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+
                 bool roleLeader = false;
+                bool checkDateUpdate = false;
+
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = model.UserId,
+                    UserId = UserId,
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
@@ -178,32 +254,70 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     {
                         roleLeader = true;
                     }
-                }
-                if (roleLeader)
-                {
-                    //get club Activity
-                    ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
-
-                    if (clubActivity != null)
+                    if (roleLeader)
                     {
-                        //update name-des-seedpoint-beginning-ending
-                        clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
-                        clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
-                        clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
-                        clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
-                        clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
-                        //clubActivity.NumOfMember = (model.NumOfMember != 0) ? model.NumOfMember : clubActivity.NumOfMember;
-                        //clubActivity.Status = (ClubActivityStatus)((model.Status.HasValue) ? model.Status : clubActivity.Status);
+                        //get club Activity
+                        ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
+                        if (clubActivity != null)
+                        {
+                            //------------ Check date update
+                            //th1
+                            if (model.Beginning.HasValue)
+                            {
+                                checkDateUpdate = CheckDate((DateTime)model.Beginning, clubActivity.Ending);
+                            }
+                            //th2
+                            if (model.Ending.HasValue)
+                            {
+                                checkDateUpdate = CheckDate(clubActivity.Beginning, (DateTime)model.Ending);
+                            }
+                            //th3
+                            if (model.Beginning.HasValue && model.Ending.HasValue)
+                            {
+                                checkDateUpdate = CheckDate((DateTime)model.Beginning, (DateTime)model.Ending);
+                            }
+                            if (checkDateUpdate)
+                            {
+                                //update name-des-seedpoint-beginning-ending
+                                clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
+                                clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
+                                clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
+                                clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
+                                clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
 
-                        await _clubActivityRepo.Update();
-                        return true;
+                                //Update DEADLINE day of member takes activity
+                                bool updateDeadline = await _memberTakesActivityRepo.UpdateDeadlineDate(clubActivity.Id, clubActivity.Ending);
+                                if (updateDeadline)
+                                {
+                                    await _clubActivityRepo.Update();
+                                    return true;
+                                }
+                                else
+                                {
+                                    throw new ArgumentException("Cant update deadline for all MemberTakesActivity");
+                                }
+                            }
+                            else
+                            {
+                                throw new ArgumentException("Date not suitable");
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Club Activity not found to update");
+                        }
+
                     }
-                    return check;
+                    else
+                    {
+                        throw new UnauthorizedAccessException("You do not a role Leader to update this Club Activity");
+                    }
                 }
                 else
                 {
-                    return check;
+                    throw new UnauthorizedAccessException("You aren't member in Club");
                 }
+
             }
             catch (Exception)
             {
@@ -241,27 +355,39 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             return seedCode;
         }
 
-        //check status by date when insert
-        private ClubActivityStatus GetClubActivityStatus(DateTime BeginingTime)
-        {
-            DateTime now = new LocalTime().GetLocalTime().DateTime;
-            int result = DateTime.Compare(now, BeginingTime);
-            //Earlier
-            if (result < 0)
-            {
-                return ClubActivityStatus.HappenningSoon;
-            }
-            if (result > 0)
-            {
-                return ClubActivityStatus.Happenning;
-            }
-            if (result == 0)
-            {
-                return ClubActivityStatus.Happenning;
-            }
-            return ClubActivityStatus.Error;
-        }
 
+
+        //Check date Insert
+        // LCT < ST < ET
+        private bool CheckDate(DateTime Beginning, DateTime Ending)
+        {
+            bool round1 = false;
+            bool result = false;
+            DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+
+            //LcTime < StartTime , EndTime
+            int rs1 = DateTime.Compare(localTime, Beginning);
+            if (rs1 < 0)
+            {
+                int rs2 = DateTime.Compare(localTime, Ending);
+                if (rs2 < 0)
+                {
+                    round1 = true;
+                }
+            }
+
+            //ST < ET
+            if (round1)
+            {
+                int rs3 = DateTime.Compare(Beginning, Ending);
+                if (rs3 < 0)
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
 
 
         //Get-List-Club-Activities-By-Conditions
@@ -274,50 +400,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             return result;
         }
 
-        ////Get Top 4 Club Activities depend on create time
-        //public async Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
-        //{
-        //    //
-        //    List<ViewClubActivity> result = await _clubActivityRepo.GetClubActivitiesByCreateTime(universityId, clubId);
-        //    //
-        //    return result;
-        //}
-
-        //Get Process Club Activity
-        //public async Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status)
-        //{
-        //    ClubActivity ca = await _clubActivityRepo.Get(clubActivityId);
-        //    if (ca != null)
-        //    {
-        //        //get total num of member join
-        //        int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(clubActivityId);
-        //        //get number of member done task
-        //        int NumberOfeMemberJoin_Status = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(clubActivityId, status);
-        //        //
-        //        ViewClubActivity viewClubActivity = TransformView(ca);
-
-        //        return new ViewProcessClubActivity()
-        //        {
-        //            ClubId = viewClubActivity.ClubId,
-        //            Beginning = viewClubActivity.Beginning,
-        //            Ending = viewClubActivity.Ending,
-        //            CreateTime = viewClubActivity.CreateTime,
-        //            Description = viewClubActivity.Description,
-        //            Id = viewClubActivity.Id,
-        //            Name = viewClubActivity.Name,
-        //            NumOfMember = viewClubActivity.NumOfMember,
-        //            SeedsCode = viewClubActivity.SeedsCode,
-        //            SeedsPoint = viewClubActivity.SeedsPoint,
-        //            Status = viewClubActivity.Status,
-        //            NumOfMemberJoin = NumberOfMemberJoin,
-        //            NumMemberDoingTask = NumberOfeMemberJoin_Status,
-        //        };
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
 
         //Get Process + Top 4
         public async Task<List<ViewProcessClubActivity>> GetTop4_Process(int universityId, int clubId)
@@ -334,10 +416,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(viewClubActivity.Id);
                 //get number of member doing task
                 int NumMemberDoingTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Doing);
-                //get number of member done task
-                int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.DoneOnTime);
+                //get number of member submit on time task
+                int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.SubmitOnTime);
+                //get number of member submit on late task
+                int NumMemberDoneLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.SubmitOnLate);
                 //get number of member late task
-                int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Late);
+                int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.LateTime);
+                //get number of member out task
+                int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.OutActivity);
 
                 ViewProcessClubActivity vpca = new ViewProcessClubActivity()
                 {
@@ -355,11 +441,13 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     NumOfMemberJoin = NumberOfMemberJoin,
                     NumMemberDoingTask = NumMemberDoingTask,
                     NumMemberDoneTask = NumMemberDoneTask,
+                    NumMemberDoneLateTask = NumMemberDoneLateTask,
                     NumMemberLateTask = NumMemberLateTask,
+                    NumMemberOutTask = NumMemberOutTask
                 };
                 viewProcessClubActivities.Add(vpca);
             }
-            return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : null;    
+            return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : null;
 
         }
     }

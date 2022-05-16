@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -84,8 +85,9 @@ namespace UniCEC.API.Controllers
         }
 
         //Post-Insert-City
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert city")]
+        [SwaggerOperation(Summary = "Insert city - Admin")]
         public async Task<IActionResult> InsertCity ([FromBody] CityInsertModel model)
         {
             try
@@ -100,6 +102,10 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -111,8 +117,9 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<CityController>/5
+        [Authorize(Roles = "Admin")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update city")]
+        [SwaggerOperation(Summary = "Update city - Admin")]
         public async Task<IActionResult> UpdateCity([FromBody] ViewCity city)
         {
             try
@@ -127,6 +134,14 @@ namespace UniCEC.API.Controllers
                     //Not has data
                     return Ok(new object());
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {

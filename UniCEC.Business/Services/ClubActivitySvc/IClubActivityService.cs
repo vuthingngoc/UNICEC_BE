@@ -11,15 +11,11 @@ namespace UniCEC.Business.Services.ClubActivitySvc
     public interface IClubActivityService
     {
         public Task<ViewClubActivity> GetByClubActivityId(int id);
-        public Task<ViewClubActivity> Insert(ClubActivityInsertModel clubActivity);
-        public Task<bool> Update(ClubActivityUpdateModel clubActivity);
-        public Task<bool> Delete(int id);
+        public Task<ViewClubActivity> Insert(ClubActivityInsertModel clubActivity, string token);
+        public Task<bool> Update(ClubActivityUpdateModel clubActivity, string token);
+        public Task<bool> Delete(ClubActivityDeleteModel model, string token);
         //Get List ClubActivity By Conditions
         public Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions);
-        //Get Top 4 club activity dựa trên ngày gần với hiện tại
-        //public Task<List<ViewClubActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
-        //Get Process club Activity by clubActivity
-        //public Task<ViewProcessClubActivity> GetProcessClubActivity(int clubActivityId, MemberTakesActivityStatus status);
 
         public Task<List<ViewProcessClubActivity>> GetTop4_Process(int universityId, int clubId);
 
