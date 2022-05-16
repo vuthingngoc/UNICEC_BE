@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -28,37 +29,7 @@ namespace UniCEC.API.Controllers
         }
 
 
-        //[HttpGet("process-club-activity")]
-        //[SwaggerOperation(Summary = "Get process of club activity by Id ,  0.HappenningSoon, 1.Happenning , 2.Ending , 3.Canceling , 4.Eror")]
-        //public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="clubActivityId")] int ClubActivityId , [FromQuery(Name ="status")] MemberTakesActivityStatus status)
-        //{
-        //    try
-        //    {
-        //        ViewProcessClubActivity result = await _clubActivityService.GetProcessClubActivity(ClubActivityId,status);
-
-        //        if (result != null)
-        //        {
-
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            //Not has data
-        //            return Ok(new object());
-        //        }
-        //    }
-        //    catch (NullReferenceException e)
-        //    {
-        //        return NotFound(e.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-
-        //}
-
-
+    
         [HttpGet("top4-process")]
         [SwaggerOperation(Summary = "Get top 4 club activities by now and process")]
         //Lưu ý University Id dựa vào JWT
@@ -90,37 +61,6 @@ namespace UniCEC.API.Controllers
 
         }
 
-
-        //[HttpGet("top4")]
-        //[SwaggerOperation(Summary = "Get top 4 club activities by now")]
-        ////Lưu ý University Id dựa vào JWT
-        //public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery(Name ="universityId")] int UniversityId, [FromQuery(Name ="clubId")] int ClubId)
-        //{
-        //    try
-        //    {
-        //        List<ViewClubActivity> result = await _clubActivityService.GetClubActivitiesByCreateTime(UniversityId, ClubId);
-
-        //        if (result != null)
-        //        {
-
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            //Not has data
-        //            return Ok(new List<object>());
-        //        }
-        //    }
-        //    catch (NullReferenceException e)
-        //    {
-        //        return NotFound(e.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-
-        //}
 
 
         [HttpGet]
@@ -183,14 +123,18 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<ClubActivityController>
+        [Authorize(Roles = "Student")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert ClubActivity")]
+        [SwaggerOperation(Summary = "Insert ClubActivity - Student(Leader of club)")]
         public async Task<IActionResult> InsertClubActivity([FromBody] ClubActivityInsertModel model)
         {
             try
             {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewClubActivity result = await _clubActivityService.Insert(model);
+                ViewClubActivity result = await _clubActivityService.Insert(model, token);
                 if (result != null)
                 {
 
@@ -200,6 +144,18 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (DbUpdateException)
             {
@@ -213,14 +169,19 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<ClubActivityController>/5
+        [Authorize(Roles = "Student")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update ClubActivity by Id")]
+        [SwaggerOperation(Summary = "Update ClubActivity by Id - Student(Leader of club)")]
         public async Task<IActionResult> UpdateClubActivity([FromBody] ClubActivityUpdateModel model)
         {
             try
             {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
                 Boolean check = false;
-                check = await _clubActivityService.Update(model);
+                check = await _clubActivityService.Update(model, token);
                 if (check)
                 {
                     return Ok();
@@ -229,6 +190,14 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (DbUpdateException)
             {
@@ -241,14 +210,19 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<ClubActivityController>/5
-        [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete ClubActivity by id")]
-        public async Task<IActionResult> DeleteClubAcitvityById(int id)
+        [Authorize(Roles = "Student")]
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete ClubActivity by id - Student(Leader of club) ")]
+        public async Task<IActionResult> DeleteClubAcitvityById([FromBody] ClubActivityDeleteModel model)
         {
             try
             {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
                 bool result = false;
-                result = await _clubActivityService.Delete(id);
+                result = await _clubActivityService.Delete(model, token);
                 if (result)
                 {
                     return Ok();
@@ -257,6 +231,18 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
             }
             catch (SqlException)
             {

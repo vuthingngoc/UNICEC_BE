@@ -54,6 +54,22 @@ namespace UniCEC.Business.Services.UniversitySvc
 
             try
             {
+
+                if (universityModel.CityId == 0
+                    || string.IsNullOrEmpty(universityModel.UniCode)
+                    || string.IsNullOrEmpty(universityModel.Name)
+                    || string.IsNullOrEmpty(universityModel.Description)
+                    || string.IsNullOrEmpty(universityModel.Phone)
+                    || string.IsNullOrEmpty(universityModel.Email)
+                    || universityModel.Founding == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || string.IsNullOrEmpty(universityModel.Openning)
+                    || string.IsNullOrEmpty(universityModel.Closing)
+                    )
+                    throw new ArgumentNullException("CityId Null || UniCode Null || Name Null || Description Null || Phone Null " +
+                                                     " Email Null  || Founding Null || Openning Null ||  Closing Null ");
+
+
+
                 University uni = new University();
 
                 uni.CityId = universityModel.CityId;
@@ -103,21 +119,27 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             try
             {
+                if (university.Id == 0) throw new ArgumentNullException("University Id Null");
                 //get Uni
                 University uni = await _universityRepo.Get(university.Id);
                 bool check = false;
                 if (uni != null)
                 {
-                    //update name-des-phone-opening-closing-founding-cityId
-                    uni.Name = (!university.Name.Equals("")) ? university.Name : uni.Name;
-                    uni.Description = (!university.Description.Equals("")) ? university.Description : uni.Description;
-                    uni.Phone = (!university.Phone.Equals("")) ? university.Phone : uni.Phone;
-                    uni.Openning = (!university.Openning.Equals("")) ? university.Openning : uni.Openning;
-                    uni.Closing = (!university.Closing.Equals("")) ? university.Closing : uni.Closing;
-                    uni.CityId = (!university.CityId.Equals("")) ? university.CityId : uni.CityId;
+                    //update name-des-phone-opening-closing-founding-cityId-unicode
+                    uni.Name = (university.Name.Length > 0) ? university.Name : uni.Name;
+                    uni.Description = (university.Description.Length > 0) ? university.Description : uni.Description;
+                    uni.Phone = (university.Phone.Length > 0) ? university.Phone : uni.Phone;
+                    uni.Openning = (university.Openning.Length > 0) ? university.Openning : uni.Openning;
+                    uni.Closing = (university.Closing.Length > 0) ? university.Closing : uni.Closing;
+                    uni.CityId = (university.CityId != 0) ? university.CityId : uni.CityId;
+                    uni.UniCode = (university.UniCode.Length > 0) ? university.UniCode : uni.UniCode;
                     uni.Status = university.Status;
                     await _universityRepo.Update();
                     return true;
+                }
+                else
+                {
+                    throw new ArgumentException("University not found to update");
                 }
                 return check;
             }
@@ -133,6 +155,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             try
             {
+
                 University university = await _universityRepo.Get(id);
                 if (university != null)
                 {
@@ -140,6 +163,10 @@ namespace UniCEC.Business.Services.UniversitySvc
                     university.Status = false;
                     await _universityRepo.Update();
                     return true;
+                }
+                else
+                {
+                    throw new ArgumentException("University not found to update");
                 }
                 return false;
             }

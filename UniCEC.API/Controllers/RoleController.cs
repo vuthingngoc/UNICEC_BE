@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -89,6 +90,7 @@ namespace UniCEC.API.Controllers
         }
 
         //InsertRoleModel
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [SwaggerOperation(Summary = "Insert role")]
         public async Task<IActionResult> InsertRoleId([FromBody] RoleInsertModel model)
@@ -105,6 +107,10 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {
@@ -133,6 +139,14 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (DbUpdateException)
             {

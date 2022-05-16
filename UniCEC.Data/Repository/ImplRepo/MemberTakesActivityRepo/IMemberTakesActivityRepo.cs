@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
@@ -20,5 +21,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         //Get number of member in task with status
         public Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status);
 
+        //Update DeadLine Date 
+        public Task<bool> UpdateDeadlineDate(int ClubActivityId, DateTime deadline);
     }
 }

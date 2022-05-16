@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,6 +16,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/university")]
     [ApiController]
     [ApiVersion("1.0")]
+   
     public class UniversityController : ControllerBase
     {
         // GET: api/<UniversityController>
@@ -89,8 +91,9 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<UniversityController>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert university")]
+        [SwaggerOperation(Summary = "Insert university - Admin")]
         public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
             try
@@ -107,6 +110,10 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -119,8 +126,9 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<UniversityController>/5
+        [Authorize(Roles = "Admin")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update university")]
+        [SwaggerOperation(Summary = "Update university - Admin")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
             try {
@@ -134,6 +142,14 @@ namespace UniCEC.API.Controllers
                    return BadRequest();
                 }
             }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -145,8 +161,9 @@ namespace UniCEC.API.Controllers
         }
 
         // DELETE api/<UniversityController>/5
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete university")]
+        [SwaggerOperation(Summary = "Delete university - Admin")]
         public async Task<IActionResult> DeleteUniversityById(int id)
         {
             try
@@ -160,6 +177,10 @@ namespace UniCEC.API.Controllers
                 else {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (SqlException)
             {

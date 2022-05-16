@@ -70,9 +70,13 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         public async Task<ViewMemberTakesActivity> Insert(MemberTakesActivityInsertModel model)
         {
-
             try
             {
+                if (model.MemberId == 0
+                    || model.ClubActivityId == 0
+                    || model.TermId == 0)
+                    throw new ArgumentNullException("MemberId Null || ClubActivityId Null || TermId Null");
+              
                 //
                 DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
                 ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
@@ -102,7 +106,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         bool checkStatusClubActivity = await CheckStatusClubActivity(model.ClubActivityId);
                         if (checkStatusClubActivity)
                         {
-
                             //LocalTime
                             DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
@@ -131,22 +134,22 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                             }
                             else
                             {
-                                return null;
+                                throw new ArgumentException("Eror when insert");
                             }
                         } // end if checkStatusClubActivity
                         else
                         {
-                            return null;
+                            throw new ArgumentException("This task is Ending");
                         }
                     }// end if MemTakesTask
                     else
                     {
-                        return null;
+                        throw new ArgumentException("You are already in this task");
                     }
                 }// end if MemInClub_Term && NumOfMem_InTask
                 else
                 {
-                    return null;
+                    throw new UnauthorizedAccessException("You aren't member in Club");
                 }
             }
             catch (Exception)
@@ -172,25 +175,25 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     if (result < 0)
                     {
                         //date end time
-                        mta.EndTime = DateTime.Now;
+                        mta.EndTime = localTime.DateTime;
                         //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.DoneOnTime;
+                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnTime;
                     }
                     //2. on time
                     if (result == 0)
                     {
                         //date end time
-                        mta.EndTime = DateTime.Now;
+                        mta.EndTime = localTime.DateTime;
                         //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.DoneOnTime;
+                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnTime;
                     }
                     //3. late
                     if (result > 0)
                     {
                         //date end time
-                        mta.EndTime = DateTime.Now;
+                        mta.EndTime = localTime.DateTime;
                         //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.Late;
+                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnLate;
                     }
                     await _memberTakesActivityRepo.Update();
                     return true;
