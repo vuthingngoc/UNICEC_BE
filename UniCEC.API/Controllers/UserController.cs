@@ -4,10 +4,12 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.UserSvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -20,6 +22,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/user")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private IUserService _userService;
@@ -33,17 +36,19 @@ namespace UniCEC.API.Controllers
             _majorService = majorService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllUser([FromQuery] PagingRequest request)
+        [HttpGet("university/{id}")]
+        [SwaggerOperation(Summary = "Get users by universityId")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUsersByUniversity(int id, UserStatus status, [FromQuery] PagingRequest request)
         {
             try
             {
-                PagingResult<ViewUser> users = await _userService.GetAllPaging(request);
+                PagingResult<ViewUser> users = await _userService.GetByUniversity(id, status, request);
                 return Ok(users);
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -52,6 +57,8 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
+        [SwaggerOperation(Summary = "Search user")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUserByCondition([FromQuery] UserRequestModel request)
         {
             try
@@ -59,9 +66,9 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewUser> users = await _userService.GetUserCondition(request);
                 return Ok(users);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return NotFound(ex.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {
@@ -71,6 +78,8 @@ namespace UniCEC.API.Controllers
 
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Insert user")]
+        [AllowAnonymous]
         public async Task<IActionResult> InsertUser([FromBody] UserInsertModel request)
         {
             try
@@ -99,6 +108,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
+        [SwaggerOperation(Summary = "Update user")]
         public async Task<IActionResult> UpdateUser([FromBody] ViewUser request)
         {
             try
@@ -155,7 +165,7 @@ namespace UniCEC.API.Controllers
                 if (result)
                 {
                     //get ViewUser
-                    ViewUser user = await _userService.GetUserByUserId(request.UserCode);
+                    ViewUser user = await _userService.GetUserByUserCode(request.UserCode);
                     //get RoleName
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     string roleName = role.RoleName;
@@ -191,6 +201,8 @@ namespace UniCEC.API.Controllers
 
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete user")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
