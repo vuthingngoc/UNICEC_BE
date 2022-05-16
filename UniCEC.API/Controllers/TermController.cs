@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -22,9 +23,9 @@ namespace UniCEC.API.Controllers
             _itermService = termService;
         }
 
-        [HttpGet("{id}/club/{club-id}")]
+        [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get term corresponding in a club")]
-        public async Task<IActionResult> GetTermById(int id, [FromRoute(Name = "club-id")] int clubId)
+        public async Task<IActionResult> GetTermById(int id, [FromQuery, BindRequired] int clubId)
         {
             try
             {

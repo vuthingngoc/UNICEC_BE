@@ -24,52 +24,45 @@ namespace UniCEC.Business.Services.UserSvc
             return new ViewUser()
             {
                 Id = user.Id,
-                Description = user.Description,
-                Dob = user.Dob,
+                RoleId = user.RoleId,
+                SponsorId = user.SponsorId.Value,
+                UniversityId = user.UniversityId,
+                MajorId = user.MajorId,
+                Fullname = user.Fullname,
+                UserCode = user.UserCode,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Avatar = user.Avatar,
-                Fullname = user.Fullname,
                 Gender = user.Gender,
-                MajorId = user.MajorId,
-                RoleId = user.RoleId,
-                UniversityId = user.UniversityId,
-                UserCode = user.UserCode,
-                Status = user.Status
+                Dob = user.Dob,
+                Description = user.Description,
+                Avatar = user.Avatar,
+                Status = user.Status,
+                IsOnline = user.IsOnline
             };
         }
 
-        public async Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request)
+        // for admin
+        public async Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request)
         {
-            PagingResult<User> users = await _userRepo.GetAllPaging(request);
-            if (users != null)
-            {
-                List<ViewUser> listViewUser = new List<ViewUser>();
-                users.Items.ForEach(e =>
-                {
-                    ViewUser viewUser = TransformViewModel(e);
-                    listViewUser.Add(viewUser);
-                });
-
-                return new PagingResult<ViewUser>(listViewUser, users.TotalCount, users.CurrentPage, users.PageSize);
-            }
-
-            throw new NullReferenceException("Not Found");
+            PagingResult<ViewUser> users = await _userRepo.GetUserByUniversity(universityId, status, request);
+            if(users == null) throw new NullReferenceException("Not Found");
+            return users;
         }
 
-        public async Task<ViewUser> GetUserByUserId(string userId)
+        // firebase
+        public async Task<ViewUser> GetUserByUserCode(string userCode)
         {
-            User user = await _userRepo.GetByUserId(userId);
-            if (user == null) throw new NullReferenceException("Not Found");
-            return TransformViewModel(user);
+            ViewUser user = await _userRepo.GetByUserCode(userCode);
+            if (user == null) throw new NullReferenceException("Not Found this user");
+            return user;
         }
 
         public async Task<ViewUser> GetUserByEmail(string email)
         {
-            User user = await _userRepo.GetByEmail(email);
+            ViewUser user = await _userRepo.GetByEmail(email);
             if (user != null)
             {
-                return TransformViewModel(user);
+                return user;
 
             }
             else
@@ -102,15 +95,15 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request)
         {
-            PagingResult<User> users = await _userRepo.GetByCondition(request);
+            PagingResult<ViewUser> users = await _userRepo.GetByCondition(request);
             if (users.Items == null) throw new NullReferenceException("Not Found");
 
             List<ViewUser> items = new List<ViewUser>();
-            users.Items.ForEach(u =>
-            {
-                ViewUser user = TransformViewModel(u);
-                items.Add(user);
-            });
+            //users.Items.ForEach(u =>
+            //{
+            //    ViewUser user = TransformViewModel(u);
+            //    items.Add(user);
+            //});
 
             return new PagingResult<ViewUser>(items, users.TotalCount, users.CurrentPage, users.PageSize);
         }
@@ -204,7 +197,7 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<bool> CheckUserEmailExsit(string email_user)
         {
             bool check = false;
-            User user = await _userRepo.GetByEmail(email_user);
+            ViewUser user = await _userRepo.GetByEmail(email_user);
             if (user != null)
             {
                 check = true;

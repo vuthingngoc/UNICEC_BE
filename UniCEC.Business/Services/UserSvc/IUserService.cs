@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.User;
@@ -7,8 +8,8 @@ namespace UniCEC.Business.Services.UserSvc
 {
     public interface IUserService
     {
-        public Task<PagingResult<ViewUser>> GetAllPaging(PagingRequest request);
-        public Task<ViewUser> GetUserByUserId(string userId);
+        public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
+        public Task<ViewUser> GetUserByUserCode(string userCode);
         public Task<ViewUser> GetUserByEmail(string email);
         public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
         public Task<ViewUser> Insert(UserInsertModel user);
