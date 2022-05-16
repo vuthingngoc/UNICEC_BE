@@ -19,7 +19,7 @@ namespace UniCEC.Data.JWT
             
         }
 
-        public static string GenerateJWTTokenStudent(ViewUser user, string roleName, string majorName)
+        public static string GenerateJWTTokenStudent(ViewUser user, string roleName)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
                 issuer: "https://securetoken.google.com/unics-e46a4",
@@ -28,22 +28,10 @@ namespace UniCEC.Data.JWT
                  //---------- STUDENT INFOMATION
                  //Id
                  new Claim("Id", user.Id.ToString()),
-                 //email
-                 new Claim("Email", user.Email),
-                 //phone
-                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
-                 //Major-id
-                 new Claim("MajorId", user.MajorId.ToString()),
-                 //Major-Name
-                 new Claim("MajorName", majorName),
                  //University
                  new Claim("UniversityId", user.UniversityId.ToString()),
-                 //UserId(MSSV)
-                 new Claim("UserCode", user.UserCode),
-                 //Dob
-                 new Claim("DOB", user.Dob),
                  //Avatar
                  new Claim("Avatar", user.Avatar),
                  //Role Id
@@ -62,7 +50,7 @@ namespace UniCEC.Data.JWT
 
 
 
-        public static string GenerateJWTTokenSponsor(ViewUser user, string roleName, string sponsorId, string sponsorName)
+        public static string GenerateJWTTokenSponsor(ViewUser user, string roleName, string sponsorId)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
                 issuer: "https://securetoken.google.com/unics-e46a4",
@@ -70,20 +58,12 @@ namespace UniCEC.Data.JWT
                 claims: new[] {
                  //Id
                  new Claim("Id", user.Id.ToString()),
-                 //email
-                 new Claim("Email", user.Email),
-                 //phone
-                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
-                 //Dob
-                 new Claim("DOB", user.Dob),
                  //Avatar
                  new Claim ("Avatar", user.Avatar),
                  //SponsorId
                  new Claim ("SponsorId", sponsorId),
-                 //SponsorName
-                 new Claim ("SponsorName", sponsorName),
                  //Role Id
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role
@@ -107,14 +87,8 @@ namespace UniCEC.Data.JWT
                 claims: new[] {
                  //Id
                  new Claim("Id", user.Id.ToString()),
-                 //email
-                 new Claim("Email", user.Email),
-                 //phone
-                 new Claim("PhoneNumber", user.PhoneNumber),
                  //fullname
                  new Claim("Fullname", user.Fullname),
-                 //Dob
-                 new Claim("DOB", user.Dob),
                  //Avatar
                  new Claim ("Avatar", user.Avatar),
                  //Role Id
@@ -146,10 +120,6 @@ namespace UniCEC.Data.JWT
                  new Claim("Fullname", user.Fullname),
                  //University
                  new Claim("UniversityId", user.UniversityId.ToString()),
-                 //email
-                 new Claim("Email", user.Email),
-                 //phone
-                 new Claim("PhoneNumber", user.PhoneNumber),
                  //Avatar
                  new Claim ("Avatar", user.Avatar),
                  //Role Id
@@ -165,8 +135,5 @@ namespace UniCEC.Data.JWT
                 ); ; ;
             return new JwtSecurityTokenHandler().WriteToken(tokenUser);
         }
-
-
-
     }
 }

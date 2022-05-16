@@ -13,7 +13,6 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.User;
 
@@ -27,13 +26,30 @@ namespace UniCEC.API.Controllers
     {
         private IUserService _userService;
         private IRoleService _roleService;
-        private IMajorService _majorService;
 
-        public UserController(IUserService userService, IRoleService roleService, IMajorService majorService)
+        public UserController(IUserService userService, IRoleService roleService)
         {
             _userService = userService;
             _roleService = roleService;
-            _majorService = majorService;
+        }
+
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get user by id")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            try
+            {
+                ViewUser users = await _userService.GetUserById(id);
+                return Ok(users);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpGet("university/{id}")]
@@ -169,10 +185,7 @@ namespace UniCEC.API.Controllers
                     //get RoleName
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     string roleName = role.RoleName;
-                    //get MajorName
-                    ViewMajor major = await _majorService.GetMajorById((int)request.MajorId);
-                    string majorName = major.Name;
-                    string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName, majorName);
+                    string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName);
                     return Ok(clientTokenUser);
                 }
                 else

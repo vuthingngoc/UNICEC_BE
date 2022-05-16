@@ -8,6 +8,7 @@ namespace UniCEC.Business.Services.UserSvc
 {
     public interface IUserService
     {
+        public Task<ViewUser> GetUserById(int id);
         public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
         public Task<ViewUser> GetUserByUserCode(string userCode);
         public Task<ViewUser> GetUserByEmail(string email);
