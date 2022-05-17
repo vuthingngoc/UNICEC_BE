@@ -8,7 +8,7 @@ namespace UniCEC.Business.Services.SponsorInCompetitionSvc
     {
         public Task<PagingResult<ViewSponsorInCompetition>> GetAllPaging(PagingRequest request);
         public Task<ViewSponsorInCompetition> GetBySponsorInCompetitionId(int id);
-        public Task<ViewSponsorInCompetition> Insert(SponsorInCompetitionInsertModel sponsorInCompetition);
+        public Task<ViewSponsorInCompetition> Insert(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
         public Task<bool> Update(ViewSponsorInCompetition sponsorInCompetition);
         public Task<bool> Delete(int id);
     }

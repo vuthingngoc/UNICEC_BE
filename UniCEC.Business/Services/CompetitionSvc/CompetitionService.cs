@@ -8,7 +8,10 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
+using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -26,17 +29,28 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionInClubRepo _competitionInClubRepo;
         // check Sponsor create Competition- Insert
         private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
-
+        // Insert Department in Competition
+        private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
+        //
+        private IDepartmentInUniversityRepo _departmentInUniversityRepo;
+        //
+        private IDepartmentRepo _departmentRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
-                                  ISponsorInCompetitionRepo sponsorInCompetitionRepo)
+                                  ISponsorInCompetitionRepo sponsorInCompetitionRepo,
+                                  ICompetitionInDepartmentRepo competitionInDepartmentRepo,
+                                  IDepartmentInUniversityRepo departmentInUniversityRepo,
+                                  IDepartmentRepo departmentRepo)
         {
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
+            _competitionInDepartmentRepo = competitionInDepartmentRepo;
+            _departmentInUniversityRepo = departmentInUniversityRepo;
+            _departmentRepo = departmentRepo;
         }
 
 
@@ -89,14 +103,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
                 var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+
                 int UserId = Int32.Parse(UserIdClaim.Value);
+                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+
                 bool roleLeader = false;
 
 
                 if (string.IsNullOrEmpty(model.Name)
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
-                    || model.NumberOfTeam == 0
+                    || model.NumberOfTeam < 0
                     || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
@@ -106,7 +124,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.ClubId == 0
                     || model.TermId == 0)
                     throw new ArgumentNullException("Name Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
-                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
+                                                    " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
 
 
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
@@ -124,75 +142,103 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         roleLeader = true;
                     }
-                }
-                if (roleLeader)
-                {
-                    //------------ Check Date
-                    bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
-                    if (checkDate)
-                    {
-                        //------------ Insert Competition
-                        //ở trong trường hợp này phân biệt EVENT - COMPETITION
-                        //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-                        Competition competition = new Competition();
-                        competition.CompetitionTypeId = model.CompetitionTypeId;
-                        competition.Address = model.Address;
-                        competition.Name = model.Name;
-                        // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-                        competition.NumberOfTeam = model.NumberOfTeam;
-                        competition.NumberOfParticipation = model.NumberOfParticipations;
-                        competition.StartTime = model.StartTime;
-                        competition.EndTime = model.EndTime;
-                        competition.StartTimeRegister = model.StartTimeRegister;
-                        competition.EndTimeRegister = model.EndTimeRegister;
-                        competition.SeedsPoint = model.SeedsPoint;
-                        competition.SeedsDeposited = model.SeedsDeposited;
-                        competition.SeedsCode = await checkExistCode();
-                        //nếu là leader -> IsSponsor == false
-                        competition.IsSponsor = false;
-                        //auto status = NotAssigned 
-                        //-> tạo thành công nhưng chưa đc assigned cho 1 or các clb
-                        competition.Status = CompetitionStatus.NotAssigned;
-                        competition.Public = model.Public;
-                        //auto = 0
-                        competition.View = 0;
-                        int competition_Id = await _competitionRepo.Insert(competition);
-                        if (competition_Id > 0)
-                        {
-                            Competition comp = await _competitionRepo.Get(competition_Id);
 
-                            //------------ Insert Competition-In-Club
-                            CompetitionInClub competitionInClub = new CompetitionInClub();
-                            competitionInClub.ClubId = model.ClubId;
-                            competitionInClub.CompetitionId = competition_Id;
-                            int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
-                            if (compInClub_Id > 0)
+                    if (roleLeader)
+                    {
+                        //------------ Check Date
+                        bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
+                        if (checkDate)
+                        {
+                            //------------ Insert Competition
+                            //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                            //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                            Competition competition = new Competition();
+                            competition.CompetitionTypeId = model.CompetitionTypeId;
+                            competition.Address = model.Address;
+                            competition.Name = model.Name;
+                            // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                            competition.NumberOfTeam = model.NumberOfTeam;
+                            competition.NumberOfParticipation = model.NumberOfParticipations;
+                            competition.StartTime = model.StartTime;
+                            competition.EndTime = model.EndTime;
+                            competition.StartTimeRegister = model.StartTimeRegister;
+                            competition.EndTimeRegister = model.EndTimeRegister;
+                            competition.SeedsPoint = model.SeedsPoint;
+                            competition.SeedsDeposited = model.SeedsDeposited;
+                            competition.SeedsCode = await CheckExistCode();
+                            //nếu là leader -> IsSponsor == false
+                            competition.IsSponsor = false;
+                            //auto status = NotAssigned 
+                            //-> tạo thành công nhưng chưa đc assigned cho 1 or các clb
+                            competition.Status = CompetitionStatus.NotAssigned;
+                            competition.Public = model.Public;
+                            //auto = 0
+                            competition.View = 0;
+                            int competition_Id = await _competitionRepo.Insert(competition);
+                            if (competition_Id > 0)
                             {
-                                //---------Update Status Competition
-                                Competition comp_Update = await _competitionRepo.Get(competition_Id);
-                                comp_Update.Status = CompetitionStatus.Launching;
-                                await _competitionRepo.Update();
-                                ViewCompetition viewCompetition = TransformViewModel(comp);
-                                return viewCompetition;
-                            }
+                                Competition comp = await _competitionRepo.Get(competition_Id);
+
+                                //------------ Insert Competition-In-Department -----------(OPTIONAL)
+                                if (model.ListDepartmentId.Count > 0)
+                                {
+                                    bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
+                                    if (departmentBelongToUni)
+                                    {
+                                        foreach (int dep_id in model.ListDepartmentId)
+                                        {
+                                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                            {
+                                                DepartmentId = dep_id,
+                                                CompetitionId = competition_Id
+                                            };
+                                            await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                                        }
+                                    }// end if CheckDepartmentId
+                                    else
+                                    {
+                                        throw new ArgumentException("Department Id not have in University");
+                                    }
+                                }
+                                //------------ Insert Competition-In-Club
+                                CompetitionInClub competitionInClub = new CompetitionInClub();
+                                competitionInClub.ClubId = model.ClubId;
+                                competitionInClub.CompetitionId = competition_Id;
+                                int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
+
+                                if (compInClub_Id > 0)
+                                {
+                                    //---------Update Status Competition
+                                    Competition comp_Update = await _competitionRepo.Get(competition_Id);
+                                    comp_Update.Status = CompetitionStatus.Launching;
+                                    await _competitionRepo.Update();
+                                    ViewCompetition viewCompetition = TransformViewModel(comp);
+                                    return viewCompetition;
+
+                                }//end compInClub_Id > 0
+                                else
+                                {
+                                    throw new ArgumentException("Add Competition Or Event Failed");
+                                }
+                            }//end if competition_Id > 0
                             else
                             {
-                                return null;
-                            }//end compInClub_Id > 0
-                        }//end if competition_Id > 0
+                                throw new ArgumentException("Add Competition Or Event Failed");
+                            }
+                        }//end if check date
                         else
                         {
-                            return null;
+                            throw new ArgumentException("Date not suitable");
                         }
-                    }//end if check date
+                    }//end if role leader
                     else
                     {
-                        throw new ArgumentException("Date not suitable");
+                        throw new UnauthorizedAccessException("You do not a role Leader to insert this Competititon");
                     }
-                }//end if role leader
+                }//end check member
                 else
                 {
-                    throw new UnauthorizedAccessException("You do not a role Leader to insert this Competititon");
+                    throw new UnauthorizedAccessException("You aren't member in Club");
                 }
             }
             catch (Exception)
@@ -214,7 +260,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (string.IsNullOrEmpty(model.Name)
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
-                    || model.NumberOfTeam == 0
+                    || model.NumberOfTeam < 0
                     || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
@@ -223,8 +269,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.SeedsDeposited == 0)
                     throw new ArgumentNullException("Name Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
                                                      " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null ");
-
-
 
                 //------------ Check Date
                 bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
@@ -245,24 +289,47 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     competition.EndTimeRegister = model.EndTimeRegister;
                     competition.SeedsPoint = model.SeedsPoint;
                     competition.SeedsDeposited = model.SeedsDeposited;
-                    competition.SeedsCode = await checkExistCode();
+                    competition.SeedsCode = await CheckExistCode();
                     competition.IsSponsor = true;
                     //auto status = NotAssigned 
                     //-> tạo thành công nhưng chưa đc assigned cho 1 Sponsor or các Sponsor
                     competition.Status = CompetitionStatus.NotAssigned;
-                    competition.Public = model.Public;
+                    //auto true
+                    competition.Public = true;
                     //auto = 0
                     competition.View = 0;
                     int competition_Id = await _competitionRepo.Insert(competition);
                     if (competition_Id > 0)
                     {
                         Competition comp = await _competitionRepo.Get(competition_Id);
-                        //------------ Sponsor-In-Competition
+
+                        //------------ Competition-In-Department -----------(OPTIONAL)
+                        if (model.ListDepartmentId.Count > 0)
+                        {
+                            bool departmentInSystem = await CheckDepartmentId(model.ListDepartmentId);
+                            if (departmentInSystem)
+                            {
+                                foreach (int dep_id in model.ListDepartmentId)
+                                {
+                                    CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                    {
+                                        DepartmentId = dep_id,
+                                        CompetitionId = comp.Id
+                                    };
+                                    await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                                }
+                            }// end if CheckDepartmentId
+                            else
+                            {
+                                throw new ArgumentException("Department Id not have in System");
+                            }
+                        }
+                        //------------ Sponsor-In-Competition -----------
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
                         sponsorInCompetition.SponsorId = SponsorId;
                         sponsorInCompetition.CompetitionId = competition_Id;
-
                         int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+
                         if (spoInCom_Id > 0)
                         {
                             //---------Update Status Competition
@@ -271,15 +338,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             await _competitionRepo.Update();
                             ViewCompetition viewCompetition = TransformViewModel(comp);
                             return viewCompetition;
-                        }
+                        }//end if spoInCom_Id > 0
                         else
                         {
-                            return null;
-                        }//end if spoInCom_Id > 0
+                            throw new ArgumentException("Add Competition Or Event Failed");
+                        }
                     }//end if competition_Id > 0
                     else
                     {
-                        return null;
+                        throw new ArgumentException("Add Competition Or Event Failed");
                     }
                 }//end if check date
                 else
@@ -334,64 +401,67 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         {
                             roleLeader = true;
                         }
-                    }
-                    if (roleLeader)
-                    {
-                        //check date
-                        bool checkDate = false;
 
-                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                        //------------ Check Date Update
-                        //TH1 STR
-                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        if (roleLeader)
                         {
-                            checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH2 ETR
-                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH3 ST
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
-                        }
+                            //check date
+                            bool checkDate = false;
+                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                            //------------ Check Date Update
+                            //TH1 STR
+                            if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                            {
+                                checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                            }
+                            //TH2 ETR
+                            if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                            {
+                                checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                            }
+                            //TH3 ST
+                            if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                            {
+                                checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
+                            }
+                            //TH4 ET
+                            if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                            {
+                                checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
+                            }
+                            //TH5 new STR ETR ST ET
+                            if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                            {
+                                checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
+                            }
 
-                        //TH4 ET
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
-                        }
-                        //TH5 new STR ETR ST ET
-                        if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
-                        }
+                            if (checkDate)
+                            {
 
-                        if (checkDate)
-                        {
-
-                            comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
-                            comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
-                            comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
-                            comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
-                            comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                            comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                            comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                            comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-                            //
-                            await _competitionRepo.Update();
-                            return true;
-                        }//end check date
+                                comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
+                                comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
+                                comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
+                                comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
+                                comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                                comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                                comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                                comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                                //
+                                await _competitionRepo.Update();
+                                return true;
+                            }//end check date
+                            else
+                            {
+                                throw new ArgumentException("Date not suitable");
+                            }
+                        }//end check leader 
                         else
                         {
-                            throw new ArgumentException("Date not suitable");
+                            throw new UnauthorizedAccessException("You do not a role Leader to update this Competition");
                         }
-                    }//end check leader 
+                    }//end check member
                     else
                     {
-                        throw new UnauthorizedAccessException("You do not a role Leader to update this Competition");
+                        throw new UnauthorizedAccessException("You aren't member in Club");
                     }
                 }// competition is not created
                 else
@@ -504,9 +574,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (model.CompetitionId == 0
                     || model.ClubId == 0
                     || model.TermId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null" +
-                                                     " ClubId Null || TermId Null ");
-
+                    throw new ArgumentNullException(" Competition Id Null || ClubId Null || TermId Null ");
 
                 //------------ Check Club Has Create Competition
                 if (CompOrEventNotCreated == false)
@@ -526,26 +594,31 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         {
                             roleLeader = true;
                         }
-                    }
-                    if (roleLeader)
-                    {
-                        //
-                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                        if (comp != null)
+
+                        if (roleLeader)
                         {
-                            comp.Status = CompetitionStatus.Canceling;
                             //
-                            await _competitionRepo.Update();
-                            return true;
-                        }//end if comp != null
+                            Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                            if (comp != null)
+                            {
+                                comp.Status = CompetitionStatus.Canceling;
+                                //
+                                await _competitionRepo.Update();
+                                return true;
+                            }//end if comp != null
+                            else
+                            {
+                                return false;
+                            }
+                        }//end check role leader
                         else
                         {
-                            return false;
+                            throw new UnauthorizedAccessException("You do not a role Leader to Delete this Competition");
                         }
-                    }//end check role leader
+                    }// check member
                     else
                     {
-                        throw new UnauthorizedAccessException("You do not a role Leader to Delete this Competition");
+                        throw new UnauthorizedAccessException("You aren't member in Club");
                     }
                 }//end clubHasCreateCompetition
                 else
@@ -632,7 +705,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //generate Seed code length 10
-        private string generateSeedCode()
+        private string GenerateSeedCode()
         {
             string codePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             char[] chars = new char[10];
@@ -647,19 +720,35 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //check exist code
-        private async Task<string> checkExistCode()
+        private async Task<string> CheckExistCode()
         {
             //auto generate seedCode
             bool check = true;
             string seedCode = "";
             while (check)
             {
-                string generateCode = generateSeedCode();
+                string generateCode = GenerateSeedCode();
                 check = await _competitionRepo.CheckExistCode(generateCode);
                 seedCode = generateCode;
             }
             return seedCode;
         }
+
+        //Check exist Department Id Belong To University - Leader
+        private async Task<bool> CheckDepartmentId(List<int> listDepartmentId, int universityId)
+        {
+            //
+            bool result = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, universityId);
+            return result;
+        }
+
+        //Check exist Department id in System
+        private async Task<bool> CheckDepartmentId(List<int> listDepartmentId)
+        {
+            bool result = await _departmentRepo.checkDepartment(listDepartmentId);
+            return result;
+        }
+
 
         //Check Date Insert - Update
         private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime, bool Update)
@@ -706,7 +795,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }
                 }
             }
-           
+
             //ROUND 2
             if (round1)
             {

@@ -24,12 +24,17 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime EndTime { get; set; }
-        public bool Public { get; set; }
+        //public bool Public { get; set; }
         public string Address { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
+        
+        //---------List DepartmentID 
+        //this field can be null
+        [JsonPropertyName("list_department_id")]
+        public List<int>? ListDepartmentId { get; set; }
 
     }
 }

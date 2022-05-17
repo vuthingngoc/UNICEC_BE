@@ -47,5 +47,23 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             ).ToListAsync();
             return (departments.Count > 0) ? new PagingResult<Department>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
         }
+
+        //
+        public async Task<bool> checkDepartment(List<int> listDepartmentId)
+        {
+            bool result = true;
+            foreach (int DepId in listDepartmentId)
+            {
+                var query = await(from dep in context.Departments
+                                  where dep.Id == DepId 
+                                  select dep).FirstOrDefaultAsync();
+
+                if (query == null)
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
     }
 }
