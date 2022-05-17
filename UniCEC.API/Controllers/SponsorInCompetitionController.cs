@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.SponsorInCompetitionSvc;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
@@ -25,40 +27,52 @@ namespace UniCEC.API.Controllers
 
 
         //// GET api/<SponsorInCompetitionController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<SponsorInCompetitionController>
-        //[Authorize(Roles = "Sponsor")]
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "sponsor creates competition")]
-        //public async Task<IActionResult> Insert([FromBody] SponsorInCompetitionInsertModel model)
+        //[HttpGet("{id}")]
+        //public string Get(int id)
         //{
-        //    try
-        //    {
-        //        ViewSponsorInCompetition result = await _sponsorInCompetitionService.Insert(model);
-        //        if (result != null)
-        //        {
-
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
+        //    return "value";
         //}
+
+        //POST api/<SponsorInCompetitionController>
+        [Authorize(Roles = "Sponsor")]
+        [HttpPost("add-sponsor-collaborate")]
+        [SwaggerOperation(Summary = "Add another sponsor in competition")]
+        public async Task<IActionResult> Insert([FromBody] SponsorInCompetitionInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewSponsorInCompetition result = await _sponsorInCompetitionService.Insert(model, token);
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
         //// PUT api/<SponsorInCompetitionController>/5
         //[HttpPut("{id}")]
