@@ -31,6 +31,11 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
 
+        //---------List DepartmentID belong to University Insert in Competition
+        //this field can be null
+        [JsonPropertyName("list_department_id")]
+        public List<int>? ListDepartmentId { get; set; }
+
         //---------Author to check user is Leader of Club   
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }
