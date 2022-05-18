@@ -2,6 +2,8 @@
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 {
@@ -28,6 +30,21 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
                 //có nghĩa là chưa 
                 return true;
             }
+        }
+
+        //
+        public async Task<List<int>> GetListSponsorId_In_Competition(int CompetitionId)
+        {
+            List<int> sponsorIdList = await (from sic in context.SponsorInCompetitions
+                                             where CompetitionId == sic.CompetitionId
+                                             select sic.SponsorId).ToListAsync();
+
+            if (sponsorIdList.Count > 0)
+            {
+                return sponsorIdList;
+            }
+
+            return null;
         }
     }
 }

@@ -16,6 +16,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
 
         }
 
-       
+        public async Task<List<int>> GetListDepartmentId_In_Competition(int CompetitionId)
+        {
+            List<int> departmentIdList = await(from cid in context.CompetitionInDepartments
+                                         where CompetitionId == cid.CompetitionId
+                                         select cid.DepartmentId).ToListAsync();
+
+            if (departmentIdList.Count > 0)
+            {
+                return departmentIdList;
+            }
+
+            return null;
+        }
     }
 }
