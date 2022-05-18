@@ -5,6 +5,7 @@ using System.Linq;
 using System;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.Common;
+using System.Collections.Generic;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 {
@@ -32,6 +33,20 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
                 //có nghĩa là chưa 
                 return true;
             }
+        }
+
+        public async Task<List<int>> GetListClubId_In_Competition(int CompetitionId)
+        {
+            List<int> clubIdList = await (from cic in context.CompetitionInClubs
+                                            where CompetitionId == cic.CompetitionId
+                                            select cic.ClubId).ToListAsync();
+
+            if (clubIdList.Count > 0)
+            {
+                return clubIdList;
+            }
+
+            return null;
         }
 
         // Nhat

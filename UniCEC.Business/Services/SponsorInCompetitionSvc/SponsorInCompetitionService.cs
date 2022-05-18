@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,6 +38,8 @@ namespace UniCEC.Business.Services.SponsorInCompetitionSvc
         {
             throw new NotImplementedException();
         }
+
+      
 
         //Sponsor Create Competition - Event
         public async Task<ViewSponsorInCompetition> Insert(SponsorInCompetitionInsertModel model, string token)

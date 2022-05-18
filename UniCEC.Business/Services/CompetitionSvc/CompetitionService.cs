@@ -71,7 +71,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 comp.View += 1;
                 await _competitionRepo.Update();
 
-                return TransformViewModel(comp);
+                return await TransformViewModel(comp);
             }
             else
             {
@@ -179,7 +179,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             {
                                 Competition comp = await _competitionRepo.Get(competition_Id);
 
-                                //------------ Insert Competition-In-Department -----------(OPTIONAL)
+                                //------------ Insert Competition-In-Department -----------(OPTIONAL 1)
                                 if (model.ListDepartmentId.Count > 0)
                                 {
                                     bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
@@ -200,6 +200,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         throw new ArgumentException("Department Id not have in University");
                                     }
                                 }
+
+                                //------------ Insert Competition-Entities-----------(OPTIONAL 2)
+                                //
+                                //... to be continuted
+
                                 //------------ Insert Competition-In-Club
                                 CompetitionInClub competitionInClub = new CompetitionInClub();
                                 competitionInClub.ClubId = model.ClubId;
@@ -212,7 +217,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     Competition comp_Update = await _competitionRepo.Get(competition_Id);
                                     comp_Update.Status = CompetitionStatus.Launching;
                                     await _competitionRepo.Update();
-                                    ViewCompetition viewCompetition = TransformViewModel(comp);
+                                    ViewCompetition viewCompetition = await TransformViewModel(comp);
                                     return viewCompetition;
 
                                 }//end compInClub_Id > 0
@@ -303,7 +308,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         Competition comp = await _competitionRepo.Get(competition_Id);
 
-                        //------------ Competition-In-Department -----------(OPTIONAL)
+                        //------------ Competition-In-Department -----------(OPTIONAL 1)
                         if (model.ListDepartmentId.Count > 0)
                         {
                             bool departmentInSystem = await CheckDepartmentId(model.ListDepartmentId);
@@ -324,6 +329,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 throw new ArgumentException("Department Id not have in System");
                             }
                         }
+
+                        //------------ Insert Competition-Entities-----------(OPTIONAL 2)
+                        //
+                        //... to be continuted
+
+
                         //------------ Sponsor-In-Competition -----------
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
                         sponsorInCompetition.SponsorId = SponsorId;
@@ -336,7 +347,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Competition comp_Update = await _competitionRepo.Get(competition_Id);
                             comp_Update.Status = CompetitionStatus.Launching;
                             await _competitionRepo.Update();
-                            ViewCompetition viewCompetition = TransformViewModel(comp);
+                            ViewCompetition viewCompetition = await TransformViewModel(comp);
                             return viewCompetition;
                         }//end if spoInCom_Id > 0
                         else
@@ -674,8 +685,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public ViewCompetition TransformViewModel(Competition competition)
+        public async Task<ViewCompetition> TransformViewModel(Competition competition)
         {
+
+            //List Sponsors in Competition
+            List<int> SponsorsInCompetition_Id = await _sponsorInCompetitionRepo.GetListSponsorId_In_Competition(competition.Id);
+
+            //List Clubs in Comeptition
+            List<int> ClubsInCompetition_Id = await _competitionInClubRepo.GetListClubId_In_Competition(competition.Id);
+
+            //List Department in Competition
+            List<int> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartmentId_In_Competition(competition.Id);
+
+
             return new ViewCompetition()
             {
                 CompetitionId = competition.Id,
@@ -695,12 +717,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 SeedsPoint = competition.SeedsPoint,
                 SeedsDeposited = competition.SeedsDeposited,
                 SeedsCode = competition.SeedsCode,
+                //Sponsor
+                IsSponsor = competition.IsSponsor,
                 //Scope
                 Public = competition.Public,
                 //Status
                 Status = competition.Status,
                 //View
                 View = competition.View,
+                //
+                ClubInCompetition_Id = ClubsInCompetition_Id,
+                //
+                SponsorInCompetition_Id = SponsorsInCompetition_Id,
+                //
+                DepartmentInCompetition_Id = DepartmentsInCompetition_Id
             };
         }
 
