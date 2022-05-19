@@ -182,6 +182,33 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             }
         }
 
+        public async Task<bool> CheckMemberInClub(List<int> List_ClubId_In_Competition, User studentInfo, int termId)
+        {
+            bool result = false;
+            //tìm user có là member trong 1 cuộc thi được tổ chức bởi nhiều Club
+            // User -> Member -> ClubHistory -> Club 
+            foreach (int ClubId_In_Competition in List_ClubId_In_Competition)
+            {
+                var query = from us in context.Users
+                            where us.Id == studentInfo.Id
+                            from mem in context.Members
+                            where mem.StudentId == us.Id
+                            from ch in context.ClubHistories
+                            where mem.Id == ch.MemberId && termId == ch.TermId && ch.Status == ClubHistoryStatus.Active
+                            from c in context.Clubs
+                            where ch.ClubId == c.Id && c.Id == ClubId_In_Competition
+                            select us;
+                //
+                User student = await query.FirstOrDefaultAsync();
+                //
+                if (student != null)
+                {
+                    return true;
+                }
+            }
+            return result;
+        }
+
         //user ID ở đây kh phải là MSSV
         public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
         {
@@ -211,17 +238,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
             {
                 return null;
             }
-            //ClubHistory clubHistory = await query.FirstOrDefaultAsync();
-            //if (clubHistory != null)
-            //{
-            //    return new ViewClubMember()
-            //    {
-            //        Name = clubHistory.Member.Student.Fullname,
-            //        ClubRoleName = clubHistory.ClubRole.Name,
-            //        MemberId = clubHistory.MemberId,
-            //        TermId = clubHistory.TermId
-            //    };
-            //}
         }
 
         public async Task<bool> UpdateMemberRole(int memberId, int clubRoleId)
@@ -231,7 +247,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
                                         select ch).FirstOrDefaultAsync();
 
             if (record == null) return false;
-            
+
             record.EndTime = DateTime.Now;
             record.Status = ClubHistoryStatus.Inactive;
             await Update();
@@ -251,9 +267,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
         public async Task<int> DeleteMember(int memberId)
         {
-            ClubHistory record = await(from ch in context.ClubHistories
-                                       where ch.MemberId.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
-                                       select ch).FirstOrDefaultAsync();
+            ClubHistory record = await (from ch in context.ClubHistories
+                                        where ch.MemberId.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                                        select ch).FirstOrDefaultAsync();
 
             if (record == null) return 0;
 
@@ -263,5 +279,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
             return record.ClubId;
         }
+
+
     }
 }

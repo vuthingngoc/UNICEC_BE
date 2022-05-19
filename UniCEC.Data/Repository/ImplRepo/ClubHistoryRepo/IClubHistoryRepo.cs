@@ -24,6 +24,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
         //check mem in club
         public Task<bool> CheckMemberInClub(int clubId, int memberId, int termId);
+        
+        public Task<bool> CheckMemberInClub(List<int> List_ClubId_In_Competition, User studentInfo, int termId);
 
         //get infomation of mem in club
         public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);
