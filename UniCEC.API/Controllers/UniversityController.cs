@@ -16,7 +16,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/university")]
     [ApiController]
     [ApiVersion("1.0")]
-   
+
     public class UniversityController : ControllerBase
     {
         // GET: api/<UniversityController>
@@ -38,21 +38,11 @@ namespace UniCEC.API.Controllers
             try
             {
                 PagingResult<ViewUniversity> result = await _universityService.GetUniversitiesByConditions(request);
-                
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                return Ok(result);
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -66,23 +56,14 @@ namespace UniCEC.API.Controllers
         [SwaggerOperation(Summary = "Get university by id")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
-            try {
-                
-                ViewUniversity result = await _universityService.GetUniversityById(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else 
-                {
-                    //
-                    return Ok(result);
-                }
-            }
-            catch (NullReferenceException e)
+            try
             {
-                return NotFound(e.Message);
+                ViewUniversity result = await _universityService.GetUniversityById(id);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
             }
             catch (SqlException)
             {
@@ -131,15 +112,17 @@ namespace UniCEC.API.Controllers
         [SwaggerOperation(Summary = "Update university - Admin")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
-            try {
+            try
+            {
                 Boolean check = false;
                 check = await _universityService.Update(university);
                 if (check)
                 {
                     return Ok();
                 }
-                else { 
-                   return BadRequest();
+                else
+                {
+                    return BadRequest();
                 }
             }
             catch (ArgumentNullException ex)
@@ -174,7 +157,8 @@ namespace UniCEC.API.Controllers
                 {
                     return Ok();
                 }
-                else {
+                else
+                {
                     return BadRequest();
                 }
             }
@@ -184,7 +168,7 @@ namespace UniCEC.API.Controllers
             }
             catch (SqlException)
             {
-               return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal server exception");
             }
         }
     }

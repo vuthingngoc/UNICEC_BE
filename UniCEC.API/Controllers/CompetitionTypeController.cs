@@ -32,20 +32,15 @@ namespace UniCEC.API.Controllers
             {
                 PagingResult<ViewCompetitionType> result = await _competitionTypeService.GetAllPaging(request);
 
-                if (result != null)
-                {
+               
 
                     return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                
+              
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -62,20 +57,16 @@ namespace UniCEC.API.Controllers
             try
             {
                 ViewCompetitionType result = await _competitionTypeService.GetByCompetitionTypeId(id);
-                if (result == null)
-                {
+                
+                
                     //Not has data
                     return Ok(new object());
-                }
-                else
-                {
-                    //
-                    return Ok(result);
-                }
+                
+                
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {

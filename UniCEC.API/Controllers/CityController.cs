@@ -36,21 +36,12 @@ namespace UniCEC.API.Controllers
         public async Task<IActionResult> GetListCity([FromQuery] CityRequestModel request)
         {
             try {
-                PagingResult<ViewCity> result = await _ICityService.GetListCities(request);
-                if (result != null)
-                {
-                    
-                    return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                PagingResult<ViewCity> result = await _ICityService.GetListCities(request);                                
+                    return Ok(result);              
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -67,15 +58,12 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCity result = await _ICityService.GetByCityId(id);
-                if (result != null)
-                {
-                  return Ok(result);
-                }
-                else
-                {
-                  return Ok(new object());
-                }
+                ViewCity result = await _ICityService.GetByCityId(id);                              
+                  return Ok(result);                              
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
             }
             catch (SqlException)
             {

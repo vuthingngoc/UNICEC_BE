@@ -29,26 +29,17 @@ namespace UniCEC.API.Controllers
         // GET: api/<MemberTakesActivityController>
         [HttpGet("tasks")]
         [SwaggerOperation(Summary = "Get tasks by conditions, 0.Doing , 1.DoneOnTime , 2.Late")]
-        public async Task<IActionResult> GetTaskByConditions([FromQuery]MemberTakesActivityRequestModel request)
+        public async Task<IActionResult> GetTaskByConditions([FromQuery] MemberTakesActivityRequestModel request)
         {
             try
             {
-                PagingResult<ViewMemberTakesActivity>  result = await _memberTakesActivityService.GetAllTaskesByConditions(request);
-
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
-                else
-                {
-                    //
-                    return Ok(result);
-                }
+                PagingResult<ViewMemberTakesActivity> result = await _memberTakesActivityService.GetAllTaskesByConditions(request);
+                //
+                return Ok(result);
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -64,20 +55,12 @@ namespace UniCEC.API.Controllers
             try
             {
                 ViewMemberTakesActivity result = await _memberTakesActivityService.GetByMemberTakesActivityId(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else
-                {
-                    //
-                    return Ok(result);
-                }
+                return Ok(result);
+
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {

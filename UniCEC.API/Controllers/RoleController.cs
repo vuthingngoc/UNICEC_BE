@@ -37,21 +37,11 @@ namespace UniCEC.API.Controllers
             try
             {
                 PagingResult<ViewRole> result = await _roleService.GetAllPaging(request);
-
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                return Ok(result);
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -67,20 +57,12 @@ namespace UniCEC.API.Controllers
             try
             {
                 ViewRole result = await _roleService.GetByRoleId(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else
-                {
-                    //
-                    return Ok(result);
-                }
+                return Ok(result);
+
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {
@@ -125,7 +107,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<RoleController>/5
         [HttpPut]
         [SwaggerOperation(Summary = "Update role")]
-        public async Task<IActionResult> UpdateRole ([FromBody] ViewRole model)
+        public async Task<IActionResult> UpdateRole([FromBody] ViewRole model)
         {
             try
             {
@@ -158,6 +140,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        
+
     }
 }
