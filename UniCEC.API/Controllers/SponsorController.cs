@@ -33,23 +33,16 @@ namespace UniCEC.API.Controllers
             try
             {
                 ViewSponsor result = await _sponsorService.GetBySponsorId(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else
-                {
-                    return Ok(result);
-                }
+                return Ok(result);
+
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {

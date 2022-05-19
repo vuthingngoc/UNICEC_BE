@@ -42,26 +42,16 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 List<ViewProcessClubActivity> result = await _clubActivityService.GetTop4_Process(ClubId, token);
-
-                if (result != null)
-                {
-
                     return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
-            }
-            catch (NullReferenceException e)
-            {
-                return NotFound(e.Message);
-            }
+            }        
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -79,21 +69,13 @@ namespace UniCEC.API.Controllers
             {
                 PagingResult<ViewClubActivity> result = await _clubActivityService.GetListClubActivitiesByConditions(conditions);
 
-                if (result != null)
-                {
-
                     return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                                        
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
-            }
+                return Ok(new List<object>());
+            }         
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -108,21 +90,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else
-                {
-                    //
+                ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);                  
                     return Ok(result);
-                }
+                
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {
