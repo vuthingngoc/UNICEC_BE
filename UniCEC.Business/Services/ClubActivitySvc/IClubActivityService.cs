@@ -17,7 +17,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         //Get List ClubActivity By Conditions
         public Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions);
 
-        public Task<List<ViewProcessClubActivity>> GetTop4_Process(int universityId, int clubId);
+        public Task<List<ViewProcessClubActivity>> GetTop4_Process(int clubId, string token);
 
     }
 }
