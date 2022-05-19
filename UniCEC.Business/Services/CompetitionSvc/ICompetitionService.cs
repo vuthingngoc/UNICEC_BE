@@ -4,6 +4,8 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
+using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
+using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -15,11 +17,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
+        public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel competitionInClub, string token);
+
 
         //-----------------------------------------------------Sponsor 
         public Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
         public Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent competition, string token);
         public Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token);
+        public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
 
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);

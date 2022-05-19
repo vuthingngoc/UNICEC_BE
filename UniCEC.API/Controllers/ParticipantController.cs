@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.Participant;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/participant")]
     [ApiController]
     [ApiVersion("1.0")]
     public class ParticipantController : ControllerBase
