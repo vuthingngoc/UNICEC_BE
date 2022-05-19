@@ -11,6 +11,8 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
+using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
+using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -348,6 +350,94 @@ namespace UniCEC.API.Controllers
                 if (check)
                 {
                     return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        //---------------------------------------------------------------------------Competition In Club
+        //POST api/<CompetitionInClubController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("add-club-collaborate")]
+        [SwaggerOperation(Summary = "add another club in competition")]
+        public async Task<IActionResult> AddClubCollaborate([FromBody] CompetitionInClubInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetitionInClub result = await _competitionService.AddClubCollaborate(model,token);
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        //---------------------------------------------------------------------------Sponsor in Competition
+        //POST api/<SponsorInCompetitionController>
+        [Authorize(Roles = "Sponsor")]
+        [HttpPost("add-sponsor-collaborate")]
+        [SwaggerOperation(Summary = "Add another sponsor in competition")]
+        public async Task<IActionResult> AddSponsorCollaborate([FromBody] SponsorInCompetitionInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewSponsorInCompetition result = await _competitionService.AddSponsorCollaborate(model,token);
+                if (result != null)
+                {
+
+                    return Ok(result);
                 }
                 else
                 {
