@@ -107,7 +107,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             }
             else
             {
-                return null;
+                throw new NullReferenceException();
             }
         }
 
@@ -471,7 +471,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         };
                         viewProcessClubActivities.Add(vpca);
                     }
-                    return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : null;
+                    return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : throw new NullReferenceException();
                 }//end check club in Uni
                 else
                 {

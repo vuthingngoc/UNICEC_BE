@@ -43,7 +43,7 @@ namespace UniCEC.Business.Services.RoleSvc
 
                 return new PagingResult<ViewRole>(listViewRole, result.TotalCount, request.CurrentPage, request.PageSize);
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public Task<bool> Delete(int id)
@@ -61,7 +61,7 @@ namespace UniCEC.Business.Services.RoleSvc
                 ViewRole viewRole = TransformViewRole(role);
                 return viewRole;
             }
-            return null;
+            throw new NullReferenceException();
 
         }
 

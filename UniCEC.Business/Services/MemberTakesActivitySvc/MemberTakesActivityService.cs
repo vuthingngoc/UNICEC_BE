@@ -63,7 +63,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             }
             else
             {
-                return null;
+                throw new NullReferenceException();
             }
 
         }
@@ -216,7 +216,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             }
             else
             {
-                return null;
+                throw new NullReferenceException();
             }
         }
 
