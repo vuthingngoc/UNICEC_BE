@@ -196,6 +196,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
         {
             List<ViewUniversity> result = await _universityRepo.GetListUniversityByEmail(email);
+            if (result == null) throw new NullReferenceException();
             return result;
         }
     }

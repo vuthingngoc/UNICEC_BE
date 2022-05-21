@@ -42,9 +42,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             var query = from u in context.Universities
                         where u.Id == universityId
                         from c in context.Clubs
-                        where c.UniversityId == u.Id
+                        where c.UniversityId == u.Id 
                         from ca in context.ClubActivities
-                        where c.Id == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
+                        where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
                         orderby ca.CreateTime descending
                         select ca;
 

@@ -8,8 +8,8 @@ namespace UniCEC.Business.Services.ParticipantSvc
     {
         public Task<PagingResult<ViewParticipant>> GetAllPaging(PagingRequest request);
         public Task<ViewParticipant> GetById(int id);
-        public Task<ViewParticipant> Insert(ParticipantInsertModel participant);
         public Task<bool> Update(ViewParticipant participant);
         public Task<bool> Delete(int id);
+        public Task<ViewParticipant> Insert(ParticipantInsertModel model, string token);
     }
 }

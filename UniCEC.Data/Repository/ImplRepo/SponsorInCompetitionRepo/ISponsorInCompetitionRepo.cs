@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 
@@ -8,5 +9,8 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
     {
         //check-sponsor-id-create-competition-or-event-duplicate
         public Task<bool> CheckDuplicateCreateCompetitionOrEvent(int sponsorId, int competitionId);
+
+        //
+        public Task<List<int>> GetListSponsorId_In_Competition(int CompetitionId);
     }
 }

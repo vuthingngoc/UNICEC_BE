@@ -29,31 +29,29 @@ namespace UniCEC.API.Controllers
         }
 
 
-    
+        [Authorize(Roles = "Student")]
         [HttpGet("top4-process")]
         [SwaggerOperation(Summary = "Get top 4 club activities by now and process")]
         //Lưu ý University Id dựa vào JWT
-        public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "universityId")] int UniversityId, [FromQuery(Name = "clubId")] int ClubId)
+        public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "clubId")] int ClubId)
         {
             try
             {
-                List<ViewProcessClubActivity> result = await _clubActivityService.GetTop4_Process(UniversityId, ClubId);
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-                if (result != null)
-                {
-
+                List<ViewProcessClubActivity> result = await _clubActivityService.GetTop4_Process(ClubId, token);
                     return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new List<object>());
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }        
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -71,21 +69,13 @@ namespace UniCEC.API.Controllers
             {
                 PagingResult<ViewClubActivity> result = await _clubActivityService.GetListClubActivitiesByConditions(conditions);
 
-                if (result != null)
-                {
-
                     return Ok(result);
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new List<object>());
-                }
+                                        
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
-            }
+                return Ok(new List<object>());
+            }         
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -100,21 +90,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);
-                if (result == null)
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
-                else
-                {
-                    //
+                ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);                  
                     return Ok(result);
-                }
+                
             }
-            catch (NullReferenceException e)
+            catch (NullReferenceException)
             {
-                return NotFound(e.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {

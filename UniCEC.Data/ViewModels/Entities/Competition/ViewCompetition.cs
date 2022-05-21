@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 
@@ -31,9 +32,20 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public double SeedsPoint { get; set; }
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
+        [JsonPropertyName("is_sponsor")]
+        public bool IsSponsor { get; set; }
         public bool Public { get; set; }
         public CompetitionStatus Status { get; set; }
         public string Address { get; set; }
         public int View { get; set; }
+        //------------- ADD Field Sponsor Collaborate
+        [JsonPropertyName("sponsors_in_competition")]
+        public List<int> SponsorInCompetition_Id { get; set; }
+        //------------- ADD Field Club Collaborate
+        [JsonPropertyName("clubs_in_competition")]
+        public List<int> ClubInCompetition_Id { get; set; }
+        //------------- ADD Field Department Id 
+        [JsonPropertyName("departments_in_competition")]
+        public List<int> DepartmentInCompetition_Id { get; set; }
     }
 }

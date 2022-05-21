@@ -22,6 +22,7 @@ namespace UniCEC.Business.Services.CitySvc
         public async Task<PagingResult<ViewCity>> GetListCities(CityRequestModel request)
         {
             PagingResult<ViewCity> result = await _cityRepo.GetListCities(request);
+            if(result == null) throw new NullReferenceException();
             return result;
         }
 
@@ -39,21 +40,25 @@ namespace UniCEC.Business.Services.CitySvc
                     viewCity.Description = city.Description;
                     return viewCity;
                 }
-                return null;
+                else
+                {
+                    throw new NullReferenceException();
+                }
             }
             catch (Exception)
             {
                 throw;
             }
-            
+
         }
         //Insert-City
         public async Task<ViewCity> Insert(CityInsertModel model)
         {
-            try {
+            try
+            {
 
 
-                if (string.IsNullOrEmpty(model.Name)|| string.IsNullOrEmpty(model.Description))
+                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
                     throw new ArgumentNullException(" Name Null || Description Null ");
 
                 City city = new City();
@@ -74,7 +79,8 @@ namespace UniCEC.Business.Services.CitySvc
                     viewCity.Description = c.Description;
                     return viewCity;
                 }
-                else {
+                else
+                {
                     return null;
                 }
             }
@@ -85,8 +91,9 @@ namespace UniCEC.Business.Services.CitySvc
         //Update-City
         public async Task<bool> Update(ViewCity city)
         {
-            try{
-                if (string.IsNullOrEmpty(city.Name) || string.IsNullOrEmpty(city.Description) || city.Id == 0 )
+            try
+            {
+                if (string.IsNullOrEmpty(city.Name) || string.IsNullOrEmpty(city.Description) || city.Id == 0)
                     throw new ArgumentNullException(" Name Null || Description Null || City Id Null");
                 //get city
                 City c = await _cityRepo.Get(city.Id);
@@ -105,7 +112,8 @@ namespace UniCEC.Business.Services.CitySvc
                 }
                 return false;
             }
-            catch (Exception) { 
+            catch (Exception)
+            {
                 throw;
             }
         }
@@ -116,6 +124,6 @@ namespace UniCEC.Business.Services.CitySvc
             throw new NotImplementedException();
         }
 
-      
+
     }
 }

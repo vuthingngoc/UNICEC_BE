@@ -36,7 +36,7 @@ namespace UniCEC.Business.Services.SponsorSvc
                 }
                 else
                 {
-                    throw new ArgumentException(" Sponsor not found");
+                    throw new NullReferenceException();
                 }
             }
             catch (Exception)
