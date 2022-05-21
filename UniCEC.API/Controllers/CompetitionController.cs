@@ -37,10 +37,9 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);            
-                    return Ok(result);
-                              
-            }
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);                             
+                return Ok(result);                                                          
+            }         
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
@@ -58,8 +57,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, Status, Public);            
-                    return Ok(result);             
+                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, Status, Public);
+                return Ok(result);
             }
             catch (NullReferenceException)
             {
@@ -79,10 +78,10 @@ namespace UniCEC.API.Controllers
             try
             {
                 ViewCompetition result = await _competitionService.GetById(id);
-   
-                    //Not has data
-                    return Ok(new object());
-          
+
+                //Not has data
+                return Ok(new object());
+
             }
             catch (NullReferenceException)
             {
@@ -365,7 +364,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetitionInClub result = await _competitionService.AddClubCollaborate(model,token);
+                ViewCompetitionInClub result = await _competitionService.AddClubCollaborate(model, token);
                 if (result != null)
                 {
 
@@ -411,7 +410,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewSponsorInCompetition result = await _competitionService.AddSponsorCollaborate(model,token);
+                ViewSponsorInCompetition result = await _competitionService.AddSponsorCollaborate(model, token);
                 if (result != null)
                 {
 

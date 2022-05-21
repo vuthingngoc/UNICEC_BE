@@ -35,7 +35,7 @@ namespace UniCEC.Business.Services.CompetitionTypeSvc
                 });
                 return new PagingResult<ViewCompetitionType>(viewCompetitionTypes, result.TotalCount, request.CurrentPage, request.PageSize);
             }
-            return null;
+            throw new NullReferenceException();
         }
 
 
@@ -49,7 +49,7 @@ namespace UniCEC.Business.Services.CompetitionTypeSvc
             }
             else
             {
-                return null;
+                throw new NullReferenceException();
             }
         }
 

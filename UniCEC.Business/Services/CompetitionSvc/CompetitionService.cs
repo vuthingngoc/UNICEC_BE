@@ -95,6 +95,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
             List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Public);
+            if(result == null) throw new NullReferenceException();
             return result;
         }
 
@@ -103,6 +104,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
         {
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
+            if (result == null) throw new NullReferenceException();
             return result;
         }
 
