@@ -6,7 +6,7 @@ namespace UniCEC.Data.ViewModels.Entities.User
 {
     public class UserModelTemporary
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonPropertyName("name")]
         public string Fullname { get; set; }
         [JsonPropertyName("university_id")]

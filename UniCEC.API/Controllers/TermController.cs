@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/term")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
     public class TermController : ControllerBase
     {
         private ITermService _itermService;
@@ -29,32 +31,41 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewTerm term = await _itermService.GetById(clubId, id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewTerm term = await _itermService.GetById(token, clubId, id);
                 return Ok(term);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            throw new NotImplementedException();
         }
 
         [HttpGet("club/{id}")]
-        [SwaggerOperation(Summary = "Get all terms in a club")]
-        public async Task<IActionResult> GetTermByClub(int id, [FromQuery] PagingRequest request)
+        [SwaggerOperation(Summary = "Get current term in a club")]
+        public async Task<IActionResult> GetCurrentTermByClub(int id)
         {
             try
             {
-                PagingResult<ViewTerm> terms = await _itermService.GetByClub(id, request);
-                return Ok(terms);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewTerm term = await _itermService.GetCurrentTermByClub(token, id);
+                return Ok(term);
             }
-            catch(NullReferenceException ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return NotFound(ex.Message);
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -68,8 +79,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewTerm> terms = await _itermService.GetByConditions(id, request);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewTerm> terms = await _itermService.GetByConditions(token, id, request);
                 return Ok(terms);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
@@ -81,39 +97,44 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpPost]
-        [SwaggerOperation(Summary = "Add term")]
-        public async Task<IActionResult> InsertTerm(TermInsertModel term)
-        {
-            try
-            {
-                ViewTerm viewTerm = await _itermService.Insert(term);
-                return Created($"api/v1/term/{viewTerm.Id}", viewTerm);
-            }
-            catch(ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "Add term")]
+        //public async Task<IActionResult> InsertTerm(TermInsertModel term)
+        //{
+        //    try
+        //    {
+        //        ViewTerm viewTerm = await _itermService.Insert(term);
+        //        return Created($"api/v1/term/{viewTerm.Id}", viewTerm);
+        //    }
+        //    catch(ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //}
 
         [HttpPut]
         [SwaggerOperation(Summary = "Update term")]
-        public async Task<IActionResult> UpdateTerm(TermUpdateModel term)
+        public async Task<IActionResult> UpdateTerm([FromBody] TermUpdateModel term, [FromQuery, BindRequired] int clubId)
         {
             try
             {
-                await _itermService.Update(term);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _itermService.Update(token, term, clubId);
                 return Ok();
             }
-            catch (ArgumentNullException ex)
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -127,27 +148,27 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete term")]
-        public async Task<IActionResult> DeleteTerm(int id)
-        {
-            try
-            {
-                await _itermService.Delete(id);
-                return NoContent();
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            };
-        }
+        //[HttpDelete("{id}")]
+        //[SwaggerOperation(Summary = "Delete term")]
+        //public async Task<IActionResult> DeleteTerm(int id)
+        //{
+        //    try
+        //    {
+        //        await _itermService.Delete(id);
+        //        return NoContent();
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    };
+        //}
     }
 }

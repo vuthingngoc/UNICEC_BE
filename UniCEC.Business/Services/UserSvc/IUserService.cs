@@ -8,19 +8,23 @@ namespace UniCEC.Business.Services.UserSvc
 {
     public interface IUserService
     {
-        public Task<ViewUser> GetUserById(int id);
+        public int DecodeToken(string token, string nameClaim);
+        public Task<ViewUser> GetById(string token, int id);
         public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
-        public Task<ViewUser> GetUserByUserCode(string userCode);
         public Task<ViewUser> GetUserByEmail(string email);
         public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
-        public Task<ViewUser> Insert(UserInsertModel user);
-        public Task<bool> Update(ViewUser user);
+        //public Task<ViewUser> Insert(UserInsertModel user);
+        // Insert-User-Temporary
+        public Task<int> InsertUserTemporary(UserModelTemporary userTem);
+        public Task<bool> Update(UserUpdateModel user, string token);
+        // firebase
+        public Task UpdateAvatar(int userId, string srcAvatar);
+        public Task UpdateInfoToken(int userId, int universityId, string token);
         public Task UpdateStatusOnline(int id, bool status);
         public Task<bool> Delete(int id);
 
         //Check-User-Exist
         public Task<bool> CheckUserEmailExsit(string email_user);
-        //Insert-User-Temporary
-        public Task<ViewUser> InsertUserTemporary(UserModelTemporary userTem);
+        
     }
 }

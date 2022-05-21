@@ -180,7 +180,7 @@ namespace UniCEC.Business.Services.ClubSvc
             if (roleId == 2) throw new UnauthorizedAccessException("You do not have permission to add new club");
 
             if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 || model.TotalMember == 0
-                || string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.Parse("1/1/0001 12:00:00 AM"))
+                || string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.MinValue)
                 throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
 
             int clubId = await _clubRepo.CheckExistedClubName(model.UniversityId, model.Name);
@@ -244,7 +244,7 @@ namespace UniCEC.Business.Services.ClubSvc
             if (clubId > 0 && clubId != club.Id) throw new ArgumentException("Duplicated club name");
 
             if (!string.IsNullOrEmpty(model.Description)) club.Description = model.Description;
-            if (model.Founding != DateTime.Parse("1/1/0001 12:00:00 AM")) club.Founding = model.Founding;
+            if (model.Founding != DateTime.MinValue) club.Founding = model.Founding;
             if (!string.IsNullOrEmpty(model.Name)) club.Name = model.Name;
             if (model.TotalMember != 0) club.TotalMember = model.TotalMember;
             club.Status = model.Status;

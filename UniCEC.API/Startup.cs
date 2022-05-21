@@ -207,10 +207,12 @@ namespace UniCEC.API
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "UniCEC.API",
-                    Version = "v1"
+                    Version = "v1",
+                    Description = "APIs for UniCEC"
                 });
 
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+
+                var securityScheme = new OpenApiSecurityScheme()
                 {
                     Description = "JWT Authorization header using the Bearer scheme. " +
                                     "\n\nEnter 'Bearer' [space] and then your token in the text input below. " +
@@ -218,24 +220,21 @@ namespace UniCEC.API
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference()
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+                c.AddSecurityDefinition("Bearer", securityScheme);
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header
-                        },
-                        new List<string>()
+                        securityScheme,
+                        new string[]{ }
                     }
                 });
 

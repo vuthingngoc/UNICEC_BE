@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
@@ -7,9 +8,9 @@ namespace UniCEC.Data.RequestModels
     {
         [FromQuery(Name = "name")]
         public string Name { get; set; }
-        [FromQuery(Name = "createYear")]
-        public string CreateYear { get; set; }
-        [FromQuery(Name = "endYear")]
-        public string EndYear { get; set; }
+        [FromQuery(Name = "createTime")]
+        public DateTime? CreateTime { get; set; }
+        [FromQuery(Name = "endTime")]
+        public DateTime? EndTime { get; set; }
     }
 }

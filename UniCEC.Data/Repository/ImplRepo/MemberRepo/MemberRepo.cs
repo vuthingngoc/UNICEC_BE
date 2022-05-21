@@ -68,7 +68,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         join ch in context.ClubHistories on m.Id equals ch.MemberId
-                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId)
+                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId) 
+                                && ch.Status == ClubHistoryStatus.Active
                         select ch.MemberId;
 
             int memberId = await query.FirstOrDefaultAsync();

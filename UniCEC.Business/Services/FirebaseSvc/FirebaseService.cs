@@ -1,7 +1,6 @@
 ﻿using FirebaseAdmin.Auth;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
@@ -21,15 +20,13 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUniversityService _universityService;
         private IRoleService _roleService;
         private ISponsorService _sponsorService;
-        private IMajorService _majorService;
 
-        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService, IMajorService majorService)
+        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
             _sponsorService = sponsorService;
-            _majorService = majorService;
         }
 
         public async Task<ViewUserInfo> Authentication(string token)
@@ -61,17 +58,17 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         RoleId = 3 // role student
                     };
                     //Add In DB [User]
-                    ViewUser userTemp = await _userService.InsertUserTemporary(userModelTemporary);
-                    await _userService.UpdateStatusOnline(userTemp.Id, true);
-                    userModelTemporary.Id = userTemp.Id.ToString();
-                    ViewRole role = await _roleService.GetByRoleId(userTemp.RoleId);
+                    int userId = await _userService.InsertUserTemporary(userModelTemporary);
+                    await _userService.UpdateStatusOnline(userId, true);
+                    userModelTemporary.Id = userId;
+                    ViewRole role = await _roleService.GetByRoleId(userModelTemporary.RoleId);
                     userModelTemporary.RoleName = role.RoleName;
 
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
                     string clientTokenUserTemp = JWTUserToken.GenerateJWTTokenUserTemp(userModelTemporary);
                     // Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
-                    return new ViewUserInfo
+                    return new ViewUserInfo()
                     {
                         Token = clientTokenUserTemp,
                         ListUniBelongToEmail = listUniBelongToEmail
@@ -81,8 +78,10 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 else
                 {
                     ViewUser user = await _userService.GetUserByEmail(email);
+                    await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
+
                     //2.1 FullFill Info
                     if (user.UniversityId != null)
                     {
@@ -102,7 +101,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     {
                         UserModelTemporary userModelTemporary = new UserModelTemporary()
                         {
-                            Id = user.Id.ToString(),
+                            Id = user.Id,
                             Email = user.Email,
                             PhoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber,
                             Fullname = user.Fullname,
@@ -129,6 +128,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 ViewUser user = await _userService.GetUserByEmail(email);
                 if (user != null)
                 {
+                    await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     //1.Admin
