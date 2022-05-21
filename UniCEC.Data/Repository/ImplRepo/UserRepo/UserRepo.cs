@@ -18,30 +18,40 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         }
 
-        public async Task<ViewUser> GetById(int id)
+        public async Task<ViewUser> GetById(int id, bool isFullInfo)
         {
             var query = from u in context.Users
                         where u.Id.Equals(id)
-                        select new ViewUser()
-                        {
-                            Id = u.Id,
-                            RoleId = u.RoleId,
-                            SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
-                            UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                            MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
-                            Fullname = u.Fullname,
-                            UserCode = u.UserCode,
-                            Email = u.Email,
-                            PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
-                            Gender = u.Gender,
-                            Dob = u.Dob,
-                            Description = (!string.IsNullOrEmpty(u.Description)) ? u.Description : "",
-                            Avatar = (!string.IsNullOrEmpty(u.Avatar)) ? u.Avatar : "",
-                            Status = u.Status,
-                            IsOnline = u.IsOnline
-                        };
+                        select u;
 
-            return await query.FirstOrDefaultAsync();
+            return (isFullInfo) ? await query.Select(user => new ViewUser()
+                {
+                    Id = user.Id,
+                    RoleId = user.RoleId,
+                    SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
+                    UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
+                    MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
+                    Fullname = user.Fullname,
+                    StudentCode = user.StudentCode,
+                    Email = user.Email,
+                    PhoneNumber = (!string.IsNullOrEmpty(user.PhoneNumber)) ? user.PhoneNumber : "",
+                    Gender = user.Gender,
+                    Dob = user.Dob,
+                    Description = (!string.IsNullOrEmpty(user.Description)) ? user.Description : "",
+                    Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
+                    Status = user.Status,
+                    IsOnline = user.IsOnline
+                }).FirstOrDefaultAsync() 
+                : await query.Select(user => new ViewUser()
+                {
+                    Id = user.Id,
+                    RoleId = user.RoleId,
+                    SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
+                    UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
+                    Fullname = user.Fullname,
+                    Gender = user.Gender,
+                    Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
+                }).FirstOrDefaultAsync();
         }
 
         public async Task<PagingResult<ViewUser>> GetUserByUniversity(int universityId, UserStatus status, PagingRequest request)
@@ -61,7 +71,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                             UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                                             MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                                             Fullname = u.Fullname,
-                                            UserCode = u.UserCode,
+                                            StudentCode = u.StudentCode,
                                             Email = u.Email,
                                             PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
                                             Gender = u.Gender,
@@ -75,11 +85,11 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             return (totalCount > 0) ? new PagingResult<ViewUser>(users, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        //UserCode
-        public async Task<ViewUser> GetByUserCode(string userCode)
+        //StudentCode
+        public async Task<ViewUser> GetByStudentCode(string studentCode)
         {
             var query = from u in context.Users
-                        where u.UserCode.Equals(userCode)
+                        where u.StudentCode.Equals(studentCode)
                         select u;
 
             return await query.Select(u => new ViewUser()
@@ -90,7 +100,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                 MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                 Fullname = u.Fullname,
-                UserCode = u.UserCode,
+                StudentCode = u.StudentCode,
                 Email = u.Email,
                 PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
                 Gender = u.Gender,
@@ -101,7 +111,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 IsOnline = u.IsOnline
             }).FirstOrDefaultAsync();
 
-            //return await context.Users.FirstOrDefaultAsync(u => u.UserCode.Equals(userCode));
+            //return await context.Users.FirstOrDefaultAsync(u => u.StudentCode.Equals(StudentCode));
         }
 
         public async Task<ViewUser> GetByEmail(string email)
@@ -118,7 +128,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                 MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                 Fullname = u.Fullname,
-                UserCode = u.UserCode,
+                StudentCode = u.StudentCode,
                 Email = u.Email,
                 PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
                 Gender = u.Gender,
@@ -154,7 +164,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                               UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                                               MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                                               Fullname = u.Fullname,
-                                              UserCode = u.UserCode,
+                                              StudentCode = u.StudentCode,
                                               Email = u.Email,
                                               PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
                                               Gender = u.Gender,
@@ -177,13 +187,13 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         public async Task<bool> CheckExistedUser(int universityId, string userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.UserCode.Equals(userId));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.StudentCode.Equals(userId));
             return (user != null) ? true : false;
         }
 
         public async Task<bool> CheckExistedUser(string userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.UserCode.Equals(userId));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.StudentCode.Equals(userId));
             return (user != null) ? true : false;
         }
     }

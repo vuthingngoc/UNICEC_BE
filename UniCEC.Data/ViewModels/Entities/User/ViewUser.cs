@@ -12,19 +12,19 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public int SponsorId { get; set; }
         [JsonPropertyName("university_id")]
         public int? UniversityId { get; set; }
+        public string Fullname { get; set; }
+        public string Avatar { get; set; }
+        public string Gender { get; set; }
         [JsonPropertyName("major_id")]
         public int? MajorId { get; set; }
-        [JsonPropertyName("user_id")]
-        public string UserCode { get; set; }
-        public string Fullname { get; set; }
+        [JsonPropertyName("user_code")]
+        public string StudentCode { get; set; }
         public string Email { get; set; }
         [JsonPropertyName("phone_number")]
         public string PhoneNumber { get; set; }
-        public string Gender { get; set; }
         public UserStatus Status { get; set; }
         public string Dob { get; set; }
         public string Description { get; set; }
-        public string Avatar { get; set; }
         [JsonPropertyName("is_online")]
         public bool IsOnline { get; set; }
     }

@@ -8,9 +8,8 @@ namespace UniCEC.Data.ViewModels.Entities.Term
         public int Id { get; set; }
         public string Name { get; set; }
         [JsonPropertyName("create_time")]
-        public DateTime CreateTime { get; set; }
+        public DateTime? CreateTime { get; set; }
         [JsonPropertyName("end_time")]
-        public DateTime EndTime { get; set; }
-        public bool? Status { get; set; }
+        public DateTime? EndTime { get; set; }
     }
 }

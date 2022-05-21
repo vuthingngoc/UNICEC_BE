@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,164 +14,134 @@ namespace UniCEC.Business.Services.UserSvc
     public class UserService : IUserService
     {
         private IUserRepo _userRepo;
+        private JwtSecurityTokenHandler _tokenHandler;
 
         public UserService(IUserRepo userRepo)
         {
             _userRepo = userRepo;
         }
 
-        public async Task<ViewUser> GetUserById(int id)
+        public int DecodeToken(string token, string nameClaim)
         {
-            ViewUser user = await _userRepo.GetById(id);
-            return (user == null) ? throw new NullReferenceException() : user;
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
         }
 
-        private ViewUser TransformViewModel(User user)
+        public async Task<ViewUser> GetById(string token, int id)
         {
-            return new ViewUser()
-            {
-                Id = user.Id,
-                RoleId = user.RoleId,
-                SponsorId = user.SponsorId.Value,
-                UniversityId = user.UniversityId,
-                MajorId = user.MajorId,
-                Fullname = user.Fullname,
-                UserCode = user.UserCode,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Gender = user.Gender,
-                Dob = user.Dob,
-                Description = user.Description,
-                Avatar = user.Avatar,
-                Status = user.Status,
-                IsOnline = user.IsOnline
-            };
+            int userId = DecodeToken(token, "Id");
+            int roleId = DecodeToken(token, "RoleId");
+            bool isFullInfo = false;
+            
+            // if admin or him/her-self call api
+            if (roleId.Equals(1) || userId.Equals(id)) isFullInfo = true;
+            ViewUser user = await _userRepo.GetById(id, isFullInfo);
+            return (user == null) ? throw new NullReferenceException() : user;
         }
 
         // for admin
         public async Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request)
         {
             PagingResult<ViewUser> users = await _userRepo.GetUserByUniversity(universityId, status, request);
-            if(users == null) throw new NullReferenceException("Not Found");
+            if (users == null) throw new NullReferenceException("Not found any students");
             return users;
-        }
-
-        // firebase
-        public async Task<ViewUser> GetUserByUserCode(string userCode)
-        {
-            ViewUser user = await _userRepo.GetByUserCode(userCode);
-            if (user == null) throw new NullReferenceException("Not Found this user");
-            return user;
         }
 
         public async Task<ViewUser> GetUserByEmail(string email)
         {
-            ViewUser user = await _userRepo.GetByEmail(email);
-            if (user != null)
-            {
-                return user;
-
-            }
-            else
-            {
-                return null;
-            }
-
+            return await _userRepo.GetByEmail(email);
         }
 
-        private async Task<bool> CheckDuplicatedEmailAndUserId(int? universityId, string email, string userId)
+        private async Task<bool> CheckDuplicatedEmailAndUserCode(int? universityId, string email, string userCode)
         {
             bool isExisted = await _userRepo.CheckExistedEmail(email);
             if (isExisted) throw new ArgumentException("Duplicated Email");
 
             if (universityId != null)
             {
-                isExisted = await _userRepo.CheckExistedUser((int)universityId, userId);
+                isExisted = await _userRepo.CheckExistedUser(universityId.Value, userCode);
             }
             else
             {
-                isExisted = await _userRepo.CheckExistedUser(userId);
+                isExisted = await _userRepo.CheckExistedUser(userCode);
             }
 
-            if (isExisted) throw new ArgumentException("Duplicated UserId");
+            if (isExisted) throw new ArgumentException("Duplicated UserCode");
 
             return isExisted;
         }
 
-
-
         public async Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request)
         {
             PagingResult<ViewUser> users = await _userRepo.GetByCondition(request);
-            if (users.Items == null) throw new NullReferenceException("Not Found");
-
-            List<ViewUser> items = new List<ViewUser>();
-            //users.Items.ForEach(u =>
-            //{
-            //    ViewUser user = TransformViewModel(u);
-            //    items.Add(user);
-            //});
-
-            return new PagingResult<ViewUser>(items, users.TotalCount, users.CurrentPage, users.PageSize);
+            if (users.Items == null) throw new NullReferenceException("Not found any users");
+            return users;
         }
 
-        public async Task<ViewUser> Insert(UserInsertModel user)
+        //public async Task<ViewUser> Insert(UserInsertModel user)
+        //{
+        //    if (string.IsNullOrEmpty(user.Description) || string.IsNullOrEmpty(user.Dob) || string.IsNullOrEmpty(user.Fullname)
+        //        || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserCode))
+        //        throw new ArgumentNullException("Description Null || Dob Null || Fullname Null || Email Null || Gender Null || RoleId || UserId Null");
+
+        //    bool isInvalid = await CheckDuplicatedEmailAndUserCode(user.UniversityId, user.Email, user.UserCode);
+
+        //    if (isInvalid) return null;
+
+        //    // default status when insert is true
+        //    UserStatus status = UserStatus.Active;
+        //    User element = new User()
+        //    {
+        //        Description = user.Description,
+        //        Dob = user.Dob,
+        //        Email = user.Email,
+        //        Fullname = user.Fullname,
+        //        Gender = user.Gender,
+        //        MajorId = user.MajorId,
+        //        RoleId = user.RoleId,
+        //        Status = status,
+        //        UniversityId = user.UniversityId,
+        //        UserCode = user.UserCode,
+        //        Avatar = user.Avatar,
+        //        IsOnline = true // default status when log in
+        //    };
+
+        //    int id = await _userRepo.Insert(element);
+        //    if (id > 0)
+        //    {
+        //        element.Id = id;
+        //        return TransformViewModel(element);
+        //    }
+
+        //    return null;
+        //}
+
+        public async Task<bool> Update(UserUpdateModel model, string token)
         {
-            if (string.IsNullOrEmpty(user.Description) || string.IsNullOrEmpty(user.Dob) || string.IsNullOrEmpty(user.Fullname)
-                || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserCode))
-                    throw new ArgumentNullException("Description Null || Dob Null || Fullname Null || Email Null || Gender Null || RoleId || UserId Null");
+            int userId = DecodeToken(token, "Id");
+            int roleId = DecodeToken(token, "RoleId");
 
-            bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserCode);
+            if (!userId.Equals(model.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (isInvalid) return null;
+            User user = await _userRepo.Get(model.Id);
+            if (user == null) throw new NullReferenceException("Not found this user");
 
-            // default status when insert is true
-            UserStatus status = UserStatus.Active;
-            User element = new User()
-            {
-                Description = user.Description,
-                Dob = user.Dob,
-                Email = user.Email,
-                Fullname = user.Fullname,
-                Gender = user.Gender,
-                MajorId = user.MajorId,
-                RoleId = user.RoleId,
-                Status = status,
-                UniversityId = user.UniversityId,
-                UserCode = user.UserCode,
-                Avatar = user.Avatar,
-                IsOnline = true // default status when log in
-            };
+            bool isInvalid = await CheckDuplicatedEmailAndUserCode(user.UniversityId, user.Email, user.StudentCode);
+            if (isInvalid) return isInvalid;
 
-            int id = await _userRepo.Insert(element);
-            if (id > 0)
-            {
-                element.Id = id;
-                return TransformViewModel(element);
-            }
+            if (!string.IsNullOrEmpty(model.Description)) user.Description = model.Description;
+            if (!string.IsNullOrEmpty(model.Dob)) user.Dob = model.Dob;
+            if (!string.IsNullOrEmpty(model.Email)) user.Email = model.Email;
+            if (!string.IsNullOrEmpty(model.Fullname)) user.Fullname = model.Fullname;
+            if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
+            if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
+            if (!string.IsNullOrEmpty(model.Avatar)) user.Avatar = model.Avatar;
+            if (model.MajorId.HasValue) user.MajorId = model.MajorId;
 
-            return null;
-        }
-
-        public async Task<bool> Update(ViewUser user)
-        {
-            User element = await _userRepo.Get(user.Id);
-            if (element == null) throw new NullReferenceException("Not found this user");
-
-            //bool isInvalid = await CheckDuplicatedEmailAndUserId(user.UniversityId, user.Email, user.UserId);
-            //if (isInvalid) return isInvalid;
-
-            if (!string.IsNullOrEmpty(user.Description)) element.Description = user.Description;
-            if (!string.IsNullOrEmpty(user.Dob))  element.Dob = user.Dob;
-            if (!string.IsNullOrEmpty(user.Email)) element.Email = user.Email;
-            if (!string.IsNullOrEmpty(user.Fullname)) element.Fullname = user.Fullname;
-            if (!string.IsNullOrEmpty(user.Gender)) element.Gender = user.Gender;
-            if(user.MajorId != 0) element.MajorId = user.MajorId;
-            if(user.RoleId != 0) element.RoleId = user.RoleId;
-            if (!string.IsNullOrEmpty(user.UserCode)) element.UserCode = user.UserCode;
-            if(user.UniversityId != 0) element.UniversityId = user.UniversityId;
-            element.Status = user.Status;
-            if (!string.IsNullOrEmpty(user.Avatar)) element.Avatar = user.Avatar;
+            // for admin
+            if (model.RoleId != 0 && roleId.Equals(1)) user.RoleId = model.RoleId.Value;
+            if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
 
             await _userRepo.Update();
             return true;
@@ -201,25 +170,15 @@ namespace UniCEC.Business.Services.UserSvc
 
         //------------------------------------------------LOGIN------------------------------------------------
 
-        //CheckUserEmail
-        public async Task<bool> CheckUserEmailExsit(string email_user)
+        // CheckUserEmail
+        public async Task<bool> CheckUserEmailExsit(string email)
         {
-            bool check = false;
-            ViewUser user = await _userRepo.GetByEmail(email_user);
-            if (user != null)
-            {
-                check = true;
-                return check;
-            }
-            else
-            {
-                return check;
-            }
-
+            ViewUser user = await _userRepo.GetByEmail(email);
+            return (user != null) ? true : false;
         }
 
-        //Insert - UserTemporary
-        public async Task<ViewUser> InsertUserTemporary(UserModelTemporary userTem)
+        // firebase - insert - UserTemporary
+        public async Task<int> InsertUserTemporary(UserModelTemporary userTem)
         {
             try
             {
@@ -229,29 +188,40 @@ namespace UniCEC.Business.Services.UserSvc
                     Email = userTem.Email,
                     Status = UserStatus.Active,
                     Avatar = userTem.Avatar,
+                    Fullname = userTem.Fullname,
                     //auto
                     Dob = "",
-                    Fullname = userTem.Fullname,
                     Gender = "",
-                    UserCode = "",
+                    StudentCode = "",
                     Description = "",
                     IsOnline = true // default status when log in
                 };
-                int id = await _userRepo.Insert(user);
-                if (id > 0)
-                {
-                    return new ViewUser
-                    {
-                        Id = id,
-                        RoleId = userTem.RoleId,
-                        Email = userTem.Email,
-                        Avatar = userTem.Avatar,
-                        Status = UserStatus.Active
-                    };
-                }
-                return null;
+                return await _userRepo.Insert(user);
+
             }
             catch (Exception) { throw; }
+        }
+
+        public async Task UpdateInfoToken(int userId, int universityId, string token)
+        {
+            int idUser = DecodeToken(token, "Id");
+            if (!userId.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            User user = await _userRepo.Get(userId);
+            if (user == null) throw new NullReferenceException("Not found this user");
+
+            if (!user.UniversityId.HasValue) user.UniversityId = universityId;
+            await _userRepo.Update();
+        }
+
+        // firebase
+        public async Task UpdateAvatar(int userId, string srcAvatar)
+        {
+            User user = await _userRepo.Get(userId);
+            if (user == null) throw new NullReferenceException("Not found this user");
+
+            user.Avatar = srcAvatar;
+            await _userRepo.Update();
         }
     }
 }

@@ -19,6 +19,35 @@ namespace UniCEC.Data.JWT
             
         }
 
+        //tạo tạm để trả về FE cho User tiếp tục update
+        public static string GenerateJWTTokenUserTemp(UserModelTemporary user)
+        {
+            JwtSecurityToken tokenUser = new JwtSecurityToken(
+                issuer: "https://securetoken.google.com/unics-e46a4",
+                audience: "unics-e46a4",
+                claims: new[] {
+                 //Id
+                 new Claim("Id", user.Id.ToString()),
+                 //fullname
+                 new Claim("Fullname", user.Fullname),
+                 //University
+                 new Claim("UniversityId", user.UniversityId.ToString()),
+                 //Avatar
+                 new Claim ("Avatar", user.Avatar),
+                 //Role Id
+                 new Claim("RoleId", user.RoleId.ToString()),
+                 //Role
+                 new Claim(ClaimTypes.Role, user.RoleName),
+                },
+                expires: DateTime.UtcNow.AddDays(30),
+                signingCredentials: new SigningCredentials(
+                        key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
+                        algorithm: SecurityAlgorithms.HmacSha256
+                        )
+                );
+            return new JwtSecurityTokenHandler().WriteToken(tokenUser);
+        }
+
         public static string GenerateJWTTokenStudent(ViewUser user, string roleName)
         {
             JwtSecurityToken tokenUser = new JwtSecurityToken(
@@ -95,37 +124,6 @@ namespace UniCEC.Data.JWT
                  new Claim("RoleId", user.RoleId.ToString()),
                  //Role
                  new Claim(ClaimTypes.Role, roleName)
-                },
-                expires: DateTime.UtcNow.AddDays(30),
-                signingCredentials: new SigningCredentials(
-                        key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
-                        algorithm: SecurityAlgorithms.HmacSha256
-                        )
-                ); ; ;
-            return new JwtSecurityTokenHandler().WriteToken(tokenUser);
-        }
-
-
-
-        //tạo tạm để trả về FE cho User tiếp tục update
-        public static string GenerateJWTTokenUserTemp(UserModelTemporary user)
-        {
-            JwtSecurityToken tokenUser = new JwtSecurityToken(
-                issuer: "https://securetoken.google.com/unics-e46a4",
-                audience: "unics-e46a4",
-                claims: new[] {
-                 //Id
-                 new Claim("Id", user.Id.ToString()),
-                 //fullname
-                 new Claim("Fullname", user.Fullname),
-                 //University
-                 new Claim("UniversityId", user.UniversityId.ToString()),
-                 //Avatar
-                 new Claim ("Avatar", user.Avatar),
-                 //Role Id
-                 new Claim("RoleId", user.RoleId.ToString()),
-                 //Role
-                 new Claim(ClaimTypes.Role, user.RoleName),
                 },
                 expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: new SigningCredentials(

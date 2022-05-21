@@ -7,11 +7,12 @@ namespace UniCEC.Business.Services.TermSvc
 {
     public interface ITermService
     {
-        public Task<ViewTerm> GetById(int clubId, int id);
-        public Task<PagingResult<ViewTerm>> GetByClub(int clubId, PagingRequest request);        
-        public Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request);
+        public Task<ViewTerm> GetById(string token, int clubId, int id);
+        public Task<ViewTerm> GetCurrentTermByClub(string token, int clubId);        
+        public Task<PagingResult<ViewTerm>> GetByConditions(string token, int clubId, TermRequestModel request);
         public Task<ViewTerm> Insert(TermInsertModel term);
-        public Task Update(TermUpdateModel term);
-        public Task Delete(int id);
+        public Task Update(string token, TermUpdateModel term, int clubId);
+        //public Task Delete(int id);
+        public Task CloseOldTermByClub(int clubId);
     }
 }

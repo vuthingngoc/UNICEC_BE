@@ -10,9 +10,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 {
     public interface IUserRepo : IRepository<User>
     {
-        public Task<ViewUser> GetById(int id);
+        public Task<ViewUser> GetById(int id, bool isFullInfo);
         public Task<PagingResult<ViewUser>> GetUserByUniversity(int universityId, UserStatus status, PagingRequest request);
-        public Task<ViewUser> GetByUserCode(string userCode);
         public Task<ViewUser> GetByEmail(string email);
         public Task<PagingResult<ViewUser>> GetByCondition(UserRequestModel request);
         public Task<bool> CheckExistedEmail(string email);

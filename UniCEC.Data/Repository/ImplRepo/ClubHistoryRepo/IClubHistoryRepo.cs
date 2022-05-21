@@ -10,13 +10,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 {
     public interface IClubHistoryRepo : IRepository<ClubHistory>
     {
-        public Task<PagingResult<ViewClubHistory>> GetAll(int clubId, PagingRequest request);
         public Task<ViewClubHistory> GetById(int id);
-        public Task<PagingResult<ViewClubHistory>> GetByConditions(ClubHistoryRequestModel request);
-        public Task<List<int>> GetIdsByMember(int memberId);
+        public Task<PagingResult<ViewClubHistory>> GetByConditions(int clubId, ClubHistoryRequestModel request);
+        public Task<List<ClubHistory>> GetCurrentHistoryByClub(int clubId);
         public Task<int> GetCurrentTermByClub(int clubId);
         public Task<bool> UpdateMemberRole(int memberId, int clubRoleId);
         public Task<int> DeleteMember(int memberId);
+        public Task UpdateEndTerm(int clubId);
 
         // Tien Anh 
         public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
