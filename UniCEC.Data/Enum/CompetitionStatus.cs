@@ -13,8 +13,6 @@ namespace UniCEC.Data.Enum
         HappeningSoon,
         Happening,
         Ending,
-        Canceling,
-        NotAssigned,
-
+        Canceling,     
     }
 }

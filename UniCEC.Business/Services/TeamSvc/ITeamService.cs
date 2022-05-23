@@ -8,7 +8,7 @@ namespace UniCEC.Business.Services.TeamSvc
     {
         public Task<PagingResult<ViewTeam>> GetAllPaging(PagingRequest request);
         public Task<ViewTeam> GetByTeamId(int id);
-        public Task<ViewTeam> Insert(TeamInsertModel team);
+        public Task<ViewTeam> InsertTeam(TeamInsertModel team, string token);
         public Task<bool> Update(TeamUpdateModel team);
         public Task<bool> Delete(int id);
     }

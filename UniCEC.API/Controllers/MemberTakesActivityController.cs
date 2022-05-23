@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -28,7 +29,7 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet("tasks")]
-        [SwaggerOperation(Summary = "Get tasks by conditions, 0.Doing , 1.DoneOnTime , 2.Late")]
+        [SwaggerOperation(Summary = "Get tasks by conditions, 0.Doing , 1.LateTime, 2.Finished, 3.FinishedLate, 4.Approved, 5.Rejected")]
         public async Task<IActionResult> GetTaskByConditions([FromQuery] MemberTakesActivityRequestModel request)
         {
             try
@@ -69,6 +70,7 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<MemberTakesActivityController>
+        [Authorize(Roles = "Student")]
         [HttpPost]
         [SwaggerOperation(Summary = "Insert member in task - Student ")]
         public async Task<IActionResult> InsertMemberTakesActivity([FromBody] MemberTakesActivityInsertModel model)
@@ -80,7 +82,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewMemberTakesActivity result = await _memberTakesActivityService.Insert(model);
+                ViewMemberTakesActivity result = await _memberTakesActivityService.Insert(model, token);
                 if (result != null)
                 {
 
@@ -115,9 +117,10 @@ namespace UniCEC.API.Controllers
 
 
         // PUT api/<MemberTakesActivityController>/5
-        [HttpPut("{id}")]
+        [Authorize(Roles = "Student")]
+        [HttpPut("submit-activity")]
         [SwaggerOperation(Summary = "Member submit task by Id - Student")]
-        public async Task<IActionResult> MemberSubmitTask(int id)
+        public async Task<IActionResult> MemberSubmitTask([FromBody] SubmitClubActivityModel model)
         {
             try
             {
@@ -127,7 +130,42 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 Boolean check = false;
-                check = await _memberTakesActivityService.Update(id);
+                check = await _memberTakesActivityService.Update(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // PUT api/<MemberTakesActivityController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("confirm-activity/{id}")]
+        [SwaggerOperation(Summary = "Club Leader is Approved task of member - Student")]
+        public async Task<IActionResult> ApprovedOrRejectedTask([FromBody] ConfirmClubActivityModel model)
+        {
+            try
+            {
+                //JWT
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                Boolean check = false;
+                check = await _memberTakesActivityService.ApprovedOrRejectedTask(model, token);
                 if (check)
                 {
                     return Ok();

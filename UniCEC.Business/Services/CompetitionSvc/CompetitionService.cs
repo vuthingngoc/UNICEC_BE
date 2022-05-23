@@ -95,7 +95,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
         {
             List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Public);
-            if(result == null) throw new NullReferenceException();
+            if (result == null) throw new NullReferenceException();
             return result;
         }
 
@@ -163,86 +163,89 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                         if (checkDate)
                         {
-                            //------------ Insert Competition
-                            //ở trong trường hợp này phân biệt EVENT - COMPETITION
-                            //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-                            Competition competition = new Competition();
-                            competition.CompetitionTypeId = model.CompetitionTypeId;
-                            competition.Address = model.Address;
-                            competition.Name = model.Name;
-                            // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-                            competition.NumberOfTeam = model.NumberOfTeam;
-                            competition.NumberOfParticipation = model.NumberOfParticipations;
-                            competition.StartTime = model.StartTime;
-                            competition.EndTime = model.EndTime;
-                            competition.StartTimeRegister = model.StartTimeRegister;
-                            competition.EndTimeRegister = model.EndTimeRegister;
-                            competition.SeedsPoint = model.SeedsPoint;
-                            competition.SeedsDeposited = model.SeedsDeposited;
-                            competition.SeedsCode = await CheckExistCode();
-                            //nếu là leader -> IsSponsor == false
-                            competition.IsSponsor = false;
-                            //auto status = NotAssigned 
-                            //-> tạo thành công nhưng chưa đc assigned cho 1 or các clb
-                            competition.Status = CompetitionStatus.NotAssigned;
-                            competition.Public = model.Public;
-                            //auto = 0
-                            competition.View = 0;
-                            int competition_Id = await _competitionRepo.Insert(competition);
-                            if (competition_Id > 0)
+                            if (CheckNumber_Team(model.NumberOfTeam, model.NumberOfParticipations))
                             {
-                                Competition comp = await _competitionRepo.Get(competition_Id);
-
-                                //------------ Insert Competition-In-Department -----------(OPTIONAL 1)
+                                
+                                //Check FK
                                 if (model.ListDepartmentId.Count > 0)
                                 {
                                     bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
-                                    if (departmentBelongToUni)
-                                    {
-                                        foreach (int dep_id in model.ListDepartmentId)
-                                        {
-                                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                                            {
-                                                DepartmentId = dep_id,
-                                                CompetitionId = competition_Id
-                                            };
-                                            await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                                        }
-                                    }// end if CheckDepartmentId
-                                    else
+                                    if (departmentBelongToUni == false)
                                     {
                                         throw new ArgumentException("Department Id not have in University");
-                                    }
+                                    }// end if CheckDepartmentId                                  
                                 }
 
-                                //------------ Insert Competition-Entities-----------(OPTIONAL 2)
-                                //
-                                //... to be continuted
-
-                                //------------ Insert Competition-In-Club
-                                CompetitionInClub competitionInClub = new CompetitionInClub();
-                                competitionInClub.ClubId = model.ClubId;
-                                competitionInClub.CompetitionId = competition_Id;
-                                int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
-
-                                if (compInClub_Id > 0)
+                                //------------ Insert Competition
+                                //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                                //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                                Competition competition = new Competition();
+                                competition.CompetitionTypeId = model.CompetitionTypeId;
+                                competition.Address = model.Address;
+                                competition.Name = model.Name;
+                                // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                                competition.NumberOfTeam = model.NumberOfTeam;
+                                competition.NumberOfParticipation = model.NumberOfParticipations;
+                                competition.StartTime = model.StartTime;
+                                competition.EndTime = model.EndTime;
+                                competition.StartTimeRegister = model.StartTimeRegister;
+                                competition.EndTimeRegister = model.EndTimeRegister;
+                                competition.SeedsPoint = model.SeedsPoint;
+                                competition.SeedsDeposited = model.SeedsDeposited;
+                                competition.SeedsCode = await CheckExistCode();
+                                //nếu là leader -> IsSponsor == false
+                                competition.IsSponsor = false;                               
+                                competition.Status = CompetitionStatus.Launching;
+                                competition.Public = model.Public;
+                                //auto = 0
+                                competition.View = 0;
+                                int competition_Id = await _competitionRepo.Insert(competition);
+                                if (competition_Id > 0)
                                 {
-                                    //---------Update Status Competition
-                                    Competition comp_Update = await _competitionRepo.Get(competition_Id);
-                                    comp_Update.Status = CompetitionStatus.Launching;
-                                    await _competitionRepo.Update();
-                                    ViewCompetition viewCompetition = await TransformViewModel(comp);
-                                    return viewCompetition;
+                                    Competition comp = await _competitionRepo.Get(competition_Id);
 
-                                }//end compInClub_Id > 0
+                                    //------------ Insert Competition-In-Department -----------
+
+                                    foreach (int dep_id in model.ListDepartmentId)
+                                    {
+                                        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                        {
+                                            DepartmentId = dep_id,
+                                            CompetitionId = competition_Id
+                                        };
+                                        await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                                    }
+
+
+                                    //------------ Insert Competition-Entities-----------
+                                    //
+                                    //... to be continuted
+
+                                    //------------ Insert Competition-In-Club
+                                    CompetitionInClub competitionInClub = new CompetitionInClub();
+                                    competitionInClub.ClubId = model.ClubId;
+                                    competitionInClub.CompetitionId = competition_Id;
+                                    int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
+
+                                    if (compInClub_Id > 0)
+                                    {                                                                          
+                                        ViewCompetition viewCompetition = await TransformViewModel(comp);
+                                        return viewCompetition;
+
+                                    }//end compInClub_Id > 0
+                                    else
+                                    {
+                                        throw new ArgumentException("Add Competition Or Event Failed");
+                                    }
+                                }//end if competition_Id > 0
                                 else
                                 {
                                     throw new ArgumentException("Add Competition Or Event Failed");
                                 }
-                            }//end if competition_Id > 0
+                            }//end if check Number Team
                             else
                             {
-                                throw new ArgumentException("Add Competition Or Event Failed");
+                                throw new ArgumentException("Number of Team and Number of Member not suitable");
                             }
                         }//end if check date
                         else
@@ -293,85 +296,86 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                 if (checkDate)
                 {
-                    //ở trong trường hợp này phân biệt EVENT - COMPETITION
-                    //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-                    Competition competition = new Competition();
-                    competition.CompetitionTypeId = model.CompetitionTypeId;
-                    competition.Address = model.Address;
-                    competition.Name = model.Name;
-                    // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-                    competition.NumberOfTeam = model.NumberOfTeam;
-                    competition.NumberOfParticipation = model.NumberOfParticipations;
-                    competition.StartTime = model.StartTime;
-                    competition.EndTime = model.EndTime;
-                    competition.StartTimeRegister = model.StartTimeRegister;
-                    competition.EndTimeRegister = model.EndTimeRegister;
-                    competition.SeedsPoint = model.SeedsPoint;
-                    competition.SeedsDeposited = model.SeedsDeposited;
-                    competition.SeedsCode = await CheckExistCode();
-                    competition.IsSponsor = true;
-                    //auto status = NotAssigned 
-                    //-> tạo thành công nhưng chưa đc assigned cho 1 Sponsor or các Sponsor
-                    competition.Status = CompetitionStatus.NotAssigned;
-                    //auto true
-                    competition.Public = true;
-                    //auto = 0
-                    competition.View = 0;
-                    int competition_Id = await _competitionRepo.Insert(competition);
-                    if (competition_Id > 0)
+                    if (CheckNumber_Team(model.NumberOfTeam, model.NumberOfParticipations))
                     {
-                        Competition comp = await _competitionRepo.Get(competition_Id);
-
-                        //------------ Competition-In-Department -----------(OPTIONAL 1)
+                        //Check FK 
                         if (model.ListDepartmentId.Count > 0)
                         {
                             bool departmentInSystem = await CheckDepartmentId(model.ListDepartmentId);
-                            if (departmentInSystem)
-                            {
-                                foreach (int dep_id in model.ListDepartmentId)
-                                {
-                                    CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                                    {
-                                        DepartmentId = dep_id,
-                                        CompetitionId = comp.Id
-                                    };
-                                    await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                                }
-                            }// end if CheckDepartmentId
-                            else
+                            if (departmentInSystem == false)
                             {
                                 throw new ArgumentException("Department Id not have in System");
-                            }
+                            }// end if CheckDepartmentId                          
                         }
 
-                        //------------ Insert Competition-Entities-----------(OPTIONAL 2)
-                        //
-                        //... to be continuted
-
-
-                        //------------ Sponsor-In-Competition -----------
-                        SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                        sponsorInCompetition.SponsorId = SponsorId;
-                        sponsorInCompetition.CompetitionId = competition_Id;
-                        int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
-
-                        if (spoInCom_Id > 0)
+                        //ở trong trường hợp này phân biệt EVENT - COMPETITION
+                        //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
+                        Competition competition = new Competition();
+                        competition.CompetitionTypeId = model.CompetitionTypeId;
+                        competition.Address = model.Address;
+                        competition.Name = model.Name;
+                        // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
+                        competition.NumberOfTeam = model.NumberOfTeam;
+                        competition.NumberOfParticipation = model.NumberOfParticipations;
+                        competition.StartTime = model.StartTime;
+                        competition.EndTime = model.EndTime;
+                        competition.StartTimeRegister = model.StartTimeRegister;
+                        competition.EndTimeRegister = model.EndTimeRegister;
+                        competition.SeedsPoint = model.SeedsPoint;
+                        competition.SeedsDeposited = model.SeedsDeposited;
+                        competition.SeedsCode = await CheckExistCode();
+                        competition.IsSponsor = true;
+                        competition.Status = CompetitionStatus.Launching;
+                        //auto true
+                        competition.Public = true;
+                        //auto = 0
+                        competition.View = 0;
+                        int competition_Id = await _competitionRepo.Insert(competition);
+                        if (competition_Id > 0)
                         {
-                            //---------Update Status Competition
-                            Competition comp_Update = await _competitionRepo.Get(competition_Id);
-                            comp_Update.Status = CompetitionStatus.Launching;
-                            await _competitionRepo.Update();
-                            ViewCompetition viewCompetition = await TransformViewModel(comp);
-                            return viewCompetition;
-                        }//end if spoInCom_Id > 0
+                            Competition comp = await _competitionRepo.Get(competition_Id);
+
+
+                            //------------ Insert Competition-In-Department -----------
+                            foreach (int dep_id in model.ListDepartmentId)
+                            {
+                                CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                {
+                                    DepartmentId = dep_id,
+                                    CompetitionId = comp.Id
+                                };
+                                await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                            }
+
+                            //------------ Insert Competition-Entities-----------(OPTIONAL 2)
+                            //
+                            //... to be continuted
+
+
+                            //------------ Sponsor-In-Competition -----------
+                            SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
+                            sponsorInCompetition.SponsorId = SponsorId;
+                            sponsorInCompetition.CompetitionId = competition_Id;
+                            int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+
+                            if (spoInCom_Id > 0)
+                            {                               
+                                ViewCompetition viewCompetition = await TransformViewModel(comp);
+                                return viewCompetition;
+                            }//end if spoInCom_Id > 0
+                            else
+                            {
+                                throw new ArgumentException("Add Competition Or Event Failed");
+                            }
+                        }//end if competition_Id > 0
                         else
                         {
                             throw new ArgumentException("Add Competition Or Event Failed");
                         }
-                    }//end if competition_Id > 0
+                    }
                     else
                     {
-                        throw new ArgumentException("Add Competition Or Event Failed");
+                        throw new ArgumentException("Number of Team and Number of Member not suitable");
                     }
                 }//end if check date
                 else
@@ -762,7 +766,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return code;
         }
-
+        //----------------------------------------------------------------------------------------Check
         //check exist code
         private async Task<string> CheckExistCode()
         {
@@ -898,6 +902,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
 
             return result;
+        }
+
+
+        //Check number of team - number of member in Team
+        private bool CheckNumber_Team(int numberOfTeam, int numberOfMember)
+        {
+            if (numberOfMember % numberOfTeam == 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         //----------------------------------------------------------------------------------------Competition-In-Club

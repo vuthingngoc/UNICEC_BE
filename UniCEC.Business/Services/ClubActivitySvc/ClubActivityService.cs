@@ -167,7 +167,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                             clubActivity.Beginning = model.Beginning;
                             clubActivity.Ending = model.Ending;
                             //Check Status
-                            clubActivity.Status = ClubActivityStatus.HappenningSoon;
+                            clubActivity.Status = ClubActivityStatus.Open;
                             //Check Code
                             clubActivity.SeedsCode = await checkExistCode();
 
@@ -441,13 +441,13 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         //get number of member doing task
                         int NumMemberDoingTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Doing);
                         //get number of member submit on time task
-                        int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.SubmitOnTime);
+                        int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Finished);
                         //get number of member submit on late task
-                        int NumMemberDoneLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.SubmitOnLate);
+                        int NumMemberDoneLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.FinishedLate);
                         //get number of member late task
                         int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.LateTime);
                         //get number of member out task
-                        int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.OutActivity);
+                        //int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Approved);
 
                         ViewProcessClubActivity vpca = new ViewProcessClubActivity()
                         {
@@ -467,7 +467,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                             NumMemberDoneTask = NumMemberDoneTask,
                             NumMemberDoneLateTask = NumMemberDoneLateTask,
                             NumMemberLateTask = NumMemberLateTask,
-                            NumMemberOutTask = NumMemberOutTask
+                            //NumMemberOutTask = NumMemberOutTask
                         };
                         viewProcessClubActivities.Add(vpca);
                     }
