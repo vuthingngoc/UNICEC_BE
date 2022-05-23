@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -19,7 +20,7 @@ namespace UniCEC.Data.Models.DB
         public string Description { get; set; }
         public int NumberOfStudentInTeam { get; set; }
         public string InvitedCode { get; set; }
-        public int Status { get; set; }
+        public TeamStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual TeamRole TeamRole { get; set; }

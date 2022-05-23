@@ -14,10 +14,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
         //check mem take task
         public Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId);
-        public Task<bool> CheckMemberTakesTask(int MemberTakeActivityId, int UserId, int UniversityId);
-        //Check number of member in task
-        //public Task<bool> AddNumOfMemInTask(int ClubActivityId);
-        //Get number of member in task
+        public Task<bool> CheckTaskBelongToStudent(int MemberTakesActivityId, int UserId, int UniversityId);    
         public Task<int> GetNumOfMemInTask(int ClubActivityId);
         //Get number of member in task with status
         public Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status);

@@ -120,7 +120,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPut("submit-activity")]
         [SwaggerOperation(Summary = "Member submit task by Id - Student")]
-        public async Task<IActionResult> MemberSubmitTask([FromBody] SubmitClubActivityModel model)
+        public async Task<IActionResult> MemberSubmitTask([FromBody] SubmitMemberTakesActivity model)
         {
             try
             {
@@ -140,6 +140,14 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -153,9 +161,9 @@ namespace UniCEC.API.Controllers
 
         // PUT api/<MemberTakesActivityController>/5
         [Authorize(Roles = "Student")]
-        [HttpPut("confirm-activity/{id}")]
+        [HttpPut("confirm-activity")]
         [SwaggerOperation(Summary = "Club Leader is Approved task of member - Student")]
-        public async Task<IActionResult> ApprovedOrRejectedTask([FromBody] ConfirmClubActivityModel model)
+        public async Task<IActionResult> ApprovedOrRejectedTask([FromBody] ConfirmMemberTakesActivity model)
         {
             try
             {
@@ -174,6 +182,18 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (DbUpdateException)
             {

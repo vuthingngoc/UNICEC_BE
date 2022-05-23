@@ -12,8 +12,8 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         public Task<ViewMemberTakesActivity> Insert(MemberTakesActivityInsertModel memberTakesActivity, string token);
 
         //------------------------------------------------sau này sẽ có comment kèm theo
-        public Task<bool> Update(SubmitClubActivityModel model, string token);
-        public Task<bool> ApprovedOrRejectedTask(ConfirmClubActivityModel model, string token);
+        public Task<bool> Update(SubmitMemberTakesActivity model, string token);
+        public Task<bool> ApprovedOrRejectedTask(ConfirmMemberTakesActivity model, string token);
 
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
 

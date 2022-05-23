@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
 {
-    public class SubmitClubActivityModel
+    public class SubmitMemberTakesActivity
     {
-        [JsonPropertyName("club_activity_id")]
-        public int ClubActivityId { get; set; }
+        [JsonPropertyName("member_takes_activity_id")]
+        public int MemberTakesActivityId { get; set; }
     }
 }
