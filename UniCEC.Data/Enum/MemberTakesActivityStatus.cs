@@ -10,8 +10,9 @@ namespace UniCEC.Data.Enum
     {
         Doing,
         LateTime,
-        SubmitOnTime,
-        SubmitOnLate,
-        OutActivity,
+        Finished,
+        FinishedLate,
+        Approved,
+        Rejected,
     }
 }

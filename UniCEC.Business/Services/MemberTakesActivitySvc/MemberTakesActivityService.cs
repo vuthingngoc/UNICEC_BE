@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -68,7 +70,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         }
 
-        public async Task<ViewMemberTakesActivity> Insert(MemberTakesActivityInsertModel model)
+        public async Task<ViewMemberTakesActivity> Insert(MemberTakesActivityInsertModel model, string token)
         {
             try
             {
@@ -76,23 +78,20 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     || model.ClubActivityId == 0
                     || model.TermId == 0)
                     throw new ArgumentNullException("MemberId Null || ClubActivityId Null || TermId Null");
-              
+
                 //
                 DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
                 ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
                 DateTime deadline = clubActivity.Ending;
                 //------------------------------------check mem in club
                 int clubId = clubActivity.ClubId;
-
                 bool MemInClub_Term = await _clubHistoryRepo.CheckMemberInClub(clubId, model.MemberId, model.TermId);
 
                 //------------------------------------Add number of member join this clubActivity     
                 bool NumOfMem_InTask = false;
-                //get club Activity
-                ClubActivity ca = await _clubActivityRepo.Get(model.ClubActivityId);
-                if (ca != null)
+                if (clubActivity != null)
                 {
-                    ca.NumOfMember = ca.NumOfMember + 1;
+                    clubActivity.NumOfMember = clubActivity.NumOfMember + 1;
                     await _clubActivityRepo.Update();
                     NumOfMem_InTask = true;
                 }
@@ -100,7 +99,9 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 {
                     //------------------------------------Check mem takes club activity
                     bool MemTakesTask = await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, model.MemberId);
-                    if (MemTakesTask)
+                    //true  -> created
+                    //false -> can insert
+                    if (MemTakesTask == false)
                     {
                         //------------------------------------Check Club Activity is Happenning Status can add                       
                         bool checkStatusClubActivity = await CheckStatusClubActivity(model.ClubActivityId);
@@ -139,7 +140,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         } // end if checkStatusClubActivity
                         else
                         {
-                            throw new ArgumentException("This task is not openning now");
+                            throw new ArgumentException("This task is Ending");
                         }
                     }// end if MemTakesTask
                     else
@@ -159,44 +160,63 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         }
 
         //update-task
-        public async Task<bool> Update(int id)
+        public async Task<bool> Update(SubmitClubActivityModel model, string token)
         {
             try
             {
-                MemberTakesActivity mta = await _memberTakesActivityRepo.Get(id);
-                if (mta != null)
+
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+
+                //CHECK Member-Take-Activity ID can't null
+                if (model.ClubActivityId == 0) throw new ArgumentNullException("Member Take Activity can't Null !");
+
+                //CHECK Task belong to this user
+                if (await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, UserId, UniversityId))
                 {
-                    //check date
-                    //LocalTime
-                    DateTimeOffset localTime = new LocalTime().GetLocalTime();
-                    //
-                    int result = DateTime.Compare(localTime.DateTime, mta.Deadline);
-                    //1. earlier 
-                    if (result < 0)
+                    MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.ClubActivityId);
+                    if (mta != null)
                     {
-                        //date end time
-                        mta.EndTime = localTime.DateTime;
+                        //check date
+                        //LocalTime
+                        DateTimeOffset localTime = new LocalTime().GetLocalTime();
                         //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnTime;
+                        int result = DateTime.Compare(localTime.DateTime, mta.Deadline);
+                        //1. earlier 
+                        if (result < 0)
+                        {
+                            //date end time
+                            mta.EndTime = localTime.DateTime;
+                            //
+                            mta.Status = Data.Enum.MemberTakesActivityStatus.Finished;
+                        }
+                        //2. on time
+                        if (result == 0)
+                        {
+                            //date end time
+                            mta.EndTime = localTime.DateTime;
+                            //
+                            mta.Status = Data.Enum.MemberTakesActivityStatus.Finished;
+                        }
+                        //3. late
+                        if (result > 0)
+                        {
+                            //date end time
+                            mta.EndTime = localTime.DateTime;
+                            //
+                            mta.Status = Data.Enum.MemberTakesActivityStatus.FinishedLate;
+                        }
+                        await _memberTakesActivityRepo.Update();
+                        return true;
                     }
-                    //2. on time
-                    if (result == 0)
-                    {
-                        //date end time
-                        mta.EndTime = localTime.DateTime;
-                        //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnTime;
-                    }
-                    //3. late
-                    if (result > 0)
-                    {
-                        //date end time
-                        mta.EndTime = localTime.DateTime;
-                        //
-                        mta.Status = Data.Enum.MemberTakesActivityStatus.SubmitOnLate;
-                    }
-                    await _memberTakesActivityRepo.Update();
-                    return true;
+                }//end check task belong to this user
+                else
+                {
+                    throw new ArgumentException("This task not belong to this Student");
                 }
                 return false;
             }
@@ -205,6 +225,16 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 throw;
             }
         }
+
+        //role leader can update
+        public Task<bool> ApprovedOrRejectedTask(ConfirmClubActivityModel model, string token)
+        {
+            //check role 
+
+            throw new NotImplementedException();
+        }
+
+
 
         //Get-All-Taskes-By-Conditions
         public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request)
@@ -220,7 +250,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             }
         }
 
-        //Check Status Club Activity
+        //Check Status Club Activity Happenning or Open can join
         private async Task<bool> CheckStatusClubActivity(int clubActivityId)
         {
             try
@@ -230,7 +260,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 //
                 if (ca != null)
                 {
-                    if (ca.Status == ClubActivityStatus.Happenning)
+                    if (ca.Status == ClubActivityStatus.Happenning || ca.Status == ClubActivityStatus.Open)
                     {
                         return true;
                     }
@@ -249,5 +279,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 throw;
             }
         }
+
+
     }
 }
