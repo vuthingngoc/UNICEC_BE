@@ -48,8 +48,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         }
 
-
-
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllPaging(PagingRequest request)
         {
             throw new NotImplementedException();
@@ -266,7 +264,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         }
                         if (role)
                         {
-
                             //Approved
                             if (((int)model.Status) == 4)
                             {
@@ -350,7 +347,5 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 throw;
             }
         }
-
-
     }
 }
