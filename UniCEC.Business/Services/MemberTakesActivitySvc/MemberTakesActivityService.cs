@@ -10,6 +10,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.Business.Services.MemberTakesActivitySvc
@@ -46,8 +47,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             };
 
         }
-
-
 
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllPaging(PagingRequest request)
         {
@@ -160,11 +159,10 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         }
 
         //update-task
-        public async Task<bool> Update(SubmitClubActivityModel model, string token)
+        public async Task<bool> Update(SubmitMemberTakesActivity model, string token)
         {
             try
             {
-
                 var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
                 var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
                 var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
@@ -173,12 +171,12 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 int UniversityId = Int32.Parse(UniversityIdClaim.Value);
 
                 //CHECK Member-Take-Activity ID can't null
-                if (model.ClubActivityId == 0) throw new ArgumentNullException("Member Take Activity can't Null !");
+                if (model.MemberTakesActivityId == 0) throw new ArgumentNullException("Member Take Activity can't Null !");
 
                 //CHECK Task belong to this user
-                if (await _memberTakesActivityRepo.CheckMemberTakesTask(model.ClubActivityId, UserId, UniversityId))
+                if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(model.MemberTakesActivityId, UserId, UniversityId))
                 {
-                    MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.ClubActivityId);
+                    MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
                     if (mta != null)
                     {
                         //check date
@@ -224,14 +222,84 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             {
                 throw;
             }
+
         }
 
         //role leader can update
-        public Task<bool> ApprovedOrRejectedTask(ConfirmClubActivityModel model, string token)
+        public async Task<bool> ApprovedOrRejectedTask(ConfirmMemberTakesActivity model, string token)
         {
-            //check role 
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
 
-            throw new NotImplementedException();
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                if (model.MemberTakesActivityId == 0 || model.TermId == 0 || model.MemberId == 0 || ((int)model.Status) < 3)
+                    throw new ArgumentNullException("Member Takes Activity Id can't Null ! || Term Id can't null || Member Id can't Null || Status < 3 can't accept, 4.Approved , 5.Rejected");
+
+                //check Member Take Activity
+                MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
+                if (mta != null)
+                {
+                    //check role 
+                    bool role = false;
+                    //------------------------------------check mem 
+                    ClubActivity clubActivity = await _clubActivityRepo.Get(mta.ClubActivityId);
+                    GetMemberInClubModel conditions = new GetMemberInClubModel()
+                    {
+                        UserId = UserId,
+                        ClubId = clubActivity.ClubId,
+                        TermId = model.TermId
+                    };
+                    ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                    //------------ Check Mem in that club
+                    if (infoClubMem != null)
+                    {
+                        //------------ Check Role Member Is Leader, 
+                        if (infoClubMem.ClubRoleName.Equals("Leader"))
+                        {
+                            role = true;
+                        }
+                        if (role)
+                        {
+                            //Approved
+                            if (((int)model.Status) == 4)
+                            {
+                                mta.Status = MemberTakesActivityStatus.Approved;
+                                await _memberTakesActivityRepo.Update();
+                                return true;
+                            }
+                            //Rejected
+                            if (((int)model.Status) == 5)
+                            {
+                                mta.Status = MemberTakesActivityStatus.Rejected;
+                                await _memberTakesActivityRepo.Update();
+                                return true;
+                            }
+                            return false;
+
+                        }//end check role
+                        else
+                        {
+                            throw new ArgumentException("You don't have permision to confirm this task");
+                        }
+                    }//end check mem in club
+                    else
+                    {
+                        throw new UnauthorizedAccessException("You aren't a member in this club");
+                    }
+                }//end check 
+                else
+                {
+                    throw new ArgumentException("Not found this Member Take Activity Id in system");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
 
@@ -279,7 +347,5 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 throw;
             }
         }
-
-
     }
 }

@@ -65,7 +65,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             }
         }
 
-        public async Task<bool> CheckMemberTakesTask(int MemberTakeActivityId, int UserId, int UniversityId)
+        public async Task<bool> CheckTaskBelongToStudent(int MemberTakeActivityId, int UserId, int UniversityId)
         {
             //User -> Uni -> Member -> ClubHistory -> Club -> ClubActivity -> MemberTakeTaskActivity
             var query = from us in context.Users
