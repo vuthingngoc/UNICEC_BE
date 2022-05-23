@@ -32,7 +32,7 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<MemberTakesActivityController>
         [HttpGet]
-        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.Launching, 1.HappenningSoon, 2.Registering, 3.Happening, 4.Ending, 5.Canceling, 6.NotAssigned")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.Launching, 1.HappenningSoon, 2.Registering, 3.Happening, 4.Ending, 5.Canceling")]
         public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
         {
             try

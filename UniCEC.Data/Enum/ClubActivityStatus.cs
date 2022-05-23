@@ -8,7 +8,7 @@ namespace UniCEC.Data.Enum
 {
     public enum ClubActivityStatus
     {
-        HappenningSoon,
+        Open,
         Happenning,
         Ending,
         Canceling,
