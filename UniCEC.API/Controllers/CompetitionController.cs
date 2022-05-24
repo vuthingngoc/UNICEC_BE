@@ -79,8 +79,7 @@ namespace UniCEC.API.Controllers
             {
                 ViewCompetition result = await _competitionService.GetById(id);
 
-                //Not has data
-                return Ok(new object());
+                return Ok(result);
 
             }
             catch (NullReferenceException)

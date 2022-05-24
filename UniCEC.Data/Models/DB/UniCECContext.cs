@@ -20,6 +20,7 @@ namespace UniCEC.Data.Models.DB
             _configuration = configuration;
         }
 
+
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
         public virtual DbSet<City> Cities { get; set; }
@@ -555,6 +556,8 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.TeamId).HasColumnName("TeamID");
 
+                entity.Property(e => e.TeamRoleId).HasColumnName("TeamRoleID");
+
                 entity.HasOne(d => d.Participant)
                     .WithMany(p => p.ParticipantInTeams)
                     .HasForeignKey(d => d.ParticipantId)
@@ -562,10 +565,16 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__Participa__Parti__71D1E811");
 
                 entity.HasOne(d => d.Team)
-                    .WithMany(p => p.ParticipantInTeams)
+                    .WithMany(p => p.ParticipantInTeamTeams)
                     .HasForeignKey(d => d.TeamId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Participa__TeamI__72C60C4A");
+
+                entity.HasOne(d => d.TeamRole)
+                    .WithMany(p => p.ParticipantInTeamTeamRoles)
+                    .HasForeignKey(d => d.TeamRoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Participa__TeamR__778AC167");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -673,19 +682,11 @@ namespace UniCEC.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.Property(e => e.TeamRoleId).HasColumnName("TeamRoleID");
-
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Teams)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Team__Competitio__76969D2E");
-
-                entity.HasOne(d => d.TeamRole)
-                    .WithMany(p => p.Teams)
-                    .HasForeignKey(d => d.TeamRoleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Team__TeamRoleID__778AC167");
             });
 
             modelBuilder.Entity<TeamRole>(entity =>

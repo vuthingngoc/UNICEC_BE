@@ -4,8 +4,7 @@ namespace UniCEC.Data.ViewModels.Entities.ParticipantInTeam
 {
     public class ParticipantInTeamInsertModel
     {
-        public int TeamId { get; set; }
-        [JsonPropertyName("participant_id")]
-        public int ParticipantId { get; set; }
+        [JsonPropertyName("invited_code")]
+        public string InvitedCode { get; set; }
     }
 }

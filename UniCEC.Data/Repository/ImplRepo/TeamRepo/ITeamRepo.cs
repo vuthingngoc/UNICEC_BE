@@ -8,5 +8,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
     {
         public Task<bool> CheckExistCode(string code);
 
+        public Task<bool> CheckNumberOfTeam(int CompetitionId);
+
+        public Task<Team> GetTeamByInvitedCode(string invitedCode);
     }
 }

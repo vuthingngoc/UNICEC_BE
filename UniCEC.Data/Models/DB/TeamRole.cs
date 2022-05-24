@@ -9,12 +9,14 @@ namespace UniCEC.Data.Models.DB
     {
         public TeamRole()
         {
-            Teams = new HashSet<Team>();
+            ParticipantInTeamTeamRoles = new HashSet<ParticipantInTeam>();
+            ParticipantInTeamTeams = new HashSet<ParticipantInTeam>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<Team> Teams { get; set; }
+        public virtual ICollection<ParticipantInTeam> ParticipantInTeamTeamRoles { get; set; }
+        public virtual ICollection<ParticipantInTeam> ParticipantInTeamTeams { get; set; }
     }
 }
