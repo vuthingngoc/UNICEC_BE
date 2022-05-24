@@ -71,6 +71,7 @@ using UniCEC.Business.Services.TermSvc;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
 
 namespace UniCEC.API
 {
@@ -161,6 +162,7 @@ namespace UniCEC.API
             services.AddTransient<ISponsorRepo, SponsorRepo>();
             services.AddTransient<ISponsorInCompetitionRepo, SponsorInCompetitionRepo>();
             services.AddTransient<ITeamRepo, TeamRepo>();
+            services.AddTransient<ITeamRoleRepo, TeamRoleRepo>();
             services.AddTransient<ITermRepo, TermRepo>();
             services.AddTransient<IUniversityRepo, UniversityRepo>();
             services.AddTransient<IUserRepo, UserRepo>();

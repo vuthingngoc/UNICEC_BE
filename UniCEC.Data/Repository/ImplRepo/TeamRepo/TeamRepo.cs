@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {
@@ -22,6 +23,48 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 return check;
             }
             return check;
+        }
+
+        public async Task<bool> CheckNumberOfTeam(int CompetitionId)
+        {
+            var query = from t in context.Teams
+                        where t.CompetitionId == CompetitionId
+                        select t;
+
+            var queryCompetition = from c in context.Competitions
+                                   where c.Id == CompetitionId
+                                   select c;
+
+            Competition comp = queryCompetition.FirstOrDefault();
+            int numberOfTeam = comp.NumberOfTeam;
+            int count = await query.CountAsync();
+            if (count < numberOfTeam)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<Team> GetTeamByInvitedCode(string invitedCode)
+        {
+            var query = from t in context.Teams
+                        where t.InvitedCode == invitedCode
+                        select t;
+
+            Team team = await query.FirstOrDefaultAsync();
+
+            if (team != null)
+            {
+                return team;
+            }
+            else
+            {
+                return null;
+            }
+
         }
     }
 }
