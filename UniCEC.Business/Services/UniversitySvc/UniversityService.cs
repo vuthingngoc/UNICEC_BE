@@ -160,9 +160,11 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (university != null)
                 {
                     //
-                    university.Status = false;
-                    await _universityRepo.Update();
-                    return true;
+                    //university.Status = false;
+                    //await _universityRepo.Update();
+                    //return true;
+                    await _universityRepo.DeleteUniversity(id);
+                    return true;    
                 }
                 else
                 {

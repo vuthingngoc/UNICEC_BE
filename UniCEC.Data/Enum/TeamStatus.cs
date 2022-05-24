@@ -9,7 +9,6 @@ namespace UniCEC.Data.Enum
     public enum TeamStatus
     {
         Available,
-        Full,
-        InActive
+        Full       
     }
 }

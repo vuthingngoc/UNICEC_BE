@@ -11,5 +11,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         public Task<bool> CheckNumberOfTeam(int CompetitionId);
 
         public Task<Team> GetTeamByInvitedCode(string invitedCode);
+
+        public Task DeleteTeam(int TeamId);
     }
 }

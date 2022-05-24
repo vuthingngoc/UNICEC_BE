@@ -6,6 +6,12 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
 {
     public interface IParticipantInTeamRepo : IRepository<ParticipantInTeam>
     {
-        public Task<bool> CheckParticipantInTeam(int TeamId, int NumberOfStudentInTeam);
+        public Task<bool> CheckNumberParticipantInTeam(int TeamId, int NumberOfStudentInTeam);
+
+        public Task<ParticipantInTeam> CheckParticipantInTeam(int TeamId, int UserId);
+
+        public Task<ParticipantInTeam> CheckParticipantInAnotherTeam(int CompetitionId, int UserId);
+
+        public Task DeleteParticipantInTeam(int TeamId);
     }
 }

@@ -3,6 +3,8 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.Enum;
+using System.Collections.Generic;
 
 namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
 {
@@ -13,7 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
 
         }
 
-        public async Task<bool> CheckParticipantInTeam(int TeamId, int NumberOfStudentInTeam)
+        public async Task<bool> CheckNumberParticipantInTeam(int TeamId, int NumberOfStudentInTeam)
         {
             var query = from pit in context.ParticipantInTeams
                         where pit.TeamId == TeamId
@@ -28,6 +30,57 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
             {
                 return false;
             }
+        }
+
+        public async Task<ParticipantInTeam> CheckParticipantInAnotherTeam(int CompetitionId, int UserId)
+        {
+            var teams_Id = from t in context.Teams
+                           where t.CompetitionId == CompetitionId
+                           select t.Id;
+            List<int> listTeamId = await teams_Id.ToListAsync();
+            foreach (int teamId in listTeamId)
+            {
+                ParticipantInTeam p = await CheckParticipantInTeam(teamId, UserId);
+                return p;
+            }
+            return null;
+        }
+
+        public async Task<ParticipantInTeam> CheckParticipantInTeam(int TeamId, int UserId)
+        {
+            var query = from us in context.Users
+                        where us.Id == UserId
+                        from p in context.Participants
+                        where us.Id == p.StudentId
+                        from pit in context.ParticipantInTeams
+                        where pit.ParticipantId == p.Id && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
+                        select pit;
+
+            ParticipantInTeam participant_in_team = await query.FirstOrDefaultAsync();
+            if (participant_in_team != null)
+            {
+                return participant_in_team;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task DeleteParticipantInTeam(int TeamId)
+        {
+            var queryPIT = from pit in context.ParticipantInTeams
+                           where pit.TeamId == TeamId
+                           select pit;
+
+            List<ParticipantInTeam> participantInTeams = await queryPIT.ToListAsync();
+
+            foreach (ParticipantInTeam participant in participantInTeams)
+            {
+                context.ParticipantInTeams.Remove(participant);
+                await Update();
+            }
+           
         }
     }
 }

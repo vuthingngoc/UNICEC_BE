@@ -33,9 +33,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
         }
 
-        public Task<bool> Delete(int id)
+        public TeamService()
         {
-            throw new NotImplementedException();
         }
 
         public Task<PagingResult<ViewTeam>> GetAllPaging(PagingRequest request)
@@ -48,10 +47,6 @@ namespace UniCEC.Business.Services.TeamSvc
             throw new NotImplementedException();
         }
 
-        public Task<bool> Update(TeamUpdateModel team)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<ViewTeam> InsertTeam(TeamInsertModel model, string token)
         {
@@ -75,7 +70,7 @@ namespace UniCEC.Business.Services.TeamSvc
             //CHECK Null
             //CHECK Competition Id in system ?
             //CHECK InvitedCODE đó là của Team thuộc Competition nào?
-            //CHECK Team Status
+            //CHECK Team Status -> team is full
             //CHECK Member Of Team is available
             //add Participant by InvitedCode
 
@@ -169,7 +164,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
 
             //check xem nó có đang ở nhóm khác không
-            //check xem nó có đang join lại chính nhóm này hay không
+            //check xem nó có đang join lại chính nhóm này hay không (done)
             try
             {
                 var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
@@ -187,31 +182,47 @@ namespace UniCEC.Business.Services.TeamSvc
                     Participant participant = await _participantRepo.Participant_In_Competition(UserId, team.CompetitionId);
                     if (participant != null)
                     {
-                        //check number of member in team
-                        Competition competition = await _competitionRepo.Get(team.CompetitionId);
-                        int NumberOfStudentInTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
-                        if (await _participantInTeamRepo.CheckParticipantInTeam(team.Id, NumberOfStudentInTeam))
+                        //check join in the same Team in Competition
+                        ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
+                        if (Participant_In_Team == null)
                         {
-                            //------ Add Participant in team
-                            ParticipantInTeam pit = new ParticipantInTeam()
+                            //kh có trong team này nhưng có thể ở team khác
+                            //check join another team when Student not out the previous team
+                            ParticipantInTeam Participant_In_Another_Team = await _participantInTeamRepo.CheckParticipantInAnotherTeam(team.CompetitionId, UserId);
+                            if (Participant_In_Another_Team == null)
                             {
-                                ParticipantId = participant.Id,
-                                TeamId = team.Id,
-                                //auto member
-                                TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
-                                //auto status 
-                                Status = ParticipantInTeamStatus.InTeam
-                            };
+                                //check number of member in team 
+                                Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                                int NumberOfStudentInTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
+                                if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, NumberOfStudentInTeam))
+                                {
+                                    //------ Add Participant in team
+                                    ParticipantInTeam pit = new ParticipantInTeam()
+                                    {
+                                        ParticipantId = participant.Id,
+                                        TeamId = team.Id,
+                                        //auto member
+                                        TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
+                                        //auto status 
+                                        Status = ParticipantInTeamStatus.InTeam
+                                    };
+                                    await _participantInTeamRepo.Insert(pit);
 
-                            await _participantInTeamRepo.Insert(pit);
-
-                            return TransformViewParticipantInTeam(pit,competition.Id);
-
-                        }
-                        //end check number of member in team
+                                    return TransformViewParticipantInTeam(pit, competition.Id);
+                                } //end check number of member in team
+                                else
+                                {
+                                    throw new ArgumentException("Team is full");
+                                }
+                            }//end join another team when Student not out the previous team
+                            else
+                            {
+                                throw new ArgumentException("You are already in Team, Please out team previous to join the next Team");
+                            }
+                        }//end in the same Team in Competition
                         else
                         {
-                            throw new ArgumentException("Team is full");
+                            throw new ArgumentException("You are already in that Team");
                         }
                     }
                     //end check is participant
@@ -232,7 +243,215 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
+        public async Task<bool> UpdateTeam(TeamUpdateModel model, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
 
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                if (model.TeamId == 0) throw new ArgumentNullException("Team Id Null");
+                //check team
+                Team team = await _teamRepo.Get(model.TeamId);
+
+                if (team != null)
+                {
+                    //role leader of team can update
+                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(model.TeamId, UserId);
+                    if (Participant_In_Team != null)
+                    {
+                        //3.check teamRole of user is Leader 
+                        if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
+                        {
+                            team.Name = (model.Name.Length > 0) ? model.Name : team.Name;
+                            team.Description = (model.Description.Length > 0) ? model.Description : team.Description;
+                            await _teamRepo.Update();
+                            return true;
+
+                        }//end check role leader
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You don't have permission to update team role");
+                        }
+                    }
+                    //end check participant in Team
+                    else
+                    {
+                        throw new ArgumentException("You aren't participant in that team");
+                    }
+                }
+                //end Check Team
+                else
+                {
+                    throw new ArgumentException("Not found this team");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> UpdateTeamRole(ParticipantInTeamUpdateModel model, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                if (model.ParticipantInTeamId != 0) throw new ArgumentNullException("Participant In Team Id Null");
+
+                //check participant
+                ParticipantInTeam pit = await _participantInTeamRepo.Get(model.ParticipantInTeamId);
+                if (pit != null)
+                {
+                    Team team = await _teamRepo.Get(pit.TeamId);
+                    Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                    int competitionId = competition.Id;
+                    //check user gọi hàm này phải là leader của Team này 
+                    //1.check student is participant in that competiiton
+                    Participant participant = await _participantRepo.Participant_In_Competition(UserId, team.CompetitionId);
+                    if (participant != null)
+                    {
+                        //2.check user in same Team in Competition
+                        ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
+                        if (Participant_In_Team != null)
+                        {
+                            //3.check teamRole of user is Leader 
+                            if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
+                            {
+                                //---UPDATE PIT ROLE
+                                //USER TO MEMBER
+                                Participant_In_Team.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member");
+                                //MEMBER TO LEADER
+                                pit.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader");
+                                await _participantInTeamRepo.Update();
+                                return true;
+                            }
+                            //end check role leader
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You don't have permission to update team role");
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException("You aren't participant in that team");
+                        }
+                    }
+                    else
+                    {
+                        throw new UnauthorizedAccessException("You aren't participant in Competition");
+                    }
+                }
+                //end check pariticpant
+                else
+                {
+                    throw new ArgumentException("Not found this participant in team");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<bool> DeleteByLeader(int TeamId, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+                //1.check team
+                Team team = await _teamRepo.Get(TeamId);
+                if (team != null)
+                {
+                    //2.check user in same Team in Competition
+                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
+                    if (Participant_In_Team != null)
+                    {
+                        //3.check teamRole of user is Leader 
+                        if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
+                        {
+                            //Delete Participant In Team
+                            await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                            //Delete Team
+                            await _teamRepo.DeleteTeam(TeamId);
+                            //
+                            return true;
+
+                        }//end check role leader
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You don't have permission to update team role");
+                        }
+
+                    }
+                    else
+                    {
+                        throw new ArgumentException("You aren't participant in that team");
+                    }
+                }
+                //end check Team
+                else
+                {
+                    throw new ArgumentException("Not found this team");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Member out team
+        public async Task<bool> OutTeam(int TeamId, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+
+                //1.check team
+                Team team = await _teamRepo.Get(TeamId);
+                if (team != null)
+                {
+                    //2.check user in same Team in Competition
+                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
+                    if (Participant_In_Team != null)
+                    {
+                        //Delete Participant In Team
+                        await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                        return true;          
+                    }
+                    else
+                    {
+                        throw new ArgumentException("You aren't participant in that team");
+                    }
+
+                } //end check Team
+                else
+                {
+                    throw new ArgumentException("Not found this team");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
         public ViewParticipantInTeam TransformViewParticipantInTeam(ParticipantInTeam participantInTeam, int CompetitionId)
@@ -250,7 +469,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             return new ViewTeam()
             {
-                Id = team.Id,
+                TeamId = team.Id,
                 Name = team.Name,
                 CompetitionId = team.CompetitionId,
                 Description = team.Description,

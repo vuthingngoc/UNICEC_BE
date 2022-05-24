@@ -140,6 +140,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-  
+
     }
 }
