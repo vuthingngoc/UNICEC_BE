@@ -10,7 +10,6 @@ namespace UniCEC.Data.Models.DB
     {
         public int Id { get; set; }
         public int CompetitionId { get; set; }
-        public int TeamRoleId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int NumberOfStudentInTeam { get; set; }
