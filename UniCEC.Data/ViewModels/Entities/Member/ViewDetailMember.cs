@@ -12,9 +12,12 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         [JsonPropertyName("club_role_name")]
         public string ClubRoleName { get; set; }
         public string Avatar { get; set; }
+        [JsonPropertyName("phone_number")]
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
+        [JsonPropertyName("join_date")]
         public DateTime JoinDate { get; set; }
+        [JsonPropertyName("is_online")]
         public bool IsOnline { get; set; }
     }
 }

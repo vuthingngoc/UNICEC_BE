@@ -1,10 +1,12 @@
 ﻿using FirebaseAdmin.Auth;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SponsorSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.Sponsor;
@@ -78,6 +80,9 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 else
                 {
                     ViewUser user = await _userService.GetUserByEmail(email);
+                    // check user is active or inactive
+                    if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
+                    
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
@@ -126,6 +131,8 @@ namespace UniCEC.Business.Services.FirebaseSvc
             {
                 //Check Role
                 ViewUser user = await _userService.GetUserByEmail(email);
+                if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
+
                 if (user != null)
                 {
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);

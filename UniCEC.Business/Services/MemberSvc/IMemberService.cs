@@ -7,12 +7,12 @@ namespace UniCEC.Business.Services.MemberSvc
 {
     public interface IMemberService
     {
-        public Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request);
-        public Task<ViewMember> GetByMemberId(int id);
+        public Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, PagingRequest request);
+        public Task<ViewDetailMember> GetByMemberId(string token, int id, int clubId);
         public Task<List<ViewMember>> GetLeadersByClub(int clubId);
-        public Task<int> GetQuantityNewMembersByClub(int clubId);
-        public Task<ViewMember> Insert(MemberInsertModel member);
-        public Task Update(MemberUpdateModel member);
-        public Task Delete(int id);
+        public Task<int> GetQuantityNewMembersByClub(string token, int clubId);
+        public Task<ViewDetailMember> Insert(string token, MemberInsertModel member);
+        public Task Update(string token, MemberUpdateModel member);
+        public Task Delete(string token, int clubId, int id);
     }
 }

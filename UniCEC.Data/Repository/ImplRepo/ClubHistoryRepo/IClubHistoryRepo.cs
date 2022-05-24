@@ -15,7 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         public Task<List<ClubHistory>> GetCurrentHistoryByClub(int clubId);
         public Task<int> GetCurrentTermByClub(int clubId);
         public Task<bool> UpdateMemberRole(int memberId, int clubRoleId);
-        public Task<int> DeleteMember(int memberId);
+        public Task DeleteMember(int memberId);
         public Task UpdateEndTerm(int clubId);
 
         // Tien Anh 
