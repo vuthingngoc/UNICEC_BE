@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -17,6 +19,7 @@ namespace UniCEC.Business.Services.MemberSvc
         private IMemberRepo _memberRepo;
         private IClubRepo _clubRepo;
         private IClubHistoryRepo _clubHistoryRepo;
+        private JwtSecurityTokenHandler _tokenHandler;
 
         public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, IClubHistoryRepo clubHistoryRepo)
         {
@@ -25,16 +28,31 @@ namespace UniCEC.Business.Services.MemberSvc
             _clubHistoryRepo = clubHistoryRepo;
         }
 
-        public async Task<PagingResult<ViewMember>> GetAllPaging(int clubId, PagingRequest request)
+        public int DecodeToken(string token, string nameClaim)
         {
+            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
+        }
+
+        public async Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, PagingRequest request)
+        {
+            int userId = DecodeToken(token, "Id");
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
             PagingResult<ViewMember> members = await _memberRepo.GetAllMemberByClub(clubId, request);
             if (members == null) throw new NullReferenceException("Not found any member in this club");
             return members;
         }
 
-        public async Task<ViewMember> GetByMemberId(int id)
+        public async Task<ViewDetailMember> GetByMemberId(string token, int id, int clubId)
         {
-            ViewMember member = await _memberRepo.GetById(id);
+            int userId = DecodeToken(token, "Id");
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            ViewDetailMember member = await _memberRepo.GetById(id, clubId);
             if (member == null) throw new NullReferenceException("Not found this member");
             return member;
         }
@@ -46,18 +64,28 @@ namespace UniCEC.Business.Services.MemberSvc
             return members;
         }
 
-        public async Task<int> GetQuantityNewMembersByClub(int clubId)
+        public async Task<int> GetQuantityNewMembersByClub(string token, int clubId)
         {
+            int userId = DecodeToken(token, "Id");
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
             int quantity = await _memberRepo.GetQuantityNewMembersByClub(clubId);
             if (quantity < 0) throw new NullReferenceException("Not found this club");
             return quantity;
         }
 
         //Insert-Member
-        public async Task<ViewMember> Insert(MemberInsertModel model)
+        public async Task<ViewDetailMember> Insert(string token, MemberInsertModel model)
         {
             Club club = await _clubRepo.Get(model.ClubId);
             if (club == null) throw new NullReferenceException("Not found this club");
+            // check user call this api
+            int userId = DecodeToken(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            // check duplicated member
+            if (model.StudentId == 0) throw new ArgumentException("StudentId Null");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(model.StudentId, model.ClubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
 
@@ -85,27 +113,33 @@ namespace UniCEC.Business.Services.MemberSvc
             if (clubHistoryId == 0) throw new DbUpdateException();
 
             await _clubRepo.Update();
-            return await _memberRepo.GetById(memberId);
+            return await _memberRepo.GetById(memberId, model.ClubId);
         }
 
         //Update-Member
-        public async Task Update(MemberUpdateModel model)
+        public async Task Update(string token, MemberUpdateModel model)
         {
-            Member member = await _memberRepo.Get(model.Id);
+            if (model.ClubRoleId == 0) throw new ArgumentException("ClubRole Null");
+            int userId = DecodeToken(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            ViewDetailMember member = await _memberRepo.GetById(model.Id, model.ClubId);
             if (member == null) throw new NullReferenceException("Not found this member");
 
-            bool success = await _clubHistoryRepo.UpdateMemberRole(model.Id, model.ClubRoleId);
-            if (!success) throw new NullReferenceException("Not found this record in history");
+            bool isSuccess = await _clubHistoryRepo.UpdateMemberRole(model.Id, model.ClubRoleId);
+            if (!isSuccess) throw new NullReferenceException("Not found this member in the club");
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(string token, int clubId, int id)
         {
-            Member member = await _memberRepo.Get(id);
+            ViewDetailMember member = await _memberRepo.GetById(id, clubId);
             if (member == null) throw new NullReferenceException("Not found this member");
+            int userId = DecodeToken(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            int clubId = await _clubHistoryRepo.DeleteMember(id);
-            if (clubId == 0) throw new NullReferenceException("Not found this record in history");
-
+            await _clubHistoryRepo.DeleteMember(id);
+            
             Club club = await _clubRepo.Get(clubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();

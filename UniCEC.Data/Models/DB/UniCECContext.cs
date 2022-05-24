@@ -575,6 +575,7 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.TeamRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Participa__TeamR__778AC167");
+
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -681,6 +682,8 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.TeamRoleId).HasColumnName("TeamRoleID");
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.Teams)

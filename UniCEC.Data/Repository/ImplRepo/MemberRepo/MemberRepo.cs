@@ -42,23 +42,27 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<ViewMember> GetById(int memberId)
+        public async Task<ViewDetailMember> GetById(int memberId, int clubId)
         {
             var query = from m in context.Members
                         join u in context.Users on m.StudentId equals u.Id
                         join ch in context.ClubHistories on m.Id equals ch.MemberId
                         join cr in context.ClubRoles on ch.ClubRoleId equals cr.Id
                         where m.Id.Equals(memberId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                                && ch.ClubId.Equals(clubId)
                         select new { m, u, cr, ch };
 
-            ViewMember member = await query.Select(x => new ViewMember()
+            ViewDetailMember member = await query.Select(selector => new ViewDetailMember()
             {
                 Id = memberId,
-                Name = x.u.Fullname,
-                Avatar = x.u.Avatar,
-                ClubRoleId = x.cr.Id,
-                ClubRoleName = x.cr.Name,
-                IsOnline = x.u.IsOnline
+                Name = selector.u.Fullname,
+                Avatar = selector.u.Avatar,
+                ClubRoleId = selector.cr.Id,
+                ClubRoleName = selector.cr.Name,
+                Email = selector.u.Email,
+                JoinDate = selector.m.JoinDate,
+                PhoneNumber = selector.u.PhoneNumber,
+                IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync();
 
             return (query.Count() > 0) ? member : null;
@@ -68,7 +72,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         join ch in context.ClubHistories on m.Id equals ch.MemberId
-                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId) 
+                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId)
                                 && ch.Status == ClubHistoryStatus.Active
                         select ch.MemberId;
 
@@ -117,7 +121,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from ch in context.ClubHistories
                         join m in context.Members on ch.MemberId equals m.Id
-                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId) 
+                        where m.StudentId.Equals(userId) && ch.ClubId.Equals(clubId)
                                 && ch.Status.Equals(ClubHistoryStatus.Active)
                         select ch.ClubRoleId;
 

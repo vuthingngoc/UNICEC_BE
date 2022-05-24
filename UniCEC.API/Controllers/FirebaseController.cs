@@ -1,16 +1,8 @@
-﻿using FirebaseAdmin.Auth;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FirebaseSvc;
-using UniCEC.Business.Services.RoleSvc;
-using UniCEC.Business.Services.UniversitySvc;
-using UniCEC.Business.Services.UserSvc;
-using UniCEC.Data.JWT;
-using UniCEC.Data.ViewModels.Entities.Role;
-using UniCEC.Data.ViewModels.Entities.University;
-using UniCEC.Data.ViewModels.Entities.User;
 using UniCEC.Data.ViewModels.Firebase.Auth;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -43,6 +35,10 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 ViewUserInfo userInfo = await _firebaseService.Authentication(token);
                 return (userInfo != null) ? Ok(userInfo) : BadRequest("Please login with your university email");                
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
             }
             catch (Exception e)
             {

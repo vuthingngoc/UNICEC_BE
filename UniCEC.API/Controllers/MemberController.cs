@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -20,8 +21,8 @@ namespace UniCEC.API.Controllers
     [Authorize]
     public class MemberController : ControllerBase // not authorize role in club yet !!!
     {
-        //
         private IMemberService _memberService;
+
         public MemberController(IMemberService ImemberService)
         {
             _memberService = ImemberService;
@@ -33,8 +34,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewMember> members = await _memberService.GetAllPaging(id, request);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, request);
                 return Ok(members);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
@@ -48,13 +54,18 @@ namespace UniCEC.API.Controllers
 
         // GET api/<MemberController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get member by id")]
-        public async Task<IActionResult> GetMemberById(int id)
+        [SwaggerOperation(Summary = "Get detail member by id")]
+        public async Task<IActionResult> GetMemberById(int id, [FromQuery, BindRequired] int clubId)
         {
             try
             {
-                ViewMember member = await _memberService.GetByMemberId(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewDetailMember member = await _memberService.GetByMemberId(token, id, clubId);
                 return Ok(member);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
@@ -91,8 +102,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                int quantity = await _memberService.GetQuantityNewMembersByClub(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                int quantity = await _memberService.GetQuantityNewMembersByClub(token, id);
                 return Ok(quantity);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException e)
             {
@@ -111,8 +127,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewMember result = await _memberService.Insert(model);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewDetailMember result = await _memberService.Insert(token, model);
                 return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
@@ -139,8 +160,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _memberService.Update(model);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _memberService.Update(token, model);
                 return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NullReferenceException ex)
             {
@@ -160,11 +186,12 @@ namespace UniCEC.API.Controllers
         // DELETE api/<MemberController>/5
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete member")]
-        public async Task<IActionResult> DeleteMember(int id)
+        public async Task<IActionResult> DeleteMember(int id, [FromQuery, BindRequired] int clubId)
         {
             try
             {
-                await _memberService.Delete(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _memberService.Delete(token, clubId, id);
                 return Ok();
             }
             catch (NullReferenceException ex)
