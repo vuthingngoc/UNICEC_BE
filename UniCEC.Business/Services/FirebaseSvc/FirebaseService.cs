@@ -84,6 +84,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
                     
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
+                    user.Avatar = userInfo.PhotoUrl;
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
 
@@ -136,6 +137,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 if (user != null)
                 {
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
+                    user.Avatar = userInfo.PhotoUrl;
                     await _userService.UpdateStatusOnline(user.Id, true);
                     ViewRole role = await _roleService.GetByRoleId(user.RoleId);
                     //1.Admin

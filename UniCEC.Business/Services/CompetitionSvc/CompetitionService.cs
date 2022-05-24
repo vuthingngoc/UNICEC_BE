@@ -126,6 +126,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 if (string.IsNullOrEmpty(model.Name)
+                    || string.IsNullOrEmpty(model.Content)
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
                     || model.NumberOfTeam < 0
@@ -137,7 +138,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.SeedsDeposited == 0
                     || model.ClubId == 0
                     || model.TermId == 0)
-                    throw new ArgumentNullException("Name Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
+                    throw new ArgumentNullException("Name Null || Content Null || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
 
 
@@ -190,6 +191,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 competition.EndTime = model.EndTime;
                                 competition.StartTimeRegister = model.StartTimeRegister;
                                 competition.EndTimeRegister = model.EndTimeRegister;
+                                competition.Content = model.Content;
+                                competition.Fee = model.Fee;
                                 competition.SeedsPoint = model.SeedsPoint;
                                 competition.SeedsDeposited = model.SeedsDeposited;
                                 competition.SeedsCode = await CheckExistCode();
@@ -280,6 +283,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int SponsorId = Int32.Parse(spIdClaim.Value);
 
                 if (string.IsNullOrEmpty(model.Name)
+                    || string.IsNullOrEmpty(model.Content)
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
                     || model.NumberOfTeam < 0
@@ -321,6 +325,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         competition.EndTime = model.EndTime;
                         competition.StartTimeRegister = model.StartTimeRegister;
                         competition.EndTimeRegister = model.EndTimeRegister;
+                        competition.Content = model.Content;
+                        competition.Fee = model.Fee;
                         competition.SeedsPoint = model.SeedsPoint;
                         competition.SeedsDeposited = model.SeedsDeposited;
                         competition.SeedsCode = await CheckExistCode();
@@ -474,6 +480,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
                                 comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
                                 comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                                comp.Fee = model.Fee;
                                 //
                                 await _competitionRepo.Update();
                                 return true;
@@ -731,6 +739,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 EndTime = competition.EndTime,
                 StartTimeRegister = competition.StartTimeRegister,
                 EndTimeRegister = competition.EndTimeRegister,
+                //
+                Content = competition.Content,
+                Fee = competition.Fee,
                 //Seed code - point
                 SeedsPoint = competition.SeedsPoint,
                 SeedsDeposited = competition.SeedsDeposited,

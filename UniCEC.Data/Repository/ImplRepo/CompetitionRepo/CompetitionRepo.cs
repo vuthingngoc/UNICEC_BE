@@ -66,6 +66,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 EndTime = x.EndTime,
                 StartTimeRegister = x.StartTimeRegister,
                 EndTimeRegister = x.EndTimeRegister,
+                Content = x.Content,
+                Fee = x.Fee,
                 SeedsCode = x.SeedsCode,
                 SeedsPoint = x.SeedsPoint,
                 SeedsDeposited = x.SeedsDeposited,
@@ -127,8 +129,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<ViewCompetition> competitions = await query.Take(3).Select(x => new ViewCompetition()
             {
                 CompetitionId = x.Id,
-                CompetitionTypeId = x.CompetitionTypeId,
                 Name = x.Name,
+                CompetitionTypeId = x.CompetitionTypeId,
                 Address = x.Address,
                 NumberOfTeam = x.NumberOfTeam,
                 NumberOfParticipation = x.NumberOfParticipation,
@@ -136,6 +138,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 EndTime = x.EndTime,
                 StartTimeRegister = x.StartTimeRegister,
                 EndTimeRegister = x.EndTimeRegister,
+                Content = x.Content,
+                Fee = x.Fee,
                 SeedsCode = x.SeedsCode,
                 SeedsPoint = x.SeedsPoint,
                 SeedsDeposited = x.SeedsDeposited,
