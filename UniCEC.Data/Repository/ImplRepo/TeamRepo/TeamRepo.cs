@@ -48,6 +48,17 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             }
         }
 
+        public async Task DeleteTeam(int TeamId)
+        {
+            var query = from t in context.Teams
+                        where t.Id == TeamId
+                        select t;
+
+            Team team = await query.FirstOrDefaultAsync();
+            context.Teams.Remove(team);
+            await Update();
+        }
+
         public async Task<Team> GetTeamByInvitedCode(string invitedCode)
         {
             var query = from t in context.Teams

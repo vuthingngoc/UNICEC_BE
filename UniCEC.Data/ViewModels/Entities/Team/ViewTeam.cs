@@ -4,7 +4,8 @@ namespace UniCEC.Data.ViewModels.Entities.Team
 {
     public class ViewTeam
     {
-        public int Id { get; set; }
+        [JsonPropertyName("team_id")]
+        public int TeamId { get; set; }
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
         public string Name { get; set; }

@@ -17,5 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         //Get-List-Universities-By-Email
         public Task<List<ViewUniversity>> GetListUniversityByEmail(string email);
         public Task<string> GetNameUniversityById(int id);
+        //test delete
+        public Task DeleteUniversity(int UniversityId);
     }
 }
