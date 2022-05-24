@@ -57,12 +57,39 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             int check = query.Count();
             if (check > 0)
             {
-                return false;
+                return true;
             }
             else
             {
+                return false;
+            }
+        }
+
+        public async Task<bool> CheckTaskBelongToStudent(int MemberTakeActivityId, int UserId, int UniversityId)
+        {
+            //User -> Uni -> Member -> ClubHistory -> Club -> ClubActivity -> MemberTakeTaskActivity
+            var query = from us in context.Users
+                        where us.Id == UserId
+                        from uni in context.Universities
+                        where uni.Id == UniversityId
+                        from mem in context.Members
+                        where mem.StudentId == us.Id
+                        from ch in context.ClubHistories
+                        where mem.Id == ch.MemberId
+                        from c in context.Clubs
+                        where ch.ClubId == c.Id
+                        from ca in context.ClubActivities
+                        where c.Id == ca.ClubId
+                        from mta in context.MemberTakesActivities
+                        where mta.Id == MemberTakeActivityId
+                        select mta;
+
+            MemberTakesActivity result = await query.FirstOrDefaultAsync();
+            if (result != null)
+            {
                 return true;
             }
+            return false;
         }
 
 
@@ -109,9 +136,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                     memberTakesActivity.Deadline = deadline;
                 }
             }
-                context.SaveChanges();
-                
-            
+            context.SaveChanges();
+
+
         }
+
+
     }
 }

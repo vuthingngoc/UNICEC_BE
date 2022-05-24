@@ -84,5 +84,21 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                 return false;
             }
         }
+
+        public async Task<Participant> Participant_In_Competition(int UserId, int CompetitionId)
+        {
+            var query = from p in context.Participants
+                        where p.CompetitionId == CompetitionId && p.StudentId == UserId
+                        select p;
+            Participant participant = await query.FirstOrDefaultAsync();
+            if (participant != null)
+            {
+                return participant;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

@@ -12,5 +12,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
         public Task<bool> CheckAddDuplicateUser(User stuInfo, int CompetitionId);
 
         public Task<bool> CheckNumOfParticipant(int CompetitionId, int numOfCompetition);
+
+        public Task<Participant> Participant_In_Competition(int UserId, int CompetitionId);
+        
     }
 }

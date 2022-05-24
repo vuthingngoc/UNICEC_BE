@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -8,14 +9,17 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
+        private readonly IConfiguration _configuration;
         public UniCECContext()
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options)
-            : base(options)
+        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
+           : base(options)
         {
+            _configuration = configuration;
         }
+
 
         public virtual DbSet<Blog> Blogs { get; set; }
         public virtual DbSet<BlogType> BlogTypes { get; set; }
@@ -52,7 +56,8 @@ namespace UniCEC.Data.Models.DB
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=.;Database=UniCEC;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
+                optionsBuilder.UseLazyLoadingProxies();
             }
         }
 
@@ -551,6 +556,8 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.TeamId).HasColumnName("TeamID");
 
+                entity.Property(e => e.TeamRoleId).HasColumnName("TeamRoleID");
+
                 entity.HasOne(d => d.Participant)
                     .WithMany(p => p.ParticipantInTeams)
                     .HasForeignKey(d => d.ParticipantId)
@@ -558,10 +565,17 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__Participa__Parti__71D1E811");
 
                 entity.HasOne(d => d.Team)
-                    .WithMany(p => p.ParticipantInTeams)
+                    .WithMany(p => p.ParticipantInTeamTeams)
                     .HasForeignKey(d => d.TeamId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Participa__TeamI__72C60C4A");
+
+                entity.HasOne(d => d.TeamRole)
+                    .WithMany(p => p.ParticipantInTeamTeamRoles)
+                    .HasForeignKey(d => d.TeamRoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Participa__TeamR__778AC167");
+
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -676,12 +690,6 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Team__Competitio__76969D2E");
-
-                entity.HasOne(d => d.TeamRole)
-                    .WithMany(p => p.Teams)
-                    .HasForeignKey(d => d.TeamRoleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Team__TeamRoleID__778AC167");
             });
 
             modelBuilder.Entity<TeamRole>(entity =>

@@ -23,6 +23,16 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
             return (university != null) ? true : false;
         }
 
+        public async Task DeleteUniversity(int UniversityId)
+        {
+            var query = from u in context.Universities
+                        where u.Id == UniversityId
+                        select u;
+            University uni = await query.FirstOrDefaultAsync();
+            context.Universities.Remove(uni);
+            await Update();
+        }
+
         //Get-List-Universities-By-Email
         public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
         {

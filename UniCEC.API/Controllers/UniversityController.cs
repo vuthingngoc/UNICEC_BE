@@ -143,33 +143,33 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // DELETE api/<UniversityController>/5
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete university - Admin")]
-        public async Task<IActionResult> DeleteUniversityById(int id)
-        {
-            try
-            {
-                bool result = false;
-                result = await _universityService.Delete(id);
-                if (result)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //// DELETE api/<UniversityController>/5
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{id}")]
+        //[SwaggerOperation(Summary = "Delete university - Admin")]
+        //public async Task<IActionResult> DeleteUniversityById(int id)
+        //{
+        //    try
+        //    {
+        //        bool result = false;
+        //        result = await _universityService.Delete(id);
+        //        if (result)
+        //        {
+        //            return Ok();
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
     }
 }

@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.Enum
 {
-    public enum ClubActivityStatus
+    public enum ParticipantInTeamStatus
     {
-        Open,
-        Happenning,
-        Ending,
-        Canceling,
-        Error
+        InTeam
     }
 }

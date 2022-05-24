@@ -4,94 +4,43 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.MemberTakesActivitySvc;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
+using UniCEC.Business.Services.TeamSvc;
+using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
+using UniCEC.Data.ViewModels.Entities.Team;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/member-takes-activity")]
+    [Route("api/team")]
     [ApiController]
-    [ApiVersion("1.0")]
-    public class MemberTakesActivityController : ControllerBase
+    public class TeamController : ControllerBase
     {
-        private IMemberTakesActivityService _memberTakesActivityService;
+        //
+        private ITeamService _teamService;
 
-        public MemberTakesActivityController(IMemberTakesActivityService memberTakesActivityService)
+
+        public TeamController(ITeamService teamService)
         {
-            _memberTakesActivityService = memberTakesActivityService;
+            _teamService = teamService;
         }
 
-        // GET: api/<MemberTakesActivityController>
-        [HttpGet("tasks")]
-        [SwaggerOperation(Summary = "Get tasks by conditions, 0.Doing , 1.LateTime, 2.Finished, 3.FinishedLate, 4.Approved, 5.Rejected")]
-        public async Task<IActionResult> GetTaskByConditions([FromQuery] MemberTakesActivityRequestModel request)
-        {
-            try
-            {
-                PagingResult<ViewMemberTakesActivity> result = await _memberTakesActivityService.GetAllTaskesByConditions(request);
-                //
-                return Ok(result);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
 
-        // GET api/<MemberTakesActivityController>/5
-        [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get tasks by Id")]
-        public async Task<IActionResult> GetTaskById(int id)
-        {
-            try
-            {
-                ViewMemberTakesActivity result = await _memberTakesActivityService.GetByMemberTakesActivityId(id);
-                return Ok(result);
-
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new object());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
-
-        // POST api/<MemberTakesActivityController>
+        // POST api/<TeamController>
         [Authorize(Roles = "Student")]
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert member in task - Student ")]
-        public async Task<IActionResult> InsertMemberTakesActivity([FromBody] MemberTakesActivityInsertModel model)
+        [HttpPost()]
+        [SwaggerOperation(Summary = "Insert team in competition - Student")]
+        public async Task<IActionResult> InsertTeam([FromBody] TeamInsertModel model)
         {
             try
             {
-                //JWT
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewMemberTakesActivity result = await _memberTakesActivityService.Insert(model, token);
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                ViewTeam result = await _teamService.InsertTeam(model, token);
+                return Ok(result);
             }
             catch (ArgumentNullException ex)
             {
@@ -107,38 +56,29 @@ namespace UniCEC.API.Controllers
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
             catch (SqlException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
         }
 
 
-        // PUT api/<MemberTakesActivityController>/5
+        // POST api/<TeamController>
         [Authorize(Roles = "Student")]
-        [HttpPut("submit-activity")]
-        [SwaggerOperation(Summary = "Member submit task by Id - Student")]
-        public async Task<IActionResult> MemberSubmitTask([FromBody] SubmitMemberTakesActivity model)
+        [HttpPost("add-participant")]
+        [SwaggerOperation(Summary = "Invited member join in team by Invited Code - Student")]
+        public async Task<IActionResult> InsertMemberInTeam([FromBody] ParticipantInTeamInsertModel model)
         {
             try
             {
-                //JWT
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                Boolean check = false;
-                check = await _memberTakesActivityService.Update(model, token);
-                if (check)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                ViewParticipantInTeam result = await _teamService.InsertMemberInTeam(model, token);
+                return Ok(result);
             }
             catch (ArgumentNullException ex)
             {
@@ -148,32 +88,34 @@ namespace UniCEC.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (DbUpdateException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
             catch (SqlException)
             {
-                return StatusCode(500, "Internal server exception");
+                return StatusCode(500, "Internal Server Exception");
             }
         }
 
 
-        // PUT api/<MemberTakesActivityController>/5
+        // PUT api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
-        [HttpPut("confirm-activity")]
-        [SwaggerOperation(Summary = "Club Leader is Approved task of member - Student")]
-        public async Task<IActionResult> ApprovedOrRejectedTask([FromBody] ConfirmMemberTakesActivity model)
+        [HttpPut("team-role")]
+        [SwaggerOperation(Summary = "Update team role by Leader - Student")]
+        public async Task<IActionResult> UpdateTeamRole([FromBody] ParticipantInTeamUpdateModel model)
         {
             try
             {
-                //JWT
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-
                 Boolean check = false;
-                check = await _memberTakesActivityService.ApprovedOrRejectedTask(model, token);
+                check = await _teamService.UpdateTeamRole(model, token);
                 if (check)
                 {
                     return Ok();
@@ -204,6 +146,86 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
+        [Authorize(Roles = "Student")]
+        [HttpDelete("team/{id}")]
+        [SwaggerOperation(Summary = "Delete team by leader")]
+        public async Task<IActionResult> DeleteByLeader(int TeamId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _teamService.DeleteByLeader(TeamId, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        [Authorize(Roles = "Student")]
+        [HttpDelete("member-out-team/{id}")]
+        [SwaggerOperation(Summary = "Delete team by leader")]
+        public async Task<IActionResult> OutTeam(int TeamId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _teamService.OutTeam(TeamId, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
 
     }
 }
