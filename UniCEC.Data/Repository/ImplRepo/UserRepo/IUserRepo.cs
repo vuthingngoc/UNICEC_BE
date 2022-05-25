@@ -12,10 +12,12 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
     {
         public Task<ViewUser> GetById(int id, bool isFullInfo);
         public Task<PagingResult<ViewUser>> GetUserByUniversity(int universityId, UserStatus status, PagingRequest request);
-        public Task<ViewUser> GetByEmail(string email);
         public Task<PagingResult<ViewUser>> GetByCondition(UserRequestModel request);
         public Task<bool> CheckExistedEmail(string email);
         public Task<bool> CheckExistedUser(int universityId, string userId);
         public Task<bool> CheckExistedUser(string userId);
+        // firebase
+        public Task<UserTokenModel> GetByEmail(string email);
+        public Task<UserTokenModel> GetUserTokenById(int id);
     }
 }

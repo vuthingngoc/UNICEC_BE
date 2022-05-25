@@ -48,11 +48,6 @@ namespace UniCEC.Business.Services.UserSvc
             return users;
         }
 
-        public async Task<ViewUser> GetUserByEmail(string email)
-        {
-            return await _userRepo.GetByEmail(email);
-        }
-
         private async Task<bool> CheckDuplicatedEmailAndUserCode(int? universityId, string email, string userCode)
         {
             bool isExisted = await _userRepo.CheckExistedEmail(email);
@@ -173,22 +168,23 @@ namespace UniCEC.Business.Services.UserSvc
         // CheckUserEmail
         public async Task<bool> CheckUserEmailExsit(string email)
         {
-            ViewUser user = await _userRepo.GetByEmail(email);
+            UserTokenModel user = await _userRepo.GetByEmail(email);
             return (user != null) ? true : false;
         }
 
-        // firebase - insert - UserTemporary
-        public async Task<int> InsertUserTemporary(UserModelTemporary userTem)
+        // firebase 
+        public async Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber)
         {
             try
             {
                 User user = new User
                 {
-                    RoleId = userTem.RoleId,
-                    Email = userTem.Email,
+                    RoleId = userModel.RoleId,
+                    Email = email,
                     Status = UserStatus.Active,
-                    Avatar = userTem.Avatar,
-                    Fullname = userTem.Fullname,
+                    Avatar = userModel.Avatar,
+                    Fullname = userModel.Fullname,
+                    PhoneNumber = phoneNumber,
                     //auto
                     Dob = "",
                     Gender = "",
@@ -214,7 +210,11 @@ namespace UniCEC.Business.Services.UserSvc
             await _userRepo.Update();
         }
 
-        // firebase
+        public async Task<UserTokenModel> GetUserByEmail(string email)
+        {
+            return await _userRepo.GetByEmail(email);
+        }
+
         public async Task UpdateAvatar(int userId, string srcAvatar)
         {
             User user = await _userRepo.Get(userId);
@@ -222,6 +222,13 @@ namespace UniCEC.Business.Services.UserSvc
 
             user.Avatar = srcAvatar;
             await _userRepo.Update();
+        }
+
+        public async Task<UserTokenModel> GetUserTokenById(int id, string token)
+        {
+            int userId = DecodeToken(token, "Id");
+            if (!userId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            return await _userRepo.GetUserTokenById(id);
         }
     }
 }
