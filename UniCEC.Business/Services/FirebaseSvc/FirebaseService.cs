@@ -9,7 +9,6 @@ using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
 using UniCEC.Data.ViewModels.Entities.Role;
-using UniCEC.Data.ViewModels.Entities.Sponsor;
 using UniCEC.Data.ViewModels.Entities.University;
 using UniCEC.Data.ViewModels.Entities.User;
 using UniCEC.Data.ViewModels.Firebase.Auth;
@@ -21,14 +20,12 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUserService _userService;
         private IUniversityService _universityService;
         private IRoleService _roleService;
-        private ISponsorService _sponsorService;
 
-        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService, ISponsorService sponsorService)
+        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
-            _sponsorService = sponsorService;
         }
 
         public async Task<ViewUserInfo> Authentication(string token)
@@ -38,7 +35,6 @@ namespace UniCEC.Business.Services.FirebaseSvc
             string uid = decodedToken.Uid;
             // Get user info
             UserRecord userInfo = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-            //-----------University
             string email = userInfo.Email;
             string emailUni = email.Split('@')[1];
             // check email university in system or not
@@ -50,88 +46,62 @@ namespace UniCEC.Business.Services.FirebaseSvc
                 //1.If student not in system
                 if (isExistedStudent == false)
                 {
-                    //Create UserModelTemporary
-                    UserModelTemporary userModelTemporary = new UserModelTemporary()
+                    //Create NewUserModel
+                    UserTokenModel userModel = new UserTokenModel()
                     {
-                        Email = email,
-                        PhoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber,
                         Fullname = userInfo.DisplayName,
                         Avatar = (string.IsNullOrEmpty(userInfo.PhotoUrl)) ? "" : userInfo.PhotoUrl,
                         RoleId = 3 // role student
                     };
                     //Add In DB [User]
-                    int userId = await _userService.InsertUserTemporary(userModelTemporary);
-                    await _userService.UpdateStatusOnline(userId, true);
-                    userModelTemporary.Id = userId;
-                    ViewRole role = await _roleService.GetByRoleId(userModelTemporary.RoleId);
-                    userModelTemporary.RoleName = role.RoleName;
+                    string phoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber;
+                    userModel.Id = await _userService.InsertNewUser(userModel, email, phoneNumber);
+                    ViewRole role = await _roleService.GetByRoleId(userModel.RoleId);
+                    userModel.RoleName = role.RoleName;
+                    userModel.UniversityId = 0;
 
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
-                    string clientTokenUserTemp = JWTUserToken.GenerateJWTTokenUserTemp(userModelTemporary);
+                    string userToken = JWTUserToken.GenerateJWTTokenUser(userModel);
                     // Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
                     return new ViewUserInfo()
                     {
-                        Token = clientTokenUserTemp,
+                        Token = userToken,
                         ListUniBelongToEmail = listUniBelongToEmail
                     };
                 }
                 //2.If Student in system
                 else
                 {
-                    ViewUser user = await _userService.GetUserByEmail(email);
+                    UserTokenModel user = await _userService.GetUserByEmail(email);
                     // check user is active or inactive
                     if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
-                    
+
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     user.Avatar = userInfo.PhotoUrl;
                     await _userService.UpdateStatusOnline(user.Id, true);
-                    ViewRole role = await _roleService.GetByRoleId(user.RoleId);
 
-                    //2.1 FullFill Info
-                    if (user.UniversityId != null)
+                    string userToken = JWTUserToken.GenerateJWTTokenUser(user);
+                    if (user.UniversityId == 0)
                     {
-                        //3.Student
-                        if (role.Id == 3)
+                        return new ViewUserInfo()
                         {
-                            //----------------Generate JWT Token Student
-                            string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, role.RoleName);
-                            return new ViewUserInfo()
-                            {
-                                Token = clientTokenUser
-                            };
-                        }
-                    }
-                    //2.2 Not FullFill Info
-                    else
-                    {
-                        UserModelTemporary userModelTemporary = new UserModelTemporary()
-                        {
-                            Id = user.Id,
-                            Email = user.Email,
-                            PhoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber,
-                            Fullname = user.Fullname,
-                            RoleName = role.RoleName,
-                            RoleId = user.RoleId,
-                            Avatar = user.Avatar
-                        };
-                        //Get List University Belong To Email
-                        List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
-                        //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
-                        string clientTokenUserTemp = JWTUserToken.GenerateJWTTokenUserTemp(userModelTemporary);
-                        return new ViewUserInfo
-                        {
-                            Token = clientTokenUserTemp,
-                            ListUniBelongToEmail = listUniBelongToEmail
+                            Token = userToken,
+                            ListUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni)
                         };
                     }
+
+                    return new ViewUserInfo()
+                    {
+                        Token = userToken
+                    };
                 }
-            }         
+            }
             //Not In University => Sponsor or Admin
             else
             {
                 //Check Role
-                ViewUser user = await _userService.GetUserByEmail(email);
+                UserTokenModel user = await _userService.GetUserByEmail(email);
                 if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
 
                 if (user != null)
@@ -139,28 +109,13 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     user.Avatar = userInfo.PhotoUrl;
                     await _userService.UpdateStatusOnline(user.Id, true);
-                    ViewRole role = await _roleService.GetByRoleId(user.RoleId);
-                    //1.Admin
-                    if (role.Id == 1)
+
+                    string userToken = JWTUserToken.GenerateJWTTokenUser(user);
+
+                    return new ViewUserInfo()
                     {
-                        //----------------Generate JWT Token Admin
-                        string clientTokenUser = JWTUserToken.GenerateJWTTokenAdmin(user, role.RoleName);
-                        return new ViewUserInfo()
-                        {
-                            Token = clientTokenUser
-                        };
-                    }
-                    //2.Sponsor
-                    if (role.Id == 2)
-                    {
-                        //----------------Generate JWT Token Sponsor
-                        ViewSponsor sponsor = await _sponsorService.GetBySponsorId(user.SponsorId);
-                        string clientTokenUser = JWTUserToken.GenerateJWTTokenSponsor(user, role.RoleName, sponsor.Id.ToString());
-                        return new ViewUserInfo()
-                        {
-                            Token = clientTokenUser
-                        };
-                    }
+                        Token = userToken
+                    };
                 }
             }
 

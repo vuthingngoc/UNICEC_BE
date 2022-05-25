@@ -25,23 +25,23 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                         select u;
 
             return (isFullInfo) ? await query.Select(user => new ViewUser()
-                {
-                    Id = user.Id,
-                    RoleId = user.RoleId,
-                    SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
-                    UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
-                    MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
-                    Fullname = user.Fullname,
-                    StudentCode = user.StudentCode,
-                    Email = user.Email,
-                    PhoneNumber = (!string.IsNullOrEmpty(user.PhoneNumber)) ? user.PhoneNumber : "",
-                    Gender = user.Gender,
-                    Dob = user.Dob,
-                    Description = (!string.IsNullOrEmpty(user.Description)) ? user.Description : "",
-                    Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
-                    Status = user.Status,
-                    IsOnline = user.IsOnline
-                }).FirstOrDefaultAsync() 
+            {
+                Id = user.Id,
+                RoleId = user.RoleId,
+                SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
+                UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
+                MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
+                Fullname = user.Fullname,
+                StudentCode = user.StudentCode,
+                Email = user.Email,
+                PhoneNumber = (!string.IsNullOrEmpty(user.PhoneNumber)) ? user.PhoneNumber : "",
+                Gender = user.Gender,
+                Dob = user.Dob,
+                Description = (!string.IsNullOrEmpty(user.Description)) ? user.Description : "",
+                Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
+                Status = user.Status,
+                IsOnline = user.IsOnline
+            }).FirstOrDefaultAsync()
                 : await query.Select(user => new ViewUser()
                 {
                     Id = user.Id,
@@ -114,32 +114,46 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             //return await context.Users.FirstOrDefaultAsync(u => u.StudentCode.Equals(StudentCode));
         }
 
-        public async Task<ViewUser> GetByEmail(string email)
+        public async Task<UserTokenModel> GetByEmail(string email)
         {
             var query = from u in context.Users
+                        join r in context.Roles on u.RoleId equals r.Id
                         where u.Email.Equals(email)
-                        select u;
+                        select new { u, r };
 
-            return await query.Select(u => new ViewUser()
+            return await query.Select(selector => new UserTokenModel()
             {
-                Id = u.Id,
-                RoleId = u.RoleId,
-                SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
-                UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
-                Fullname = u.Fullname,
-                StudentCode = u.StudentCode,
-                Email = u.Email,
-                PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
-                Gender = u.Gender,
-                Dob = u.Dob,
-                Description = (!string.IsNullOrEmpty(u.Description)) ? u.Description : "",
-                Avatar = (!string.IsNullOrEmpty(u.Avatar)) ? u.Avatar : "",
-                Status = u.Status,
-                IsOnline = u.IsOnline
+                Id = selector.u.Id,
+                RoleId = selector.u.RoleId,
+                UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
+                RoleName = selector.r.RoleName,
+                Fullname = selector.u.Fullname,
+                Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
+                Status = selector.u.Status
             }).FirstOrDefaultAsync();
 
             //return await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
+        }
+
+        public async Task<UserTokenModel> GetUserTokenById(int id)
+        {
+            var query = from u in context.Users
+                        join r in context.Roles on u.RoleId equals r.Id
+                        where u.Id.Equals(id)
+                        select new { u, r };
+
+            return await query.Select(selector => new UserTokenModel()
+            {
+                Id = selector.u.Id,
+                RoleId = selector.u.RoleId,
+                UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
+                RoleName = selector.r.RoleName,
+                Fullname = selector.u.Fullname,
+                Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
+                Status = selector.u.Status
+            }).FirstOrDefaultAsync();
         }
 
         public async Task<PagingResult<ViewUser>> GetByCondition(UserRequestModel request)

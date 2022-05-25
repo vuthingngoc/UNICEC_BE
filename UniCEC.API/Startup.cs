@@ -72,6 +72,8 @@ using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
+using UniCEC.Business.Services.InfluencerSvc;
+using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 
 namespace UniCEC.API
 {
@@ -119,6 +121,7 @@ namespace UniCEC.API
             services.AddScoped<IDepartmentInUniversityService, DepartmentInUniversityService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEntityTypeService, EntityTypeService>();
+            services.AddScoped<IInfluencerService, InfluencerService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IMajorService, MajorService>();
             services.AddScoped<IMemberService, MemberService>();
@@ -151,6 +154,7 @@ namespace UniCEC.API
             services.AddTransient<IDepartmentInUniversityRepo, DepartmentInUniversityRepo>();
             services.AddTransient<IDepartmentRepo, DepartmentRepo>();
             services.AddTransient<IEntityTypeRepo, EntityTypeRepo>();
+            services.AddTransient<IInfluencerRepo, InfluencerRepo>();
             services.AddTransient<IMajorRepo, MajorRepo>();
             services.AddTransient<IMemberRepo, MemberRepo>();
             services.AddTransient<IMemberRepo, MemberRepo>();

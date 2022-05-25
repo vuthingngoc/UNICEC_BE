@@ -186,13 +186,9 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _userService.UpdateInfoToken(id, universityId, token);
-
-                ViewUser user = await _userService.GetById(token, id);
-                ViewRole role = await _roleService.GetByRoleId(user.RoleId);
-                string roleName = role.RoleName;
-                
-                string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName);
-                return Ok(clientTokenUser);
+                UserTokenModel user = await _userService.GetUserTokenById(id, token);
+                string userToken = JWTUserToken.GenerateJWTTokenUser(user);
+                return Ok(userToken);
             }
             catch(UnauthorizedAccessException ex)
             {
