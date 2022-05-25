@@ -93,64 +93,73 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 if (competition != null)
                 {
-                    if (await _participantRepo.Participant_In_Competition(UserId, model.CompetitionId) != null)
+                    //check competition is Event or not -> if event can't create team
+                    if (competition.NumberOfTeam != 0)
                     {
-                        if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
+                        if (await _participantRepo.Participant_In_Competition(UserId, model.CompetitionId) != null)
                         {
-                            int numberStuOfTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
-                            //-----------------Add Team
-                            Team team = new Team()
+                            if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
                             {
-                                CompetitionId = model.CompetitionId,
-                                Name = model.Name,
-                                Description = model.Description,
-                                //number of student in team
-                                NumberOfStudentInTeam = numberStuOfTeam,
-                                //generate code
-                                InvitedCode = await CheckExistCode(),
-                                //status available
-                                Status = TeamStatus.Available
-                            };
-                            int Team_Id = await _teamRepo.Insert(team);
-                            if (Team_Id > 0)
-                            {
-                                Team getTeam = await _teamRepo.Get(Team_Id);
-                                //-----------------Add ParticiPant in Team with Role Leader
-                                ParticipantInTeam pit = new ParticipantInTeam()
+                                int numberStuOfTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
+                                //-----------------Add Team
+                                Team team = new Team()
                                 {
-                                    ParticipantId = model.CompetitionId,
-                                    //Team Id
-                                    TeamId = getTeam.Id,
-                                    //auto leader 
-                                    TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
-                                    //auto status 
-                                    Status = ParticipantInTeamStatus.InTeam
+                                    CompetitionId = model.CompetitionId,
+                                    Name = model.Name,
+                                    Description = model.Description,
+                                    //number of student in team
+                                    NumberOfStudentInTeam = numberStuOfTeam,
+                                    //generate code
+                                    InvitedCode = await CheckExistCode(),
+                                    //status available
+                                    Status = TeamStatus.Available
                                 };
-                                await _participantInTeamRepo.Insert(pit);
-                                return TransformViewTeam(getTeam);
+                                int Team_Id = await _teamRepo.Insert(team);
+                                if (Team_Id > 0)
+                                {
+                                    Team getTeam = await _teamRepo.Get(Team_Id);
+                                    //-----------------Add ParticiPant in Team with Role Leader
+                                    ParticipantInTeam pit = new ParticipantInTeam()
+                                    {
+                                        ParticipantId = model.CompetitionId,
+                                        //Team Id
+                                        TeamId = getTeam.Id,
+                                        //auto leader 
+                                        TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
+                                        //auto status 
+                                        Status = ParticipantInTeamStatus.InTeam
+                                    };
+                                    await _participantInTeamRepo.Insert(pit);
+                                    return TransformViewTeam(getTeam);
 
-                            }//end add team
+                                }//end add team
+                                else
+                                {
+                                    throw new ArgumentException("Add Team Failed");
+                                }
+                            }
+                            //end check Number Of Team
                             else
                             {
-                                throw new ArgumentException("Add Team Failed");
+                                throw new ArgumentException("Can't create Team beacause it's full");
                             }
                         }
-                        //end check Number Of Team
+                        //end check is Participant
                         else
                         {
-                            throw new ArgumentException("Can't create Team beacause it's full");
+                            throw new UnauthorizedAccessException("You aren't participant in Competition");
                         }
                     }
-                    //end check is Participant
+                    //end check Event
                     else
                     {
-                        throw new UnauthorizedAccessException("You aren't participant in Competition");
+                        throw new ArgumentException("Event can't not create team !");
                     }
                 }
                 //end check competition != null
                 else
                 {
-                    throw new ArgumentException("Competition is not found");
+                    throw new ArgumentException("Competition Or Event is not found");
                 }
             }
             catch (Exception)
@@ -434,7 +443,7 @@ namespace UniCEC.Business.Services.TeamSvc
                     {
                         //Delete Participant In Team
                         await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                        return true;          
+                        return true;
                     }
                     else
                     {
