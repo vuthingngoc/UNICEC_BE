@@ -4,6 +4,7 @@ using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.ViewModels.Entities.Competition;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 {
@@ -33,17 +34,37 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         }
 
         //
-        public async Task<List<int>> GetListSponsorId_In_Competition(int CompetitionId)
+        public async Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int CompetitionId)
         {
-            List<int> sponsorIdList = await (from sic in context.SponsorInCompetitions
-                                             where CompetitionId == sic.CompetitionId
-                                             select sic.SponsorId).ToListAsync();
+            List<SponsorInCompetition> sponsor_In_Competition_List = await (from sic in context.SponsorInCompetitions
+                                                                            where CompetitionId == sic.CompetitionId
+                                                                            select sic).ToListAsync();
 
-            if (sponsorIdList.Count > 0)
+            List<ViewSponsorInComp> listViewSponsor = new List<ViewSponsorInComp>();
+
+            if (sponsor_In_Competition_List.Count > 0)
             {
-                return sponsorIdList;
-            }
+                foreach (var sponsor_In_Competition in sponsor_In_Competition_List)
+                {
+                    Sponsor sponsor = await (from s in context.Sponsors
+                                             where s.Id == sponsor_In_Competition.SponsorId
+                                             select s).FirstOrDefaultAsync();
 
+                    ViewSponsorInComp vsc = new ViewSponsorInComp()
+                    {
+                        Id = sponsor.Id,
+                        Name = sponsor.Name,
+                        Logo = sponsor.Logo,
+                    };
+
+                    listViewSponsor.Add(vsc);
+                }
+
+                if (listViewSponsor.Count > 0)
+                {
+                    return listViewSponsor;
+                }
+            }
             return null;
         }
     }

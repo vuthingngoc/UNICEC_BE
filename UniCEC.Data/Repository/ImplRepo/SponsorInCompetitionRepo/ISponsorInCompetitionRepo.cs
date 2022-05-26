@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.ViewModels.Entities.Competition;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 {
@@ -11,6 +12,6 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         public Task<bool> CheckDuplicateCreateCompetitionOrEvent(int sponsorId, int competitionId);
 
         //
-        public Task<List<int>> GetListSponsorId_In_Competition(int CompetitionId);
+        public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int CompetitionId);
     }
 }
