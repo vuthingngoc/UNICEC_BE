@@ -12,16 +12,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
     public interface ICompetitionService
     {
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request);
-        public Task<ViewCompetition> GetById(int id);
+        public Task<ViewDetailCompetition> GetById(int id);
         //-----------------------------------------------------Leader 
-        public Task<ViewCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
+        public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel competitionInClub, string token);
 
 
         //-----------------------------------------------------Sponsor 
-        public Task<ViewCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
+        public Task<ViewDetailCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
         public Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent competition, string token);
         public Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token);
         public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);

@@ -25,5 +25,9 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_deposited")]
         public double SeedsDeposited { get; set; }
         public string? Address { get; set; }
+        [JsonPropertyName("address_name")]
+        public string? AddressName { get; set; }
+        public string? Content { get; set; }
+        public double? Fee { get; set; }
     }
 }

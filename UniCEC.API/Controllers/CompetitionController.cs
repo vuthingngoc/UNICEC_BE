@@ -77,7 +77,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCompetition result = await _competitionService.GetById(id);
+                ViewDetailCompetition result = await _competitionService.GetById(id);
 
                 return Ok(result);
 
@@ -106,7 +106,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
+                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
                 if (viewCompetition != null)
                 {
 
@@ -153,7 +153,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetition viewCompetition = await _competitionService.SponsorInsert(model, token);
+                ViewDetailCompetition viewCompetition = await _competitionService.SponsorInsert(model, token);
                 if (viewCompetition != null)
                 {
 

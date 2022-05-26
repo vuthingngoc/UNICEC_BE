@@ -22,9 +22,11 @@ namespace UniCEC.Data.Models.DB
         public int Id { get; set; }
         public int CompetitionTypeId { get; set; }
         public string Name { get; set; }
+        public string AddressName { get; set; }
         public string Address { get; set; }
         public int NumberOfParticipation { get; set; }
         public int NumberOfTeam { get; set; }
+        public DateTime CreateTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
         public DateTime EndTimeRegister { get; set; }
         public DateTime StartTime { get; set; }
