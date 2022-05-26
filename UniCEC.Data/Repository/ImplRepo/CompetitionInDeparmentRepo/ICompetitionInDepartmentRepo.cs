@@ -12,5 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
     public interface ICompetitionInDepartmentRepo : IRepository<CompetitionInDepartment> 
     {
         public Task<List<ViewDeparmentInComp>> GetListDepartment_In_Competition(int CompetitionId);
+
+        public Task<List<int>> GetListDepartmentId_In_Competition(int CompetitionId);
     }
 }
