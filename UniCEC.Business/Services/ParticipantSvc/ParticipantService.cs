@@ -98,9 +98,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                     {
                         //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
                         bool round1 = false;
-                        //-------------------------------------------------------Club Create Competition Or Event                    
-                        if (competition.IsSponsor == false)
-                        {
+                        //-------------------------------------------------------Club Create Competition Or Event                                          
                             //----------------------------------------------Check level Department
                             // dành cho những sinh viên thuộc nghành 
                             // lấy list Department có trong competition
@@ -163,7 +161,6 @@ namespace UniCEC.Business.Services.ParticipantSvc
                                     }
                                 }
                             }
-
                             //----------------------------------------------Check level Club
                             //dành cho sinh viên có thể thuộc hoặc kh thuộc clb
                             if (listDepartmentId == null)
@@ -212,50 +209,8 @@ namespace UniCEC.Business.Services.ParticipantSvc
                                         throw new ArgumentException("User isn't a student in this University, Competition can't support");
                                     }
                                 }
-                            }
-                        }
-                        //-------------------------------------------------------Sponsor Create Competition Or Event
-                        if (competition.IsSponsor)
-                        {
-                            //----------------------------------------------Check level Department
-                            //dành cho những sinh viên thuộc nghành
-                            // lấy list Department có trong competition
-                            List<int> listDepartmentId = await _competitionInDepartmentRepo.GetListDepartmentId_In_Competition(competition.Id);
-                            if (listDepartmentId != null)
-                            {
-                                //Pulic
-                                if (competition.Public)
-                                {
-                                    //kiểm tra xem trong list DepartmentId đó có trong University của user đó hay kh
-                                    bool dep_in_uni = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, UniversityId);
-                                    if (dep_in_uni)
-                                    {
-                                        //xong mới tới kiểm tra xem UserId ~ Student đó có thuộc Department đó kh
-                                        // userID - MajorID -> Student thuộc nghành đó
-                                        bool stu_in_dep = await _participantRepo.CheckStudentInCom_In_Dep(listDepartmentId, studentInfo);
-                                        //có thì qua ải
-                                        if (stu_in_dep)
-                                        {
-                                            round1 = true;
-                                        }
-                                        //end check stu_in_dep
-                                        else
-                                        {
-                                            throw new ArgumentException("Student don't studying in that Major belong to this Department, Competition can't support");
-                                        }
-
-                                    }
-                                    //end if dep_in_uni
-                                    else
-                                    {
-                                        throw new ArgumentException("University don't have this Department, Competition can't support");
-                                    }
-                                }
-                            }//end if listDepartmentId
-
-                            //Cuộc thi mà nhà tài trợ tạo ra cho tất cả ai muốn vào thì vào                            
-                        }
-
+                            }     
+                            
                         //ROUND 2 - Check xem Competition is RegisterTime
                         bool round2 = false;
                         if (round1)
@@ -368,3 +323,46 @@ namespace UniCEC.Business.Services.ParticipantSvc
 
     }
 }
+
+
+//-------------------------------------------------------Sponsor Create Competition Or Event
+//if (competition.IsSponsor)
+//{
+//    //----------------------------------------------Check level Department
+//    //dành cho những sinh viên thuộc nghành
+//    // lấy list Department có trong competition
+//    List<int> listDepartmentId = await _competitionInDepartmentRepo.GetListDepartmentId_In_Competition(competition.Id);
+//    if (listDepartmentId != null)
+//    {
+//        //Pulic
+//        if (competition.Public)
+//        {
+//            //kiểm tra xem trong list DepartmentId đó có trong University của user đó hay kh
+//            bool dep_in_uni = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, UniversityId);
+//            if (dep_in_uni)
+//            {
+//                //xong mới tới kiểm tra xem UserId ~ Student đó có thuộc Department đó kh
+//                // userID - MajorID -> Student thuộc nghành đó
+//                bool stu_in_dep = await _participantRepo.CheckStudentInCom_In_Dep(listDepartmentId, studentInfo);
+//                //có thì qua ải
+//                if (stu_in_dep)
+//                {
+//                    round1 = true;
+//                }
+//                //end check stu_in_dep
+//                else
+//                {
+//                    throw new ArgumentException("Student don't studying in that Major belong to this Department, Competition can't support");
+//                }
+
+//            }
+//            //end if dep_in_uni
+//            else
+//            {
+//                throw new ArgumentException("University don't have this Department, Competition can't support");
+//            }
+//        }
+//    }//end if listDepartmentId
+
+//    //Cuộc thi mà nhà tài trợ tạo ra cho tất cả ai muốn vào thì vào                            
+//}

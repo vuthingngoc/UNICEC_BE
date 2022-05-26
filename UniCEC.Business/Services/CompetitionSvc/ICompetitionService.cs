@@ -21,9 +21,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //-----------------------------------------------------Sponsor 
-        public Task<ViewDetailCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
-        public Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent competition, string token);
-        public Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token);
+        //public Task<ViewDetailCompetition> SponsorInsert(SponsorInsertCompOrEventModel competition, string token);
+        //public Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent competition, string token);
+        //public Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token);
         public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
 
         //Get EVENT or COMPETITION by conditions
