@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.ViewModels.Entities.Competition;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
 {
@@ -16,17 +17,33 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
 
         }
 
-        public async Task<List<int>> GetListDepartmentId_In_Competition(int CompetitionId)
+        public async Task<List<ViewDeparmentInComp>> GetListDepartment_In_Competition(int CompetitionId)
         {
-            List<int> departmentIdList = await(from cid in context.CompetitionInDepartments
-                                         where CompetitionId == cid.CompetitionId
-                                         select cid.DepartmentId).ToListAsync();
-
-            if (departmentIdList.Count > 0)
+            List<CompetitionInDepartment> department_In_CompetitionList = await (from cid in context.CompetitionInDepartments
+                                                                                 where CompetitionId == cid.CompetitionId
+                                                                                 select cid).ToListAsync();
+            List<ViewDeparmentInComp> list_vdic = new List<ViewDeparmentInComp>();
+            if (department_In_CompetitionList.Count > 0)
             {
-                return departmentIdList;
-            }
+                foreach (var department_In_Competition in department_In_CompetitionList)
+                {
+                    Department department = await (from d in context.Departments
+                                                   where d.Id == department_In_Competition.DepartmentId
+                                                   select d).FirstOrDefaultAsync();
 
+                    ViewDeparmentInComp vdic = new ViewDeparmentInComp()
+                    {
+                        Id = department.Id,
+                        Name = department.Name,
+                    };
+                    list_vdic.Add(vdic);
+                }
+
+                if (list_vdic.Count > 0)
+                {
+                    return list_vdic;
+                }
+            }
             return null;
         }
     }

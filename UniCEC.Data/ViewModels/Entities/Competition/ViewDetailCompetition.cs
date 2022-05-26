@@ -53,19 +53,23 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //------------- ADD Field Sponsor Collaborate -> Object Array
         [JsonPropertyName("sponsors_in_competition")]
-        public List<int> SponsorInCompetition_Id { get; set; }
+        public List<ViewSponsorInComp> SponsorInCompetition { get; set; }
 
         //------------- ADD Field Club Collaborate -> Object Array
         [JsonPropertyName("clubs_in_competition")]
-        public List<int> ClubInCompetition_Id { get; set; }
+        public List<ViewClubInComp> ClubInCompetition { get; set; }
 
         //------------- ADD Field Department   -> Object Array
         [JsonPropertyName("departments_in_competition")]
-        public List<int> DepartmentInCompetition_Id { get; set; }
+        public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
 
         //------------- ADD Field Infuencer   -> Object Array
 
+        //------------- ADD Field Competition Entity   -> Object Array
+
         //------------- ADD number of participant joining
+        [JsonPropertyName("number_of_participant_join")]
+        public int NumberOfParticipantJoin { get; set; }
 
     }
 }

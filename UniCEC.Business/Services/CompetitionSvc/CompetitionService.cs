@@ -13,6 +13,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
+using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.RequestModels;
@@ -43,6 +44,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IClubRepo _clubRepo;
         //
         private ISponsorRepo _sponsorRepo;
+        //
+        private IParticipantRepo _participantRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
@@ -52,6 +55,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IDepartmentInUniversityRepo departmentInUniversityRepo,
                                   IClubRepo clubRepo,
                                   ISponsorRepo sponsorRepo,
+                                  IParticipantRepo participantRepo,
                                   IDepartmentRepo departmentRepo)
         {
             _competitionRepo = competitionRepo;
@@ -62,6 +66,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _departmentInUniversityRepo = departmentInUniversityRepo;
             _clubRepo = clubRepo;
             _sponsorRepo = sponsorRepo;
+            _participantRepo = participantRepo;
             _departmentRepo = departmentRepo;
         }
 
@@ -741,14 +746,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
 
             //List Sponsors in Competition
-            List<int> SponsorsInCompetition_Id = await _sponsorInCompetitionRepo.GetListSponsorId_In_Competition(competition.Id);
+            List<ViewSponsorInComp> SponsorsInCompetition = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(competition.Id);
 
             //List Clubs in Comeptition
-            List<int> ClubsInCompetition_Id = await _competitionInClubRepo.GetListClubId_In_Competition(competition.Id);
+            List<ViewClubInComp> ClubsInCompetition = await _competitionInClubRepo.GetListClub_In_Competition(competition.Id);
 
             //List Department in Competition
-            List<int> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartmentId_In_Competition(competition.Id);
+            List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
 
+            //Number Of Participant Join This Competition
+            int NumberOfParticipantJoin = await _participantRepo.NumOfParticipant(competition.Id);
 
             return new ViewDetailCompetition()
             {
@@ -774,11 +781,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Status = competition.Status,             
                 View = competition.View,
                 //
-                ClubInCompetition_Id = ClubsInCompetition_Id,
+                ClubInCompetition = ClubsInCompetition,
                 //
-                SponsorInCompetition_Id = SponsorsInCompetition_Id,
+                SponsorInCompetition = SponsorsInCompetition,
                 //
-                DepartmentInCompetition_Id = DepartmentsInCompetition_Id
+                DepartmentInCompetition = DepartmentsInCompetition_Id,
+                //
+                NumberOfParticipantJoin = NumberOfParticipantJoin
             };
         }
 

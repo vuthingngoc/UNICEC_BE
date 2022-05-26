@@ -100,5 +100,16 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                 return null;
             }
         }
+
+        public async Task<int> NumOfParticipant(int CompetitionId)
+        {
+            var query = from p in context.Participants
+                        where p.CompetitionId == CompetitionId
+                        select p;
+
+            int totalNumOfParticipant = await query.CountAsync();
+
+            return totalNumOfParticipant;
+        }
     }
 }
