@@ -26,7 +26,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime EndTime { get; set; }
         public string Content { get; set; }
         public double Fee { get; set; }
-        //public bool Public { get; set; }
+        [JsonPropertyName("address_name")]
+        public string AddressName { get; set; }
         public string Address { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
