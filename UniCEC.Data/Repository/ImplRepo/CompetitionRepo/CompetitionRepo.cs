@@ -39,9 +39,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.ClubId == request.ClubId
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id
+                        where cic.CompetitionId == comp.Id && cic.IsOwner == true
                         select comp;
-
             //status
             if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
             //Public
@@ -51,33 +50,78 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             {
                 if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
             }
-            //
             int totalCount = query.Count();
             //
-            List<ViewCompetition> Competitions = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new ViewCompetition()
+            List<ViewCompetition> Competitions = new List<ViewCompetition>();
+
+            List<Competition> list_Competition = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+
+            foreach (Competition compe in list_Competition)
             {
-                CompetitionId = x.Id,
-                Name = x.Name,
-                CompetitionTypeId = x.CompetitionTypeId,
-                Address = x.Address,
-                NumberOfTeam = x.NumberOfTeam,
-                NumberOfParticipation = x.NumberOfParticipation,
-                StartTime = x.StartTime,
-                EndTime = x.EndTime,
-                StartTimeRegister = x.StartTimeRegister,
-                EndTimeRegister = x.EndTimeRegister,
-                Content = x.Content,
-                Fee = x.Fee,
-                SeedsCode = x.SeedsCode,
-                SeedsPoint = x.SeedsPoint,
-                SeedsDeposited = x.SeedsDeposited,
-                Public = x.Public,
-                Status = x.Status,
-                View = x.View
-            }).ToListAsync();
+                //lấy department ID
+                List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
+
+                List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
+
+                //lấy  Club Owner
+                Club clubOwner = await (from cic in context.CompetitionInClubs
+                                        where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        from c in context.Clubs
+                                        where c.Id == cic.ClubId
+                                        select c).FirstOrDefaultAsync();
+
+                foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
+                {
+                    Department dep = await (from d in context.Departments
+                                            where d.Id == competitionInDepartment.DepartmentId
+                                            select d).FirstOrDefaultAsync();
+                    if (dep != null)
+                    {
+                        ViewDeparmentInComp vdic = new ViewDeparmentInComp()
+                        {
+                            Id = dep.Id,
+                            Name = dep.Name,
+                        };
+                        list_View_DeparmentInComp.Add(vdic);
+                    }
+                }
+
+                //cb tạo View
+                ViewCompetition vc = new ViewCompetition()
+                {
+                    CompetitionId = compe.Id,
+                    Name = compe.Name,
+                    CompetitionTypeId = compe.CompetitionTypeId,
+                    Address = compe.Address,
+                    NumberOfTeam = compe.NumberOfTeam,
+                    NumberOfParticipation = compe.NumberOfParticipation,
+                    StartTime = compe.StartTime,
+                    EndTime = compe.EndTime,
+                    StartTimeRegister = compe.StartTimeRegister,
+                    EndTimeRegister = compe.EndTimeRegister,
+                    Content = compe.Content,
+                    Fee = compe.Fee,
+                    SeedsCode = compe.SeedsCode,
+                    SeedsPoint = compe.SeedsPoint,
+                    SeedsDeposited = compe.SeedsDeposited,
+                    Public = compe.Public,
+                    Status = compe.Status,
+                    View = compe.View,
+                    AddressName = compe.AddressName,
+                    CreateTime = compe.CreateTime,
+                    IsSponsor = compe.IsSponsor,
+                    //
+                    DepartmentInCompetition = list_View_DeparmentInComp,
+                    ClubOwnerId = clubOwner.Id,
+                    ClubOwnerImage = clubOwner.Image,
+                    ClubOwnerName = clubOwner.Name,
+                };
+                Competitions.Add(vc);
+            }//end each competition
+
+
 
             return (Competitions.Count != 0) ? new PagingResult<ViewCompetition>(Competitions, totalCount, request.CurrentPage, request.PageSize) : null;
-
         }
 
         //Get top 3 EVENT or COMPETITION by Status
@@ -96,15 +140,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        where comp.StartTime >= localTime.DateTime
+                        where comp.StartTime >= localTime.DateTime && cic.IsOwner == true
                         orderby comp.StartTime
                         select comp;
-
-                //query = from comp in context.Competitions
-                //        join cic in context.CompetitionInClubs on comp.Id equals cic.CompetitionId
-                //        where cic.ClubId == ClubId && comp.StartTime > localTime.DateTime
-                //        orderby comp.StartTime
-                //        select comp;
             }
             else
             {
@@ -124,29 +162,73 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Status
             if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
 
+            List<ViewCompetition> competitions = new List<ViewCompetition>();
 
-            //
-            List<ViewCompetition> competitions = await query.Take(3).Select(x => new ViewCompetition()
+            List<Competition> list_Competition = await query.Take(3).ToListAsync();
+
+            foreach (Competition compe in list_Competition)
             {
-                CompetitionId = x.Id,
-                Name = x.Name,
-                CompetitionTypeId = x.CompetitionTypeId,
-                Address = x.Address,
-                NumberOfTeam = x.NumberOfTeam,
-                NumberOfParticipation = x.NumberOfParticipation,
-                StartTime = x.StartTime,
-                EndTime = x.EndTime,
-                StartTimeRegister = x.StartTimeRegister,
-                EndTimeRegister = x.EndTimeRegister,
-                Content = x.Content,
-                Fee = x.Fee,
-                SeedsCode = x.SeedsCode,
-                SeedsPoint = x.SeedsPoint,
-                SeedsDeposited = x.SeedsDeposited,
-                Public = x.Public,
-                Status = x.Status,
-                View = x.View
-            }).ToListAsync();
+                //lấy department ID
+                List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
+
+                List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
+
+                //lấy  Club Owner
+                Club clubOwner = await (from cic in context.CompetitionInClubs
+                                        where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        from c in context.Clubs
+                                        where c.Id == cic.ClubId
+                                        select c).FirstOrDefaultAsync();
+
+                foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
+                {
+                    Department dep = await (from d in context.Departments
+                                            where d.Id == competitionInDepartment.DepartmentId
+                                            select d).FirstOrDefaultAsync();
+                    if (dep != null)
+                    {
+                        ViewDeparmentInComp vdic = new ViewDeparmentInComp()
+                        {
+                            Id = dep.Id,
+                            Name = dep.Name,
+                        };
+                        list_View_DeparmentInComp.Add(vdic);
+                    }
+                }
+
+                //cb tạo View
+                ViewCompetition vc = new ViewCompetition()
+                {
+                    CompetitionId = compe.Id,
+                    Name = compe.Name,
+                    CompetitionTypeId = compe.CompetitionTypeId,
+                    Address = compe.Address,
+                    NumberOfTeam = compe.NumberOfTeam,
+                    NumberOfParticipation = compe.NumberOfParticipation,
+                    StartTime = compe.StartTime,
+                    EndTime = compe.EndTime,
+                    StartTimeRegister = compe.StartTimeRegister,
+                    EndTimeRegister = compe.EndTimeRegister,
+                    Content = compe.Content,
+                    Fee = compe.Fee,
+                    SeedsCode = compe.SeedsCode,
+                    SeedsPoint = compe.SeedsPoint,
+                    SeedsDeposited = compe.SeedsDeposited,
+                    Public = compe.Public,
+                    Status = compe.Status,
+                    View = compe.View,
+                    AddressName = compe.AddressName,
+                    CreateTime = compe.CreateTime,
+                    IsSponsor = compe.IsSponsor,
+                    //
+                    DepartmentInCompetition = list_View_DeparmentInComp,
+                    ClubOwnerId = clubOwner.Id,
+                    ClubOwnerImage = clubOwner.Image,
+                    ClubOwnerName = clubOwner.Name,
+                };
+                competitions.Add(vc);
+            }//end each competition
+
             return (competitions.Count > 0) ? competitions : null;
         }
 

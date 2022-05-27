@@ -18,21 +18,39 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
         }
 
         //
-        public async Task<bool> CheckDuplicateCreateCompetitionOrEvent(int clubId, int competitionId)
+        //public async Task<bool> CheckDuplicateCreateCompetitionOrEvent(int clubId, int competitionId)
+        //{
+        //    var query = from cic in context.CompetitionInClubs
+        //                where cic.ClubId == clubId && cic.CompetitionId == competitionId
+        //                select cic;
+        //    int check = await query.CountAsync();
+        //    if (check > 0)
+        //    {
+        //        //có nghĩa là đã tạo nó r
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        //có nghĩa là chưa 
+        //        return true;
+        //    }
+        //}
+
+        public async Task<bool> IsOwnerCompetitionOrEvent(int clubId, int competitionId)
         {
             var query = from cic in context.CompetitionInClubs
-                        where cic.ClubId == clubId && cic.CompetitionId == competitionId
+                        where cic.ClubId == clubId && cic.CompetitionId == competitionId && cic.IsOwner == true
                         select cic;
-            int check = query.Count();
+            int check = await query.CountAsync();
             if (check > 0)
             {
-                //có nghĩa là đã tạo nó r
-                return false;
+                
+                return true;
             }
             else
             {
-                //có nghĩa là chưa 
-                return true;
+                
+                return false;
             }
         }
 
@@ -80,5 +98,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 
             return await query.CountAsync();
         }
+
+        
     }
 }
