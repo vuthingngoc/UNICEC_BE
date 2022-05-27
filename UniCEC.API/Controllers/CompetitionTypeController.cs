@@ -19,6 +19,7 @@ namespace UniCEC.API.Controllers
     public class CompetitionTypeController : ControllerBase
     {
         private ICompetitionTypeService _competitionTypeService;
+
         public CompetitionTypeController(ICompetitionTypeService competitionTypeService)
         {
             _competitionTypeService = competitionTypeService;

@@ -7,6 +7,7 @@ namespace UniCEC.Business.Services.CitySvc
 {
     public interface ICityService
     {
+        //public Task UploadFile(IFormFile file, string token);
         public Task<PagingResult<ViewCity>> GetListCities(CityRequestModel request);
         public Task<ViewCity> GetByCityId(int id);
         public Task<ViewCity> Insert(CityInsertModel city);
