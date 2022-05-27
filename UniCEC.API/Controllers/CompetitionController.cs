@@ -109,7 +109,7 @@ namespace UniCEC.API.Controllers
                 //
                 IFormFile file = Request.Form.Files[0];
 
-                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
+                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token, file);
                 if (viewCompetition != null)
                 {
 
