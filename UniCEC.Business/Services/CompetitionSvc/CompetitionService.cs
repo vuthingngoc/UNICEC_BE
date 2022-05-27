@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.FileSvc;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
@@ -46,6 +49,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ISponsorRepo _sponsorRepo;
         //
         private IParticipantRepo _participantRepo;
+        //
+        private IFileService _fileService;
+        //
+        private ICompetitionEntityRepo _competitionEntityRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
@@ -56,7 +63,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IClubRepo clubRepo,
                                   ISponsorRepo sponsorRepo,
                                   IParticipantRepo participantRepo,
-                                  IDepartmentRepo departmentRepo)
+                                  IDepartmentRepo departmentRepo,
+                                  ICompetitionEntityRepo competitionEntityRepo,
+                                  IFileService fileService)
         {
             _competitionRepo = competitionRepo;
             _clubHistoryRepo = clubHistoryRepo;
@@ -68,6 +77,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _sponsorRepo = sponsorRepo;
             _participantRepo = participantRepo;
             _departmentRepo = departmentRepo;
+            _fileService = fileService;
+            _competitionEntityRepo = competitionEntityRepo;
         }
 
 
@@ -116,7 +127,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //Leader Insert
-        public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
+        public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token, IFormFile file)
         {
             try
             {
@@ -174,6 +185,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             {
 
                                 bool insertDepartment = false;
+                                bool insertFileImage = false;
+
                                 //------------Check FK
                                 if (model.ListDepartmentId.Count > 0)
                                 {
@@ -187,6 +200,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         insertDepartment = true;
                                     }
                                 }
+
+                                string Url = await _fileService.UploadFile(file);
+                                if (Url != null)
+                                {
+                                    insertFileImage = true;
+                                }
+
                                 //------------ Insert Competition
                                 //ở trong trường hợp này phân biệt EVENT - COMPETITION
                                 //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
@@ -234,8 +254,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     }
 
                                     //------------ Insert Competition-Entities-----------
-                                    //
-                                    //... to be continuted
+                                    if (insertFileImage)
+                                    {
+                                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                                        {
+                                            CompetitionId = competition_Id,
+                                            Url = Url
+                                        };
+                                        await _competitionEntityRepo.Insert(competitionEntity); 
+                                    }
 
                                     //------------ Insert Competition-In-Club
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
@@ -766,6 +793,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //Number Of Participant Join This Competition
             int NumberOfParticipantJoin = await _participantRepo.NumOfParticipant(competition.Id);
 
+            //Img Url
+            CompetitionEntity compeEntity = await _competitionEntityRepo.Get(competition.Id);
+            string imgUrl = compeEntity.Url;
+
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
@@ -796,7 +827,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //
                 DepartmentInCompetition = DepartmentsInCompetition_Id,
                 //
-                NumberOfParticipantJoin = NumberOfParticipantJoin
+                NumberOfParticipantJoin = NumberOfParticipantJoin,
+                //
+                ImgUrl = imgUrl
             };
         }
 
@@ -1143,7 +1176,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                
+
                 var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
                 var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
 
