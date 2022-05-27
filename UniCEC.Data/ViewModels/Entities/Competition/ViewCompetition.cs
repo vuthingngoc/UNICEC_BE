@@ -41,6 +41,17 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("address_name")]
         public string AddressName { get; set; }
         public string Address { get; set; }
-        public int View { get; set; }       
+        public int View { get; set; }
+
+        //-------------ADD Field 
+        [JsonPropertyName("club_owner_id")]
+        public int ClubOwnerId { get; set; }
+        [JsonPropertyName("club_owner_name")]
+        public string ClubOwnerName { get; set; }
+        [JsonPropertyName("club_owner_image")]
+        public string ClubOwnerImage { get; set; }
+        [JsonPropertyName("departments_in_competition")]
+        public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
+
     }
 }
