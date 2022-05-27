@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +106,8 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
+                //
+                IFormFile file = Request.Form.Files[0];
 
                 ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
                 if (viewCompetition != null)

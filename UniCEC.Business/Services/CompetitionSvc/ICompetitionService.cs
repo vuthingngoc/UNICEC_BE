@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
@@ -14,7 +15,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request);
         public Task<ViewDetailCompetition> GetById(int id);
         //-----------------------------------------------------Leader 
-        public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
+        public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token, IFormFile file);
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel competitionInClub, string token);
