@@ -11,6 +11,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
@@ -46,6 +47,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ISponsorRepo _sponsorRepo;
         //
         private IParticipantRepo _participantRepo;
+        //
+        private ICompetitionTypeRepo _competitionTypeRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
@@ -56,6 +59,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IClubRepo clubRepo,
                                   ISponsorRepo sponsorRepo,
                                   IParticipantRepo participantRepo,
+                                  ICompetitionTypeRepo competitionTypeRepo,
                                   IDepartmentRepo departmentRepo)
         {
             _competitionRepo = competitionRepo;
@@ -67,6 +71,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _clubRepo = clubRepo;
             _sponsorRepo = sponsorRepo;
             _participantRepo = participantRepo;
+            _competitionTypeRepo = competitionTypeRepo;
             _departmentRepo = departmentRepo;
         }
 
@@ -766,11 +771,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //Number Of Participant Join This Competition
             int NumberOfParticipantJoin = await _participantRepo.NumOfParticipant(competition.Id);
 
+            //competition type name
+            CompetitionType competitionType = await _competitionTypeRepo.Get(competition.Id);
+            string competitionTypeName = competitionType.TypeName;
+
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
                 Name = competition.Name,
                 CompetitionTypeId = competition.CompetitionTypeId,
+                CompetitionTypeName = competitionTypeName,
                 Address = competition.Address,
                 NumberOfParticipation = competition.NumberOfParticipation,
                 NumberOfTeam = competition.NumberOfTeam,
@@ -802,34 +812,34 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
 
-        public ViewCompetition TransformViewCompetition(Competition competition)
-        {
+        //public ViewCompetition TransformViewCompetition(Competition competition)
+        //{
 
-            return new ViewCompetition()
-            {
-                CompetitionId = competition.Id,
-                Name = competition.Name,
-                CompetitionTypeId = competition.CompetitionTypeId,
-                AddressName = competition.AddressName,
-                Address = competition.Address,
-                NumberOfParticipation = competition.NumberOfParticipation,
-                NumberOfTeam = competition.NumberOfTeam,
-                CreateTime = competition.CreateTime,
-                StartTime = competition.StartTime,
-                EndTime = competition.EndTime,
-                StartTimeRegister = competition.StartTimeRegister,
-                EndTimeRegister = competition.EndTimeRegister,
-                Content = competition.Content,
-                Fee = competition.Fee,
-                SeedsPoint = competition.SeedsPoint,
-                SeedsDeposited = competition.SeedsDeposited,
-                SeedsCode = competition.SeedsCode,
-                IsSponsor = competition.IsSponsor,
-                Public = competition.Public,
-                Status = competition.Status,
-                View = competition.View
-            };
-        }
+        //    return new ViewCompetition()
+        //    {
+        //        CompetitionId = competition.Id,
+        //        Name = competition.Name,
+        //        CompetitionTypeId = competition.CompetitionTypeId,
+        //        AddressName = competition.AddressName,
+        //        Address = competition.Address,
+        //        NumberOfParticipation = competition.NumberOfParticipation,
+        //        NumberOfTeam = competition.NumberOfTeam,
+        //        CreateTime = competition.CreateTime,
+        //        StartTime = competition.StartTime,
+        //        EndTime = competition.EndTime,
+        //        StartTimeRegister = competition.StartTimeRegister,
+        //        EndTimeRegister = competition.EndTimeRegister,
+        //        Content = competition.Content,
+        //        Fee = competition.Fee,
+        //        SeedsPoint = competition.SeedsPoint,
+        //        SeedsDeposited = competition.SeedsDeposited,
+        //        SeedsCode = competition.SeedsCode,
+        //        IsSponsor = competition.IsSponsor,
+        //        Public = competition.Public,
+        //        Status = competition.Status,
+        //        View = competition.View
+        //    };
+        //}
 
         //generate Seed code length 10
         private string GenerateSeedCode()
