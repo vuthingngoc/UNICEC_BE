@@ -8,6 +8,6 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
 {
     public interface IInfluencerRepo : IRepository<Influencer>
     {
-        public Task<PagingResult<ViewInfluencer>> GetByCompetition(int competition);
+        public Task<PagingResult<ViewInfluencer>> GetByCompetition(int competitionId, PagingRequest request);
     }
 }

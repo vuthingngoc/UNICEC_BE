@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Firebase.Auth;
+using Firebase.Storage;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -16,13 +22,24 @@ namespace UniCEC.Business.Services.CitySvc
         {
             _cityRepo = cityRepo;
         }
+        // Test upload file 
+        //public async Task UploadFile(IFormFile file, string token)
+        //{
+        //    string bucket = "unics-e46a4.appspot.com";
 
+        //    if (file.Length == 0) throw new NullReferenceException("Null File");
+
+        //    Stream stream = file.OpenReadStream();
+        //    var cancellationToken = new CancellationTokenSource().Token;
+        //    string link = await new FirebaseStorage(bucket).Child("assets").Child($"{Guid.NewGuid()}").PutAsync(stream, cancellationToken);
+        //    Console.WriteLine("\n======== link: " + link);
+        //}
 
         //Get-List-Cites
         public async Task<PagingResult<ViewCity>> GetListCities(CityRequestModel request)
         {
             PagingResult<ViewCity> result = await _cityRepo.GetListCities(request);
-            if(result == null) throw new NullReferenceException();
+            if (result == null) throw new NullReferenceException();
             return result;
         }
 
@@ -123,7 +140,5 @@ namespace UniCEC.Business.Services.CitySvc
         {
             throw new NotImplementedException();
         }
-
-
     }
 }

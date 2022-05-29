@@ -20,9 +20,11 @@ namespace UniCEC.Business.Services.InfluencerSvc
             throw new NotImplementedException();
         }
 
-        public Task<PagingResult<ViewInfluencer>> GetByCompetition(int competition)
+        public async Task<PagingResult<ViewInfluencer>> GetByCompetition(int competitionId, PagingRequest request)
         {
-            throw new NotImplementedException();
+            PagingResult<ViewInfluencer> result = await _influencerRepo.GetByCompetition(competitionId, request);
+            if (result == null) throw new NullReferenceException();
+            return result; 
         }
 
         public Task<ViewInfluencer> Insert(InfluencerInsertModel model)
@@ -30,7 +32,7 @@ namespace UniCEC.Business.Services.InfluencerSvc
             throw new NotImplementedException();
         }
 
-        public Task Update(InfluencerInsertModel model)
+        public Task Update(ViewInfluencer model)
         {
             throw new NotImplementedException();
         }

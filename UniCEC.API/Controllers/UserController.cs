@@ -12,7 +12,6 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.API.Controllers
@@ -24,12 +23,10 @@ namespace UniCEC.API.Controllers
     public class UserController : ControllerBase
     {
         private IUserService _userService;
-        private IRoleService _roleService;
 
-        public UserController(IUserService userService, IRoleService roleService)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _roleService = roleService;
         }
 
         [HttpGet("{id}")]

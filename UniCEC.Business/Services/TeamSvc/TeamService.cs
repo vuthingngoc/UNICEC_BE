@@ -215,7 +215,23 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto status 
                                         Status = ParticipantInTeamStatus.InTeam
                                     };
+
                                     await _participantInTeamRepo.Insert(pit);
+
+                                    //------------------Update status Team
+                                    Team t = await _teamRepo.Get(team.Id);
+                                    //check lại 1 phát nữa nếu như true là available 
+                                    //else là full
+                                    if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, NumberOfStudentInTeam))
+                                    {
+                                        t.Status = TeamStatus.Available;
+                                    }
+                                    else
+                                    {
+                                        t.Status = TeamStatus.Full;
+                                    }
+
+                                    await _teamRepo.Update();
 
                                     return TransformViewParticipantInTeam(pit, competition.Id);
                                 } //end check number of member in team
@@ -443,6 +459,12 @@ namespace UniCEC.Business.Services.TeamSvc
                     {
                         //Delete Participant In Team
                         await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+
+                        //---- auto Team Available
+                        //------------------Update status Team
+                        Team t = await _teamRepo.Get(team.Id);
+                        t.Status = TeamStatus.Available;
+                        await _teamRepo.Update();
                         return true;
                     }
                     else

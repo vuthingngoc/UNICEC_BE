@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# firebase configure
+unics-e46a4-firebase-adminsdk-td0dr-86cc1f1def.json
+
 # User-specific files
 *.rsuser
 *.suo

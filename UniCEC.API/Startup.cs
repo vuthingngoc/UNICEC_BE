@@ -74,6 +74,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
 using UniCEC.Business.Services.InfluencerSvc;
 using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
+using UniCEC.Business.Services.FileSvc;
 
 namespace UniCEC.API
 {
@@ -136,6 +137,7 @@ namespace UniCEC.API
             services.AddScoped<ITermService, TermService>();
             services.AddScoped<IUniversityService, UniversityService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IFileService, FileService>();
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

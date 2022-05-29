@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CitySvc;
 using UniCEC.Data.RequestModels;
@@ -20,8 +24,6 @@ namespace UniCEC.API.Controllers
     [ApiVersion("1.0")]
     public class CityController : ControllerBase
     {
-
-
         //gọi service
         private ICityService _ICityService;
 
@@ -30,14 +32,43 @@ namespace UniCEC.API.Controllers
             _ICityService = ICityService;
         }
 
+        // Test upload file
+
+        //[HttpPost("upload-image")]
+        //[SwaggerOperation(Summary = "update image")]
+        //public async Task<IActionResult> CreateImage()
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        IFormFile file = Request.Form.Files[0];
+                
+        //        await _ICityService.UploadFile(file, token);
+        //        return Ok();
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return StatusCode(500, ex.Message);
+        //    }
+        //}
+
         // Get-List-Cities
         [HttpGet("cities")]
         [SwaggerOperation(Summary = "Get cities")]
         public async Task<IActionResult> GetListCity([FromQuery] CityRequestModel request)
         {
-            try {
-                PagingResult<ViewCity> result = await _ICityService.GetListCities(request);                                
-                    return Ok(result);              
+            try
+            {
+                PagingResult<ViewCity> result = await _ICityService.GetListCities(request);
+                return Ok(result);
             }
             catch (NullReferenceException)
             {
@@ -58,8 +89,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCity result = await _ICityService.GetByCityId(id);                              
-                  return Ok(result);                              
+                ViewCity result = await _ICityService.GetByCityId(id);
+                return Ok(result);
             }
             catch (NullReferenceException)
             {
@@ -76,11 +107,11 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [SwaggerOperation(Summary = "Insert city - Admin")]
-        public async Task<IActionResult> InsertCity ([FromBody] CityInsertModel model)
+        public async Task<IActionResult> InsertCity([FromBody] CityInsertModel model)
         {
             try
             {
-                ViewCity result = await _ICityService.Insert(model);                
+                ViewCity result = await _ICityService.Insert(model);
                 if (result != null)
                 {
                     return Ok(result);
@@ -115,10 +146,12 @@ namespace UniCEC.API.Controllers
                 Boolean check = false;
                 //
                 check = await _ICityService.Update(city);
-                if (check) {
+                if (check)
+                {
                     return Ok();
                 }
-                else {
+                else
+                {
                     //Not has data
                     return Ok(new object());
                 }
@@ -140,6 +173,5 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
     }
 }
