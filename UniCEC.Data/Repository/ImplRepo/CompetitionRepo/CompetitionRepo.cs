@@ -92,34 +92,31 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CompetitionId = compe.Id,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
-                    Address = compe.Address,
-                    NumberOfTeam = compe.NumberOfTeam,
-                    NumberOfParticipation = compe.NumberOfParticipation,
-                    StartTime = compe.StartTime,
-                    EndTime = compe.EndTime,
-                    StartTimeRegister = compe.StartTimeRegister,
-                    EndTimeRegister = compe.EndTimeRegister,
-                    Content = compe.Content,
-                    Fee = compe.Fee,
-                    SeedsCode = compe.SeedsCode,
-                    SeedsPoint = compe.SeedsPoint,
-                    SeedsDeposited = compe.SeedsDeposited,
                     Public = compe.Public,
-                    Status = compe.Status,
                     View = compe.View,
-                    AddressName = compe.AddressName,
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
-                    //
                     DepartmentInCompetition = list_View_DeparmentInComp,
                     ClubOwnerId = clubOwner.Id,
                     ClubOwnerImage = clubOwner.Image,
                     ClubOwnerName = clubOwner.Name,
+                    //Address = compe.Address,
+                    //NumberOfTeam = compe.NumberOfTeam,
+                    //NumberOfParticipation = compe.NumberOfParticipation,
+                    //StartTime = compe.StartTime,
+                    //EndTime = compe.EndTime,
+                    //StartTimeRegister = compe.StartTimeRegister,
+                    //EndTimeRegister = compe.EndTimeRegister,
+                    //Content = compe.Content,
+                    //Fee = compe.Fee,
+                    //SeedsCode = compe.SeedsCode,
+                    //SeedsPoint = compe.SeedsPoint,
+                    //SeedsDeposited = compe.SeedsDeposited,
+                    //AddressName = compe.AddressName,
+                    //Status = compe.Status,
                 };
                 Competitions.Add(vc);
             }//end each competition
-
-
 
             return (Competitions.Count != 0) ? new PagingResult<ViewCompetition>(Competitions, totalCount, request.CurrentPage, request.PageSize) : null;
         }
@@ -180,6 +177,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                         where c.Id == cic.ClubId
                                         select c).FirstOrDefaultAsync();
 
+                //lấy competition type name
+                CompetitionType competitionType = await (from c in context.Competitions
+                                                        where c.Id == compe.Id
+                                                        from ct in context.CompetitionTypes
+                                                        where ct.Id == c.CompetitionTypeId
+                                                        select ct).FirstOrDefaultAsync();
+
+                string competitionTypeName = competitionType.TypeName;
+
                 foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
                 {
                     Department dep = await (from d in context.Departments
@@ -202,29 +208,29 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CompetitionId = compe.Id,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
-                    Address = compe.Address,
-                    NumberOfTeam = compe.NumberOfTeam,
-                    NumberOfParticipation = compe.NumberOfParticipation,
-                    StartTime = compe.StartTime,
-                    EndTime = compe.EndTime,
-                    StartTimeRegister = compe.StartTimeRegister,
-                    EndTimeRegister = compe.EndTimeRegister,
-                    Content = compe.Content,
-                    Fee = compe.Fee,
-                    SeedsCode = compe.SeedsCode,
-                    SeedsPoint = compe.SeedsPoint,
-                    SeedsDeposited = compe.SeedsDeposited,
+                    CompetitionTypeName = competitionTypeName,  
                     Public = compe.Public,
-                    Status = compe.Status,
                     View = compe.View,
-                    AddressName = compe.AddressName,
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
-                    //
                     DepartmentInCompetition = list_View_DeparmentInComp,
                     ClubOwnerId = clubOwner.Id,
                     ClubOwnerImage = clubOwner.Image,
                     ClubOwnerName = clubOwner.Name,
+                    //Address = compe.Address,
+                    //NumberOfTeam = compe.NumberOfTeam,
+                    //NumberOfParticipation = compe.NumberOfParticipation,
+                    //StartTime = compe.StartTime,
+                    //EndTime = compe.EndTime,
+                    //StartTimeRegister = compe.StartTimeRegister,
+                    //EndTimeRegister = compe.EndTimeRegister,
+                    //Content = compe.Content,
+                    //Fee = compe.Fee,
+                    //SeedsCode = compe.SeedsCode,
+                    //SeedsPoint = compe.SeedsPoint,
+                    //SeedsDeposited = compe.SeedsDeposited,
+                    //AddressName = compe.AddressName,
+                    //Status = compe.Status,
                 };
                 competitions.Add(vc);
             }//end each competition

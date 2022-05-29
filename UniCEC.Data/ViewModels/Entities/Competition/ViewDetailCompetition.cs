@@ -15,6 +15,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public string Name { get; set; }
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
+        [JsonPropertyName("competition_type_name")]
+        public string CompetitionTypeName { get; set; }
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipation { get; set; }
         [JsonPropertyName("number_of_team")]
