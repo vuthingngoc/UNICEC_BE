@@ -1,14 +1,13 @@
 ﻿using Firebase.Auth;
 using Firebase.Storage;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
-using System.IO;
-using System.Threading;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
-using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
 
@@ -17,34 +16,59 @@ namespace UniCEC.Business.Services.CitySvc
     public class CityService : ICityService
     {
         private ICityRepo _cityRepo;
+        private JwtSecurityTokenHandler _tokenHandler;
+        //private IConfiguration _configuration;
 
-        public CityService(ICityRepo cityRepo)
+        public CityService(ICityRepo cityRepo, IConfiguration configuration)
         {
             _cityRepo = cityRepo;
+            //_configuration = configuration;
         }
         // Test upload file 
-        //public async Task UploadFile(IFormFile file, string token)
+        //public async Task<string> UploadFile(IFormFile file, string token)
         //{
-        //    string bucket = "unics-e46a4.appspot.com";
-
-        //    if (file.Length == 0) throw new NullReferenceException("Null File");
+        //    string bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;//"unics-e46a4.appspot.com";
 
         //    Stream stream = file.OpenReadStream();
         //    var cancellationToken = new CancellationTokenSource().Token;
-        //    string link = await new FirebaseStorage(bucket).Child("assets").Child($"{Guid.NewGuid()}").PutAsync(stream, cancellationToken);
-        //    Console.WriteLine("\n======== link: " + link);
+        //    var firebaseStorage = new FirebaseStorage(bucket);
+        //    var fullPath = await firebaseStorage.Child("assets").Child($"{Guid.NewGuid()}").PutAsync(stream, cancellationToken);
+        //    var fileName = GetFileName(fullPath);
+        //    return await firebaseStorage.Child("assets").Child(fileName).GetDownloadUrlAsync();
         //}
 
-        //Get-List-Cites
-        public async Task<PagingResult<ViewCity>> GetListCities(CityRequestModel request)
+        //private string GetFileName(string url)
+        //{
+        //    return url.Split("%2F")[1].Split("?")[0];
+        //}
+
+        //public async Task DeleteFile(string url)
+        //{
+        //    string fileName = GetFileName(url);
+        //    string bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;
+        //    await new FirebaseStorage(bucket).Child("assets").Child(fileName).DeleteAsync();
+        //}
+
+        //public async Task UpdateFile(string oldFileName, IFormFile file, string token)
+        //{
+        //    string bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;//"unics-e46a4.appspot.com";
+
+        //    Stream stream = file.OpenReadStream();
+        //    var cancellationToken = new CancellationTokenSource().Token;
+        //    var firebaseStorage = new FirebaseStorage(bucket);
+        //    await firebaseStorage.Child("assets").Child($"{oldFileName}").PutAsync(stream, cancellationToken);
+        //}
+
+        // Search cities
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, string token, PagingRequest request)
         {
-            PagingResult<ViewCity> result = await _cityRepo.GetListCities(request);
+            PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(name, request);
             if (result == null) throw new NullReferenceException();
             return result;
         }
 
-        //Get-List-Cites-By-Id
-        public async Task<ViewCity> GetByCityId(int id)
+        // Get city by id
+        public async Task<ViewCity> GetByCityId(int id, string token)
         {
             try
             {
@@ -73,8 +97,6 @@ namespace UniCEC.Business.Services.CitySvc
         {
             try
             {
-
-
                 if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
                     throw new ArgumentNullException(" Name Null || Description Null ");
 

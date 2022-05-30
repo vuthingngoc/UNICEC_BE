@@ -157,6 +157,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             Club club = await context.Clubs.FirstOrDefaultAsync(c => c.Name == name && c.UniversityId == universityId);
             return (club != null) ? club.Id : 0;
         }
+
+        public async Task<List<int>> GetByCompetition(int competitionId)
+        {
+            return await (from cic in context.CompetitionInClubs
+                         where cic.CompetitionId.Equals(competitionId)
+                         select cic.ClubId).ToListAsync();
+        }
     }
 }
 
