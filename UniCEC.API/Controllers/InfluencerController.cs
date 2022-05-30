@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,6 +15,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/influencer")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
 
     public class InfluencerController : ControllerBase
     {
@@ -49,11 +51,12 @@ namespace UniCEC.API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Insert a new influencer to the competition")]
-        public async Task<IActionResult> InsertInfluencer(InfluencerInsertModel model)
+        public async Task<IActionResult> InsertInfluencer([FromBody] InfluencerInsertModel model)
         {
             try
             {
-                ViewInfluencer influencer = await _influencerService.Insert(model);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewInfluencer influencer = await _influencerService.Insert(model, token);
                 return Ok(influencer);
             }
             catch (ArgumentException ex)
@@ -70,13 +73,39 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpPut]
-        [SwaggerOperation(Summary = "Update an influencer in the competition")]
-        public async Task<IActionResult> UpdateInfluencer(ViewInfluencer model)
+        [HttpPut("{id}/upload-image")]
+        [SwaggerOperation(Summary = "Update image for influencer in the competition")]
+        public async Task<IActionResult> UpdateImageForInfluencer(int id)
         {
             try
             {
-                await _influencerService.Update(model);
+                var imageFile = Request.Form.Files[0];
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _influencerService.Update(id, imageFile, token);
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update info influencer in the competition")]
+        public async Task<IActionResult> UpdateInfluencer(InfluencerUpdateModel model)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _influencerService.Update(model, token);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -99,6 +128,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _influencerService.Delete(id);
                 return NoContent();
             }

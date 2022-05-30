@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Entities.Influencer;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
 {
@@ -14,6 +15,12 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
 
         public InfluencerRepo(UniCECContext context) : base(context)
         {
+        }
+
+        public async Task Delete(Influencer influencer)
+        {
+            context.Influencers.Remove(influencer);
+            await Update();
         }
 
         public async Task<PagingResult<ViewInfluencer>> GetByCompetition(int competitioId, PagingRequest request)
@@ -32,6 +39,23 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
             }).ToListAsync();
 
             return (influencers.Any()) ? new PagingResult<ViewInfluencer>(influencers, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
+
+        public async Task<ViewInfluencer> GetById(int id)
+        {
+            return await (from i in context.Influencers
+                        where i.Id.Equals(id)
+                        select new ViewInfluencer()
+                        {
+                            Id = i.Id,
+                            Name = i.Name,
+                            ImageUrl = i.ImageUrl
+                        }).FirstOrDefaultAsync();
+        }
+
+        public Task<int> Insert(Influencer influencer, int competitionId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

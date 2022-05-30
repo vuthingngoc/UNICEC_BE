@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
 
 namespace UniCEC.Data.ViewModels.Entities.Influencer
 {
     public class InfluencerInsertModel
     {
+        [JsonPropertyName("competition_id")]
+        public int CompetitionId { get; set; }
         public string Name { get; set; }
-        [JsonPropertyName("image_url")]
-        public string ImageUrl { get; set; }
     }
 }
