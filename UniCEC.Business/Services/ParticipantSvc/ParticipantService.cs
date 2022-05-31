@@ -109,7 +109,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                                 if (competition.Public)
                                 {
                                     //kiểm tra xem trong list DepartmentId đó có trong University của user đó hay kh
-                                    bool dep_in_uni = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, UniversityId);
+                                    bool dep_in_uni = await _departmentInUniversityRepo.CheckDepartmentBelongToUni(listDepartmentId, UniversityId);
                                     if (dep_in_uni)
                                     {
                                         //xong mới tới kiểm tra xem UserId ~ Student đó có thuộc Department đó kh
