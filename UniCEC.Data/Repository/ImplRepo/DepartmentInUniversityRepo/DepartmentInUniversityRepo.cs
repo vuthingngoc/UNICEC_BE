@@ -14,7 +14,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo
 
         }
 
-        public async Task<bool> checkDepartmentBelongToUni(List<int> listDepartmentId, int universityId)
+        public async Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId)
         {
             bool result = true;
             foreach (int DepId in listDepartmentId)
