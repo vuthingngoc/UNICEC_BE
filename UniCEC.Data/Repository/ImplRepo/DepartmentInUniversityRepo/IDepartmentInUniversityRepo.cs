@@ -7,6 +7,6 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo
 {
     public interface IDepartmentInUniversityRepo : IRepository<DepartmentInUniversity>
     {
-        public Task<bool> checkDepartmentBelongToUni(List<int> listDepartmentId, int universityId);
+        public Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId);
     }
 }

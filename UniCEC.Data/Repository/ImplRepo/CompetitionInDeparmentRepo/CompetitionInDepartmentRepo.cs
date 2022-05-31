@@ -17,6 +17,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
 
         }
 
+        public async Task<CompetitionInDepartment> GetDepartment_In_Competition(int DepartmentId, int CompetitionId)
+        {
+            var query = await (from cid in context.CompetitionInDepartments
+                               where cid.DepartmentId == DepartmentId && cid.CompetitionId == CompetitionId
+                               select cid).FirstOrDefaultAsync();
+            if (query != null)
+            {
+                return query;
+            }
+            return null;
+        }
+
         public async Task<List<int>> GetListDepartmentId_In_Competition(int CompetitionId)
         {
             List<int> department_Id_List = await (from cid in context.CompetitionInDepartments

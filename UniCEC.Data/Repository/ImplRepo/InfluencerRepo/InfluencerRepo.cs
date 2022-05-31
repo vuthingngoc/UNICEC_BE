@@ -17,6 +17,8 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
         {
         }
 
+       
+
         public async Task Delete(Influencer influencer)
         {
             context.Influencers.Remove(influencer);
@@ -56,6 +58,24 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
         public Task<int> Insert(Influencer influencer, int competitionId)
         {
             throw new NotImplementedException();
+        }
+
+        //Tien Anh
+        public async Task<bool> CheckInfluencerInSystem(List<int> listInfluencerId)
+        {
+            bool result = true;
+            foreach (int InfluId in listInfluencerId)
+            {
+                var query = await(from influencer in context.Influencers
+                                  where influencer.Id == InfluId
+                                  select influencer).FirstOrDefaultAsync();
+
+                if (query == null)
+                {
+                    result = false;
+                }
+            }
+            return result;
         }
     }
 }

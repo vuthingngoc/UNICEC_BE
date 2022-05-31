@@ -14,5 +14,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo
         public Task<List<ViewDeparmentInComp>> GetListDepartment_In_Competition(int CompetitionId);
 
         public Task<List<int>> GetListDepartmentId_In_Competition(int CompetitionId);
+
+
+        public Task<CompetitionInDepartment> GetDepartment_In_Competition(int DepartmentId, int CompetitionId);
     }
 }

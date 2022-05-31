@@ -29,6 +29,9 @@ using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
+using UniCEC.Data.ViewModels.Entities.Influencer;
+using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
+using UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -61,6 +64,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionEntityRepo _competitionEntityRepo;
         //
         private ICompetitionManagerRepo _competitionManagerRepo;
+        //
+        private IInfluencerRepo _influencerRepo;
+        //
+        private IInfluencerInCompetitionRepo _influencerInCompetitionRepo;
+        //    
+        //
+        private JwtSecurityTokenHandler _tokenHandler;
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
@@ -74,6 +84,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IDepartmentRepo departmentRepo,
                                   ICompetitionEntityRepo competitionEntityRepo,
                                   ICompetitionManagerRepo competitionManagerRepo,
+                                  IInfluencerRepo influencerRepo,
+                                  IInfluencerInCompetitionRepo influencerInCompetitionRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -90,6 +102,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _fileService = fileService;
             _competitionEntityRepo = competitionEntityRepo;
             _competitionManagerRepo = competitionManagerRepo;
+            _influencerInCompetitionRepo = influencerInCompetitionRepo;
+            _influencerRepo = influencerRepo;
         }
 
 
@@ -140,12 +154,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
-                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
+                int UniversityId = DecodeToken(token, "UniversityId");
 
                 bool roleLeader = false;
 
@@ -290,9 +300,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                int UserId = DecodeToken(token, "Id");
+
 
                 if (model.CompetitionId == 0
                   || model.ClubId == 0
@@ -379,17 +389,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //add Competition In Department
-
         public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
-                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
+                int UniversityId = DecodeToken(token, "UniversityId");
 
                 if (model.CompetitionId == 0
                   || model.ClubId == 0
@@ -419,19 +424,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
                             if (isAllow != null)
                             {
-                                bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
 
-                                List<int> list_dic_Id = new List<int>();
-
-                                List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
                                 //------------- CHECK Department belong to University
+                                bool departmentBelongToUni = await _departmentInUniversityRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
+
                                 if (departmentBelongToUni)
                                 {
                                     //------------- CHECK Add Department is existed
                                     bool DepartmentIsExsited = true;
                                     foreach (int dep_id in model.ListDepartmentId)
                                     {
-                                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(dep_id);
+                                        //
+                                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.GetDepartment_In_Competition(dep_id, competition.Id);
                                         if (cid != null)
                                         {
                                             DepartmentIsExsited = false;
@@ -439,6 +443,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     }
                                     if (DepartmentIsExsited)
                                     {
+                                        List<int> list_dic_Id = new List<int>();
+                                        List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
+
                                         foreach (int dep_id in model.ListDepartmentId)
                                         {
                                             CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
@@ -473,7 +480,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     else
                                     {
                                         throw new ArgumentException("Department already in Competition");
-                                    }                        
+                                    }
                                 }// end if CheckDepartmentId
                                 else
                                 {
@@ -511,13 +518,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
+
+
+
         public async Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel model, string token)
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                int UserId = DecodeToken(token, "Id");
+
 
                 if (model.CompetitionId == 0
                    || model.ClubId == 0
@@ -629,15 +639,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
 
-
         public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token)
         {
             try
             {
 
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
 
                 if (model.CompetitionId == 0
                     || model.ClubId == 0
@@ -724,13 +731,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
-
-                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
+                int UniversityId = DecodeToken(token, "UniversityId");
 
                 if (model.ClubIdCollaborate == 0
                    || model.CompetitionId == 0
@@ -854,8 +856,136 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
+        //add Influencer In Competition
+        public async Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token)
+        {
+            try
+            {
+                int UserId = DecodeToken(token, "Id");
 
+                if (model.CompetitionId == 0
+                     || model.ClubId == 0
+                     || model.TermId == 0
+                     || model.ListInfluencerId.Count < 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null || TermId Null || List Influencer Id Null");
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
+                    {
+                        GetMemberInClubModel conditions = new GetMemberInClubModel()
+                        {
+                            UserId = UserId,
+                            ClubId = model.ClubId,
+                            TermId = model.TermId
+                        };
+                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        //------------- CHECK Mem in that club
+                        if (infoClubMem != null)
+                        {
+                            //------------- CHECK is in CompetitionManger table
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            if (isAllow != null)
+                            {
+                                //------------- CHECK Role Is Manger
+                                if (isAllow.CompetitionRoleId == 1)
+                                {
+                                    //------------- CHECK Influencer belong to system
+                                    bool influencerBelongToSystem = await _influencerRepo.CheckInfluencerInSystem(model.ListInfluencerId);
+                                    if (influencerBelongToSystem)
+                                    {
+                                        //------------- CHECK Add Influencer Id is existed
+                                        bool InfluencerIsExsited = true;
+                                        foreach (int influ_id in model.ListInfluencerId)
+                                        {
+                                            InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(influ_id, competition.Id);
+                                            if (iic != null)
+                                            {
+                                                InfluencerIsExsited = false;
+                                            }
+                                        }
+                                        if (InfluencerIsExsited)
+                                        {
+                                            List<int> list_iic_Id = new List<int>();
+                                            List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
 
+                                            foreach (int influ_id in model.ListInfluencerId)
+                                            {
+                                                InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
+                                                {
+                                                    CompetitionId = competition.Id,
+                                                    InfluencerId = influ_id,
+                                                };
+                                                int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
+                                                list_iic_Id.Add(id);
+                                            }
+
+                                            if (list_iic_Id.Count > 0)
+                                            {
+                                                foreach (int id in list_iic_Id)
+                                                {
+                                                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+
+                                                    ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
+                                                    {                                                       
+                                                        CompetitionId = iic.CompetitionId,
+                                                        InfluencerInCompetitionId = iic.Id,
+                                                        Id = iic.Influencer.Id,
+                                                        ImageUrl = iic.Influencer.ImageUrl,
+                                                        Name = iic.Influencer.Name                                                                                                           
+                                                    };
+                                                    list_result.Add(viic);  
+                                                }
+                                                return list_result; 
+                                            }
+                                            else
+                                            {
+                                                throw new ArgumentException("Add Influencer Failed");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            throw new ArgumentException("Influencer already in Competition");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        throw new ArgumentException("Influencer Id not have in System");
+                                    }
+                                }
+                                else
+                                {
+                                    throw new UnauthorizedAccessException("Only role Manager can do this action");
+                                }
+                            }
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You do not have permission to do this action");
+                            }
+                        }
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You are not member in Club");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Club in not found");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
         //ROLE SPONSOR
@@ -864,12 +994,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                var SponsorIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
 
-                int UserId = Int32.Parse(UserIdClaim.Value);
-                int SponsorId = Int32.Parse(SponsorIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
+                int SponsorId = DecodeToken(token, "SponsorId");
 
                 if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
 
@@ -918,7 +1045,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        //Transfer View
+        //----------------------------------------------------------------------------------------Transfer View
         private ViewCompetitionInClub TransferViewCompetitionInClub(CompetitionInClub competitionInClub)
         {
             return new ViewCompetitionInClub()
@@ -1014,7 +1141,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return code;
         }
-        //----------------------------------------------------------------------------------------Check
+
         //check exist code
         private async Task<string> CheckExistCode()
         {
@@ -1028,14 +1155,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 seedCode = generateCode;
             }
             return seedCode;
-        }
-
-        //Check exist Department Id Belong To University - Leader
-        private async Task<bool> CheckDepartmentId(List<int> listDepartmentId, int universityId)
-        {
-            //
-            bool result = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, universityId);
-            return result;
         }
 
         //Check Date Insert - Update
@@ -1153,6 +1272,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return false;
         }
+
+        private int DecodeToken(string token, string nameClaim)
+        {
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
+        }
+
 
     }
 }

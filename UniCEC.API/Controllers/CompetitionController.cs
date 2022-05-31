@@ -15,6 +15,7 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
+using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -331,13 +332,58 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        
+
+        //---------------------------------------------------------------------------
+        //POST api/<CompetitionInClubController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("add-influencer")]
+        [SwaggerOperation(Summary = "Add influencer in competition")]
+        public async Task<IActionResult> AddInfluencerInCompetition([FromBody] InfluencerInComeptitionInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                List<ViewInfluencerInCompetition> result = await _competitionService.AddInfluencerInCompetition(model, token);
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
 
         //---------------------------------------------------------------------------Competition In Club
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-club-collaborate")]
+        [HttpPost("add-club")]
         [SwaggerOperation(Summary = "Add another club in competition")]
         public async Task<IActionResult> AddClubCollaborate([FromBody] CompetitionInClubInsertModel model)
         {
@@ -385,7 +431,7 @@ namespace UniCEC.API.Controllers
         //---------------------------------------------------------------------------Sponsor in Competition
         //POST api/<SponsorInCompetitionController>
         [Authorize(Roles = "Sponsor")]
-        [HttpPost("sponsor-apply-competition")]
+        [HttpPost("sponsor-apply")]
         [SwaggerOperation(Summary = "Sponsor apply in competition")]
         public async Task<IActionResult> AddSponsorCollaborate([FromBody] SponsorInCompetitionInsertModel model)
         {
