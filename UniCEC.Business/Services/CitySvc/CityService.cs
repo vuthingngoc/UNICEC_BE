@@ -1,13 +1,10 @@
-﻿using Firebase.Auth;
-using Firebase.Storage;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
+using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
 
@@ -16,12 +13,14 @@ namespace UniCEC.Business.Services.CitySvc
     public class CityService : ICityService
     {
         private ICityRepo _cityRepo;
+        private IUniversityRepo _universityRepo;
         private JwtSecurityTokenHandler _tokenHandler;
         //private IConfiguration _configuration;
 
-        public CityService(ICityRepo cityRepo, IConfiguration configuration)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)
         {
             _cityRepo = cityRepo;
+            _universityRepo = universityRepo;
             //_configuration = configuration;
         }
         // Test upload file 
@@ -59,10 +58,20 @@ namespace UniCEC.Business.Services.CitySvc
         //    await firebaseStorage.Child("assets").Child($"{oldFileName}").PutAsync(stream, cancellationToken);
         //}
 
+        private int DecodeToken(string token, string nameClaim)
+        {
+            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
+        }
+
         // Search cities
         public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, string token, PagingRequest request)
         {
-            PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(name, request);
+            int roleId = DecodeToken(token, "RoleId");
+            PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(name, roleId, request);
+
+
             if (result == null) throw new NullReferenceException();
             return result;
         }
@@ -72,19 +81,11 @@ namespace UniCEC.Business.Services.CitySvc
         {
             try
             {
-                City city = await _cityRepo.Get(id);
-                ViewCity viewCity = new ViewCity();
-                if (city != null)
-                {
-                    viewCity.Id = city.Id;
-                    viewCity.Name = city.Name;
-                    viewCity.Description = city.Description;
-                    return viewCity;
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
+                int roleId = DecodeToken(token, "RoleId");
+                ViewCity city = await _cityRepo.GetById(id,roleId);
+
+                if (city == null) throw new NullReferenceException("Not found this city");
+                return city;
             }
             catch (Exception)
             {
@@ -128,19 +129,20 @@ namespace UniCEC.Business.Services.CitySvc
 
 
         //Update-City
-        public async Task<bool> Update(ViewCity city)
+        public async Task<bool> Update(CityUpdateModel model)
         {
             try
             {
-                if (string.IsNullOrEmpty(city.Name) || string.IsNullOrEmpty(city.Description) || city.Id == 0)
-                    throw new ArgumentNullException(" Name Null || Description Null || City Id Null");
+                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description) || model.Id == 0)
+                    throw new ArgumentNullException(" Name Null || Description Null || Id Null");
                 //get city
-                City c = await _cityRepo.Get(city.Id);
+                City city = await _cityRepo.Get(model.Id);
                 //
-                if (c != null)
+                if (city != null)
                 {
-                    c.Name = (!city.Name.Equals("")) ? city.Name : c.Name;
-                    c.Description = (!city.Description.Equals("")) ? city.Description : c.Description;
+                    city.Name = (!model.Name.Equals("")) ? model.Name : city.Name;
+                    city.Description = (!model.Description.Equals("")) ? model.Description : city.Description;
+                    if(city.Status == false && model.Status == true) await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);               
 
                     await _cityRepo.Update();
                     return true;
@@ -158,9 +160,16 @@ namespace UniCEC.Business.Services.CitySvc
         }
 
         //
-        public Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            City city = await _cityRepo.Get(id);
+            if (city == null) throw new NullReferenceException("Not found this city");
+
+            bool status = false; // status for delete
+            city.Status = status; 
+            
+            await _universityRepo.UpdateStatusByCityId(city.Id, status);
+            await _cityRepo.Update();
         }
     }
 }

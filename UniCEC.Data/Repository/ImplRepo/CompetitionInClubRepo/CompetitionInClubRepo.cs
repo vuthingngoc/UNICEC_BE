@@ -39,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
         public async Task<bool> IsOwnerCompetitionOrEvent(int clubId, int competitionId)
         {
             var query = from cic in context.CompetitionInClubs
-                        where cic.ClubId == clubId && cic.CompetitionId == competitionId && cic.IsOwner == true
+                        //where cic.ClubId == clubId && cic.CompetitionId == competitionId && cic.IsOwner == true
                         select cic;
             int check = await query.CountAsync();
             if (check > 0)

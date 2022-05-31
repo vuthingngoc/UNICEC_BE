@@ -210,5 +210,21 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.StudentCode.Equals(userId));
             return (user != null) ? true : false;
         }
+
+        public async Task UpdateStatusByUniversityId(int universityId, UserStatus status)
+        {
+            List<User> users = await (from u in context.Users
+                                      where u.UniversityId.Equals(universityId)
+                                      select u).ToListAsync();
+
+            if(users.Count > 0)
+            {
+                foreach (User user in users)
+                {
+                    user.Status = status;
+                }
+                await Update();
+            }
+        }
     }
 }

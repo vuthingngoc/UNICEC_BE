@@ -8,7 +8,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 {
     public interface ICityRepo : IRepository<City>
     {
-        public Task<PagingResult<ViewCity>> SearchCitiesByName(string name, PagingRequest request);
-        public Task<ViewCity> GetById(int id);
+        public Task<PagingResult<ViewCity>> SearchCitiesByName(string name, int roleId, PagingRequest request);
+        public Task<ViewCity> GetById(int id, int roleId);
     }
 }

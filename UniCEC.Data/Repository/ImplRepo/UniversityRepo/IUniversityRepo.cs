@@ -19,5 +19,6 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         public Task<string> GetNameUniversityById(int id);
         //test delete
         public Task DeleteUniversity(int UniversityId);
+        public Task UpdateStatusByCityId(int cityId, bool status); // not test yet
     }
 }

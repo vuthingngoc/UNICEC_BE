@@ -60,7 +60,7 @@ namespace UniCEC.API.Controllers
 
         // Search cities
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Search cities by name")]
+        [SwaggerOperation(Summary = "Search cities by name - All roles")]
         public async Task<IActionResult> SearchCitiesByName([FromQuery] string name, PagingRequest request)
         {
             try
@@ -81,7 +81,7 @@ namespace UniCEC.API.Controllers
 
         //GET CITY BY ID
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get city by id")]
+        [SwaggerOperation(Summary = "Get city by id - All roles")]
         public async Task<IActionResult> GetCityById(int id)
         {
             try
@@ -104,7 +104,7 @@ namespace UniCEC.API.Controllers
         //Post-Insert-City
         [Authorize(Roles = "System Admin")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert city - Admin")]
+        [SwaggerOperation(Summary = "Insert city - System Admin")]
         public async Task<IActionResult> InsertCity([FromBody] CityInsertModel model)
         {
             try
@@ -136,23 +136,41 @@ namespace UniCEC.API.Controllers
         // PUT api/<CityController>/5
         [Authorize(Roles = "System Admin")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update city - Admin")]
-        public async Task<IActionResult> UpdateCity([FromBody] ViewCity city)
+        [SwaggerOperation(Summary = "Update city - System Admin")]
+        public async Task<IActionResult> UpdateCity([FromBody] CityUpdateModel city)
         {
             try
             {
-                Boolean check = false;
-                //
-                check = await _cityService.Update(city);
-                if (check)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    //Not has data
-                    return Ok(new object());
-                }
+                bool check = await _cityService.Update(city);
+                return (check == true) ? Ok() : Ok(new object());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [Authorize(Roles = "System Admin")]
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete city - System Admin")]
+        public async Task<IActionResult> DeleteCity(int id)
+        {
+            try
+            {
+                await _cityService.Delete(id);
+                return Ok();
             }
             catch (ArgumentNullException ex)
             {
