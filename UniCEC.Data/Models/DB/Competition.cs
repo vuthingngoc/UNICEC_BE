@@ -14,7 +14,6 @@ namespace UniCEC.Data.Models.DB
             CompetitionEntities = new HashSet<CompetitionEntity>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
             CompetitionInDepartments = new HashSet<CompetitionInDepartment>();
-            CompetitionManagers = new HashSet<CompetitionManager>();
             InfluencerInCompetitions = new HashSet<InfluencerInCompetition>();
             Participants = new HashSet<Participant>();
             SponsorInCompetitions = new HashSet<SponsorInCompetition>();
@@ -48,7 +47,6 @@ namespace UniCEC.Data.Models.DB
         public virtual ICollection<CompetitionEntity> CompetitionEntities { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual ICollection<CompetitionInDepartment> CompetitionInDepartments { get; set; }
-        public virtual ICollection<CompetitionManager> CompetitionManagers { get; set; }
         public virtual ICollection<InfluencerInCompetition> InfluencerInCompetitions { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<SponsorInCompetition> SponsorInCompetitions { get; set; }

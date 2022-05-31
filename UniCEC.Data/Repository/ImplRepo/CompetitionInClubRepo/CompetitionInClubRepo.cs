@@ -17,43 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 
         }
 
-        //
-        //public async Task<bool> CheckDuplicateCreateCompetitionOrEvent(int clubId, int competitionId)
-        //{
-        //    var query = from cic in context.CompetitionInClubs
-        //                where cic.ClubId == clubId && cic.CompetitionId == competitionId
-        //                select cic;
-        //    int check = await query.CountAsync();
-        //    if (check > 0)
-        //    {
-        //        //có nghĩa là đã tạo nó r
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        //có nghĩa là chưa 
-        //        return true;
-        //    }
-        //}
-
-        public async Task<bool> IsOwnerCompetitionOrEvent(int clubId, int competitionId)
-        {
-            var query = from cic in context.CompetitionInClubs
-                        //where cic.ClubId == clubId && cic.CompetitionId == competitionId && cic.IsOwner == true
-                        select cic;
-            int check = await query.CountAsync();
-            if (check > 0)
-            {
-                
-                return true;
-            }
-            else
-            {
-                
-                return false;
-            }
-        }
-
+        
         public async Task<List<ViewClubInComp>> GetListClub_In_Competition(int CompetitionId)
         {
             List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
