@@ -16,6 +16,7 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/university")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
 
     public class UniversityController : ControllerBase
     {
@@ -27,12 +28,12 @@ namespace UniCEC.API.Controllers
         //constructor để DI Service vào
         public UniversityController(IUniversityService universityService)
         {
-            this._universityService = universityService;
+            _universityService = universityService;
         }
 
 
         [HttpGet("universities")]
-        [SwaggerOperation(Summary = "Get universities by conditions")]
+        [SwaggerOperation(Summary = "Get universities by conditions - All roles")]
         public async Task<IActionResult> GetUniversityByConditions([FromQuery] UniversityRequestModel request)
         {
             try
@@ -53,7 +54,7 @@ namespace UniCEC.API.Controllers
 
         //Get 1 university by ID
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get university by id")]
+        [SwaggerOperation(Summary = "Get university by id - All roles")]
         public async Task<IActionResult> GetUniversityById(int id)
         {
             try
@@ -72,9 +73,9 @@ namespace UniCEC.API.Controllers
         }
 
         // POST api/<UniversityController>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "System Admin")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert university - Admin")]
+        [SwaggerOperation(Summary = "Insert university - System Admin")]
         public async Task<IActionResult> InsertUniversity([FromBody] UniversityInsertModel model)
         {
             try
@@ -109,7 +110,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<UniversityController>/5
         [Authorize(Roles = "Admin")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update university - Admin")]
+        [SwaggerOperation(Summary = "Update university - System Admin")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
         {
             try

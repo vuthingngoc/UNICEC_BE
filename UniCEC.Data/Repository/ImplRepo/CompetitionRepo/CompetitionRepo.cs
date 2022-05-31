@@ -39,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.ClubId == request.ClubId
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id && cic.IsOwner == true
+                        //where cic.CompetitionId == comp.Id && cic.IsOwner == true
                         select comp;
             //status
             if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
@@ -65,7 +65,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 //lấy  Club Owner
                 Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        //where cic.CompetitionId == compe.Id && cic.IsOwner == true
                                         from c in context.Clubs
                                         where c.Id == cic.ClubId
                                         select c).FirstOrDefaultAsync();
@@ -137,7 +137,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        where comp.StartTime >= localTime.DateTime && cic.IsOwner == true
+                        //where comp.StartTime >= localTime.DateTime && cic.IsOwner == true
                         orderby comp.StartTime
                         select comp;
             }
@@ -172,7 +172,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 //lấy  Club Owner
                 Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        //where cic.CompetitionId == compe.Id && cic.IsOwner == true
                                         from c in context.Clubs
                                         where c.Id == cic.ClubId
                                         select c).FirstOrDefaultAsync();

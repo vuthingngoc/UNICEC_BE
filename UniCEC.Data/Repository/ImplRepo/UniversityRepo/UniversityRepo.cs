@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.University;
@@ -12,15 +14,36 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
 {
     public class UniversityRepo : Repository<University>, IUniversityRepo
     {
-        public UniversityRepo(UniCECContext context) : base(context)
-        {
+        private IUserRepo _userRepo;
 
+        public UniversityRepo(UniCECContext context, IUserRepo userRepo) : base(context)
+        {
+            _userRepo = userRepo;
         }
         //Check-University-Email
         public async Task<bool> CheckEmailUniversity(string email)
         {
             University university = await context.Universities.FirstOrDefaultAsync(u => u.Email.Equals(email));
             return (university != null) ? true : false;
+        }
+
+        public async Task UpdateStatusByCityId(int cityId, bool status)
+        {
+            List<University> universities = await (from u in context.Universities
+                                                   where u.CityId.Equals(cityId)
+                                                   select u).ToListAsync();
+
+            if(universities.Count > 0)
+            {
+                foreach (var university in universities)
+                {
+                    university.Status = status;
+                    UserStatus userStatus = UserStatus.Active;
+                    if (status == false) userStatus = UserStatus.InActive;
+                    await _userRepo.UpdateStatusByUniversityId(university.Id, userStatus);
+                }
+                await Update();
+            }
         }
 
         public async Task DeleteUniversity(int UniversityId)
@@ -85,8 +108,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
             {
                 //Constains Name
                 var queryStatus = from University u in context.Universities
-                               where u.Status == request.Status && u.Name.Contains(request.Name)
-                               select u;
+                                  where u.Status == request.Status && u.Name.Contains(request.Name)
+                                  select u;
 
                 //City Id
                 if (request.CityId.HasValue)
@@ -98,7 +121,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 //Paging
                 count = queryStatus.Count();
                 List<University> listUni = await queryStatus.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
-                
+
                 //return view
                 listUni.ForEach(u =>
                 {
@@ -122,26 +145,27 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
 
             }
             //NoStatus
-            else {
+            else
+            {
 
                 var queryAll = from University u in context.Universities
                                select u;
-                              
+
 
                 //Constains Name
                 if (request.Name != null)
                 {
-                     queryAll = from University u in context.Universities
-                                   where u.Name.Contains(request.Name)
-                                   select u;
+                    queryAll = from University u in context.Universities
+                               where u.Name.Contains(request.Name)
+                               select u;
                 }
 
                 //City Id
                 if (request.CityId.HasValue)
                 {
                     queryAll = from University u in queryAll
-                                  where u.CityId == request.CityId
-                                  select u;
+                               where u.CityId == request.CityId
+                               select u;
                 }
 
                 //Paging

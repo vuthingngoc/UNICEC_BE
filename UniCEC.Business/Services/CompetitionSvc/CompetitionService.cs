@@ -265,7 +265,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         CompetitionEntity competitionEntity = new CompetitionEntity()
                                         {
                                             CompetitionId = competition_Id,
-                                            Url = Url
+                                            ImageUrl = Url
                                         };
                                         await _competitionEntityRepo.Insert(competitionEntity);
                                     }
@@ -274,8 +274,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubId;
                                     competitionInClub.CompetitionId = competition_Id;
-                                    //auto isOwner = true
-                                    competitionInClub.IsOwner = true;
 
                                     int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
 
@@ -805,7 +803,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             //Img Url
             CompetitionEntity compeEntity = await _competitionEntityRepo.Get(competition.Id);
-            string imgUrl = compeEntity.Url;
+            string imgUrl = compeEntity.ImageUrl;
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
@@ -1114,8 +1112,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                             CompetitionInClub competitionInClub = new CompetitionInClub();
                                             competitionInClub.ClubId = model.ClubIdCollaborate;
                                             competitionInClub.CompetitionId = model.CompetitionId;
-                                            // do là add collaborate thì isOwner == false
-                                            competitionInClub.IsOwner = false;
 
                                             int result = await _competitionInClubRepo.Insert(competitionInClub);
                                             if (result > 0)

@@ -163,8 +163,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                             clubActivity.SeedsPoint = model.SeedsPoint;
                             //LocalTime
                             clubActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                            //
-                            clubActivity.Beginning = model.Beginning;
                             clubActivity.Ending = model.Ending;
                             //Check Status
                             clubActivity.Status = ClubActivityStatus.Open;
@@ -212,7 +210,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             return new ViewClubActivity()
             {
                 ClubId = clubActivity.ClubId,
-                Beginning = clubActivity.Beginning,
                 Ending = clubActivity.Ending,
                 CreateTime = clubActivity.CreateTime,
                 Description = clubActivity.Description,
@@ -271,11 +268,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                                 checkDateUpdate = CheckDate((DateTime)model.Beginning, clubActivity.Ending, true);
                             }
                             //th2
-                            if (model.Ending.HasValue && !model.Beginning.HasValue)
-                            {
-                                checkDateUpdate = CheckDate(clubActivity.Beginning, (DateTime)model.Ending, true);
-                            }
-                            //th3
                             if (model.Beginning.HasValue && model.Ending.HasValue)
                             {
                                 checkDateUpdate = CheckDate((DateTime)model.Beginning, (DateTime)model.Ending, true);
@@ -286,7 +278,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                                 clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
                                 clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
                                 clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
-                                clubActivity.Beginning = (DateTime)((model.Beginning.HasValue) ? model.Beginning : clubActivity.Beginning);
                                 clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
 
                                 //Update DEADLINE day of member takes activity
@@ -452,7 +443,6 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         ViewProcessClubActivity vpca = new ViewProcessClubActivity()
                         {
                             ClubId = viewClubActivity.ClubId,
-                            Beginning = viewClubActivity.Beginning,
                             Ending = viewClubActivity.Ending,
                             CreateTime = viewClubActivity.CreateTime,
                             Description = viewClubActivity.Description,
