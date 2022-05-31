@@ -98,8 +98,8 @@ namespace UniCEC.API.Controllers
         //ClubLeader
         // POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
-        [HttpPost("leader")]
-        [SwaggerOperation(Summary = "Leader insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
+        [HttpPost()]
+        [SwaggerOperation(Summary = "Insert EVENT or COMPETITON, if Event please put value at number-of-group = 0 ")]
         //phải có author student
         public async Task<IActionResult> Insert([FromBody] LeaderInsertCompOrEventModel model)
         {
@@ -144,11 +144,10 @@ namespace UniCEC.API.Controllers
             }
         }
 
-    
         // PUT api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
-        [HttpPut("leader")]
-        [SwaggerOperation(Summary = "Leader update detail EVENT or COMPETITON")]
+        [HttpPut()]
+        [SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
         public async Task<IActionResult> Update([FromBody] LeaderUpdateCompOrEventModel model)
         {
             try
@@ -192,8 +191,8 @@ namespace UniCEC.API.Controllers
 
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
-        [HttpDelete("leader")]
-        [SwaggerOperation(Summary = "Leader canceling EVENT or COMPETITION")]
+        [HttpDelete()]
+        [SwaggerOperation(Summary = "Canceling EVENT or COMPETITION")]
         public async Task<IActionResult> Delete([FromBody] LeaderDeleteCompOrEventModel model)
         {
             try
@@ -239,7 +238,7 @@ namespace UniCEC.API.Controllers
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
         [HttpPost("add-entity")]
-        [SwaggerOperation(Summary = "add image for competition")]
+        [SwaggerOperation(Summary = "Add image for competition")]
         public async Task<IActionResult> AddCompetitionEntity([FromBody] CompetitionEntityInsertModel model)
         {
             try
@@ -290,7 +289,7 @@ namespace UniCEC.API.Controllers
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
         [HttpPost("add-department")]
-        [SwaggerOperation(Summary = "add department for competition")]
+        [SwaggerOperation(Summary = "Add department for competition")]
         public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInDepartmentInsertModel model)
         {
             try
@@ -335,12 +334,11 @@ namespace UniCEC.API.Controllers
         
 
 
-        
         //---------------------------------------------------------------------------Competition In Club
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
         [HttpPost("add-club-collaborate")]
-        [SwaggerOperation(Summary = "add another club in competition")]
+        [SwaggerOperation(Summary = "Add another club in competition")]
         public async Task<IActionResult> AddClubCollaborate([FromBody] CompetitionInClubInsertModel model)
         {
             try

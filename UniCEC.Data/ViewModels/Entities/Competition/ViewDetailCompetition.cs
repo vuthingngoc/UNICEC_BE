@@ -67,6 +67,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //------------- ADD Field Infuencer   -> Object Array
 
+
         //------------- ADD Field Competition Entity   
         [JsonPropertyName("img_url")]
         public string ImgUrl { get; set; }

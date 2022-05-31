@@ -223,8 +223,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 {
                                     Competition comp = await _competitionRepo.Get(competition_Id);
 
-
-
                                     //------------ Insert Competition-In-Club
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubId;
@@ -426,40 +424,56 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 List<int> list_dic_Id = new List<int>();
 
                                 List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
-
+                                //------------- CHECK Department belong to University
                                 if (departmentBelongToUni)
                                 {
-
+                                    //------------- CHECK Add Department is existed
+                                    bool DepartmentIsExsited = true;
                                     foreach (int dep_id in model.ListDepartmentId)
                                     {
-                                        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(dep_id);
+                                        if (cid != null)
                                         {
-                                            DepartmentId = dep_id,
-                                            CompetitionId = model.CompetitionId
-                                        };
-                                        int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                                        list_dic_Id.Add(id);
-                                    }
-                                    if (list_dic_Id.Count > 0)
-                                    {
-                                        foreach (int id in list_dic_Id)
-                                        {
-                                            CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
-
-                                            ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
-                                            {
-                                                Id = cid.Id,
-                                                CompetitionId = cid.CompetitionId,
-                                                DepartmentId = cid.DepartmentId
-                                            };
-                                            list_result.Add(vcid);
+                                            DepartmentIsExsited = false;
                                         }
-                                        return list_result;
                                     }
+                                    if (DepartmentIsExsited)
+                                    {
+                                        foreach (int dep_id in model.ListDepartmentId)
+                                        {
+                                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                            {
+                                                DepartmentId = dep_id,
+                                                CompetitionId = model.CompetitionId
+                                            };
+                                            int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                                            list_dic_Id.Add(id);
+                                        }
+                                        if (list_dic_Id.Count > 0)
+                                        {
+                                            foreach (int id in list_dic_Id)
+                                            {
+                                                CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
+
+                                                ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
+                                                {
+                                                    Id = cid.Id,
+                                                    CompetitionId = cid.CompetitionId,
+                                                    DepartmentId = cid.DepartmentId
+                                                };
+                                                list_result.Add(vcid);
+                                            }
+                                            return list_result;
+                                        }//
+                                        else
+                                        {
+                                            throw new ArgumentException("Add Department Failed");
+                                        }
+                                    }//
                                     else
                                     {
-                                        throw new ArgumentException("Add Department Failed");
-                                    }
+                                        throw new ArgumentException("Department already in Competition");
+                                    }                        
                                 }// end if CheckDepartmentId
                                 else
                                 {
@@ -489,8 +503,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     throw new ArgumentException("Competition or Event not found ");
                 }
-
-
             }
             catch (Exception)
             {
@@ -892,7 +904,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }
                     else
                     {
-                        throw new ArgumentException("Sponsor already join");
+                        throw new ArgumentException("Sponsor has already submit");
                     }
                 }
                 else

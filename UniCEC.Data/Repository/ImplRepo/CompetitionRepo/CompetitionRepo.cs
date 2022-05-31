@@ -63,12 +63,31 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
 
-                //lấy  Club Owner
-                Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        where cic.CompetitionId == compe.Id
-                                        from c in context.Clubs
-                                        where c.Id == cic.ClubId
-                                        select c).FirstOrDefaultAsync();
+                //lấy Club Owner
+                List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
+                                                          where compe.Id == cic.CompetitionId
+                                                          select cic).ToListAsync();
+
+                List<ViewClubInComp> List_vcip = new List<ViewClubInComp>();
+
+                if (clubList.Count > 0)
+                {
+                    foreach (var competitionInClub in clubList)
+                    {
+                        Club club = await (from c in context.Clubs
+                                           where c.Id == competitionInClub.ClubId
+                                           select c).FirstOrDefaultAsync();
+
+                        ViewClubInComp vcip = new ViewClubInComp()
+                        {
+                            Id = club.Id,
+                            Name = club.Name,
+                            Image = club.Image
+                        };
+
+                        List_vcip.Add(vcip);
+                    }
+                }
 
                 foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
                 {
@@ -97,9 +116,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = list_View_DeparmentInComp,
-                    ClubOwnerId = clubOwner.Id,
-                    ClubOwnerImage = clubOwner.Image,
-                    ClubOwnerName = clubOwner.Name,
+                    ClubInCompetition = List_vcip
 
                 };
                 Competitions.Add(vc);
@@ -157,12 +174,31 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
 
-                //lấy  Club Owner
-                Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        where cic.CompetitionId == compe.Id
-                                        from c in context.Clubs
-                                        where c.Id == cic.ClubId
-                                        select c).FirstOrDefaultAsync();
+                //lấy Club Owner
+                List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
+                                                          where compe.Id == cic.CompetitionId
+                                                          select cic).ToListAsync();
+
+                List<ViewClubInComp> List_vcip = new List<ViewClubInComp>();
+
+                if (clubList.Count > 0)
+                {
+                    foreach (var competitionInClub in clubList)
+                    {
+                        Club club = await (from c in context.Clubs
+                                           where c.Id == competitionInClub.ClubId
+                                           select c).FirstOrDefaultAsync();
+
+                        ViewClubInComp vcip = new ViewClubInComp()
+                        {
+                            Id = club.Id,
+                            Name = club.Name,
+                            Image = club.Image
+                        };
+
+                        List_vcip.Add(vcip);
+                    }
+                }
 
                 //lấy competition type name
                 CompetitionType competitionType = await (from c in context.Competitions
@@ -201,10 +237,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = list_View_DeparmentInComp,
-                    ClubOwnerId = clubOwner.Id,
-                    ClubOwnerImage = clubOwner.Image,
-                    ClubOwnerName = clubOwner.Name,
-
+                    ClubInCompetition = List_vcip
                 };
                 competitions.Add(vc);
             }//end each competition
