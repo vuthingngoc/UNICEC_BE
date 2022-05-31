@@ -12,7 +12,7 @@ namespace UniCEC.Business.Services.CitySvc
         public Task<PagingResult<ViewCity>> SearchCitiesByName(string name, string token, PagingRequest request);
         public Task<ViewCity> GetByCityId(int id, string token);
         public Task<ViewCity> Insert(CityInsertModel city);
-        public Task<bool> Update(ViewCity city);
-        public Task<bool> Delete(int id);
+        public Task<bool> Update(CityUpdateModel city);
+        public Task Delete(int id);
     }
 }

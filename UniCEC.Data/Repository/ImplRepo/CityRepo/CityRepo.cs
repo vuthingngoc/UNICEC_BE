@@ -16,20 +16,37 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 
         }
 
-        public Task<ViewCity> GetById(int id)
+        public async Task<ViewCity> GetById(int id, int roleId)
         {
-            var query = from c in context.Cities
-                        where c.Id.Equals(id)
-            throw new System.NotImplementedException();
+            return (roleId.Equals(1) || roleId.Equals(4)) ? // university admin and system admin
+                await (from c in context.Cities
+                       where c.Id.Equals(id)
+                       select new ViewCity()
+                       {
+                           Id = c.Id,
+                           Name = c.Name,
+                           Description = c.Description
+                       }).FirstOrDefaultAsync()
+                :
+                await (from c in context.Cities
+                       where c.Id.Equals(id) && c.Status.Equals(true)
+                       select new ViewCity()
+                       {
+                           Id = c.Id,
+                           Name = c.Name,
+                           Description = c.Description
+                       }).FirstOrDefaultAsync();
         }
 
         // Search Cities
-        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, PagingRequest request)
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, int roleId, PagingRequest request)
         {
             var query = from c in context.Cities
                         where c.Name.Contains(name)
                         select c;
-            
+
+            if (roleId.Equals(2) || roleId == 3) query = query.Where(city => city.Status.Equals(true)); // student and sponsor
+
             int totalCount = query.Count();
             //filter 
             List<ViewCity> cities = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
@@ -38,7 +55,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
                     Id = c.Id,
                     Name = c.Name,
                     Description = c.Description
-                }).ToListAsync();            
+                }).ToListAsync();
 
             return new PagingResult<ViewCity>(cities, totalCount, request.CurrentPage, request.PageSize);
         }

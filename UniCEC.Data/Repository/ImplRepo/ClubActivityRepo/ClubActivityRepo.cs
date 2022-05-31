@@ -52,7 +52,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             {
                 Id = ca.Id,
                 ClubId = ca.ClubId,
-                Beginning = ca.Beginning,
                 CreateTime = ca.CreateTime,
                 Description = ca.Description,
                 Ending = ca.Ending,
@@ -106,7 +105,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
                                                     {
                                                         Id = ca.Id,
                                                         ClubId = ca.ClubId,
-                                                        Beginning = ca.Beginning,
                                                         CreateTime = ca.CreateTime,
                                                         Description = ca.Description,
                                                         Ending = ca.Ending,

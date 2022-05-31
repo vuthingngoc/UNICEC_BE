@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class CompetitionEntity
+    public partial class ActivitiesEntity
     {
         public int Id { get; set; }
-        public int CompetitionId { get; set; }
+        public int ClubActivityId { get; set; }
         public string Name { get; set; }
         public string ImageUrl { get; set; }
 
-        public virtual Competition Competition { get; set; }
+        public virtual ClubActivity ClubActivity { get; set; }
     }
 }

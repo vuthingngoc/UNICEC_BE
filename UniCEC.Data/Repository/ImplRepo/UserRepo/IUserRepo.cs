@@ -16,6 +16,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public Task<bool> CheckExistedEmail(string email);
         public Task<bool> CheckExistedUser(int universityId, string userId);
         public Task<bool> CheckExistedUser(string userId);
+        public Task UpdateStatusByUniversityId(int universityId, UserStatus status);
         // firebase
         public Task<UserTokenModel> GetByEmail(string email);
         public Task<UserTokenModel> GetUserTokenById(int id);

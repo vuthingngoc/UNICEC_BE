@@ -5,14 +5,15 @@ using System.Collections.Generic;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class SponsorInCompetition
+    public partial class CompetitionManager
     {
         public int Id { get; set; }
         public int CompetitionId { get; set; }
-        public int SponsorId { get; set; }
-        public int Status { get; set; }
+        public int CompetitionRoleId { get; set; }
+        public int MemberId { get; set; }
+        public string Fullname { get; set; }
 
         public virtual Competition Competition { get; set; }
-        public virtual Sponsor Sponsor { get; set; }
+        public virtual CompetitionRole CompetitionRole { get; set; }
     }
 }

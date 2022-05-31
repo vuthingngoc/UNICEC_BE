@@ -15,7 +15,7 @@ namespace UniCEC.Data.Models.DB
         public int TeamRoleId { get; set; }
 
         public virtual Participant Participant { get; set; }
-        public virtual TeamRole Team { get; set; }
+        public virtual Team Team { get; set; }
         public virtual TeamRole TeamRole { get; set; }
     }
 }

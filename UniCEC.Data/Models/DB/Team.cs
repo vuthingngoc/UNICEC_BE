@@ -8,6 +8,11 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class Team
     {
+        public Team()
+        {
+            ParticipantInTeams = new HashSet<ParticipantInTeam>();
+        }
+
         public int Id { get; set; }
         public int CompetitionId { get; set; }
         public string Name { get; set; }
@@ -17,5 +22,6 @@ namespace UniCEC.Data.Models.DB
         public TeamStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }
+        public virtual ICollection<ParticipantInTeam> ParticipantInTeams { get; set; }
     }
 }
