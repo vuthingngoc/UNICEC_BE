@@ -39,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.ClubId == request.ClubId
                         from comp in context.Competitions
-                        //where cic.CompetitionId == comp.Id && cic.IsOwner == true
+                        where cic.CompetitionId == comp.Id
                         select comp;
             //status
             if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
@@ -65,7 +65,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 //lấy  Club Owner
                 Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        //where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        where cic.CompetitionId == compe.Id
                                         from c in context.Clubs
                                         where c.Id == cic.ClubId
                                         select c).FirstOrDefaultAsync();
@@ -100,20 +100,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     ClubOwnerId = clubOwner.Id,
                     ClubOwnerImage = clubOwner.Image,
                     ClubOwnerName = clubOwner.Name,
-                    //Address = compe.Address,
-                    //NumberOfTeam = compe.NumberOfTeam,
-                    //NumberOfParticipation = compe.NumberOfParticipation,
-                    //StartTime = compe.StartTime,
-                    //EndTime = compe.EndTime,
-                    //StartTimeRegister = compe.StartTimeRegister,
-                    //EndTimeRegister = compe.EndTimeRegister,
-                    //Content = compe.Content,
-                    //Fee = compe.Fee,
-                    //SeedsCode = compe.SeedsCode,
-                    //SeedsPoint = compe.SeedsPoint,
-                    //SeedsDeposited = compe.SeedsDeposited,
-                    //AddressName = compe.AddressName,
-                    //Status = compe.Status,
+
                 };
                 Competitions.Add(vc);
             }//end each competition
@@ -137,7 +124,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        //where comp.StartTime >= localTime.DateTime && cic.IsOwner == true
+                        where comp.StartTime >= localTime.DateTime
                         orderby comp.StartTime
                         select comp;
             }
@@ -172,17 +159,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 //lấy  Club Owner
                 Club clubOwner = await (from cic in context.CompetitionInClubs
-                                        //where cic.CompetitionId == compe.Id && cic.IsOwner == true
+                                        where cic.CompetitionId == compe.Id
                                         from c in context.Clubs
                                         where c.Id == cic.ClubId
                                         select c).FirstOrDefaultAsync();
 
                 //lấy competition type name
                 CompetitionType competitionType = await (from c in context.Competitions
-                                                        where c.Id == compe.Id
-                                                        from ct in context.CompetitionTypes
-                                                        where ct.Id == c.CompetitionTypeId
-                                                        select ct).FirstOrDefaultAsync();
+                                                         where c.Id == compe.Id
+                                                         from ct in context.CompetitionTypes
+                                                         where ct.Id == c.CompetitionTypeId
+                                                         select ct).FirstOrDefaultAsync();
 
                 string competitionTypeName = competitionType.TypeName;
 
@@ -208,7 +195,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CompetitionId = compe.Id,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
-                    CompetitionTypeName = competitionTypeName,  
+                    CompetitionTypeName = competitionTypeName,
                     Public = compe.Public,
                     View = compe.View,
                     CreateTime = compe.CreateTime,
@@ -217,20 +204,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     ClubOwnerId = clubOwner.Id,
                     ClubOwnerImage = clubOwner.Image,
                     ClubOwnerName = clubOwner.Name,
-                    //Address = compe.Address,
-                    //NumberOfTeam = compe.NumberOfTeam,
-                    //NumberOfParticipation = compe.NumberOfParticipation,
-                    //StartTime = compe.StartTime,
-                    //EndTime = compe.EndTime,
-                    //StartTimeRegister = compe.StartTimeRegister,
-                    //EndTimeRegister = compe.EndTimeRegister,
-                    //Content = compe.Content,
-                    //Fee = compe.Fee,
-                    //SeedsCode = compe.SeedsCode,
-                    //SeedsPoint = compe.SeedsPoint,
-                    //SeedsDeposited = compe.SeedsDeposited,
-                    //AddressName = compe.AddressName,
-                    //Status = compe.Status,
+
                 };
                 competitions.Add(vc);
             }//end each competition

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -8,14 +9,17 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
+        private readonly IConfiguration _configuration;
         public UniCECContext()
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options)
-            : base(options)
+        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
+           : base(options)
         {
+            _configuration = configuration;
         }
+
 
         public virtual DbSet<ActivitiesEntity> ActivitiesEntities { get; set; }
         public virtual DbSet<City> Cities { get; set; }
@@ -55,7 +59,8 @@ namespace UniCEC.Data.Models.DB
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=.;Database=UniCEC;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
+                optionsBuilder.UseLazyLoadingProxies();
             }
         }
 
@@ -208,12 +213,6 @@ namespace UniCEC.Data.Models.DB
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ClubHisto__ClubR__6477ECF3");
 
-                entity.HasOne(d => d.Member)
-                    .WithMany(p => p.ClubHistories)
-                    .HasForeignKey(d => d.MemberId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ClubHisto__Membe__656C112C");
-
                 entity.HasOne(d => d.Term)
                     .WithMany(p => p.ClubHistories)
                     .HasForeignKey(d => d.TermId)
@@ -355,7 +354,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
+                entity.Property(e => e.CompetitionInClubId).HasColumnName("CompetitionInClubID");
 
                 entity.Property(e => e.CompetitionRoleId).HasColumnName("CompetitionRoleID");
 
@@ -365,9 +364,9 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.MemberId).HasColumnName("MemberID");
 
-                entity.HasOne(d => d.Competition)
+                entity.HasOne(d => d.CompetitionInClub)
                     .WithMany(p => p.CompetitionManagers)
-                    .HasForeignKey(d => d.CompetitionId)
+                    .HasForeignKey(d => d.CompetitionInClubId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__6D0D32F4");
 

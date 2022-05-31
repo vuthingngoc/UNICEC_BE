@@ -18,6 +18,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 
         public async Task<ViewCity> GetById(int id, int roleId)
         {
+
             return (roleId.Equals(1) || roleId.Equals(4)) ? // university admin and system admin
                 await (from c in context.Cities
                        where c.Id.Equals(id)
