@@ -12,8 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Text;
-using UniCEC.Business.Services.BlogSvc;
-using UniCEC.Business.Services.BlogTypeSvc;
 using UniCEC.Business.Services.CitySvc;
 using UniCEC.Business.Services.ClubActivitySvc;
 using UniCEC.Business.Services.ClubHistorySvc;
@@ -25,7 +23,6 @@ using UniCEC.Business.Services.CompetitionSvc;
 using UniCEC.Business.Services.CompetitionTypeSvc;
 using UniCEC.Business.Services.DepartmentInUniversitySvc;
 using UniCEC.Business.Services.DepartmentSvc;
-using UniCEC.Business.Services.EntityTypeSvc;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Business.Services.InfluencerSvc;
@@ -44,8 +41,6 @@ using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
-using UniCEC.Data.Repository.ImplRepo.BlogRepo;
-using UniCEC.Data.Repository.ImplRepo.BlogTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
@@ -54,11 +49,11 @@ using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
+using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
@@ -107,8 +102,6 @@ namespace UniCEC.API
             // Add DbContext
             services.AddDbContext<UniCECContext>();
             // Service
-            services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<IBlogTypeService, BlogTypeService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IClubActivityService, ClubActivityService>();
             services.AddScoped<IClubHistoryService, ClubHistoryService>();
@@ -120,7 +113,6 @@ namespace UniCEC.API
             services.AddScoped<ICompetitionTypeService, CompetitionTypeService>();
             services.AddScoped<IDepartmentInUniversityService, DepartmentInUniversityService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
-            services.AddScoped<IEntityTypeService, EntityTypeService>();
             services.AddScoped<IInfluencerService, InfluencerService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IMajorService, MajorService>();
@@ -140,8 +132,6 @@ namespace UniCEC.API
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddTransient<IBlogRepo, BlogRepo>();
-            services.AddTransient<IBlogTypeRepo, BlogTypeRepo>();
             services.AddTransient<ICityRepo, CityRepo>();
             services.AddTransient<IClubActivityRepo, ClubActivityRepo>();
             services.AddTransient<IClubHistoryRepo, ClubHistoryRepo>();
