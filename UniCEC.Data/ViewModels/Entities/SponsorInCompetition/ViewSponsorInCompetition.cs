@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.SponsorInCompetition
 {
@@ -9,5 +10,6 @@ namespace UniCEC.Data.ViewModels.Entities.SponsorInCompetition
         public int CompetitionId { get; set; }
         [JsonPropertyName("sponsor_id")]
         public int SponsorId { get; set; }
+        public SponsorInCompetitionStatus Status { get; set;}
     }
 }

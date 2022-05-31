@@ -19,7 +19,6 @@ namespace UniCEC.Data.Models.DB
 
         public virtual Club Club { get; set; }
         public virtual ClubRole ClubRole { get; set; }
-        public virtual Member Member { get; set; }
         public virtual Term Term { get; set; }
     }
 }

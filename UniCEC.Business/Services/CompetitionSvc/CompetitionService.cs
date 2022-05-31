@@ -13,6 +13,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
+using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
@@ -26,6 +27,8 @@ using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
+using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -51,13 +54,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //
         private IParticipantRepo _participantRepo;
         //
-
         private ICompetitionTypeRepo _competitionTypeRepo;
-
+        //
         private IFileService _fileService;
         //
         private ICompetitionEntityRepo _competitionEntityRepo;
-
+        //
+        private ICompetitionManagerRepo _competitionManagerRepo;
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IClubHistoryRepo clubHistoryRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
@@ -70,6 +73,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionTypeRepo competitionTypeRepo,
                                   IDepartmentRepo departmentRepo,
                                   ICompetitionEntityRepo competitionEntityRepo,
+                                  ICompetitionManagerRepo competitionManagerRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -85,6 +89,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _departmentRepo = departmentRepo;
             _fileService = fileService;
             _competitionEntityRepo = competitionEntityRepo;
+            _competitionManagerRepo = competitionManagerRepo;
         }
 
 
@@ -130,8 +135,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-
-
         //Leader Insert
         public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token, IFormFile file)
         {
@@ -145,7 +148,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int UniversityId = Int32.Parse(UniversityIdClaim.Value);
 
                 bool roleLeader = false;
-
 
                 if (string.IsNullOrEmpty(model.Name)
                     || string.IsNullOrEmpty(model.Content)
@@ -165,7 +167,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null || TermId Null ");
 
-
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
                     UserId = UserId,
@@ -176,7 +177,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
-                    //------------ Check Role Member Is Leader 
+                    //------------ Check Role Member Is Leader Of Club
                     if (infoClubMem.ClubRoleName.Equals("Leader"))
                     {
                         roleLeader = true;
@@ -189,29 +190,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         {
                             if (CheckNumber_Team(model.NumberOfTeam, model.NumberOfParticipations))
                             {
-
-                                bool insertDepartment = false;
-                                bool insertFileImage = false;
-
-                                //------------Check FK
-                                if (model.ListDepartmentId.Count > 0)
-                                {
-                                    bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
-                                    if (departmentBelongToUni == false)
-                                    {
-                                        throw new ArgumentException("Department Id not have in University");
-                                    }// end if CheckDepartmentId
-                                    else
-                                    {
-                                        insertDepartment = true;
-                                    }
-                                }
-
-                                string Url = await _fileService.UploadFile(file);
-                                if (Url != null)
-                                {
-                                    insertFileImage = true;
-                                }
 
                                 //------------ Insert Competition
                                 //ở trong trường hợp này phân biệt EVENT - COMPETITION
@@ -245,41 +223,27 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 {
                                     Competition comp = await _competitionRepo.Get(competition_Id);
 
-                                    //------------ Insert Competition-In-Department -----------
-                                    if (insertDepartment)
-                                    {
-                                        foreach (int dep_id in model.ListDepartmentId)
-                                        {
-                                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                                            {
-                                                DepartmentId = dep_id,
-                                                CompetitionId = competition_Id
-                                            };
-                                            await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                                        }
-                                    }
-
-                                    //------------ Insert Competition-Entities-----------
-                                    if (insertFileImage)
-                                    {
-                                        CompetitionEntity competitionEntity = new CompetitionEntity()
-                                        {
-                                            CompetitionId = competition_Id,
-                                            Url = Url
-                                        };
-                                        await _competitionEntityRepo.Insert(competitionEntity);
-                                    }
 
                                     //------------ Insert Competition-In-Club
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubId;
                                     competitionInClub.CompetitionId = competition_Id;
-                                    //auto isOwner = true
-                                    competitionInClub.IsOwner = true;
-
                                     int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
 
-                                    if (compInClub_Id > 0)
+
+                                    //------------ Insert Competition-Manager
+                                    CompetitionManager cm = new CompetitionManager()
+                                    {
+                                        CompetitionInClubId = compInClub_Id,
+                                        //auto role 1 Manager
+                                        CompetitionRoleId = 1,
+                                        MemberId = infoClubMem.MemberId,
+                                        Fullname = infoClubMem.Name
+                                    };
+
+                                    int cmId = await _competitionManagerRepo.Insert(cm);
+
+                                    if (cmId > 0)
                                     {
                                         ViewDetailCompetition viewDetailCompetition = await TransformViewDetailCompetition(comp);
                                         return viewDetailCompetition;
@@ -321,140 +285,217 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        //Sponsor Insert
-        //Check Authorize Sponsor in controller
-        //public async Task<ViewDetailCompetition> SponsorInsert(SponsorInsertCompOrEventModel model, string token)
-        //{
-        //    try
-        //    {
-        //        var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        //        var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
-        //        int SponsorId = Int32.Parse(spIdClaim.Value);
 
-        //        if (string.IsNullOrEmpty(model.Name)
-        //            || string.IsNullOrEmpty(model.Content)
-        //            || string.IsNullOrEmpty(model.AddressName)
-        //            || string.IsNullOrEmpty(model.Address)
-        //            || model.CompetitionTypeId == 0
-        //            || model.NumberOfParticipations == 0
-        //            || model.NumberOfTeam < 0
-        //            || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-        //            || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
-        //            || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-        //            || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-        //            || model.SeedsPoint == 0
-        //            || model.SeedsDeposited == 0)
-        //            throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
-        //                                             " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null ");
+        //add Competition Entity
+        public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = Int32.Parse(UserIdClaim.Value);
 
-        //        //------------ Check Date
-        //        bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
-        //        if (checkDate)
-        //        {
-        //            if (CheckNumber_Team(model.NumberOfTeam, model.NumberOfParticipations))
-        //            {
-        //                //------------Check FK 
-        //                bool insertDepartment = false;
-        //                if (model.ListDepartmentId.Count > 0)
-        //                {
-        //                    bool departmentInSystem = await CheckDepartmentId(model.ListDepartmentId);
-        //                    if (departmentInSystem == false)
-        //                    {
-        //                        throw new ArgumentException("Department Id not have in System");
-        //                    }// end if CheckDepartmentId
-        //                    else
-        //                    {
-        //                        insertDepartment = true;
-        //                    }
-        //                }
+                if (model.CompetitionId == 0
+                  || model.ClubId == 0
+                  || model.TermId == 0
+                  || string.IsNullOrEmpty(model.Name))
+                    throw new ArgumentNullException("|| Competition Id Null  || Name Null" +
+                                                     " ClubId Null || TermId Null ");
 
-        //                //ở trong trường hợp này phân biệt EVENT - COMPETITION
-        //                //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
-        //                Competition competition = new Competition();
-        //                competition.CompetitionTypeId = model.CompetitionTypeId;
-        //                competition.AddressName = model.AddressName;
-        //                competition.Address = model.Address;
-        //                competition.Name = model.Name;
-        //                // Nếu NumberOfTeam có giá trị là = 0 => đó là đang create EVENT
-        //                competition.NumberOfTeam = model.NumberOfTeam;
-        //                competition.NumberOfParticipation = model.NumberOfParticipations;
-        //                competition.CreateTime = new LocalTime().GetLocalTime().DateTime;
-        //                competition.StartTime = model.StartTime;
-        //                competition.EndTime = model.EndTime;
-        //                competition.StartTimeRegister = model.StartTimeRegister;
-        //                competition.EndTimeRegister = model.EndTimeRegister;
-        //                competition.Content = model.Content;
-        //                competition.Fee = model.Fee;
-        //                competition.SeedsPoint = model.SeedsPoint;
-        //                competition.SeedsDeposited = model.SeedsDeposited;
-        //                competition.SeedsCode = await CheckExistCode();
-        //                competition.IsSponsor = true;
-        //                competition.Status = CompetitionStatus.Launching;
-        //                //auto true
-        //                competition.Public = true;
-        //                //auto = 0
-        //                competition.View = 0;
-        //                int competition_Id = await _competitionRepo.Insert(competition);
-        //                if (competition_Id > 0)
-        //                {
-        //                    Competition comp = await _competitionRepo.Get(competition_Id);
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
+                    {
+                        GetMemberInClubModel conditions = new GetMemberInClubModel()
+                        {
+                            UserId = UserId,
+                            ClubId = model.ClubId,
+                            TermId = model.TermId
+                        };
+                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        //------------- CHECK Mem in that club
+                        if (infoClubMem != null)
+                        {
+                            //------------- CHECK is in CompetitionManger table
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            if (isAllow != null)
+                            {
+                                //------------ Insert Competition-Entities-----------
+                                string Url = await _fileService.UploadFile(file);
+                                CompetitionEntity competitionEntity = new CompetitionEntity()
+                                {
+                                    CompetitionId = model.CompetitionId,
+                                    Name = model.Name,
+                                    ImageUrl = Url
+                                };
 
+                                int id = await _competitionEntityRepo.Insert(competitionEntity);
+                                if (id > 0)
+                                {
+                                    CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+                                    return new ViewCompetitionEntity()
+                                    {
+                                        Id = entity.Id,
+                                        Name = entity.Name,
+                                        CompetitionId = entity.CompetitionId,
+                                        ImageUrl = entity.ImageUrl,
+                                    };
+                                }
+                                return null;
+                            }
+                            //end check allow
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You do not have permission to do this action");
+                            }
+                        }
+                        //end check member
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You are not member in Club");
+                        }
+                    }
+                    //end check club in system
+                    else
+                    {
+                        throw new ArgumentException("Club in not found");
+                    }
+                }
+                //end check competition 
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
 
-        //                    //------------ Insert Competition-In-Department -----------
-        //                    if (insertDepartment)
-        //                    {
-        //                        foreach (int dep_id in model.ListDepartmentId)
-        //                        {
-        //                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-        //                            {
-        //                                DepartmentId = dep_id,
-        //                                CompetitionId = comp.Id
-        //                            };
-        //                            await _competitionInDepartmentRepo.Insert(comp_in_dep);
-        //                        }
-        //                    }
-
-        //                    //------------ Insert Competition-Entities-----------(OPTIONAL 2)
-        //                    //
-        //                    //... to be continuted
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
-        //                    //------------ Sponsor-In-Competition -----------
-        //                    SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-        //                    sponsorInCompetition.SponsorId = SponsorId;
-        //                    sponsorInCompetition.CompetitionId = competition_Id;
-        //                    int spoInCom_Id = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+        //add Competition In Department
 
-        //                    if (spoInCom_Id > 0)
-        //                    {
-        //                        ViewDetailCompetition viewDetailCompetition = await TransformViewDetailCompetition(comp);
-        //                        return viewDetailCompetition;
-        //                    }//end if spoInCom_Id > 0
-        //                    else
-        //                    {
-        //                        throw new ArgumentException("Add Competition Or Event Failed");
-        //                    }
-        //                }//end if competition_Id > 0
-        //                else
-        //                {
-        //                    throw new ArgumentException("Add Competition Or Event Failed");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("Number of Team and Number of Member not suitable");
-        //            }
-        //        }//end if check date
-        //        else
-        //        {
-        //            throw new ArgumentException("Date not suitable");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+        public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+
+                if (model.CompetitionId == 0
+                  || model.ClubId == 0
+                  || model.TermId == 0
+                  || model.ListDepartmentId.Count < 0)
+                    throw new ArgumentNullException("|| Competition Id Null  || Department Null" +
+                                                     " ClubId Null || TermId Null ");
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
+                    {
+                        GetMemberInClubModel conditions = new GetMemberInClubModel()
+                        {
+                            UserId = UserId,
+                            ClubId = model.ClubId,
+                            TermId = model.TermId
+                        };
+                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        //------------- CHECK Mem in that club
+                        if (infoClubMem != null)
+                        {
+                            //------------- CHECK is in CompetitionManger table
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            if (isAllow != null)
+                            {
+                                bool departmentBelongToUni = await CheckDepartmentId(model.ListDepartmentId, UniversityId);
+
+                                List<int> list_dic_Id = new List<int>();
+
+                                List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
+
+                                if (departmentBelongToUni)
+                                {
+
+                                    foreach (int dep_id in model.ListDepartmentId)
+                                    {
+                                        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                                        {
+                                            DepartmentId = dep_id,
+                                            CompetitionId = model.CompetitionId
+                                        };
+                                        int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                                        list_dic_Id.Add(id);
+                                    }
+                                    if (list_dic_Id.Count > 0)
+                                    {
+                                        foreach (int id in list_dic_Id)
+                                        {
+                                            CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
+
+                                            ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
+                                            {
+                                                Id = cid.Id,
+                                                CompetitionId = cid.CompetitionId,
+                                                DepartmentId = cid.DepartmentId
+                                            };
+                                            list_result.Add(vcid);
+                                        }
+                                        return list_result;
+                                    }
+                                    else
+                                    {
+                                        throw new ArgumentException("Add Department Failed");
+                                    }
+                                }// end if CheckDepartmentId
+                                else
+                                {
+                                    throw new ArgumentException("Department Id not have in University");
+                                }
+                            }
+                            //end check allow
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You do not have permission to do this action");
+                            }
+                        }
+                        //end check member
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You are not member in Club");
+                        }
+                    }
+                    //end check club in system
+                    else
+                    {
+                        throw new ArgumentException("Club in not found");
+                    }
+                }
+                //end check competition 
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
+
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
         public async Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel model, string token)
@@ -471,13 +512,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     throw new ArgumentNullException("|| Competition Id Null  " +
                                                      " ClubId Null || TermId Null ");
 
-                //Check Competition is have in system or not
+                //------------- CHECK Competition is have in system or not
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
                 if (competition != null)
                 {
-                    //------------ Check Club is Owner Competition or Event
-                    bool isOwner = await _competitionInClubRepo.IsOwnerCompetitionOrEvent(model.ClubId, model.CompetitionId);
-                    if (isOwner)
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
                     {
                         GetMemberInClubModel conditions = new GetMemberInClubModel()
                         {
@@ -486,22 +527,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             TermId = model.TermId
                         };
                         ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
-                        //------------ Check Mem in that club
+                        //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
-                            //------------ Check Role Member Is Leader 
-                            bool roleLeader = false;
-                            if (infoClubMem.ClubRoleName.Equals("Leader"))
-                            {
-                                roleLeader = true;
-                            }
-
-                            if (roleLeader)
+                            //------------- CHECK is in CompetitionManger table
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            if (isAllow != null)
                             {
                                 //check date
                                 bool checkDate = false;
                                 Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                                //------------ Check Date Update
+                                //------------- CHECK Date Update
                                 //TH1 STR
                                 if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                                 {
@@ -529,7 +565,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 }
                                 if (checkDate)
                                 {
-
                                     comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
                                     comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
                                     comp.AddressName = (model.AddressName.Length > 0) ? model.AddressName : comp.AddressName;
@@ -544,25 +579,28 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     //
                                     await _competitionRepo.Update();
                                     return true;
+
                                 }//end check date
                                 else
                                 {
                                     throw new ArgumentException("Date not suitable");
                                 }
-                            }//end check leader 
+                            }
+                            //end check allow
                             else
                             {
-                                throw new UnauthorizedAccessException("You do not a role Leader to update this Competition or Event");
+                                throw new UnauthorizedAccessException("You do not have permission to do this action");
                             }
                         }//end check member
                         else
                         {
                             throw new UnauthorizedAccessException("You aren't member in Club");
                         }
-                    }// end check Club has Owner Competition or Event
+                    }
+                    //end check club in system
                     else
                     {
-                        throw new ArgumentException("Club has not create this Competition or Event");
+                        throw new ArgumentException("Club in not found");
                     }
                 }
                 else
@@ -577,87 +615,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        //public async Task<bool> SponsorUpdate(SponsorUpdateCompOrEvent model, string token)
-        //{
-        //    try
-        //    {
-        //        var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        //        var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
-        //        int SponsorId = Int32.Parse(spIdClaim.Value);
-
-        //        //check date
-        //        bool checkDate = false;
-        //        //Use method check
-        //        //-> if FALSE mean it's created -> Can Update
-        //        //-> if TRUE mean it isn't created -> Can't Update
-        //        bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
-
-        //        if (model.CompetitionId == 0)
-        //            throw new ArgumentNullException("|| Competition Id Null");
-
-        //        //------------ Check Sponsor Has Create Competition
-        //        if (CompOrEventNotCreated == false)
-        //        {
-        //            Competition comp = await _competitionRepo.Get(model.CompetitionId);
-        //            //------------ Check Date Update
-        //            //TH1 STR
-        //            if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-        //            {
-        //                checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-        //            }
-        //            //TH2 ETR
-        //            if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-        //            {
-        //                checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-        //            }
-        //            //TH3 ST
-        //            if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
-        //            {
-        //                checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
-        //            }
-        //            //TH4 ET
-        //            if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
-        //            {
-        //                checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
-        //            }
-        //            //TH5 new STR ETR ST ET
-        //            if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
-        //            {
-        //                checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
-        //            }
-        //            if (checkDate)
-        //            {
-
-        //                comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
-        //                comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
-        //                comp.AddressName = (model.AddressName.Length > 0) ? model.AddressName : comp.AddressName;
-        //                comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
-        //                comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
-        //                comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-        //                comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-        //                comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-        //                comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-        //                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
-        //                comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
-        //                //
-        //                await _competitionRepo.Update();
-        //                return true;
-        //            }//end check date
-        //            else
-        //            {
-        //                throw new ArgumentException("Date not suitable");
-        //            }
-        //        }//end check CompOrEventNotCreated
-        //        else
-        //        {
-        //            throw new ArgumentException("Competition not found to update");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
 
 
         public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token)
@@ -674,14 +631,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.TermId == 0)
                     throw new ArgumentNullException(" Competition Id Null || ClubId Null || TermId Null ");
 
-
-                //Check Competition is have in system or not
+                //------------- CHECK Competition is have in system or not
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
                 if (competition != null)
                 {
-                    //------------ Check Club is Owner Competition or Event
-                    bool isOwner = await _competitionInClubRepo.IsOwnerCompetitionOrEvent(model.ClubId, model.CompetitionId);
-                    if (isOwner)
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
                     {
                         GetMemberInClubModel conditions = new GetMemberInClubModel()
                         {
@@ -690,50 +646,54 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             TermId = model.TermId
                         };
                         ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
-                        //------------ Check Mem in that club
+                        //------------ CHECK Mem in that club
                         if (infoClubMem != null)
                         {
-                            bool roleLeader = false;
-                            //------------ Check Role Member Is Leader 
-                            if (infoClubMem.ClubRoleName.Equals("Leader"))
+                            //------------- CHECK is in CompetitionManger table
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            if (isAllow != null)
                             {
-                                roleLeader = true;
-                            }
-                            if (roleLeader)
-                            {
-                                //
-                                Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                                if (comp != null)
+                                //------------- CHECK Role Is Manger
+                                if (isAllow.CompetitionRoleId == 1)
                                 {
-                                    comp.Status = CompetitionStatus.Canceling;
                                     //
-                                    await _competitionRepo.Update();
-                                    return true;
-                                }//end if comp != null
+                                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                                    if (comp != null)
+                                    {
+                                        comp.Status = CompetitionStatus.Canceling;
+                                        //
+                                        await _competitionRepo.Update();
+                                        return true;
+                                    }//end if comp != null
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                }
                                 else
                                 {
-                                    return false;
+                                    throw new UnauthorizedAccessException("Only role Manager can do this action");
                                 }
-                            }//end check role leader
+                            }
                             else
                             {
-                                throw new UnauthorizedAccessException("You do not a role Leader to Delete this Competition");
+                                throw new UnauthorizedAccessException("You do not have permission to do this action");
                             }
-                        }// check member
+                        }
+                        //end not member in club
                         else
                         {
                             throw new UnauthorizedAccessException("You aren't member in Club");
                         }
-                    }// end check Club has Owner Competition or Event
+                    } //end check club
                     else
                     {
-                        throw new ArgumentException("Club has not create this Competition or Event");
+                        throw new ArgumentException("Club not in the system");
                     }
-                }
-                //end check Competition not have in system
+                }// end check Competition not in system
                 else
                 {
-                    throw new ArgumentException("Competition or Event not found to delete");
+                    throw new ArgumentException("Competition or Event not found ");
                 }
             }
             catch (Exception)
@@ -742,47 +702,219 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        //public async Task<bool> SponsorDelete(SponsorDeleteCompOrEventModel model, string token)
-        //{
-        //    try
-        //    {
-        //        var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        //        var spIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
-        //        int SponsorId = Int32.Parse(spIdClaim.Value);
-        //        //Use method check  
-        //        //-> if FALSE mean it's created -> Can Update
-        //        //-> if TRUE mean it isn't created -> Can't Update
-        //        bool CompOrEventNotCreated = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
 
-        //        if (model.CompetitionId == 0)
-        //            throw new ArgumentNullException("|| Competition Id Null");
 
-        //        if (CompOrEventNotCreated == false)
-        //        {
-        //            //
-        //            Competition comp = await _competitionRepo.Get(model.CompetitionId);
-        //            if (comp != null)
-        //            {
-        //                comp.Status = CompetitionStatus.Canceling;
-        //                //
-        //                await _competitionRepo.Update();
-        //                return true;
-        //            }//end if comp != null
-        //            else
-        //            {
-        //                return false;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            throw new ArgumentException("Competition not found to Delete");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+
+        //ROLE MANAGER
+        //----------------------------------------------------------------------------------------Competition-In-Club
+        public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+
+                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
+
+                if (model.ClubIdCollaborate == 0
+                   || model.CompetitionId == 0
+                   || model.ClubId == 0
+                   || model.TermId == 0)
+                    throw new ArgumentNullException("Club Id Collaborate Null || Competition Id Null || Club Id Null || Term Id Null ");
+
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------- CHECK Club in system
+                    Club club = await _clubRepo.Get(model.ClubId);
+                    if (club != null)
+                    {
+                        GetMemberInClubModel conditions = new GetMemberInClubModel()
+                        {
+                            UserId = UserId,
+                            ClubId = model.ClubId,
+                            TermId = model.TermId
+                        };
+                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        //------------ CHECK 2 club are the same 
+                        if (model.ClubIdCollaborate != model.ClubId)
+                        {
+                            //------------ CHECK Mem in that club
+                            if (infoClubMem != null)
+                            {
+                                //------------- CHECK is in CompetitionManger table
+                                CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                                if (isAllow != null)
+                                {
+                                    //------------- CHECK Role Is Manger
+                                    if (isAllow.CompetitionRoleId == 1)
+                                    {
+                                        //---------------CHECK Club-Id-Collaborate----------
+                                        //check club Id Collaborate has in system
+                                        Club clubCollaborate = await _clubRepo.Get(model.ClubIdCollaborate);
+                                        if (clubCollaborate != null)
+                                        {
+                                            //
+                                            bool checkClubIn_Out = false;
+                                            //public == false just for club inside University 
+                                            if (competition.Public == false)
+                                            {
+                                                if (clubCollaborate.UniversityId == UniversityId)
+                                                {
+                                                    checkClubIn_Out = true;
+                                                }
+                                                else
+                                                {
+                                                    checkClubIn_Out = false;
+                                                }
+                                            }
+                                            //public == true can join
+                                            else
+                                            {
+                                                checkClubIn_Out = true;
+                                            }
+                                            if (checkClubIn_Out)
+                                            {
+                                                CompetitionInClub competitionInClub = new CompetitionInClub();
+                                                competitionInClub.ClubId = model.ClubIdCollaborate;
+                                                competitionInClub.CompetitionId = model.CompetitionId;
+                                                int result = await _competitionInClubRepo.Insert(competitionInClub);
+                                                if (result > 0)
+                                                {
+                                                    CompetitionInClub cic = await _competitionInClubRepo.Get(result);
+
+                                                    return TransferViewCompetitionInClub(cic);
+                                                }//end result
+                                                else
+                                                {
+                                                    throw new ArgumentException("Add Competition Or Event Failed");
+                                                }
+                                            }//end check ClubIn_Out
+                                            else
+                                            {
+                                                throw new ArgumentException("Club collaborate not in University");
+                                            }
+                                        }//end check club in system
+                                        else
+                                        {
+                                            throw new ArgumentException("Club collaborate not found in system");
+                                        }
+                                    }//end check role Manager
+                                    else
+                                    {
+                                        throw new UnauthorizedAccessException("Only role Manager can do this action");
+                                    }
+                                }//end check allow
+                                else
+                                {
+                                    throw new UnauthorizedAccessException("You do not have permission to do this action");
+                                }
+                            }//end not member in club
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You aren't member in Club");
+                            }
+                        }//end check 2 club are the same 
+                        else
+                        {
+                            throw new ArgumentException("Club is the same ");
+                        }
+                    }
+                    //end check club
+                    else
+                    {
+                        throw new ArgumentException("Club not in the system");
+                    }
+                }// end check Competition not in system
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+
+
+        //ROLE SPONSOR
+        //----------------------------------------------------------------------------------------Sponsor-In-Competition
+        public async Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel model, string token)
+        {
+            try
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                var SponsorIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("SponsorId"));
+
+                int UserId = Int32.Parse(UserIdClaim.Value);
+                int SponsorId = Int32.Parse(SponsorIdClaim.Value);
+
+                if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
+
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------------------------------check-sponsor-id-create-competition-or-event-duplicate
+                    //true  -> có nghĩa là chưa tạo -> continute
+                    //false -> là sponsor này đã có trong cuộc thi r -> lỗi thêm sponsor
+                    bool checkCreateSponsorInCompetition = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
+                    if (checkCreateSponsorInCompetition)
+                    {
+                        SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
+                        sponsorInCompetition.SponsorId = SponsorId;
+                        sponsorInCompetition.CompetitionId = model.CompetitionId;
+                        sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+
+                        int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+                        if (result > 0)
+                        {
+                            SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
+                            //UPDATE IsSponsor của competition -> IsSponsor true                                               
+                            competition.IsSponsor = true;
+                            await _competitionRepo.Update();
+                            return TransferViewSponsorInCompetition(sic);
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Add Sponsor failed");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Sponsor already join");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Transfer View
+        private ViewCompetitionInClub TransferViewCompetitionInClub(CompetitionInClub competitionInClub)
+        {
+            return new ViewCompetitionInClub()
+            {
+                Id = competitionInClub.Id,
+                ClubId = competitionInClub.ClubId,
+                CompetitionId = competitionInClub.CompetitionId,
+            };
+        }
 
         public async Task<ViewDetailCompetition> TransformViewDetailCompetition(Competition competition)
         {
@@ -805,7 +937,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             //Img Url
             CompetitionEntity compeEntity = await _competitionEntityRepo.Get(competition.Id);
-            string imgUrl = compeEntity.Url;
+            string imgUrl = compeEntity.ImageUrl;
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
@@ -843,36 +975,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
+        private ViewSponsorInCompetition TransferViewSponsorInCompetition(SponsorInCompetition sponsorInCompetition)
+        {
+            return new ViewSponsorInCompetition()
+            {
+                Id = sponsorInCompetition.Id,
+                SponsorId = sponsorInCompetition.SponsorId,
+                CompetitionId = sponsorInCompetition.CompetitionId,
 
+            };
+        }
 
-        //public ViewCompetition TransformViewCompetition(Competition competition)
-        //{
-
-        //    return new ViewCompetition()
-        //    {
-        //        CompetitionId = competition.Id,
-        //        Name = competition.Name,
-        //        CompetitionTypeId = competition.CompetitionTypeId,
-        //        AddressName = competition.AddressName,
-        //        Address = competition.Address,
-        //        NumberOfParticipation = competition.NumberOfParticipation,
-        //        NumberOfTeam = competition.NumberOfTeam,
-        //        CreateTime = competition.CreateTime,
-        //        StartTime = competition.StartTime,
-        //        EndTime = competition.EndTime,
-        //        StartTimeRegister = competition.StartTimeRegister,
-        //        EndTimeRegister = competition.EndTimeRegister,
-        //        Content = competition.Content,
-        //        Fee = competition.Fee,
-        //        SeedsPoint = competition.SeedsPoint,
-        //        SeedsDeposited = competition.SeedsDeposited,
-        //        SeedsCode = competition.SeedsCode,
-        //        IsSponsor = competition.IsSponsor,
-        //        Public = competition.Public,
-        //        Status = competition.Status,
-        //        View = competition.View
-        //    };
-        //}
 
         //generate Seed code length 10
         private string GenerateSeedCode()
@@ -911,14 +1024,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             bool result = await _departmentInUniversityRepo.checkDepartmentBelongToUni(listDepartmentId, universityId);
             return result;
         }
-
-        //Check exist Department id in System
-        //private async Task<bool> CheckDepartmentId(List<int> listDepartmentId)
-        //{
-        //    bool result = await _departmentRepo.checkDepartment(listDepartmentId);
-        //    return result;
-        //}
-
 
         //Check Date Insert - Update
         private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime, bool Update)
@@ -1026,7 +1131,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-
         //Check number of team - number of member in Team
         private bool CheckNumber_Team(int numberOfTeam, int numberOfMember)
         {
@@ -1037,269 +1141,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return false;
         }
 
-        //----------------------------------------------------------------------------------------Competition-In-Club
-        public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
-        {
-            try
-            {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                var UniversityIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
 
-                int UserId = Int32.Parse(UserIdClaim.Value);
-
-                int UniversityId = Int32.Parse(UniversityIdClaim.Value);
-
-                if (model.ClubIdCollaborate == 0
-                   || model.CompetitionId == 0
-                   || model.ClubId == 0
-                   || model.TermId == 0)
-                    throw new ArgumentNullException("Club Id Collaborate Null || Competition Id Null || Club Id Null || Term Id Null ");
-
-                //Check Competition is have in system or not
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
-                if (competition == null)
-                {
-                    //------------ Check Club is Owner Competition or Event
-                    bool isOwner = await _competitionInClubRepo.IsOwnerCompetitionOrEvent(model.ClubId, model.CompetitionId);
-                    if (isOwner)
-                    {
-                        GetMemberInClubModel conditions = new GetMemberInClubModel()
-                        {
-                            UserId = UserId,
-                            ClubId = model.ClubId,
-                            TermId = model.TermId
-                        };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
-                        //------------ Check 2 club are the same 
-                        if (model.ClubIdCollaborate != model.ClubId)
-                        {
-                            //------------ Check Mem in that club
-                            if (infoClubMem != null)
-                            {
-                                //------------ Check Role Member Is Leader 
-                                bool roleLeader = false;
-                                if (infoClubMem.ClubRoleName.Equals("Leader"))
-                                {
-                                    roleLeader = true;
-                                }
-                                if (roleLeader)
-                                {
-                                    //---------------Check Club-Id-Collaborate----------
-                                    //check club Id Collaborate has in system
-                                    Club clubCollaborate = await _clubRepo.Get(model.ClubIdCollaborate);
-                                    if (clubCollaborate != null)
-                                    {
-                                        //
-                                        bool checkClubIn_Out = false;
-                                        //public == false just for club inside University 
-                                        if (competition.Public == false)
-                                        {
-                                            if (clubCollaborate.UniversityId == UniversityId)
-                                            {
-                                                checkClubIn_Out = true;
-                                            }
-                                            else
-                                            {
-                                                checkClubIn_Out = false;
-                                            }
-                                        }
-                                        //public == true can join
-                                        else
-                                        {
-                                            checkClubIn_Out = true;
-                                        }
-                                        if (checkClubIn_Out)
-                                        {
-                                            CompetitionInClub competitionInClub = new CompetitionInClub();
-                                            competitionInClub.ClubId = model.ClubIdCollaborate;
-                                            competitionInClub.CompetitionId = model.CompetitionId;
-                                            // do là add collaborate thì isOwner == false
-                                            competitionInClub.IsOwner = false;
-
-                                            int result = await _competitionInClubRepo.Insert(competitionInClub);
-                                            if (result > 0)
-                                            {
-                                                CompetitionInClub cic = await _competitionInClubRepo.Get(result);
-
-                                                return TransferViewCompetitionInClub(cic);
-                                            }//end result
-                                            else
-                                            {
-                                                throw new ArgumentException("Add Competition Or Event Failed");
-                                            }
-                                        }//end check ClubIn_Out
-                                        else
-                                        {
-                                            throw new ArgumentException("Club collaborate not in University");
-                                        }
-                                    }//end check club in system
-                                    else
-                                    {
-                                        throw new ArgumentException("Club collaborate not found in system");
-                                    }
-                                }//end role leader
-                                else
-                                {
-                                    throw new UnauthorizedAccessException("You do not a role Leader to add Club in this Competititon");
-                                }
-                            }//end not member in club
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You aren't member in Club");
-                            }
-                        }//end check 2 club are the same 
-                        else
-                        {
-                            throw new ArgumentException("Club already join");
-                        }
-                    }//end check Club not Owner Competition Or Event
-                    else
-                    {
-                        throw new ArgumentException("Club has not create this Competition or Event");
-                    }
-                }// end check Competition not in system
-                else
-                {
-                    throw new ArgumentException("Competition or Event not found ");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private ViewCompetitionInClub TransferViewCompetitionInClub(CompetitionInClub competitionInClub)
-        {
-            return new ViewCompetitionInClub()
-            {
-                Id = competitionInClub.Id,
-                ClubId = competitionInClub.ClubId,
-                CompetitionId = competitionInClub.CompetitionId,
-            };
-        }
-
-
-        //----------------------------------------------------------------------------------------Sponsor-In-Competition
-        public async Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel model, string token)
-        {
-            try
-            {
-
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
-
-                if (model.CompetitionId == 0
-                   || model.ClubId == 0
-                   || model.TermId == 0)
-                    throw new ArgumentNullException("Competition Id Null || Club Id Null || Term Id Null");
-
-                //Check Competition is have in system or not
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
-                if (competition != null)
-                {
-                    //------------ Check Club is Owner Competition or Event
-                    bool isOwner = await _competitionInClubRepo.IsOwnerCompetitionOrEvent(model.ClubId, model.CompetitionId);
-                    if (isOwner)
-                    {
-                        GetMemberInClubModel conditions = new GetMemberInClubModel()
-                        {
-                            UserId = UserId,
-                            ClubId = model.ClubId,
-                            TermId = model.TermId
-                        };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
-                        //------------ Check Mem in that club
-                        if (infoClubMem != null)
-                        {
-                            //------------ Check Role Member Is Leader 
-                            bool roleLeader = false;
-                            if (infoClubMem.ClubRoleName.Equals("Leader"))
-                            {
-                                roleLeader = true;
-                            }
-                            if (roleLeader)
-                            {
-                                //------------------------------------Check Sponsor Collaborate in System
-                                Sponsor sponsor = await _sponsorRepo.Get(model.SponsorIdCollaborate);
-                                if (sponsor != null)
-                                {
-                                    //------------------------------------check-sponsor-id-create-competition-or-event-duplicate
-                                    //true  -> có nghĩa là chưa tạo -> continute
-                                    //false -> là sponsor này đã có trong cuộc thi r -> lỗi thêm sponsor
-                                    bool checkCreateSponsorInCompetition = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(model.SponsorIdCollaborate, model.CompetitionId);
-                                    if (checkCreateSponsorInCompetition)
-                                    {
-                                        SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                                        sponsorInCompetition.SponsorId = model.SponsorIdCollaborate;
-                                        sponsorInCompetition.CompetitionId = model.CompetitionId;
-                                        int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
-                                        if (result > 0)
-                                        {
-                                            SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
-                                            //UPDATE IsSponsor của competition -> IsSponsor true                                               
-                                            competition.IsSponsor = true;
-                                            await _competitionRepo.Update();
-                                            return TransferViewSponsorInCompetition(sic);
-                                        }//end result
-                                        else
-                                        {
-                                            throw new ArgumentException("Add Sponsor in Competition Or Event Failed");
-                                        }
-                                    }
-                                    //end check sponsor
-                                    else
-                                    {
-                                        throw new ArgumentException("Sponsor already join");
-                                    }
-                                }
-                                //end check sponsor Collaborate
-                                else
-                                {
-                                    throw new ArgumentException("Sponsor collaborate not in system");
-                                }
-                            }//end role leader
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You do not a role Leader to add Sponsor in this Competititon");
-                            }
-                        }//end not member in club
-                        else
-                        {
-                            throw new UnauthorizedAccessException("You aren't member in Club");
-                        }
-                    }
-                    //end check Club not Owner Competition Or Event
-                    else
-                    {
-                        throw new ArgumentException("Club has not create this Competition or Event");
-                    }
-                }
-                // end check Competition not in system
-                else
-                {
-                    throw new ArgumentException("Competition or Event not found ");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-
-        private ViewSponsorInCompetition TransferViewSponsorInCompetition(SponsorInCompetition sponsorInCompetition)
-        {
-            return new ViewSponsorInCompetition()
-            {
-                Id = sponsorInCompetition.Id,
-                SponsorId = sponsorInCompetition.SponsorId,
-                CompetitionId = sponsorInCompetition.CompetitionId,
-            };
-        }
 
     }
 }

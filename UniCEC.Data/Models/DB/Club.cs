@@ -12,6 +12,7 @@ namespace UniCEC.Data.Models.DB
             ClubActivities = new HashSet<ClubActivity>();
             ClubHistories = new HashSet<ClubHistory>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
+            RegisterForms = new HashSet<RegisterForm>();
         }
 
         public int Id { get; set; }
@@ -29,5 +30,6 @@ namespace UniCEC.Data.Models.DB
         public virtual ICollection<ClubActivity> ClubActivities { get; set; }
         public virtual ICollection<ClubHistory> ClubHistories { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
+        public virtual ICollection<RegisterForm> RegisterForms { get; set; }
     }
 }

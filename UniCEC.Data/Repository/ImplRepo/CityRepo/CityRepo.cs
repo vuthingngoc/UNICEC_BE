@@ -18,8 +18,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 
         public Task<ViewCity> GetById(int id)
         {
-            var query = from c in context.Cities
-                        where c.Id.Equals(id)
+            //var query = from c in context.Cities
+            //            where c.Id.Equals(id)
             throw new System.NotImplementedException();
         }
 

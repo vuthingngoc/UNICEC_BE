@@ -5,19 +5,15 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
+namespace UniCEC.Data.ViewModels.Entities.CompetitionInDepartment
 {
-    public class ViewCompetitionEntity
+    public class ViewCompetitionInDepartment
     {
-        [JsonPropertyName("competition_entity_id")]
+        [JsonPropertyName("competition_in_department_id")]
         public int Id { get; set; }
-
+        [JsonPropertyName("department_id")]
+        public int DepartmentId { get; set; }
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
-
-        public string Name { get; set; }
-
-        [JsonPropertyName("image_url")]
-        public string ImageUrl { get; set; }
     }
 }

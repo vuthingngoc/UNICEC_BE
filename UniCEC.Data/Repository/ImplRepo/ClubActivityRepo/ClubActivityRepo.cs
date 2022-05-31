@@ -52,7 +52,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             {
                 Id = ca.Id,
                 ClubId = ca.ClubId,
-                Beginning = ca.Beginning,
                 CreateTime = ca.CreateTime,
                 Description = ca.Description,
                 Ending = ca.Ending,
@@ -91,22 +90,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubActivityRepo
             if (conditions.NumberOfMember.HasValue) query = query.Where(ca => ca.NumOfMember == conditions.NumberOfMember);
             //Status
             if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
-            //-------------------------------------------------Time-------------------------------------------------
-            //chỉ search theo ngày
-            ////Begin-Time
-            //if (conditions.BeginTime.HasValue) query = query.Where(ca => ca.Beginning.Date.Equals(conditions.BeginTime));
-            ////End-Time
-            //if (conditions.EndTime.HasValue) query = query.Where(ca => ca.Ending.Date.Equals(conditions.EndTime));
-            ////Creatime
-            //if (conditions.CreateTime.HasValue) query = query.Where(ca => ca.CreateTime.Date.Equals(conditions.CreateTime));
 
             int totalCount = query.Count();
             List<ViewClubActivity> clubActivities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
                                                     .Select(ca => new ViewClubActivity
                                                     {
                                                         Id = ca.Id,
-                                                        ClubId = ca.ClubId,
-                                                        Beginning = ca.Beginning,
+                                                        ClubId = ca.ClubId,                                                        
                                                         CreateTime = ca.CreateTime,
                                                         Description = ca.Description,
                                                         Ending = ca.Ending,
