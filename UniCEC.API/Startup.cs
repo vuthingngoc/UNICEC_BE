@@ -142,7 +142,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionInDepartmentRepo, CompetitionInDepartmentRepo>();
             services.AddTransient<ICompetitionRepo, CompetitionRepo>();
             services.AddTransient<ICompetitionTypeRepo, CompetitionTypeRepo>();
-            services.AddTransient<ICompetitionManagerRepo, ICompetitionManagerRepo>();
+            services.AddTransient<ICompetitionManagerRepo, CompetitionManagerRepo>();
             services.AddTransient<IDepartmentInUniversityRepo, DepartmentInUniversityRepo>();
             services.AddTransient<IDepartmentRepo, DepartmentRepo>();
             services.AddTransient<IInfluencerRepo, InfluencerRepo>();

@@ -223,8 +223,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 {
                                     Competition comp = await _competitionRepo.Get(competition_Id);
 
-
-
                                     //------------ Insert Competition-In-Club
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubId;
