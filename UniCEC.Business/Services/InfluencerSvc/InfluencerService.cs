@@ -108,6 +108,7 @@ namespace UniCEC.Business.Services.InfluencerSvc
             try
             {
                 // check role
+
                 // update
                 Influencer influencer = await _influencerRepo.Get(model.Id);
                 if (influencer == null) throw new NullReferenceException("Not found this influencer");

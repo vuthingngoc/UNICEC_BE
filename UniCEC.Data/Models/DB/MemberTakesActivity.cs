@@ -16,7 +16,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime Deadline { get; set; }
         public MemberTakesActivityStatus Status { get; set; }
 
-        public virtual ClubActivity ClubActivity { get; set; }
+        public virtual CompetitionActivity ClubActivity { get; set; }
         public virtual Member Member { get; set; }
     }
 }

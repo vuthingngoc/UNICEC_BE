@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace UniCEC.Data.ViewModels.Entities.ClubActivity
+namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ClubActivityDeleteModel
+    public class CompetitionActivityDeleteModel
     {
         [JsonPropertyName("club_activity_id")]
         public int ClubActivityId { get; set; }

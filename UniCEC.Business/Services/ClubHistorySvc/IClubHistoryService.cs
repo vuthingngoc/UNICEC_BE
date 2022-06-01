@@ -15,6 +15,6 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
 
         // Tien Anh
-        public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);
+        //public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);
     }
 }

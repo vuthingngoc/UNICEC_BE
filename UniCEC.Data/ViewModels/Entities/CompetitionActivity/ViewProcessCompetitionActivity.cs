@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UniCEC.Data.ViewModels.Entities.ClubActivity
+namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ViewProcessClubActivity : ViewClubActivity
+    public class ViewProcessCompetitionActivity : ViewCompetitionActivity
     {
         //Extra infomation 
         [JsonPropertyName("num_of_member_join")]

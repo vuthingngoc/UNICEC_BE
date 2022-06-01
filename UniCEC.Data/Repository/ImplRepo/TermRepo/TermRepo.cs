@@ -22,8 +22,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
         public async Task<bool> CloseOldTermByClub(int clubId)
         {
             var term = await (from t in context.Terms
-                              join ch in context.ClubHistories on t.Id equals ch.TermId
-                              where ch.ClubId.Equals(clubId) && ch.Status.Equals(ClubHistoryStatus.Active)
+                              join m in context.Members on t.Id equals m.TermId
+                              where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
                               select t).FirstOrDefaultAsync();
 
             if (term != null)
@@ -39,9 +39,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
         public async Task<ViewTerm> GetCurrentTermByClub(int clubId)
         {
-            return await (from ch in context.ClubHistories
-                                      join t in context.Terms on ch.TermId equals t.Id
-                                      where ch.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
+            return await (from m in context.Members
+                                      join t in context.Terms on m.TermId equals t.Id
+                                      where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
                                       select new ViewTerm()
                                       {
                                           Id = t.Id,
@@ -53,9 +53,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
         public async Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
         {
-            var query = (from ch in context.ClubHistories
-                         join t in context.Terms on ch.TermId equals t.Id
-                         where ch.ClubId.Equals(clubId)
+            var query = (from m in context.Members
+                         join t in context.Terms on m.TermId equals t.Id
+                         where m.ClubId.Equals(clubId)
                          select t).Distinct();
 
             if (!string.IsNullOrEmpty(request.Name)) query = query.Where(t => t.Name.Contains(request.Name));
@@ -80,9 +80,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
         public async Task<ViewTerm> GetById(int clubId, int id)
         {
-            var query = from ch in context.ClubHistories
-                        join t in context.Terms on ch.TermId equals t.Id
-                        where ch.ClubId.Equals(clubId) && t.Id.Equals(id)
+            var query = from m in context.Members
+                        join t in context.Terms on m.TermId equals t.Id
+                        where m.ClubId.Equals(clubId) && t.Id.Equals(id)
                         select new ViewTerm()
                         {
                             Id = t.Id,

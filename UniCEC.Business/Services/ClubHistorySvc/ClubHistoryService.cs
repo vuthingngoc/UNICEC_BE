@@ -37,9 +37,10 @@ namespace UniCEC.Business.Services.ClubHistorySvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            PagingResult<ViewClubHistory> ClubHistories = await _clubHistoryRepo.GetByConditions(clubId, request);
-            if (ClubHistories == null) throw new NullReferenceException("Not found any previous clubs");
-            return ClubHistories;
+            //PagingResult<ViewClubHistory> ClubHistories = await _clubHistoryRepo.GetByConditions(clubId, request);
+            //if (ClubHistories == null) throw new NullReferenceException("Not found any previous clubs");
+            //return ClubHistories;
+            return null;
         }
 
         public async Task InsertForNewTerm(string token, int clubId, TermInsertModel termModel)
@@ -58,10 +59,10 @@ namespace UniCEC.Business.Services.ClubHistorySvc
                 // update endtime of old term
                 await _termService.CloseOldTermByClub(clubId);
 
-                List<ClubHistory> clubHistories = await _clubHistoryRepo.GetCurrentHistoryByClub(clubId);
+                List<ClubHistory> clubHistories = new List<ClubHistory>();//await _clubHistoryRepo.GetCurrentHistoryByClub(clubId);
                 if(clubHistories != null)
                 {
-                    await _clubHistoryRepo.UpdateEndTerm(clubId);
+                    //await _clubHistoryRepo.UpdateEndTerm(clubId);
                     // insert new records
                     foreach (ClubHistory record in clubHistories)
                     {
@@ -75,16 +76,17 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         // ???
         public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
         {
-            PagingResult<ViewClubMember> clubMembers = await _clubHistoryRepo.GetMembersByClub(clubId, termId, request);
-            if (clubMembers == null) throw new NullReferenceException("This club has no any members in this term");
-            return clubMembers;
+            //PagingResult<ViewClubMember> clubMembers = await _clubHistoryRepo.GetMembersByClub(clubId, termId, request);
+            //if (clubMembers == null) throw new NullReferenceException("This club has no any members in this term");
+            //return clubMembers;
+            return null;
         }
 
         // Tien Anh
-        public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
-        {
-            ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);
-            return result;
-        }
+        //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        //{
+        //    ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);
+        //    return result;
+        //}
     }
 }

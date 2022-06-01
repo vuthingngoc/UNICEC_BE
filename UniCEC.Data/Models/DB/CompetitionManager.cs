@@ -15,5 +15,6 @@ namespace UniCEC.Data.Models.DB
 
         public virtual CompetitionInClub CompetitionInClub { get; set; }
         public virtual CompetitionRole CompetitionRole { get; set; }
+        public virtual Member Member { get; set; }
     }
 }
