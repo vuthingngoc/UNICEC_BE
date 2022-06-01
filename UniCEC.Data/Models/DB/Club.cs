@@ -9,9 +9,8 @@ namespace UniCEC.Data.Models.DB
     {
         public Club()
         {
-            ClubActivities = new HashSet<ClubActivity>();
-            ClubHistories = new HashSet<ClubHistory>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
+            Members = new HashSet<Member>();
             RegisterForms = new HashSet<RegisterForm>();
         }
 
@@ -27,9 +26,8 @@ namespace UniCEC.Data.Models.DB
         public string ClubContact { get; set; }
 
         public virtual University University { get; set; }
-        public virtual ICollection<ClubActivity> ClubActivities { get; set; }
-        public virtual ICollection<ClubHistory> ClubHistories { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
         public virtual ICollection<RegisterForm> RegisterForms { get; set; }
     }
 }

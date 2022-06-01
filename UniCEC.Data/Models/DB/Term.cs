@@ -9,7 +9,7 @@ namespace UniCEC.Data.Models.DB
     {
         public Term()
         {
-            ClubHistories = new HashSet<ClubHistory>();
+            Members = new HashSet<Member>();
         }
 
         public int Id { get; set; }
@@ -18,6 +18,6 @@ namespace UniCEC.Data.Models.DB
         public DateTime EndTime { get; set; }
         public bool Status { get; set; }
 
-        public virtual ICollection<ClubHistory> ClubHistories { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
     }
 }

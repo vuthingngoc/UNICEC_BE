@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 
-namespace UniCEC.Data.ViewModels.Entities.ClubActivity
+namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ClubActivityUpdateModel
+    public class CompetitionActivityUpdateModel
     {
         public int Id { get; set; }
         public string? Name { get; set; }

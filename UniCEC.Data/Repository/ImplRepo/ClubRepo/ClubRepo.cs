@@ -104,10 +104,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
         public async Task<List<ViewClub>> GetByUser(int userId)
         {
             var query = from m in context.Members
-                        join ch in context.ClubHistories on m.Id equals ch.MemberId
-                        join c in context.Clubs on ch.ClubId equals c.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
                         join u in context.Universities on c.UniversityId equals u.Id
-                        where m.StudentId == userId && ch.Status == ClubHistoryStatus.Active
+                        where m.UserId == userId && m.Status == MemberStatus.Active
                         select new { c, u };
 
             int totalCount = query.Count();

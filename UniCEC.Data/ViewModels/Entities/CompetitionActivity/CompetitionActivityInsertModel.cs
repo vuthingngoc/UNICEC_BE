@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 
-namespace UniCEC.Data.ViewModels.Entities.ClubActivity
+namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ClubActivityInsertModel
+    public class CompetitionActivityInsertModel
     {
     
         [JsonPropertyName("club_id")]

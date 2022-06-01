@@ -183,7 +183,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -224,7 +224,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 competition.SeedsCode = await CheckExistCode();
                                 //nếu là leader -> IsSponsor == false
                                 competition.IsSponsor = false;
-                                competition.Status = CompetitionStatus.Launching;
+                                //competition.Status = CompetitionStatus.Launching;
                                 competition.Public = model.Public;
                                 //auto = 0
                                 competition.View = 0;
@@ -325,7 +325,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -416,7 +416,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -549,7 +549,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -665,7 +665,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------ CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -680,7 +680,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
                                     if (comp != null)
                                     {
-                                        comp.Status = CompetitionStatus.Canceling;
+                                        //comp.Status = CompetitionStatus.Canceling;
                                         //
                                         await _competitionRepo.Update();
                                         return true;
@@ -754,7 +754,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------ CHECK 2 club are the same 
                         if (model.ClubIdCollaborate != model.ClubId)
                         {
@@ -882,7 +882,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -1013,7 +1013,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
                         sponsorInCompetition.SponsorId = SponsorId;
                         sponsorInCompetition.CompetitionId = model.CompetitionId;
-                        sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+                        //sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
 
                         int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
                         if (result > 0)
@@ -1100,7 +1100,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 SeedsCode = competition.SeedsCode,
                 IsSponsor = competition.IsSponsor,
                 Public = competition.Public,
-                Status = competition.Status,
+                //Status = competition.Status,
                 View = competition.View,
                 //
                 ClubInCompetition = ClubsInCompetition,

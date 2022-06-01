@@ -192,9 +192,9 @@ namespace UniCEC.Business.Services.ParticipantSvc
                                     //kiểm tra có trùng Uni hay không
                                     if (uniId_In_Comp == UniversityId)
                                     {
-                                        //kiểm tra xem có là thành viên trong CLB
-                                        //có hàm get term hiện tại
-                                        bool stuIsMember = await _clubHistoryRepo.CheckMemberInClub(listClub_Id, studentInfo, 2);
+                                    //kiểm tra xem có là thành viên trong CLB
+                                    //có hàm get term hiện tại
+                                    bool stuIsMember = true;//await _clubHistoryRepo.CheckMemberInClub(listClub_Id, studentInfo, 2);
                                         if (stuIsMember)
                                         {
                                             round1 = true;
@@ -215,14 +215,15 @@ namespace UniCEC.Business.Services.ParticipantSvc
                         bool round2 = false;
                         if (round1)
                         {
-                            if (competition.Status == CompetitionStatus.Registering)
-                            {
-                                round2 = true;
-                            }//end check Registering
-                            else
-                            {
-                                throw new ArgumentException("Time Register is end for this Compeititon");
-                            }
+                            round2 = true;
+                            //if (competition.Status == CompetitionStatus.Registering)
+                            //{
+                            //    round2 = true;
+                            //}//end check Registering
+                            //else
+                            //{
+                            //    throw new ArgumentException("Time Register is end for this Compeititon");
+                            //}
                         }
 
                         //ROUND 3 - Check Number Of Participant is full or Not??
@@ -263,7 +264,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                                         ClubId = (int)model.ClubId,
                                         TermId = 2 // default
                                     };
-                                    ViewClubMember viewClubMember = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                                    ViewClubMember viewClubMember = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                                     if (viewClubMember != null)
                                     {
                                         participant.MemberId = viewClubMember.MemberId;

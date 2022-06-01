@@ -130,7 +130,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
-                Status = selector.u.Status
+                //Status = selector.u.Status
             }).FirstOrDefaultAsync();
 
             //return await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));

@@ -9,12 +9,12 @@ namespace UniCEC.Data.Models.DB
     {
         public ClubRole()
         {
-            ClubHistories = new HashSet<ClubHistory>();
+            Members = new HashSet<Member>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<ClubHistory> ClubHistories { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
     }
 }

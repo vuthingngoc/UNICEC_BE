@@ -12,6 +12,6 @@ namespace UniCEC.Data.Models.DB
         public string Name { get; set; }
         public string ImageUrl { get; set; }
 
-        public virtual ClubActivity ClubActivity { get; set; }
+        public virtual CompetitionActivity ClubActivity { get; set; }
     }
 }

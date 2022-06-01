@@ -73,13 +73,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                         from uni in context.Universities
                         where uni.Id == UniversityId
                         from mem in context.Members
-                        where mem.StudentId == us.Id
-                        from ch in context.ClubHistories
-                        where mem.Id == ch.MemberId
+                        where mem.UserId == us.Id
+                        //from ch in context.ClubHistories
+                        //where mem.Id == ch.MemberId
                         from c in context.Clubs
-                        where ch.ClubId == c.Id
-                        from ca in context.ClubActivities
-                        where c.Id == ca.ClubId
+                        where mem.ClubId == c.Id
                         from mta in context.MemberTakesActivities
                         where mta.Id == MemberTakeActivityId
                         select mta;
@@ -101,10 +99,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             var query = from MemberTakesActivity mta in context.MemberTakesActivities
                         where mta.MemberId == request.MemberId
                         select mta;
-            //club id
-            if (request.ClubId.HasValue) query = query.Where(mta => mta.ClubActivity.ClubId == request.ClubId);
             //status
-            if (request.Status.HasValue) query = query.Where(mta => mta.Status == request.Status);
+            //if (request.Status.HasValue) query = query.Where(mta => mta.Status == request.Status);
             //
             int totalCount = query.Count();
 
@@ -116,7 +112,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                 StartTime = mta.StartTime,
                 Deadline = mta.Deadline,
                 EndTime = mta.EndTime,
-                Status = mta.Status,
+                //Status = mta.Status,
             }).ToListAsync();
 
             //

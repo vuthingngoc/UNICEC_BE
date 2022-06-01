@@ -13,10 +13,9 @@ using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Text;
 using UniCEC.Business.Services.CitySvc;
-using UniCEC.Business.Services.ClubActivitySvc;
-using UniCEC.Business.Services.ClubHistorySvc;
 using UniCEC.Business.Services.ClubRoleSvc;
 using UniCEC.Business.Services.ClubSvc;
+using UniCEC.Business.Services.CompetitionActivitySvc;
 using UniCEC.Business.Services.CompetitionEntitySvc;
 using UniCEC.Business.Services.CompetitionInClubSvc;
 using UniCEC.Business.Services.CompetitionSvc;
@@ -42,10 +41,9 @@ using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
-using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
@@ -104,8 +102,7 @@ namespace UniCEC.API
             services.AddDbContext<UniCECContext>();
             // Service
             services.AddScoped<ICityService, CityService>();
-            services.AddScoped<IClubActivityService, ClubActivityService>();
-            services.AddScoped<IClubHistoryService, ClubHistoryService>();
+            services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();
             services.AddScoped<IClubRoleService, ClubRoleService>();
             services.AddScoped<IClubService, ClubService>();
             services.AddScoped<ICompetitionEntityService, CompetitionEntityService>();
@@ -134,8 +131,7 @@ namespace UniCEC.API
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<ICityRepo, CityRepo>();
-            services.AddTransient<IClubActivityRepo, ClubActivityRepo>();
-            services.AddTransient<IClubHistoryRepo, ClubHistoryRepo>();
+            services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<IClubRepo, ClubRepo>();
             services.AddTransient<IClubRoleRepo, ClubRoleRepo>();
             services.AddTransient<ICompetitionEntityRepo, CompetitionEntityRepo>();
