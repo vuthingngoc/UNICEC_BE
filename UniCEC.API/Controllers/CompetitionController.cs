@@ -114,10 +114,9 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                //
-                IFormFile file = Request.Form.Files[0];
+                
 
-                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token, file);
+                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
                 if (viewCompetition != null)
                 {
 
@@ -194,8 +193,8 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-  
 
+  
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete()]
@@ -291,7 +290,6 @@ namespace UniCEC.API.Controllers
         }
 
 
-
         //---------------------------------------------------------------------------Competition In Department
         //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
@@ -384,6 +382,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
 
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
@@ -611,6 +610,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
 
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Sponsor")]

@@ -21,7 +21,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewDetailCompetition> GetById(int id);
 
         //-----------------------------------------------------Leader 
-        public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token, IFormFile? file);
+        public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
         public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file);

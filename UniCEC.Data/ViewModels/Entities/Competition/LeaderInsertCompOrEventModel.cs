@@ -39,9 +39,14 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("list_department_id")]
         public List<int>? ListDepartmentId { get; set; }
 
+        //List Major
+        //public List<int>? ListMajorId { get; set; } -> sửa lại
+
         //List Influencer Id Belong To System
         [JsonPropertyName("list_influencer_id")]
         public List<int>? ListInfluencerId { get; set; }
+
+        //List<InfluencerModel> ListInfluencer { get; set; } -> sửa lại
 
         //---------Author to check user is Leader of Club   
         [JsonPropertyName("club_id")]

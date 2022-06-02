@@ -409,7 +409,6 @@ namespace UniCEC.Business.Services.TeamSvc
                         {
                             throw new UnauthorizedAccessException("You don't have permission to update team role");
                         }
-
                     }
                     else
                     {

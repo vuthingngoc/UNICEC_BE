@@ -31,13 +31,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewCompetitionType> result = await _competitionTypeService.GetAllPaging(request);
-
-               
-
-                    return Ok(result);
-                
-              
+                PagingResult<ViewCompetitionType> result = await _competitionTypeService.GetAllPaging(request);           
+                    return Ok(result);                           
             }
             catch (NullReferenceException)
             {

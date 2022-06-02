@@ -27,6 +27,5 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
 
-
     }
 }
