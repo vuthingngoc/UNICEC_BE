@@ -1002,11 +1002,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
                 if (competition != null)
                 {
-                    //------------------------------------check-sponsor-id-create-competition-or-event-duplicate
-                    //true  -> có nghĩa là chưa tạo -> continute
-                    //false -> là sponsor này đã có trong cuộc thi r -> lỗi thêm sponsor
-                    bool checkCreateSponsorInCompetition = await _sponsorInCompetitionRepo.CheckDuplicateCreateCompetitionOrEvent(SponsorId, model.CompetitionId);
-                    if (checkCreateSponsorInCompetition)
+                    //------------------------------------CHECK-sponsor-id-create-competition-or-event-duplicate                  
+                    SponsorInCompetition checkSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId);
+                    if (checkSponsorInCompetition == null)
                     {
                         SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
                         sponsorInCompetition.SponsorId = SponsorId;
@@ -1043,6 +1041,48 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
+        public async Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDeleteModel model, string token)
+        {
+            try
+            {
+                int UserId = DecodeToken(token, "Id");
+                int SponsorId = DecodeToken(token, "SponsorId");
+
+                if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
+                //------------- CHECK Competition is have in system or not
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition != null)
+                {
+                    //------------- CHECK this apply is exsited
+                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId);
+                    if (sponsorInCompetition != null)
+                    {
+                        //------------- CHECK this apply Status is Waiting 
+                        if (sponsorInCompetition.Status == SponsorInCompetitionStatus.Waiting)
+                        {
+                            await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sponsorInCompetition.Id);
+                            return true;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Deny Failed, Please Contact with Club Manager Of Competition !!!");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("This Apply is not found ");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition or Event not found ");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         //transfer view
 

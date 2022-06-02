@@ -9,9 +9,10 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
     public interface ISponsorInCompetitionRepo : IRepository<SponsorInCompetition>
     {
         //check-sponsor-id-create-competition-or-event-duplicate
-        public Task<bool> CheckDuplicateCreateCompetitionOrEvent(int sponsorId, int competitionId);
-
+        public Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId);
         //
-        public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int CompetitionId);
+        public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int competitionId);
+        //
+        public Task DeleteSponsorInCompetition(int sponsorInCompetitionId);
     }
 }
