@@ -132,7 +132,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token, IFormFile file)
+        public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
             {
@@ -254,29 +254,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     int competition_Id = await _competitionRepo.Insert(competition);
                                     if (competition_Id > 0)
                                     {
-                                        Competition comp = await _competitionRepo.Get(competition_Id);
-
-                                        //------------ Insert Competition-Entity                                 
-                                        if (file.Length > 0)
-                                        {
-                                            bool insertEntity = false;
-                                            string imgUrl = await _fileService.UploadFile(file);
-                                            if (imgUrl != null)
-                                            {
-                                                insertEntity = true;
-                                            }
-                                            if (insertEntity)
-                                            {
-                                                CompetitionEntity competitionEntity = new CompetitionEntity()
-                                                {
-                                                    CompetitionId = comp.Id,
-                                                    Name = model.Name,
-                                                    ImageUrl = imgUrl
-                                                };
-
-                                                await _competitionEntityRepo.Insert(competitionEntity);
-                                            }
-                                        }
+                                        Competition comp = await _competitionRepo.Get(competition_Id);                                      
 
                                         //------------ Insert Competition-In-Department  
                                         if (insertDepartment)
@@ -1177,7 +1155,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 FullName = competitionManager.Fullname,
             };
         }
-
 
         private string GenerateSeedCode()
         {
