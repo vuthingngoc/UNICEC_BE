@@ -27,7 +27,7 @@ namespace UniCEC.API.Controllers
 
         // POST api/<ParticipantController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-participant")]
+        [HttpPost()]
         [SwaggerOperation(Summary = "Add paritcipant in Competition Or Event")]
         public async Task<IActionResult> Insert ([FromBody] ParticipantInsertModel model)
         {

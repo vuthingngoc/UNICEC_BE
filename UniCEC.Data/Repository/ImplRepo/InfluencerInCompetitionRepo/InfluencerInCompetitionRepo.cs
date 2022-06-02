@@ -16,6 +16,16 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo
 
         }
 
+        public async Task DeleteInfluencerInCompetition(int id)
+        {
+            var query = from iic in context.InfluencerInCompetitions
+                        where iic.Id == id
+                        select iic;
+            InfluencerInCompetition result = await query.FirstOrDefaultAsync();
+            context.InfluencerInCompetitions.Remove(result);
+            await Update();
+        }
+
         public async Task<InfluencerInCompetition> GetInfluencerInCompetition(int InfluencerId, int CompetitionId)
         {
             var query = await (from iic in context.InfluencerInCompetitions

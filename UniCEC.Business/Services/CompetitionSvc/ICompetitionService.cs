@@ -8,7 +8,9 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
+using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 using UniCEC.Data.ViewModels.Entities.Influencer;
+using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 
 namespace UniCEC.Business.Services.CompetitionSvc
@@ -25,8 +27,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file);
         public Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
+
+        //Influencer
         public Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token);
-        
+        public Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token);
+
+        //Competition - Manager
+        public Task<ViewCompetitionManager> AddMemberInCompetitionManager(CompetitionManagerInsertModel model, string token);
+        //public Task<bool> UpdateMemberInCompetitionManager(CompetitionManagerUpdateModel model, string token);
+
+
         //-----------------------------------------------------Sponsor       
         public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
 

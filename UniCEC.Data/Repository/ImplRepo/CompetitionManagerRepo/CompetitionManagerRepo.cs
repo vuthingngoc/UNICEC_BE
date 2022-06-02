@@ -27,8 +27,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.CompetitionId == CompetitionId && cic.ClubId == ClubId
                         from cm in context.CompetitionManagers
-                        where cm.CompetitionInClubId == cic.Id
-                        where cm.MemberId == MemberId
+                        where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId                     
                         select cm;
 
             CompetitionManager competitionManager = await query.FirstOrDefaultAsync();

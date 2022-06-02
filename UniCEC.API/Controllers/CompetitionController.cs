@@ -15,7 +15,9 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
+using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 using UniCEC.Data.ViewModels.Entities.Influencer;
+using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -54,6 +56,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
         // GET: api/<MemberTakesActivityController>
         [HttpGet("top3")]
         [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status, public")]
@@ -73,6 +76,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
 
         // GET api/<CompetitionController>/5
         [HttpGet("{id}")]
@@ -95,6 +99,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
 
         //ClubLeader
         // POST api/<CompetitionController>
@@ -144,6 +149,7 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
+
 
         // PUT api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
@@ -236,7 +242,7 @@ namespace UniCEC.API.Controllers
 
 
         //---------------------------------------------------------------------------Competition Entity
-        //POST api/<CompetitionInClubController>
+        //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
         [HttpPost("entity")]
         [SwaggerOperation(Summary = "Add image for competition")]
@@ -287,7 +293,7 @@ namespace UniCEC.API.Controllers
 
 
         //---------------------------------------------------------------------------Competition In Department
-        //POST api/<CompetitionInClubController>
+        //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
         [HttpPost("department")]
         [SwaggerOperation(Summary = "Add department for competition")]
@@ -333,8 +339,8 @@ namespace UniCEC.API.Controllers
         }
 
 
-        //---------------------------------------------------------------------------
-        //POST api/<CompetitionInClubController>
+        //---------------------------------------------------------------------------Influencer In Competition
+        //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
         [HttpPost("influencer")]
         [SwaggerOperation(Summary = "Add influencer in competition")]
@@ -379,9 +385,53 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        // DELETE api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpDelete("influencer")]
+        [SwaggerOperation(Summary = "Delete influencer in Competition")]
+        public async Task<IActionResult> DeleteInluencerInCompetition([FromBody] InfluencerInCompetitionDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionService.DeleteInluencerInCompetition(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
 
         //---------------------------------------------------------------------------Competition In Club
-        //POST api/<CompetitionInClubController>
+        //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
         [HttpPost("club")]
         [SwaggerOperation(Summary = "Add another club in competition")]
@@ -425,6 +475,100 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
+
+
+
+        //---------------------------------------------------------------------------Competition Manager
+        //POST api/<CompetitionController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("member")]
+        [SwaggerOperation(Summary = "Add member to manage competition")]
+        public async Task<IActionResult> AddMemberInCompetitionManager(CompetitionManagerInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetitionManager result = await _competitionService.AddMemberInCompetitionManager(model, token);
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        //// PUT api/<CompetitionController>/5
+        //[Authorize(Roles = "Student")]
+        //[HttpPut("member-role")]
+        //[SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
+        //public async Task<IActionResult> UpdateMemberInCompetitionManagerRole([FromBody] CompetitionManagerUpdateModel model)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        //        Boolean check = false;
+        //        check = await _competitionService.UpdateMemberInCompetitionManager(model, token);
+        //        if (check)
+        //        {
+        //            return Ok();
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
 
 
