@@ -83,6 +83,11 @@ namespace UniCEC.Business.Services.ClubHistorySvc
             return null;
         }
 
+        //Task<PagingResult<ViewClubMember>> IClubHistoryService.GetMembersByClub(int clubId, int termId, PagingRequest request)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         // Tien Anh
         //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)
         //{

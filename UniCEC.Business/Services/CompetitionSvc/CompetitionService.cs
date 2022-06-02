@@ -331,7 +331,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                             if (isAllow != null)
                             {
                                 //------------ Insert Competition-Entities-----------
@@ -422,7 +422,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                             if (isAllow != null)
                             {
 
@@ -555,7 +555,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                             if (isAllow != null)
                             {
                                 //check date
@@ -671,7 +671,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                             if (isAllow != null)
                             {
                                 //------------- CHECK Role Is Manger
@@ -763,7 +763,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             if (infoClubMem != null)
                             {
                                 //------------- CHECK is in CompetitionManger table
-                                CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                                CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                                 if (isAllow != null)
                                 {
                                     //------------- CHECK Role Is Manger
@@ -888,7 +888,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.MemberId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetCompetitionManager(model.CompetitionId, model.ClubId, infoClubMem.Id);
                             if (isAllow != null)
                             {
                                 //------------- CHECK Role Is Manger
