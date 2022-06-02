@@ -53,7 +53,7 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            ViewDetailMember member = await _memberRepo.GetById(id, clubId);
+            ViewDetailMember member = await _memberRepo.GetById(id); //GetById(id, clubId); -> GetById(id)
             if (member == null) throw new NullReferenceException("Not found this member");
             return member;
         }
@@ -105,7 +105,7 @@ namespace UniCEC.Business.Services.MemberSvc
             club.TotalMember += 1;
            
             await _clubRepo.Update();
-            return await _memberRepo.GetById(memberId, model.ClubId);
+            return await _memberRepo.GetById(memberId);//GetById(id, clubId); -> GetById(id)
         }
 
         //Update-Member
@@ -116,13 +116,13 @@ namespace UniCEC.Business.Services.MemberSvc
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            ViewDetailMember member = await _memberRepo.GetById(model.Id, model.ClubId);
+            ViewDetailMember member = await _memberRepo.GetById(model.Id); //GetById(id, clubId); -> GetById(id)
             if (member == null) throw new NullReferenceException("Not found this member");
         }
 
         public async Task Delete(string token, int clubId, int id)
         {
-            ViewDetailMember member = await _memberRepo.GetById(id, clubId);
+            ViewDetailMember member = await _memberRepo.GetById(id);//GetById(id, clubId); -> GetById(id)
             if (member == null) throw new NullReferenceException("Not found this member");
             int userId = DecodeToken(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);

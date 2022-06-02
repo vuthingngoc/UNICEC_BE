@@ -29,7 +29,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         private async Task<DateTime> GetJoinDate(int memberId)
         {
             var member = await Get(memberId);
-            return await GetJoinDate(member.UserId, member.ClubId);            
+            return await GetJoinDate(member.UserId, member.ClubId);
         }
 
         public async Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, int? termId, MemberStatus? status, PagingRequest request)
@@ -154,25 +154,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model)
-        {
-            var query = from m in context.Members
-                        join us in context.Users on m.UserId equals us.Id
-                        where m.ClubId == model.ClubId && m.TermId == model.TermId && m.UserId == model.UserId && m.Status == MemberStatus.Active
-                        select new { us, m };
-
-
-            return await query.Select(x => new ViewBasicInfoMember()
-            {
-                Name = x.us.Fullname,
-                ClubRoleName = x.m.ClubRole.Name,
-                ClubRoleId = x.m.ClubRoleId,
-                Id = x.m.Id,
-                TermId = x.m.TermId
-
-            }).FirstOrDefaultAsync();
-        }
-
 
         //public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId)
         //{
@@ -223,33 +204,88 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         //    return (items.Count > 0) ? new PagingResult<ViewClubHistory>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         //}
+        //TA
+        public async Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model)
+        {
+            var query = from m in context.Members
+                        join us in context.Users on m.UserId equals us.Id
+                        where m.ClubId == model.ClubId && m.TermId == model.TermId && m.UserId == model.UserId && m.Status == MemberStatus.Active
+                        select new { us, m };
 
-        public async Task<bool> CheckMemberInClub(List<int> List_ClubId_In_Competition, User studentInfo, int termId)
+
+            return await query.Select(x => new ViewBasicInfoMember()
+            {
+                Name = x.us.Fullname,
+                ClubRoleName = x.m.ClubRole.Name,
+                ClubRoleId = x.m.ClubRoleId,
+                Id = x.m.Id,
+                TermId = x.m.TermId
+
+            }).FirstOrDefaultAsync();
+        }
+        public async Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo)
         {
             bool result = false;
             //tìm user có là member trong 1 cuộc thi được tổ chức bởi nhiều Club
-            // User -> Member -> ClubHistory -> Club 
+            // User -> Member -> Club 
             foreach (int ClubId_In_Competition in List_ClubId_In_Competition)
             {
+                //Get current Term của 1 club
+                Term term = await (from m in context.Members
+                                   join t in context.Terms on m.TermId equals t.Id
+                                   where m.ClubId.Equals(ClubId_In_Competition) && t.Status.Equals(true) // current term
+                                   select t).FirstOrDefaultAsync();
+
+
                 var query = from us in context.Users
                             where us.Id == studentInfo.Id
                             from mem in context.Members
-                            where mem.UserId == us.Id
-                            //from ch in context.ClubHistories
-                            //where mem.Id == ch.MemberId && termId == ch.TermId && ch.Status == MemberStatus.Active
+                            where mem.UserId == us.Id && term.Id == mem.TermId && mem.Status == MemberStatus.Active
                             from c in context.Clubs
                             where mem.ClubId == c.Id && c.Id == ClubId_In_Competition
-                            select us;
-                //
-                User student = await query.FirstOrDefaultAsync();
-                //
-                if (student != null)
+                            select mem;
+
+                Member member = await query.FirstOrDefaultAsync();
+
+                if (member != null)
                 {
-                    return true;
+                    return member;
                 }
             }
-            return result;
+            return null;
         }
+
+        public async Task<Member> GetLeaderByClub(int clubId)
+        {
+            //Get current Term của 1 club
+            Term term = await (from m in context.Members
+                               join t in context.Terms on m.TermId equals t.Id
+                               where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
+                               select t).FirstOrDefaultAsync();
+
+            //current club leader 
+            Member mem = await (from m in context.Members
+                                where m.ClubId == clubId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active && m.TermId == term.Id
+                                select m).FirstOrDefaultAsync();
+
+            return mem;
+
+        }
+
+       
+
+
+        //public async Task<Member> GetMember (int memberId, int userId, int clubId)
+        //{
+        //    //Member Id có là Leader không => ClubRoleId == 1
+        //    //Cái Status Active này        => đang hoat động thõa Member Id in Current Club and Current Term
+        //    //MemberId vs UserId           => sẽ loại bỏ trường hợp có 1 User có N Member
+        //    return await (from m in context.Members
+        //                  where m.Id == memberId && m.UserId == userId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active
+        //                  select m).FirstOrDefaultAsync();
+        //}
+
+
 
         //user ID ở đây kh phải là MSSV
         //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)

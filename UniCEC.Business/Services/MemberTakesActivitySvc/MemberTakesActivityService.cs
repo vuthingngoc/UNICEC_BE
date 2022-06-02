@@ -22,14 +22,12 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         //lấy end date of Club Activity
         private ICompetitionActivityRepo _competitionActivityRepo;
 
-        //check mem in club
-        private IClubHistoryRepo _clubHistoryRepo;
+        
 
-        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, ICompetitionActivityRepo clubActivityRepo, IClubHistoryRepo clubHistoryRepo)
+        public MemberTakesActivityService(IMemberTakesActivityRepo memberTakesActivityRepo, ICompetitionActivityRepo clubActivityRepo)
         {
             _memberTakesActivityRepo = memberTakesActivityRepo;
-            _competitionActivityRepo = clubActivityRepo;
-            _clubHistoryRepo = clubHistoryRepo;
+            _competitionActivityRepo = clubActivityRepo;     
         }
 
         //transfer View Model
@@ -231,71 +229,73 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                //var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                //var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
 
 
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                //int UserId = Int32.Parse(UserIdClaim.Value);
 
-                if (model.MemberTakesActivityId == 0 || model.TermId == 0 || model.MemberId == 0 || ((int)model.Status) < 3)
-                    throw new ArgumentNullException("Member Takes Activity Id can't Null ! || Term Id can't null || Member Id can't Null || Status < 3 can't accept, 4.Approved , 5.Rejected");
+                //if (model.MemberTakesActivityId == 0 || model.TermId == 0 || model.MemberId == 0 || ((int)model.Status) < 3)
+                //    throw new ArgumentNullException("Member Takes Activity Id can't Null ! || Term Id can't null || Member Id can't Null || Status < 3 can't accept, 4.Approved , 5.Rejected");
 
-                //check Member Take Activity
-                MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
-                if (mta != null)
-                {
-                    //check role 
-                    bool role = false;
-                    //------------------------------------check mem 
-                    CompetitionActivity clubActivity = await _competitionActivityRepo.Get(mta.ClubActivityId);
-                    GetMemberInClubModel conditions = new GetMemberInClubModel()
-                    {
-                        UserId = UserId,
-                        TermId = model.TermId
-                    };
-                    //ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
-                    ViewClubMember infoClubMem = new ViewClubMember();
-                    //------------ Check Mem in that club
-                    if (infoClubMem != null)
-                    {
-                        //------------ Check Role Member Is Leader, 
-                        if (infoClubMem.ClubRoleName.Equals("Leader"))
-                        {
-                            role = true;
-                        }
-                        if (role)
-                        {
-                            //Approved
-                            if (((int)model.Status) == 4)
-                            {
-                                //mta.Status = MemberTakesActivityStatus.Approved;
-                                await _memberTakesActivityRepo.Update();
-                                return true;
-                            }
-                            //Rejected
-                            if (((int)model.Status) == 5)
-                            {
-                                //mta.Status = MemberTakesActivityStatus.Rejected;
-                                await _memberTakesActivityRepo.Update();
-                                return true;
-                            }
-                            return false;
+                ////check Member Take Activity
+                //MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
+                //if (mta != null)
+                //{
+                //    //check role 
+                //    bool role = false;
+                //    //------------------------------------check mem 
+                //    CompetitionActivity clubActivity = await _competitionActivityRepo.Get(mta.ClubActivityId);
+                //    GetMemberInClubModel conditions = new GetMemberInClubModel()
+                //    {
+                //        UserId = UserId,
+                //        TermId = model.TermId
+                //    };
+                //    //ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                //    ViewClubMember infoClubMem = new ViewClubMember();
+                //    //------------ Check Mem in that club
+                //    if (infoClubMem != null)
+                //    {
+                //        //------------ Check Role Member Is Leader, 
+                //        if (infoClubMem.ClubRoleName.Equals("Leader"))
+                //        {
+                //            role = true;
+                //        }
+                //        if (role)
+                //        {
+                //            //Approved
+                //            if (((int)model.Status) == 4)
+                //            {
+                //                //mta.Status = MemberTakesActivityStatus.Approved;
+                //                await _memberTakesActivityRepo.Update();
+                //                return true;
+                //            }
+                //            //Rejected
+                //            if (((int)model.Status) == 5)
+                //            {
+                //                //mta.Status = MemberTakesActivityStatus.Rejected;
+                //                await _memberTakesActivityRepo.Update();
+                //                return true;
+                //            }
+                //            return false;
 
-                        }//end check role
-                        else
-                        {
-                            throw new ArgumentException("You don't have permision to confirm this task");
-                        }
-                    }//end check mem in club
-                    else
-                    {
-                        throw new UnauthorizedAccessException("You aren't a member in this club");
-                    }
-                }//end check 
-                else
-                {
-                    throw new ArgumentException("Not found this Member Take Activity Id in system");
-                }
+                //        }//end check role
+                //        else
+                //        {
+                //            throw new ArgumentException("You don't have permision to confirm this task");
+                //        }
+                //    }//end check mem in club
+                //    else
+                //    {
+                //        throw new UnauthorizedAccessException("You aren't a member in this club");
+                //    }
+                //}//end check 
+                //else
+                //{
+                //    throw new ArgumentException("Not found this Member Take Activity Id in system");
+                //}
+
+                throw new NullReferenceException();
             }
             catch (Exception)
             {

@@ -40,15 +40,15 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
         public async Task<ViewTerm> GetCurrentTermByClub(int clubId)
         {
             return await (from m in context.Members
-                                      join t in context.Terms on m.TermId equals t.Id
-                                      where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
-                                      select new ViewTerm()
-                                      {
-                                          Id = t.Id,
-                                          Name = t.Name,
-                                          CreateTime = t.CreateTime,
-                                          EndTime = t.EndTime
-                                      }).FirstOrDefaultAsync();     
+                          join t in context.Terms on m.TermId equals t.Id
+                          where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
+                          select new ViewTerm()
+                          {
+                              Id = t.Id,
+                              Name = t.Name,
+                              CreateTime = t.CreateTime,
+                              EndTime = t.EndTime
+                          }).FirstOrDefaultAsync();
         }
 
         public async Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
@@ -93,5 +93,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
 
             return await query.FirstOrDefaultAsync();
         }
+
+        
     }
 }

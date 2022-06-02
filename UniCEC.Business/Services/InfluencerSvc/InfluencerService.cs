@@ -6,14 +6,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
-using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 
 namespace UniCEC.Business.Services.InfluencerSvc
@@ -25,22 +21,16 @@ namespace UniCEC.Business.Services.InfluencerSvc
         private readonly IClubRepo _clubRepo;
         private readonly IFileService _fileService;
 
-        private ICompetitionRepo _competitionRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
-        private IClubHistoryRepo _clubHistoryRepo;
+        
 
         private JwtSecurityTokenHandler _tokenHandler;
 
-        public InfluencerService(IInfluencerRepo influencerRepo, IMemberRepo memberRepo, IClubRepo clubRepo, IFileService fileService,
-                                 ICompetitionRepo competitionRepo, ICompetitionManagerRepo competitionManagerRepo, IClubHistoryRepo clubHistoryRepo)
+        public InfluencerService(IInfluencerRepo influencerRepo, IMemberRepo memberRepo, IClubRepo clubRepo, IFileService fileService)
         {
             _influencerRepo = influencerRepo;
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
-            _fileService = fileService;
-            _clubHistoryRepo = clubHistoryRepo;
-            _competitionManagerRepo = competitionManagerRepo;
-            _competitionRepo = competitionRepo;
+            _fileService = fileService;          
         }
 
         private int DecodeToken(string token, string nameClaim)

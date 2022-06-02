@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
@@ -23,15 +22,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //
         private IMemberTakesActivityRepo _memberTakesActivityRepo;
 
-        //check Infomation Member -> is Leader
-        private IClubHistoryRepo _clubHistoryRepo;
+       
         private IClubRepo _clubRepo;
 
-        public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo, IClubHistoryRepo clubHistoryRepo, IClubRepo clubRepo)
+        public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo, IClubRepo clubRepo)
         {
             _competitionActivityRepo = clubActivityRepo;
-            _memberTakesActivityRepo = memberTakesActivityRepo;
-            _clubHistoryRepo = clubHistoryRepo;
+            _memberTakesActivityRepo = memberTakesActivityRepo;        
             _clubRepo = clubRepo;
         }
 

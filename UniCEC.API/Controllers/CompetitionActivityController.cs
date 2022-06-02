@@ -16,7 +16,7 @@ using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/club-activity")]
+    [Route("api/v1/competition-activity")]
     [ApiController]
     [ApiVersion("1.0")]
     public class CompetitionActivityController : ControllerBase
@@ -31,7 +31,7 @@ namespace UniCEC.API.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("top4-process")]
-        [SwaggerOperation(Summary = "Get top 4 club activities by now and process")]
+        [SwaggerOperation(Summary = "Get top 4 competition activities by now and process")]
         //Lưu ý University Id dựa vào JWT
         public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "clubId")] int ClubId)
         {
@@ -62,7 +62,7 @@ namespace UniCEC.API.Controllers
 
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Get ClubActivities by conditions")]
+        [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
         public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
         {
             try
@@ -85,7 +85,7 @@ namespace UniCEC.API.Controllers
 
         // GET api/<ClubActivityController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get ClubActivity by id")]
+        [SwaggerOperation(Summary = "Get Competition Activity by Id")]
         public async Task<IActionResult> GetClubActivityById(int id)
         {
             try
@@ -107,7 +107,7 @@ namespace UniCEC.API.Controllers
         // POST api/<ClubActivityController>
         [Authorize(Roles = "Student")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert ClubActivity - Student(Leader of club)")]
+        [SwaggerOperation(Summary = "Insert competition activity")]
         public async Task<IActionResult> InsertClubActivity([FromBody] CompetitionActivityInsertModel model)
         {
             try
@@ -153,7 +153,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<ClubActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update ClubActivity by Id - Student(Leader of club)")]
+        [SwaggerOperation(Summary = "Update Competition Activity by Id ")]
         public async Task<IActionResult> UpdateClubActivity([FromBody] CompetitionActivityUpdateModel model)
         {
             try
@@ -194,7 +194,7 @@ namespace UniCEC.API.Controllers
         // DELETE api/<ClubActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete]
-        [SwaggerOperation(Summary = "Delete ClubActivity by id - Student(Leader of club) ")]
+        [SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
         public async Task<IActionResult> DeleteClubAcitvityById([FromBody] CompetitionActivityDeleteModel model)
         {
             try
