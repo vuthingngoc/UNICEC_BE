@@ -136,7 +136,7 @@ namespace UniCEC.Business.Services.UserSvc
 
             // for admin
             if (model.RoleId != 0 && roleId.Equals(1)) user.RoleId = model.RoleId.Value;
-            if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
+            //if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
 
             await _userRepo.Update();
             return true;
@@ -156,7 +156,7 @@ namespace UniCEC.Business.Services.UserSvc
             User user = await _userRepo.Get(id);
             if (user == null) throw new NullReferenceException("Not found");
 
-            user.Status = UserStatus.InActive;
+            //user.Status = UserStatus.InActive;
             await _userRepo.Update();
             return true;
         }
@@ -181,7 +181,7 @@ namespace UniCEC.Business.Services.UserSvc
                 {
                     RoleId = userModel.RoleId,
                     Email = email,
-                    Status = UserStatus.Active,
+                    //Status = UserStatus.Active,
                     Avatar = userModel.Avatar,
                     Fullname = userModel.Fullname,
                     PhoneNumber = phoneNumber,

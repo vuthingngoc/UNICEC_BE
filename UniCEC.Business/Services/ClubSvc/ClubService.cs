@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
@@ -21,15 +20,14 @@ namespace UniCEC.Business.Services.ClubSvc
     public class ClubService : IClubService
     {
         private IClubRepo _clubRepo;
-        private IClubActivityRepo _clubActivityRepo;
+        private ICompetitionActivityRepo _clubActivityRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionInClubRepo _competitionInClubRepo;
         private ICompetitionRepo _competitionRepo;
         private ITermRepo _termRepo;
-        private IClubHistoryRepo _clubHistoryRepo;
 
-        public ClubService(IClubRepo clubRepo, IClubActivityRepo clubActivityRepo, ITermRepo termRepo
-                            , IMemberRepo memberRepo, ICompetitionInClubRepo competitionInClubRepo, IClubHistoryRepo clubHistoryRepo
+        public ClubService(IClubRepo clubRepo, ICompetitionActivityRepo clubActivityRepo, ITermRepo termRepo
+                            , IMemberRepo memberRepo, ICompetitionInClubRepo competitionInClubRepo
                                 , ICompetitionRepo competitionRepo)
         {
             _clubRepo = clubRepo;
@@ -38,7 +36,6 @@ namespace UniCEC.Business.Services.ClubSvc
             _competitionInClubRepo = competitionInClubRepo;
             _competitionRepo = competitionRepo;
             _termRepo = termRepo;
-            _clubHistoryRepo = clubHistoryRepo;
         }
 
         public async Task<ViewClub> GetByClub(string token, int id, int universityId)
@@ -201,8 +198,8 @@ namespace UniCEC.Business.Services.ClubSvc
             DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
             Member member = new Member()
             {
-                StudentId = userId,
-                JoinDate = currentTime
+                //StudentId = userId,
+                //JoinDate = currentTime
             };
             int memberId = await _memberRepo.Insert(member);
 
@@ -215,16 +212,16 @@ namespace UniCEC.Business.Services.ClubSvc
             };
             int termId = await _termRepo.Insert(term);
 
-            ClubHistory clubHistory = new ClubHistory()
-            {
-                ClubId = id,
-                ClubRoleId = 1, // leader
-                MemberId = memberId,
-                TermId = termId,
-                StartTime = currentTime,
-                Status = ClubHistoryStatus.Active
-            };
-            int clubHistoryId = await _clubHistoryRepo.Insert(clubHistory);
+            //ClubHistory clubHistory = new ClubHistory()
+            //{
+            //    ClubId = id,
+            //    ClubRoleId = 1, // leader
+            //    MemberId = memberId,
+            //    TermId = termId,
+            //    StartTime = currentTime,
+            //    Status = MemberStatus.Active
+            //};
+            //int clubHistoryId = await _clubHistoryRepo.Insert(clubHistory);
 
             return await _clubRepo.GetById(clubId, roleId, model.UniversityId);
         }

@@ -25,6 +25,6 @@ namespace UniCEC.Data.ViewModels.Entities.ClubHistory
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
-        public ClubHistoryStatus Status { get; set; }
+        public MemberStatus Status { get; set; }
     }
 }

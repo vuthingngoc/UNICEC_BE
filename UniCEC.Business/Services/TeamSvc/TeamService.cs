@@ -112,7 +112,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                     //generate code
                                     InvitedCode = await CheckExistCode(),
                                     //status available
-                                    Status = TeamStatus.Available
+                                    //Status = TeamStatus.Available
                                 };
                                 int Team_Id = await _teamRepo.Insert(team);
                                 if (Team_Id > 0)
@@ -127,7 +127,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto leader 
                                         TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
                                         //auto status 
-                                        Status = ParticipantInTeamStatus.InTeam
+                                        //Status = ParticipantInTeamStatus.InTeam
                                     };
                                     await _participantInTeamRepo.Insert(pit);
                                     return TransformViewTeam(getTeam);
@@ -213,7 +213,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto member
                                         TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
                                         //auto status 
-                                        Status = ParticipantInTeamStatus.InTeam
+                                        //Status = ParticipantInTeamStatus.InTeam
                                     };
 
                                     await _participantInTeamRepo.Insert(pit);
@@ -224,11 +224,11 @@ namespace UniCEC.Business.Services.TeamSvc
                                     //else là full
                                     if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, NumberOfStudentInTeam))
                                     {
-                                        t.Status = TeamStatus.Available;
+                                        //t.Status = TeamStatus.Available;
                                     }
                                     else
                                     {
-                                        t.Status = TeamStatus.Full;
+                                        //t.Status = TeamStatus.Full;
                                     }
 
                                     await _teamRepo.Update();
@@ -463,7 +463,7 @@ namespace UniCEC.Business.Services.TeamSvc
                         //---- auto Team Available
                         //------------------Update status Team
                         Team t = await _teamRepo.Get(team.Id);
-                        t.Status = TeamStatus.Available;
+                        //t.Status = TeamStatus.Available;
                         await _teamRepo.Update();
                         return true;
                     }

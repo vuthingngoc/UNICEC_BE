@@ -17,8 +17,6 @@ namespace UniCEC.Data.ViewModels.Entities.Influencer
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
-        public int ClubId { get; set; }
-        [JsonPropertyName("term_id")]
-        public int TermId { get; set; }
+        public int ClubId { get; set; }        
     }
 }

@@ -10,7 +10,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionInClub
         public int CompetitionId { get; set; }
         //---------Author to check user is Leader of Club
         [JsonPropertyName("club_id")]
-        public int ClubId { get; set; }
-        public int TermId { get; set; }
+        public int ClubId { get; set; }       
     }
 }

@@ -238,7 +238,7 @@ namespace UniCEC.API.Controllers
         //---------------------------------------------------------------------------Competition Entity
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-entity")]
+        [HttpPost("entity")]
         [SwaggerOperation(Summary = "Add image for competition")]
         public async Task<IActionResult> AddCompetitionEntity([FromBody] CompetitionEntityInsertModel model)
         {
@@ -289,7 +289,7 @@ namespace UniCEC.API.Controllers
         //---------------------------------------------------------------------------Competition In Department
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-department")]
+        [HttpPost("department")]
         [SwaggerOperation(Summary = "Add department for competition")]
         public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInDepartmentInsertModel model)
         {
@@ -336,7 +336,7 @@ namespace UniCEC.API.Controllers
         //---------------------------------------------------------------------------
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-influencer")]
+        [HttpPost("influencer")]
         [SwaggerOperation(Summary = "Add influencer in competition")]
         public async Task<IActionResult> AddInfluencerInCompetition([FromBody] InfluencerInComeptitionInsertModel model)
         {
@@ -383,7 +383,7 @@ namespace UniCEC.API.Controllers
         //---------------------------------------------------------------------------Competition In Club
         //POST api/<CompetitionInClubController>
         [Authorize(Roles = "Student")]
-        [HttpPost("add-club")]
+        [HttpPost("club")]
         [SwaggerOperation(Summary = "Add another club in competition")]
         public async Task<IActionResult> AddClubCollaborate([FromBody] CompetitionInClubInsertModel model)
         {

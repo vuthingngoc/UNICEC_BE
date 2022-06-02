@@ -13,5 +13,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
         public Task<ViewTerm> GetCurrentTermByClub(int clubId);
         public Task<ViewTerm> GetById(int clubId, int id);
         public Task<bool> CloseOldTermByClub(int clubId);
+        
     }
 }

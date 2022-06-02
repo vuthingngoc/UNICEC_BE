@@ -1,15 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
 {
-    public class ClubActivityRequestModel : PagingRequest
+    public class CompetitionActivityRequestModel : PagingRequest
     {
 
         [FromQuery(Name = "universityId")]
@@ -18,7 +13,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "clubId")]
         public int? ClubId { get; set; }
         [FromQuery(Name = "status")]
-        public ClubActivityStatus? Status { get; set; }
+        public CompetitionActivityStatus? Status { get; set; }
         [FromQuery(Name = "seedsPoint")]
         public int? SeedsPoint { get; set; }
         [FromQuery(Name = "numberOfMember")]

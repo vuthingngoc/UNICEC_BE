@@ -11,5 +11,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
     public interface ICompetitionManagerRepo : IRepository<CompetitionManager>
     {
         public Task<CompetitionManager> GetCompetitionManager(int CompetitionId, int ClubId, int MemberId);
+
+        //
+        public Task<bool> CheckValidCompetitionManager(int userId, int competitionId);
     }
 }

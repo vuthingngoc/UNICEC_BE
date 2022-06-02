@@ -6,37 +6,34 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubActivityRepo;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubActivity;
-using UniCEC.Data.ViewModels.Entities.ClubHistory;
+using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
+using UniCEC.Data.ViewModels.Entities.Member;
 
-namespace UniCEC.Business.Services.ClubActivitySvc
+namespace UniCEC.Business.Services.CompetitionActivitySvc
 {
-    public class ClubActivityService : IClubActivityService
+    public class CompetitionActivityService : ICompetitionActivityService
     {
-        private IClubActivityRepo _clubActivityRepo;
+        private ICompetitionActivityRepo _competitionActivityRepo;
         //
         private IMemberTakesActivityRepo _memberTakesActivityRepo;
 
-        //check Infomation Member -> is Leader
-        private IClubHistoryRepo _clubHistoryRepo;
+       
         private IClubRepo _clubRepo;
 
-        public ClubActivityService(IClubActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo, IClubHistoryRepo clubHistoryRepo, IClubRepo clubRepo)
+        public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo, IMemberTakesActivityRepo memberTakesActivityRepo, IClubRepo clubRepo)
         {
-            _clubActivityRepo = clubActivityRepo;
-            _memberTakesActivityRepo = memberTakesActivityRepo;
-            _clubHistoryRepo = clubHistoryRepo;
+            _competitionActivityRepo = clubActivityRepo;
+            _memberTakesActivityRepo = memberTakesActivityRepo;        
             _clubRepo = clubRepo;
         }
 
         //Delete-Club-Activity-By-Id
-        public async Task<bool> Delete(ClubActivityDeleteModel model, string token)
+        public async Task<bool> Delete(CompetitionActivityDeleteModel model, string token)
         {
             try
             {
@@ -54,7 +51,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     TermId = model.TermId
                 };
 
-                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -66,12 +63,12 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
                     if (roleLeader)
                     {
-                        ClubActivity clubActivity = await _clubActivityRepo.Get(model.ClubActivityId);
-                        if (clubActivity != null)
+                        CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.ClubActivityId);
+                        if (competitionActivity != null)
                         {
                             //
-                            clubActivity.Status = ClubActivityStatus.Canceling;
-                            await _clubActivityRepo.Update();
+                            //clubActivity.Status = ClubActivityStatus.Canceling;
+                            await _competitionActivityRepo.Update();
                             return true;
                         }
                         else
@@ -97,13 +94,13 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
 
         //Get-ClubActivity-By-Id
-        public async Task<ViewClubActivity> GetByClubActivityId(int id)
+        public async Task<ViewCompetitionActivity> GetByClubActivityId(int id)
         {
-            ClubActivity clubActivity = await _clubActivityRepo.Get(id);
+            CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
             //
-            if (clubActivity != null)
+            if (competitionActivity != null)
             {
-                return TransformView(clubActivity);
+                return TransformView(competitionActivity);
             }
             else
             {
@@ -112,7 +109,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
         }
 
         //Insert
-        public async Task<ViewClubActivity> Insert(ClubActivityInsertModel model, string token)
+        public async Task<ViewCompetitionActivity> Insert(CompetitionActivityInsertModel model, string token)
         {
             try
             {
@@ -138,7 +135,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -153,27 +150,25 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         if (checkDate)
                         {
                             //
-                            ClubActivity clubActivity = new ClubActivity();
-                            //
-                            clubActivity.ClubId = model.ClubId;
+                            CompetitionActivity competitionActivity = new CompetitionActivity();
                             //When Member Take Activity will +1
-                            clubActivity.NumOfMember = 0;
-                            clubActivity.Description = model.Description;
-                            clubActivity.Name = model.Name;
-                            clubActivity.SeedsPoint = model.SeedsPoint;
+                            competitionActivity.NumOfMember = 0;
+                            competitionActivity.Description = model.Description;
+                            competitionActivity.Name = model.Name;
+                            competitionActivity.SeedsPoint = model.SeedsPoint;
                             //LocalTime
-                            clubActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                            clubActivity.Ending = model.Ending;
+                            competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                            competitionActivity.Ending = model.Ending;
                             //Check Status
-                            clubActivity.Status = ClubActivityStatus.Open;
+                            //clubActivity.Status = ClubActivityStatus.Open;
                             //Check Code
-                            clubActivity.SeedsCode = await checkExistCode();
+                            competitionActivity.SeedsCode = await checkExistCode();
 
-                            int result = await _clubActivityRepo.Insert(clubActivity);
+                            int result = await _competitionActivityRepo.Insert(competitionActivity);
                             if (result > 0)
                             {
-                                ClubActivity ca = await _clubActivityRepo.Get(result);
-                                ViewClubActivity viewClubActivity = TransformView(ca);
+                                CompetitionActivity ca = await _competitionActivityRepo.Get(result);
+                                ViewCompetitionActivity viewClubActivity = TransformView(ca);
                                 return viewClubActivity;
                             }
                             else
@@ -205,20 +200,19 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
 
         //transform View Model
-        public ViewClubActivity TransformView(ClubActivity clubActivity)
+        public ViewCompetitionActivity TransformView(CompetitionActivity competitionActivity)
         {
-            return new ViewClubActivity()
+            return new ViewCompetitionActivity()
             {
-                ClubId = clubActivity.ClubId,
-                Ending = clubActivity.Ending,
-                CreateTime = clubActivity.CreateTime,
-                Description = clubActivity.Description,
-                Id = clubActivity.Id,
-                Name = clubActivity.Name,
-                NumOfMember = clubActivity.NumOfMember,
-                SeedsCode = clubActivity.SeedsCode,
-                SeedsPoint = clubActivity.SeedsPoint,
-                Status = clubActivity.Status
+                Ending = competitionActivity.Ending,
+                CreateTime = competitionActivity.CreateTime,
+                Description = competitionActivity.Description,
+                Id = competitionActivity.Id,
+                Name = competitionActivity.Name,
+                NumOfMember = competitionActivity.NumOfMember,
+                SeedsCode = competitionActivity.SeedsCode,
+                SeedsPoint = competitionActivity.SeedsPoint,
+                //Status = clubActivity.Status
             };
         }
 
@@ -227,7 +221,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
 
         //Update
-        public async Task<bool> Update(ClubActivityUpdateModel model, string token)
+        public async Task<bool> Update(CompetitionActivityUpdateModel model, string token)
         {
             try
             {
@@ -246,7 +240,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -258,14 +252,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                     if (roleLeader)
                     {
                         //get club Activity
-                        ClubActivity clubActivity = await _clubActivityRepo.Get(model.Id);
-                        if (clubActivity != null)
+                        CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.Id);
+                        if (competitionActivity != null)
                         {
                             //------------ Check date update
                             //th1
                             if (model.Beginning.HasValue && !model.Ending.HasValue)
                             {
-                                checkDateUpdate = CheckDate((DateTime)model.Beginning, clubActivity.Ending, true);
+                                checkDateUpdate = CheckDate((DateTime)model.Beginning, competitionActivity.Ending, true);
                             }
                             //th2
                             if (model.Beginning.HasValue && model.Ending.HasValue)
@@ -275,14 +269,14 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                             if (checkDateUpdate)
                             {
                                 //update name-des-seedpoint-beginning-ending
-                                clubActivity.Name = (model.Name.Length > 0) ? model.Name : clubActivity.Name;
-                                clubActivity.Description = (model.Description.Length > 0) ? model.Description : clubActivity.Description;
-                                clubActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : clubActivity.SeedsPoint;
-                                clubActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : clubActivity.Ending);
+                                competitionActivity.Name = (model.Name.Length > 0) ? model.Name : competitionActivity.Name;
+                                competitionActivity.Description = (model.Description.Length > 0) ? model.Description : competitionActivity.Description;
+                                competitionActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : competitionActivity.SeedsPoint;
+                                competitionActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : competitionActivity.Ending);
 
                                 //Update DEADLINE day of member takes activity
-                                await _memberTakesActivityRepo.UpdateDeadlineDate(clubActivity.Id, clubActivity.Ending);
-                                await _clubActivityRepo.Update();
+                                await _memberTakesActivityRepo.UpdateDeadlineDate(competitionActivity.Id, competitionActivity.Ending);
+                                await _competitionActivityRepo.Update();
                                 return true;
 
                             }
@@ -338,7 +332,7 @@ namespace UniCEC.Business.Services.ClubActivitySvc
             while (check)
             {
                 string generateCode = generateSeedCode();
-                check = await _clubActivityRepo.CheckExistCode(generateCode);
+                check = await _competitionActivityRepo.CheckExistCode(generateCode);
                 seedCode = generateCode;
             }
             return seedCode;
@@ -395,24 +389,24 @@ namespace UniCEC.Business.Services.ClubActivitySvc
 
         //Get-List-Club-Activities-By-Conditions
         //lấy tất cả các task của 1 trường - 1 câu lạc bộ - seed point - Number of member
-        public async Task<PagingResult<ViewClubActivity>> GetListClubActivitiesByConditions(ClubActivityRequestModel conditions)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
             //
-            PagingResult<ViewClubActivity> result = await _clubActivityRepo.GetListClubActivitiesByConditions(conditions);
+            PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListClubActivitiesByConditions(conditions);
             //
             return result;
         }
 
 
         //Get Process + Top 4
-        public async Task<List<ViewProcessClubActivity>> GetTop4_Process(int clubId, string token)
+        public async Task<List<ViewProcessCompetitionActivity>> GetTop4_Process(int clubId, string token)
         {
             //
             var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
             var UniIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
             int UniId = Int32.Parse(UniIdClaim.Value);
 
-            List<ViewProcessClubActivity> viewProcessClubActivities = new List<ViewProcessClubActivity>();
+            List<ViewProcessCompetitionActivity> viewProcessClubActivities = new List<ViewProcessCompetitionActivity>();
 
             //check clubId in the system
             Club club = await _clubRepo.Get(clubId);
@@ -422,9 +416,9 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                 if (club.UniversityId == UniId)
                 {
                     //top 4 activity by ClubId
-                    List<ViewClubActivity> ListViewClubActivity = await _clubActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
+                    List<ViewCompetitionActivity> ListViewClubActivity = await _competitionActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
 
-                    foreach (ViewClubActivity viewClubActivity in ListViewClubActivity)
+                    foreach (ViewCompetitionActivity viewClubActivity in ListViewClubActivity)
                     {
                         //Get Process
                         //get total num of member join
@@ -440,9 +434,8 @@ namespace UniCEC.Business.Services.ClubActivitySvc
                         //get number of member out task
                         //int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Approved);
 
-                        ViewProcessClubActivity vpca = new ViewProcessClubActivity()
+                        ViewProcessCompetitionActivity vpca = new ViewProcessCompetitionActivity()
                         {
-                            ClubId = viewClubActivity.ClubId,
                             Ending = viewClubActivity.Ending,
                             CreateTime = viewClubActivity.CreateTime,
                             Description = viewClubActivity.Description,

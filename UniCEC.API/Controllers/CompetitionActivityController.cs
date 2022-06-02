@@ -6,24 +6,24 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.ClubActivitySvc;
+using UniCEC.Business.Services.CompetitionActivitySvc;
 using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubActivity;
+using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/club-activity")]
+    [Route("api/v1/competition-activity")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class ClubActivityController : ControllerBase
+    public class CompetitionActivityController : ControllerBase
     {
-        private IClubActivityService _clubActivityService;
+        private ICompetitionActivityService _clubActivityService;
 
-        public ClubActivityController(IClubActivityService clubActivityService)
+        public CompetitionActivityController(ICompetitionActivityService clubActivityService)
         {
             _clubActivityService = clubActivityService;
         }
@@ -31,7 +31,7 @@ namespace UniCEC.API.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("top4-process")]
-        [SwaggerOperation(Summary = "Get top 4 club activities by now and process")]
+        [SwaggerOperation(Summary = "Get top 4 competition activities by now and process")]
         //Lưu ý University Id dựa vào JWT
         public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "clubId")] int ClubId)
         {
@@ -41,7 +41,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewProcessClubActivity> result = await _clubActivityService.GetTop4_Process(ClubId, token);
+                List<ViewProcessCompetitionActivity> result = await _clubActivityService.GetTop4_Process(ClubId, token);
                     return Ok(result);
             }
             catch (NullReferenceException)
@@ -62,12 +62,12 @@ namespace UniCEC.API.Controllers
 
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Get ClubActivities by conditions")]
-        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] ClubActivityRequestModel conditions)
+        [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
         {
             try
             {
-                PagingResult<ViewClubActivity> result = await _clubActivityService.GetListClubActivitiesByConditions(conditions);
+                PagingResult<ViewCompetitionActivity> result = await _clubActivityService.GetListClubActivitiesByConditions(conditions);
 
                     return Ok(result);
                                         
@@ -85,12 +85,12 @@ namespace UniCEC.API.Controllers
 
         // GET api/<ClubActivityController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get ClubActivity by id")]
+        [SwaggerOperation(Summary = "Get Competition Activity by Id")]
         public async Task<IActionResult> GetClubActivityById(int id)
         {
             try
             {
-                ViewClubActivity result = await _clubActivityService.GetByClubActivityId(id);                  
+                ViewCompetitionActivity result = await _clubActivityService.GetByClubActivityId(id);                  
                     return Ok(result);
                 
             }
@@ -107,8 +107,8 @@ namespace UniCEC.API.Controllers
         // POST api/<ClubActivityController>
         [Authorize(Roles = "Student")]
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert ClubActivity - Student(Leader of club)")]
-        public async Task<IActionResult> InsertClubActivity([FromBody] ClubActivityInsertModel model)
+        [SwaggerOperation(Summary = "Insert competition activity")]
+        public async Task<IActionResult> InsertClubActivity([FromBody] CompetitionActivityInsertModel model)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewClubActivity result = await _clubActivityService.Insert(model, token);
+                ViewCompetitionActivity result = await _clubActivityService.Insert(model, token);
                 if (result != null)
                 {
 
@@ -153,8 +153,8 @@ namespace UniCEC.API.Controllers
         // PUT api/<ClubActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update ClubActivity by Id - Student(Leader of club)")]
-        public async Task<IActionResult> UpdateClubActivity([FromBody] ClubActivityUpdateModel model)
+        [SwaggerOperation(Summary = "Update Competition Activity by Id ")]
+        public async Task<IActionResult> UpdateClubActivity([FromBody] CompetitionActivityUpdateModel model)
         {
             try
             {
@@ -194,8 +194,8 @@ namespace UniCEC.API.Controllers
         // DELETE api/<ClubActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete]
-        [SwaggerOperation(Summary = "Delete ClubActivity by id - Student(Leader of club) ")]
-        public async Task<IActionResult> DeleteClubAcitvityById([FromBody] ClubActivityDeleteModel model)
+        [SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
+        public async Task<IActionResult> DeleteClubAcitvityById([FromBody] CompetitionActivityDeleteModel model)
         {
             try
             {

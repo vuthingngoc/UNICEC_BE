@@ -15,6 +15,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         {
         }
 
+        public Task<bool> CheckValidCompetitionManager(int userId, int competitionId)
+        {
+            //var query = from cm in context.CompetitionManagers
+            //            where 
+            throw new NotImplementedException();
+        }
+
         public async Task<CompetitionManager> GetCompetitionManager(int CompetitionId, int ClubId, int MemberId)
         {
             var query = from cic in context.CompetitionInClubs
@@ -29,7 +36,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             {
                 return competitionManager;
             }
-            return null;
+            return null; 
         }
     }
 }
