@@ -225,7 +225,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         }
         public async Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo)
         {
-            bool result = false;
+            
             //tìm user có là member trong 1 cuộc thi được tổ chức bởi nhiều Club
             // User -> Member -> Club 
             foreach (int ClubId_In_Competition in List_ClubId_In_Competition)

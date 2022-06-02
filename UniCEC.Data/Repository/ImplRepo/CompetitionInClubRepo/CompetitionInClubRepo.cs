@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.Common;
 using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Entities.Competition;
+using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 {
@@ -17,7 +18,27 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 
         }
 
-        
+        public async Task<ViewCompetitionInClub> GetCompetitionInClub(int clubId, int competitionId)
+        {
+            CompetitionInClub query = await (from cic in context.CompetitionInClubs
+                                             where cic.CompetitionId == competitionId && cic.ClubId == clubId
+                                             select cic).FirstOrDefaultAsync();
+
+            if (query != null)
+            {
+                return new ViewCompetitionInClub()
+                {
+                    Id = query.Id,
+                    CompetitionId = query.CompetitionId,
+                    ClubId = query.ClubId,
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public async Task<List<ViewClubInComp>> GetListClub_In_Competition(int CompetitionId)
         {
             List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
@@ -41,7 +62,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
                         Image = club.Image
                     };
 
-                    List_vcip.Add(vcip);      
+                    List_vcip.Add(vcip);
                 }
                 if (List_vcip.Count > 0)
                 {
@@ -63,6 +84,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
             return await query.CountAsync();
         }
 
-        
+
     }
 }

@@ -10,6 +10,8 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo
 {
     public interface IInfluencerInCompetitionRepo : IRepository<InfluencerInCompetition>
     {
-        public Task<InfluencerInCompetition> GetInfluencerInCompetition(int InfluencerId, int CompetitionId);
+        public Task<InfluencerInCompetition> GetInfluencerInCompetition(int influencerId, int competitionId);
+
+        public Task DeleteInfluencerInCompetition(int id);
     }
 }

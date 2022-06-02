@@ -162,7 +162,6 @@ namespace UniCEC.API.Controllers
             {
                 return NotFound(ex.Message);
             }
-        }
-
+        }       
     }
 }

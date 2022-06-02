@@ -80,9 +80,6 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 int UserId = DecodeToken(token, "Id");
                 int UniversityId = DecodeToken(token, "UniversityId");
 
-
-
-
                 //get Student Info
                 User studentInfo = await _userRepo.Get(UserId);
 
