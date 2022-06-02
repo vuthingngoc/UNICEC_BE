@@ -22,15 +22,19 @@ namespace UniCEC.Business.Services.TeamSvc
         private ICompetitionRepo _competitionRepo;
         private ITeamRoleRepo _teamRoleRepo;
         private IParticipantInTeamRepo _participantInTeamRepo;
+        private JwtSecurityTokenHandler _tokenHandler;
 
-        public TeamService(ITeamRepo teamRepo, IParticipantRepo participantRepo, ICompetitionRepo competitionRepo, ITeamRoleRepo teamRoleRepo)
+        public TeamService(ITeamRepo teamRepo, 
+            IParticipantRepo participantRepo, 
+            ICompetitionRepo competitionRepo, 
+            ITeamRoleRepo teamRoleRepo,
+            IParticipantInTeamRepo participantInTeamRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
             _competitionRepo = competitionRepo;
             _teamRoleRepo = teamRoleRepo;
-
-
+            _participantInTeamRepo = participantInTeamRepo;
         }
 
         public TeamService()
@@ -80,10 +84,7 @@ namespace UniCEC.Business.Services.TeamSvc
             //2.Member
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
 
                 if (model.CompetitionId == 0
                  || string.IsNullOrEmpty(model.Name)
@@ -112,7 +113,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                     //generate code
                                     InvitedCode = await CheckExistCode(),
                                     //status available
-                                    //Status = TeamStatus.Available
+                                    Status = TeamStatus.Available
                                 };
                                 int Team_Id = await _teamRepo.Insert(team);
                                 if (Team_Id > 0)
@@ -127,7 +128,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto leader 
                                         TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
                                         //auto status 
-                                        //Status = ParticipantInTeamStatus.InTeam
+                                        Status = ParticipantInTeamStatus.InTeam
                                     };
                                     await _participantInTeamRepo.Insert(pit);
                                     return TransformViewTeam(getTeam);
@@ -176,10 +177,7 @@ namespace UniCEC.Business.Services.TeamSvc
             //check xem nó có đang join lại chính nhóm này hay không (done)
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
 
                 if (string.IsNullOrEmpty(model.InvitedCode)) throw new ArgumentNullException("Invited Code Null");
 
@@ -213,7 +211,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto member
                                         TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
                                         //auto status 
-                                        //Status = ParticipantInTeamStatus.InTeam
+                                        Status = ParticipantInTeamStatus.InTeam
                                     };
 
                                     await _participantInTeamRepo.Insert(pit);
@@ -224,11 +222,11 @@ namespace UniCEC.Business.Services.TeamSvc
                                     //else là full
                                     if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, NumberOfStudentInTeam))
                                     {
-                                        //t.Status = TeamStatus.Available;
+                                        t.Status = TeamStatus.Available;
                                     }
                                     else
                                     {
-                                        //t.Status = TeamStatus.Full;
+                                        t.Status = TeamStatus.Full;
                                     }
 
                                     await _teamRepo.Update();
@@ -272,10 +270,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
 
                 if (model.TeamId == 0) throw new ArgumentNullException("Team Id Null");
                 //check team
@@ -324,10 +319,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
 
                 if (model.ParticipantInTeamId != 0) throw new ArgumentNullException("Participant In Team Id Null");
 
@@ -391,10 +383,8 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+                int UserId = DecodeToken(token, "Id");
 
-                int UserId = Int32.Parse(UserIdClaim.Value);
                 if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
@@ -443,10 +433,10 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
+               
 
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                int UserId = DecodeToken(token, "Id");
+
                 if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
 
                 //1.check team
@@ -463,7 +453,7 @@ namespace UniCEC.Business.Services.TeamSvc
                         //---- auto Team Available
                         //------------------Update status Team
                         Team t = await _teamRepo.Get(team.Id);
-                        //t.Status = TeamStatus.Available;
+                        t.Status = TeamStatus.Available;
                         await _teamRepo.Update();
                         return true;
                     }
@@ -509,8 +499,6 @@ namespace UniCEC.Business.Services.TeamSvc
         }
 
 
-
-
         //Generate Seed code length 15
         private string GenerateSeedCode()
         {
@@ -539,6 +527,13 @@ namespace UniCEC.Business.Services.TeamSvc
                 seedCode = generateCode;
             }
             return seedCode;
+        }
+
+        private int DecodeToken(string token, string nameClaim)
+        {
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
         }
 
 
