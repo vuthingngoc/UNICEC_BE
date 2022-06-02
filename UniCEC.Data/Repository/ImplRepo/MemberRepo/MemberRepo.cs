@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.ClubHistory;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 {
@@ -18,18 +19,29 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         }
 
-        //private DateTime GetJoinDate(int memberId, )
+        private async Task<DateTime> GetJoinDate(int userId, int clubId)
+        {
+            return await (from m in context.Members
+                          where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
+                          select m.StartTime).FirstOrDefaultAsync();
+        }
+
+        private async Task<DateTime> GetJoinDate(int memberId)
+        {
+            var member = await Get(memberId);
+            return await GetJoinDate(member.UserId, member.ClubId);            
+        }
 
         public async Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, int? termId, MemberStatus? status, PagingRequest request)
         {
             var query = from m in context.Members
                         join t in context.Terms on m.TermId equals t.Id
-                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id                        
+                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join u in context.Users on m.UserId equals u.Id
                         where m.ClubId.Equals(clubId)
                         select new { cr, m, u, t };
 
-            if(termId.HasValue) query = query.Where(selector => selector.m.TermId.Equals(termId.Value));
+            if (termId.HasValue) query = query.Where(selector => selector.m.TermId.Equals(termId.Value));
 
 
 
@@ -45,21 +57,21 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                         IsOnline = selector.u.IsOnline,
                                                         TermId = selector.t.Id,
                                                         TermName = selector.t.Name,
-                                                        
+
                                                     }).ToListAsync();
 
             return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<ViewDetailMember> GetById(int memberId, int clubId)
+        public async Task<ViewDetailMember> GetById(int memberId)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
-                        where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
-                                && m.ClubId.Equals(clubId)
-                        select new { m, u, cr};
+                        where m.Id.Equals(memberId)
+                        select new { m, u, cr };
 
+            DateTime joinDate = await GetJoinDate(memberId);
             ViewDetailMember member = await query.Select(selector => new ViewDetailMember()
             {
                 Id = memberId,
@@ -68,7 +80,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
                 Email = selector.u.Email,
-                //JoinDate = selector.m.JoinDate,
+                JoinDate = joinDate,
                 PhoneNumber = selector.u.PhoneNumber,
                 IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync();
@@ -89,7 +101,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
         {
-            var query = from m in context.Members                       
+            var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         where m.ClubId.Equals(clubId)
@@ -135,14 +147,32 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         public async Task<int> GetRoleMemberInClub(int memberId)
         {
-            var query = from m in context.Members 
+            var query = from m in context.Members
                         where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
                         select m.ClubRoleId;
 
             return await query.FirstOrDefaultAsync();
         }
 
-        
+        public async Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model)
+        {
+            var query = from m in context.Members
+                        join us in context.Users on m.UserId equals us.Id
+                        where m.ClubId == model.ClubId && m.TermId == model.TermId && m.UserId == model.UserId && m.Status == MemberStatus.Active
+                        select new { us, m };
+
+
+            return await query.Select(x => new ViewBasicInfoMember()
+            {
+                Name = x.us.Fullname,
+                ClubRoleName = x.m.ClubRole.Name,
+                ClubRoleId = x.m.ClubRoleId,
+                Id = x.m.Id,
+                TermId = x.m.TermId
+
+            }).FirstOrDefaultAsync();
+        }
+
 
         //public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId)
         //{
@@ -222,7 +252,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         }
 
         //user ID ở đây kh phải là MSSV
-        //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)
         //{
         //    var query = from us in context.Users
         //                where us.Id == model.UserId
@@ -233,7 +263,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         //                select new { ch, us, me };
 
 
-        //    List<ViewClubMember> viewClubMembers = await query.Select(x => new ViewClubMember()
+        //    List<ViewBasicInfoMember> viewClubMembers = await query.Select(x => new ViewBasicInfoMember()
         //    {
         //        Name = x.us.Fullname,
         //        ClubRoleName = x.ch.ClubRole.Name,

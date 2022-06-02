@@ -1,15 +1,16 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace UniCEC.Data.ViewModels.Entities.ClubHistory
+namespace UniCEC.Data.ViewModels.Entities.Member
 {
-    public class ViewClubMember
+    public class ViewBasicInfoMember
     {
         [JsonPropertyName("member_id")]
-        public int MemberId { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
+        [JsonPropertyName("club_role_id")]
+        public int ClubRoleId { get; set; }
         [JsonPropertyName("club_role_name")]
         public string ClubRoleName { get; set; }
-
         [JsonPropertyName("term_id")]
         public int TermId { get; set; }
     }

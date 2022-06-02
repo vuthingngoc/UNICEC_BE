@@ -8,7 +8,6 @@ using UniCEC.Business.Services.FileSvc;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
@@ -32,6 +31,8 @@ using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 using UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberRepo;
+using UniCEC.Data.ViewModels.Entities.Member;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -39,7 +40,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
     {
         private ICompetitionRepo _competitionRepo;
         //check Infomation Member -> is Leader
-        private IClubHistoryRepo _clubHistoryRepo;
+        private IMemberRepo _memberRepo;
         // check Club Has Competition - Insert   
         private ICompetitionInClubRepo _competitionInClubRepo;
         // check Sponsor create Competition- Insert
@@ -72,7 +73,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //
         private JwtSecurityTokenHandler _tokenHandler;
         public CompetitionService(ICompetitionRepo competitionRepo,
-                                  IClubHistoryRepo clubHistoryRepo,
+                                  IMemberRepo memberRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
                                   ISponsorInCompetitionRepo sponsorInCompetitionRepo,
                                   ICompetitionInDepartmentRepo competitionInDepartmentRepo,
@@ -89,7 +90,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
-            _clubHistoryRepo = clubHistoryRepo;
+            _memberRepo = memberRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
             _competitionInDepartmentRepo = competitionInDepartmentRepo;
@@ -183,7 +184,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions); // GetMemberInClub => GetBasicInfoMember - I have implemented this func again
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -246,7 +247,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         CompetitionInClubId = compInClub_Id,
                                         //auto role 1 Manager
                                         CompetitionRoleId = 1,
-                                        MemberId = infoClubMem.MemberId,
+                                        MemberId = infoClubMem.Id,
                                         Fullname = infoClubMem.Name
                                     };
 
@@ -325,7 +326,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -416,7 +417,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -549,7 +550,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember(); //await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -665,7 +666,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------ CHECK Mem in that club
                         if (infoClubMem != null)
                         {
@@ -754,7 +755,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------ CHECK 2 club are the same 
                         if (model.ClubIdCollaborate != model.ClubId)
                         {
@@ -882,7 +883,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             ClubId = model.ClubId,
                             TermId = model.TermId
                         };
-                        ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
+                        ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                         //------------- CHECK Mem in that club
                         if (infoClubMem != null)
                         {

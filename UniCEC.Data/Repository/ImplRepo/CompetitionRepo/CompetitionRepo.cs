@@ -42,7 +42,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         where cic.CompetitionId == comp.Id
                         select comp;
             //status
-            //if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
+            if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
             //Public
             if (request.Public.HasValue) query = query.Where(comp => comp.Public == request.Public);
             //Serach Event
@@ -161,7 +161,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Public
             if (Public.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Public == Public);
             //Status
-            //if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
+            if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();
 
