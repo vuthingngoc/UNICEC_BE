@@ -12,7 +12,7 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         public Task InsertForNewTerm(string token, int clubId, TermInsertModel termModel);
 
         // ???
-        public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
+        //public Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request);
 
         // Tien Anh
         //public Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model);

@@ -11,6 +11,7 @@ using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ClubHistory;
+using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.ClubHistorySvc
@@ -74,18 +75,23 @@ namespace UniCEC.Business.Services.ClubHistorySvc
         }
 
         // ???
-        public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
+        public async Task<PagingResult<ViewBasicInfoMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
         {
-            //PagingResult<ViewClubMember> clubMembers = await _clubHistoryRepo.GetMembersByClub(clubId, termId, request);
+            //PagingResult<ViewBasicInfoMember> clubMembers = await _clubHistoryRepo.GetMembersByClub(clubId, termId, request);
             //if (clubMembers == null) throw new NullReferenceException("This club has no any members in this term");
             //return clubMembers;
             return null;
         }
 
-        // Tien Anh
-        //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        //Task<PagingResult<ViewClubMember>> IClubHistoryService.GetMembersByClub(int clubId, int termId, PagingRequest request)
         //{
-        //    ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);
+        //    throw new NotImplementedException();
+        //}
+
+        // Tien Anh
+        //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)
+        //{
+        //    ViewBasicInfoMember result = await _clubHistoryRepo.GetMemberInCLub(model);
         //    return result;
         //}
     }

@@ -132,7 +132,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         //    return (items.Count > 0) ? new PagingResult<ViewClubHistory>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         //}
 
-        //public async Task<PagingResult<ViewClubMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
+        //public async Task<PagingResult<ViewBasicInfoMember>> GetMembersByClub(int clubId, int termId, PagingRequest request)
         //{
         //    var query = from ch in context.ClubHistories
         //                join m in context.Members on ch.MemberId equals m.Id
@@ -142,15 +142,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         //                select new { ch, u, r };
 
         //    int totalCount = query.Count();
-        //    List<ViewClubMember> clubMembers = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-        //                                                  .Select(x => new ViewClubMember()
+        //    List<ViewBasicInfoMember> clubMembers = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+        //                                                  .Select(x => new ViewBasicInfoMember()
         //                                                  {
         //                                                      MemberId = x.ch.MemberId,
         //                                                      ClubRoleName = x.r.Name,
         //                                                      Name = x.u.Fullname
         //                                                  }).ToListAsync();
 
-        //    return (clubMembers.Count > 0) ? new PagingResult<ViewClubMember>(clubMembers, totalCount, request.CurrentPage, request.PageSize) : null;
+        //    return (clubMembers.Count > 0) ? new PagingResult<ViewBasicInfoMember>(clubMembers, totalCount, request.CurrentPage, request.PageSize) : null;
         //}
 
         //public async Task<bool> CheckMemberInClub(int clubId, int memberId, int termId)
@@ -199,7 +199,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         //}
 
         ////user ID ở đây kh phải là MSSV
-        //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
+        //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)
         //{
         //    var query = from us in context.Users
         //                where us.Id == model.UserId
@@ -210,7 +210,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
         //                select new { ch, us, me };
 
 
-        //    List<ViewClubMember> viewClubMembers = await query.Select(x => new ViewClubMember()
+        //    List<ViewBasicInfoMember> viewClubMembers = await query.Select(x => new ViewBasicInfoMember()
         //    {
         //        Name = x.us.Fullname,
         //        ClubRoleName = x.ch.ClubRole.Name,
@@ -219,9 +219,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo
 
         //    }).ToListAsync();
 
-        //    if (viewClubMembers.Count > 0)
+        //    if (ViewBasicInfoMembers.Count > 0)
         //    {
-        //        return viewClubMembers[0];
+        //        return ViewBasicInfoMembers[0];
         //    }
         //    else
         //    {

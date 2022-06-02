@@ -12,8 +12,8 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
+using UniCEC.Data.ViewModels.Entities.Member;
 
 namespace UniCEC.Business.Services.CompetitionActivitySvc
 {
@@ -54,7 +54,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     TermId = model.TermId
                 };
 
-                ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -138,7 +138,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = new ViewClubMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
@@ -243,7 +243,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     ClubId = model.ClubId,
                     TermId = model.TermId
                 };
-                ViewClubMember infoClubMem = new ViewClubMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
+                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
                 //------------ Check Mem in that club
                 if (infoClubMem != null)
                 {
