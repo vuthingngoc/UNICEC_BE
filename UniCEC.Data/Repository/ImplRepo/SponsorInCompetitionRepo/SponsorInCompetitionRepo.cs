@@ -15,22 +15,29 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 
         }
 
-        public async Task<bool> CheckDuplicateCreateCompetitionOrEvent(int sponsorId, int competitionId)
+        public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId)
         {
-            var query = from sic in context.SponsorInCompetitions
-                        where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId
-                        select sic;
-            int check = query.Count();
-            if (check > 0)
+            SponsorInCompetition query = await (from sic in context.SponsorInCompetitions
+                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId
+                                                select sic).FirstOrDefaultAsync();
+            if (query != null)
             {
-                //có nghĩa là đã tạo nó r
-                return false;
+
+                return query;
             }
             else
             {
-                //có nghĩa là chưa 
-                return true;
+                return null;
             }
+        }
+
+        public async Task DeleteSponsorInCompetition(int sponsorInCompetitionId)
+        {
+            SponsorInCompetition result = await (from sic in context.SponsorInCompetitions
+                                                 where sic.Id == sponsorInCompetitionId
+                                                 select sic).FirstOrDefaultAsync();
+            context.SponsorInCompetitions.Remove(result);
+            await Update();
         }
 
         //

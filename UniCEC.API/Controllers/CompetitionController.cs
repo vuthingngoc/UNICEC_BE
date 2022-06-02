@@ -477,8 +477,6 @@ namespace UniCEC.API.Controllers
         }
 
 
-
-
         //---------------------------------------------------------------------------Competition Manager
         //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
@@ -603,6 +601,50 @@ namespace UniCEC.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        // DELETE api/<CompetitionController>/5
+        [Authorize(Roles = "Sponsor")]
+        [HttpDelete("sponsor-deny")]
+        [SwaggerOperation(Summary = "Sponsor deny in Competition")]
+        public async Task<IActionResult> SponsorDeny([FromBody] SponsorInCompetitionDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionService.SponsorDenyInCompetition(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (DbUpdateException)
             {
