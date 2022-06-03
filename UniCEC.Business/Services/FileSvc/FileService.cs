@@ -1,5 +1,6 @@
 ﻿using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -21,7 +22,7 @@ namespace UniCEC.Business.Services.FileSvc
 
         public bool ValidationFile(IFormFile file)
         {
-            const int MAX_SIZE = 10 * 1024 * 1024; // 10MB
+            const int MAX_SIZE = 5 * 1024 * 1024; // 5MB
             string[] listExtensions = { ".png", ".jpeg", ".jpg", ".jfif", ".gif", ".webp" }; 
 
             bool isValid = false;
@@ -50,24 +51,42 @@ namespace UniCEC.Business.Services.FileSvc
         public async Task<string> UploadFile(IFormFile file)
         {
             bool isValid = ValidationFile(file);
-            if (!isValid) throw new ArgumentException("Just image and the size is less than 10MB");
+            if (!isValid) throw new ArgumentException("Just image and the size is less than 5MB");
 
             Stream stream = file.OpenReadStream();
-            var cancellationToken = new CancellationTokenSource().Token;
-            var fileName = Guid.NewGuid();
-            var firebaseStorage = new FirebaseStorage(_bucket);
-            await firebaseStorage.Child("assets").Child($"{fileName}").PutAsync(stream, cancellationToken);
-            return await firebaseStorage.Child("assets").Child($"{fileName}").GetDownloadUrlAsync();
+            var filename = Guid.NewGuid();
+            
+            return await Upload(filename, stream);
         }
 
         public async Task UploadFile(string oldFilename, IFormFile file)
         {
             bool isValid = ValidationFile(file);
-            if (!isValid) throw new ArgumentException("Just image and the size is less than 10MB");
+            if (!isValid) throw new ArgumentException("Just image and the size is less than 5MB");
 
             Stream stream = file.OpenReadStream();
             var cancellationToken = new CancellationTokenSource().Token;
             await new FirebaseStorage(_bucket).Child("assets").Child($"{oldFilename}").PutAsync(stream, cancellationToken);
+        }
+
+        public async Task<string> UploadFile(string base64String)
+        {
+            Stream stream = ConvertBase64ToStream(base64String);
+            var filename = Guid.NewGuid();
+            return await Upload(filename, stream);
+        }
+
+        private Stream ConvertBase64ToStream(string base64)
+        {
+            byte[] bytes = Convert.FromBase64String(base64);
+            return new MemoryStream(bytes);
+        }
+
+        private async Task<string> Upload(Guid filename, Stream stream)
+        {
+            var cancellationToken = new CancellationTokenSource().Token;
+            await new FirebaseStorage(_bucket).Child("assets").Child($"{filename}").PutAsync(stream, cancellationToken);
+            return filename.ToString();
         }
 
         public async Task DeleteFile(string filename)

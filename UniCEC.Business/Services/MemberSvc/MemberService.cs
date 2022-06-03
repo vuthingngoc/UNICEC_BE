@@ -95,7 +95,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 UserId = model.UserId,
                 ClubId = model.ClubId,
                 ClubRoleId = 4, // default role is member
-                //Status = MemberStatus.Active, // default status
+                Status = MemberStatus.Active, // default status
                 StartTime = DateTime.Now,
                 TermId = model.TermId,
             };
@@ -149,18 +149,17 @@ namespace UniCEC.Business.Services.MemberSvc
                 // update endtime of old term
                 await _termService.CloseOldTermByClub(clubId);
 
-                //PagingRequest request;
-                //List<Member> members = await _memberRepo.GetMembersByClub(clubId, null, null, request);
-                //if (members != null)
-                //{
-                //    await _clubHistoryRepo.UpdateEndTerm(clubId);
-                //    // insert new records
-                //    foreach (Member record in members)
-                //    {
-                //        record.TermId = term.Id;
-                //        await _memberRepo.Insert(record);
-                //    }
-                //}
+                List<Member> members = await _memberRepo.GetMembersByClub(clubId);
+                if (members != null)
+                {
+                    await _memberRepo.UpdateEndTerm(clubId);
+                    // insert new records
+                    foreach (Member record in members)
+                    {
+                        record.TermId = term.Id;
+                        await _memberRepo.Insert(record);
+                    }
+                }
             }
         }
 

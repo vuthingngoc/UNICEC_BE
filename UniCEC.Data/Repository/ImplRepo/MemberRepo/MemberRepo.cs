@@ -8,15 +8,18 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubHistory;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 {
     public class MemberRepo : Repository<Member>, IMemberRepo
     {
-        public MemberRepo(UniCECContext context) : base(context)
+        private ITermRepo _termRepo;
+        public MemberRepo(UniCECContext context, ITermRepo termRepo) : base(context)
         {
-
+            _termRepo = termRepo;
         }
 
         private async Task<DateTime> GetJoinDate(int userId, int clubId)
@@ -43,8 +46,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             if (termId.HasValue) query = query.Where(selector => selector.m.TermId.Equals(termId.Value));
 
-
-
             int totalCount = query.Count();
             List<ViewMember> members = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                                     .Select(selector => new ViewMember()
@@ -61,6 +62,27 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                     }).ToListAsync();
 
             return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
+
+        public async Task<List<Member>> GetMembersByClub(int clubId)
+        {
+            var query = from m in context.Members
+                        join t in context.Terms on m.TermId equals t.Id
+                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
+                        join u in context.Users on m.UserId equals u.Id
+                        where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
+                        select new { cr, m, u, t };
+
+            return await query.Select(selector => new Member()
+            {
+                Id = selector.m.Id,
+                ClubId = selector.m.ClubId,
+                StartTime = selector.m.StartTime,
+                EndTime = selector.m.EndTime,
+                UserId = selector.m.UserId,
+                TermId = selector.t.Id,
+                ClubRoleId = selector.m.Id,
+            }).ToListAsync();
         }
 
         public async Task<ViewDetailMember> GetById(int memberId)
@@ -154,56 +176,51 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int userId, int termId)
+        {
+            Member member = await context.Members.FirstOrDefaultAsync(m => m.ClubId.Equals(clubId)
+                                                                && m.ClubRoleId.Equals(clubRoleId)
+                                                                && m.UserId.Equals(userId)
+                                                                && m.TermId.Equals(termId));
+            return (member != null) ? member.Id : 0;
+        }
 
-        //public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int memberId, int termId)
-        //{
-        //    ClubHistory clubHistory = await context.ClubHistories.FirstOrDefaultAsync(x => x.ClubId.Equals(clubId)
-        //                                                        && x.ClubRoleId.Equals(clubRoleId)
-        //                                                        && x.MemberId.Equals(memberId)
-        //                                                        && x.TermId.Equals(termId));
-        //    return (clubHistory != null) ? clubHistory.Id : 0;
-        //}
+        public async Task<PagingResult<ViewMember>> GetByConditions(int clubId, MemberRequestModel request)
+        {
+            var query = from m in context.Members
+                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
+                        join t in context.Terms on m.TermId equals t.Id
+                        where m.ClubId.Equals(clubId)
+                        select new { m, cr, c, t };
 
-        //public async Task<PagingResult<ViewClubHistory>> GetByConditions(int clubId, ClubHistoryRequestModel request)
-        //{
-        //    var query = from ch in context.ClubHistories
-        //                join cr in context.ClubRoles on ch.ClubRoleId equals cr.Id
-        //                join c in context.Clubs on ch.ClubId equals c.Id
-        //                join t in context.Terms on ch.TermId equals t.Id
-        //                where ch.ClubId.Equals(clubId)
-        //                select new { ch, cr, c, t };
+            if (request.ClubRoleId.HasValue) query = query.Where(x => x.m.ClubRoleId.Equals(request.ClubRoleId));
 
-        //    if (request.ClubRoleId.HasValue) query = query.Where(x => x.ch.ClubRoleId.Equals(request.ClubRoleId));
+            if (request.StartTime.HasValue) query = query.Where(x => x.m.StartTime.Equals(request.StartTime));
 
-        //    if (request.MemberId.HasValue) query = query.Where(x => x.ch.MemberId.Equals(request.MemberId));
+            if (request.EndTime.HasValue) query = query.Where(x => x.m.EndTime.Equals(request.EndTime));
 
-        //    if (request.StartTime.HasValue) query = query.Where(x => x.ch.StartTime.Equals(request.StartTime));
+            if (request.TermId.HasValue) query = query.Where(x => x.m.TermId.Equals(request.TermId));
 
-        //    if (request.EndTime.HasValue) query = query.Where(x => x.ch.EndTime.Equals(request.EndTime));
+            if (request.Status.HasValue) query = query.Where(x => x.m.Status.Equals(request.Status));
 
-        //    if (request.TermId.HasValue) query = query.Where(x => x.ch.TermId.Equals(request.TermId));
+            int totalCount = query.Count();
+            List<ViewMember> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                     .Select(x => new ViewMember()
+                                                     {
+                                                         Id = x.m.Id,
+                                                         ClubRoleId = x.m.ClubRoleId,
+                                                         ClubRoleName = x.cr.Name,
+                                                         TermId = x.m.TermId,
+                                                         TermName = x.t.Name,
+                                                         StartTime = x.m.StartTime,
+                                                         EndTime = x.m.EndTime,
+                                                         Status = x.m.Status
+                                                     }).ToListAsync();
 
-        //    if (request.Status.HasValue) query = query.Where(x => x.ch.Status.Equals(request.Status));
+            return (items.Count > 0) ? new PagingResult<ViewMember>(items, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
 
-        //    int totalCount = query.Count();
-        //    List<ViewClubHistory> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-        //                                             .Select(x => new ViewClubHistory()
-        //                                             {
-        //                                                 Id = x.ch.Id,
-        //                                                 ClubId = x.ch.ClubId,
-        //                                                 ClubName = x.c.Name,
-        //                                                 ClubRoleId = x.ch.ClubRoleId,
-        //                                                 ClubRoleName = x.cr.Name,
-        //                                                 MemberId = x.ch.MemberId,
-        //                                                 TermId = x.ch.TermId,
-        //                                                 TermName = x.t.Name,
-        //                                                 StartTime = x.ch.StartTime,
-        //                                                 EndTime = x.ch.EndTime,
-        //                                                 Status = x.ch.Status
-        //                                             }).ToListAsync();
-
-        //    return (items.Count > 0) ? new PagingResult<ViewClubHistory>(items, totalCount, request.CurrentPage, request.PageSize) : null;
-        //}
         //TA
         public async Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model)
         {
@@ -220,22 +237,17 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = x.m.ClubRoleId,
                 Id = x.m.Id,
                 TermId = x.m.TermId
-
             }).FirstOrDefaultAsync();
         }
         public async Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo)
         {
-            
+
             //tìm user có là member trong 1 cuộc thi được tổ chức bởi nhiều Club
             // User -> Member -> Club 
             foreach (int ClubId_In_Competition in List_ClubId_In_Competition)
             {
                 //Get current Term của 1 club
-                Term term = await (from m in context.Members
-                                   join t in context.Terms on m.TermId equals t.Id
-                                   where m.ClubId.Equals(ClubId_In_Competition) && t.Status.Equals(true) // current term
-                                   select t).FirstOrDefaultAsync();
-
+                ViewTerm term = await _termRepo.GetCurrentTermByClub(ClubId_In_Competition);
 
                 var query = from us in context.Users
                             where us.Id == studentInfo.Id
@@ -258,137 +270,64 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public async Task<Member> GetLeaderByClub(int clubId)
         {
             //Get current Term của 1 club
-            Term term = await (from m in context.Members
-                               join t in context.Terms on m.TermId equals t.Id
-                               where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
-                               select t).FirstOrDefaultAsync();
+            ViewTerm term = await _termRepo.GetCurrentTermByClub(clubId);
 
             //current club leader 
-            Member mem = await (from m in context.Members
-                                where m.ClubId == clubId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active && m.TermId == term.Id
-                                select m).FirstOrDefaultAsync();
-
-            return mem;
-
+            return await (from m in context.Members
+                          where m.ClubId == clubId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active && m.TermId == term.Id
+                          select m).FirstOrDefaultAsync();
         }
 
-       
+        public async Task UpdateMemberRole(int memberId, int clubRoleId)
+        {
+            Member member = await (from m in context.Members
+                                   where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
+                                   select m).FirstOrDefaultAsync();
 
+            if (member == null) throw new NullReferenceException("Not found this member in club");
 
-        //public async Task<Member> GetMember (int memberId, int userId, int clubId)
-        //{
-        //    //Member Id có là Leader không => ClubRoleId == 1
-        //    //Cái Status Active này        => đang hoat động thõa Member Id in Current Club and Current Term
-        //    //MemberId vs UserId           => sẽ loại bỏ trường hợp có 1 User có N Member
-        //    return await (from m in context.Members
-        //                  where m.Id == memberId && m.UserId == userId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active
-        //                  select m).FirstOrDefaultAsync();
-        //}
+            member.EndTime = DateTime.Now;
+            member.Status = MemberStatus.Inactive;
+            await Update();
 
+            // add new record
+            Member newRecord = new Member()
+            {
+                ClubId = clubRoleId,
+                ClubRoleId = member.ClubRoleId,
+                StartTime = DateTime.Now,
+                TermId = member.TermId,
+                UserId = member.UserId,
+                Status = MemberStatus.Active, // default status new record                
+            };
+            await Insert(newRecord);
+        }
 
+        public async Task DeleteMember(int memberId)
+        {
+            Member record = await (from m in context.Members
+                                   where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
+                                   select m).FirstOrDefaultAsync();
 
-        //user ID ở đây kh phải là MSSV
-        //public async Task<ViewBasicInfoMember> GetMemberInCLub(GetMemberInClubModel model)
-        //{
-        //    var query = from us in context.Users
-        //                where us.Id == model.UserId
-        //                from me in context.Members
-        //                where me.StudentId == us.Id
-        //                from ch in context.ClubHistories
-        //                where ch.ClubId == model.ClubId && ch.TermId == model.TermId && me.Id == ch.MemberId && ch.Status == MemberStatus.Active
-        //                select new { ch, us, me };
+            if (record != null)
+            {
+                record.EndTime = DateTime.Now;
+                record.Status = MemberStatus.Inactive;
+                await Update();
+            }
+        }
 
+        public async Task UpdateEndTerm(int clubId)
+        {
+            (from m in context.Members
+             where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
+             select m).ToList().ForEach(record =>
+             {
+                 record.EndTime = DateTime.Now;
+                 record.Status = MemberStatus.Inactive;
+             });
 
-        //    List<ViewBasicInfoMember> viewClubMembers = await query.Select(x => new ViewBasicInfoMember()
-        //    {
-        //        Name = x.us.Fullname,
-        //        ClubRoleName = x.ch.ClubRole.Name,
-        //        MemberId = x.me.Id,
-        //        TermId = x.ch.TermId
-
-        //    }).ToListAsync();
-
-        //    if (viewClubMembers.Count > 0)
-        //    {
-        //        return viewClubMembers[0];
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
-
-        //public async Task<bool> UpdateMemberRole(int memberId, int clubRoleId)
-        //{
-        //    ClubHistory record = await (from ch in context.ClubHistories
-        //                                where ch.MemberId.Equals(memberId) && ch.Status.Equals(MemberStatus.Active)
-        //                                select ch).FirstOrDefaultAsync();
-
-        //    if (record == null) return false;
-
-        //    record.EndTime = DateTime.Now;
-        //    record.Status = MemberStatus.Inactive;
-        //    await Update();
-
-        //    ClubHistory newRecord = new ClubHistory()
-        //    {
-        //        ClubId = record.ClubId,
-        //        ClubRoleId = clubRoleId, // new role
-        //        MemberId = memberId,
-        //        StartTime = DateTime.Now,
-        //        Status = MemberStatus.Active, // default status
-        //        TermId = record.TermId
-        //    };
-
-        //    return await Insert(newRecord) > 0;
-        //}
-
-        //public async Task DeleteMember(int memberId)
-        //{
-        //    ClubHistory record = await (from ch in context.ClubHistories
-        //                                where ch.MemberId.Equals(memberId) && ch.Status.Equals(MemberStatus.Active)
-        //                                select ch).FirstOrDefaultAsync();
-
-        //    if (record != null)
-        //    {
-        //        record.EndTime = DateTime.Now;
-        //        record.Status = MemberStatus.Inactive;
-        //        await Update();
-        //    }
-        //}
-
-        //public async Task UpdateEndTerm(int clubId)
-        //{
-        //    (from ch in context.ClubHistories
-        //     where ch.ClubId.Equals(clubId) && ch.Status.Equals(MemberStatus.Active)
-        //     select ch).ToList().ForEach(record =>
-        //     {
-        //         record.EndTime = DateTime.Now;
-        //         record.Status = MemberStatus.Inactive;
-        //     });
-
-        //    await Update();
-        //}
-
-        //public async Task<List<ClubHistory>> GetCurrentHistoryByClub(int clubId)
-        //{
-        //    var query = from ch in context.ClubHistories
-        //                where ch.ClubId.Equals(clubId) && ch.Status.Equals(MemberStatus.Active)
-        //                select ch;
-
-        //    int totalCount = query.Count();
-        //    List<ClubHistory> items = await query.Select(ch => new ClubHistory()
-        //    {
-        //        ClubId = ch.ClubId,
-        //        ClubRoleId = ch.ClubRoleId,
-        //        MemberId = ch.MemberId,
-        //        StartTime = ch.StartTime,
-        //        EndTime = ch.EndTime,
-        //        TermId = ch.TermId,
-        //        Status = ch.Status
-        //    }).ToListAsync();
-
-        //    return (items.Count > 0) ? items : null;
-        //}
+            await Update();
+        }
     }
 }

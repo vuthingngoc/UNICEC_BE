@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -30,19 +29,14 @@ namespace UniCEC.API.Controllers
         }
 
         // Test upload file
-
-        //[HttpPost("update-image/{filename}")]
+        //[AllowAnonymous]
+        //[HttpGet("update-image")]
         //[SwaggerOperation(Summary = "update image")]
         //public async Task<IActionResult> CreateImage(string filename)
         //{
         //    try
         //    {
-
-        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-        //        IFormFile file = Request.Form.Files[0];
-
-        //        await _ICityService.UpdateFile(filename, file, token);
-        //        return Ok();
+        //        return Ok(await _cityService.GetUrlFromFilenameAsync(filename));
         //    }
         //    catch (NullReferenceException ex)
         //    {

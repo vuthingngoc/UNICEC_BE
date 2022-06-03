@@ -1,6 +1,12 @@
-﻿using System;
+﻿using Firebase.Storage;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -15,13 +21,13 @@ namespace UniCEC.Business.Services.CitySvc
         private ICityRepo _cityRepo;
         private IUniversityRepo _universityRepo;
         private JwtSecurityTokenHandler _tokenHandler;
-        //private IConfiguration _configuration;
+        private IConfiguration _configuration;
 
-        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo, IConfiguration configuration)
         {
             _cityRepo = cityRepo;
             _universityRepo = universityRepo;
-            //_configuration = configuration;
+            _configuration = configuration;
         }
         // Test upload file 
         //public async Task<string> UploadFile(IFormFile file, string token)
@@ -57,6 +63,32 @@ namespace UniCEC.Business.Services.CitySvc
         //    var firebaseStorage = new FirebaseStorage(bucket);
         //    await firebaseStorage.Child("assets").Child($"{oldFileName}").PutAsync(stream, cancellationToken);
         //}
+
+        //private Stream ConvertBase64ToStream(string base64)
+        //{
+        //    byte[] bytes = Convert.FromBase64String(base64);
+        //    return new MemoryStream(bytes);
+        //}
+
+        //public async Task<string> UploadFile(string base64String)
+        //{
+        //    Stream stream = ConvertBase64ToStream(base64String);
+
+        //    string bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;//"unics-e46a4.appspot.com";
+
+        //    var cancellationToken = new CancellationTokenSource().Token;
+        //    var firebaseStorage = new FirebaseStorage(bucket);
+        //    var filename = Guid.NewGuid();
+        //    await firebaseStorage.Child("assets").Child($"{filename}").PutAsync(stream, cancellationToken);
+        //    return filename.ToString();
+        //}
+
+        //public async Task<string> GetUrlFromFilenameAsync(string filename)
+        //{
+        //    return await new FirebaseStorage("unics-e46a4.appspot.com").Child("assets").Child($"{filename}").GetDownloadUrlAsync();
+        //}
+
+
 
         private int DecodeToken(string token, string nameClaim)
         {

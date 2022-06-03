@@ -5,12 +5,13 @@ using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
 {
-    public  class ClubHistoryRequestModel : PagingRequest
+    public  class MemberRequestModel : PagingRequest
     {
+        public string Name { get; set; }
+        [FromQuery(Name = "clubId")]
+        public int? ClubId { get; set; }
         [FromQuery(Name = "clubRoleId")]
         public int? ClubRoleId { get; set; }
-        [FromQuery(Name = "memberId")]
-        public int? MemberId { get; set; }
         [FromQuery(Name = "termId")]
         public int? TermId { get; set; }
         [FromQuery(Name = "startTime")]
@@ -18,6 +19,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "endTime")]
         public DateTime? EndTime { get; set; }
         [FromQuery(Name = "status")]
-        public ClubHistoryStatus? Status { get; set; }
+        public MemberStatus? Status { get; set; }
+        public bool? IsOnline { get; set; }
     }
 }
