@@ -64,23 +64,23 @@ namespace UniCEC.Business.Services.InfluencerSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
-                //check role
-                List<int> clubIds = await _clubRepo.GetByCompetition(model.CompetitionId);
-                foreach (int clubId in clubIds)
-                {
-                    bool isValid = await CheckRoleUser(UserId, clubId);
-                    if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-                }
+                //int UserId = DecodeToken(token, "Id");
+                ////check role
+                //List<int> clubIds = await _clubRepo.GetByCompetition(model.CompetitionId);
+                //foreach (int clubId in clubIds)
+                //{
+                //    bool isValid = await CheckRoleUser(UserId, clubId);
+                //    if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                //}
 
-                Influencer influencer = new Influencer()
-                {
-                    Name = model.Name,
+                //Influencer influencer = new Influencer()
+                //{
+                //    Name = model.Name,
 
-                };
-                int id = await _influencerRepo.Insert(influencer, model.CompetitionId);
-                return await _influencerRepo.GetById(id);
-
+                //};
+                //int id = await _influencerRepo.Insert(influencer, model.CompetitionId);
+                //return await _influencerRepo.GetById(id);
+                throw new NotImplementedException();
 
                 
             }

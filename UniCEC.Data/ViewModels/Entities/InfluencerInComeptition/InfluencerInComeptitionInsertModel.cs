@@ -12,8 +12,8 @@ namespace UniCEC.Data.ViewModels.Entities.Influencer
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
 
-        [JsonPropertyName("list_influencer_id")]
-        public List<int> ListInfluencerId { get; set; }
+        [JsonPropertyName("list_influencer")]
+        public List<InfluencerInsertModel> ListInfluencer { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
