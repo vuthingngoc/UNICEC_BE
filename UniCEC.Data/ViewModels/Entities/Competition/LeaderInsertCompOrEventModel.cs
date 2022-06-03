@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using UniCEC.Data.ViewModels.Entities.Influencer;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -32,21 +33,16 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public string Address { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
-        [JsonPropertyName("seeds_deposited")]
-        public double SeedsDeposited { get; set; }
+        //[JsonPropertyName("seeds_deposited")]
+        //public double SeedsDeposited { get; set; }
 
         //List Department Id Belong To University
         [JsonPropertyName("list_department_id")]
         public List<int>? ListDepartmentId { get; set; }
-
-        //List Major
-        //public List<int>? ListMajorId { get; set; } -> sửa lại
-
+        
         //List Influencer Id Belong To System
-        [JsonPropertyName("list_influencer_id")]
-        public List<int>? ListInfluencerId { get; set; }
-
-        //List<InfluencerModel> ListInfluencer { get; set; } -> sửa lại
+        [JsonPropertyName("list_influencer")]
+        public List<InfluencerInsertModel>? ListInfluencer { get; set; }
 
         //---------Author to check user is Leader of Club   
         [JsonPropertyName("club_id")]

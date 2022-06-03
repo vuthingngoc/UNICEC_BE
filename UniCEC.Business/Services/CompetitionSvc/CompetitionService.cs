@@ -55,6 +55,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IInfluencerInCompetitionRepo _influencerInCompetitionRepo;
         private ITermRepo _termRepo;
         private JwtSecurityTokenHandler _tokenHandler;
+
+        //20% for Seed Deposited
+        private double percentPoint = 0.2;
+
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
@@ -153,10 +157,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.SeedsPoint == 0
-                    || model.SeedsDeposited == 0
                     || model.ClubId == 0)
                     throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || NumberOfTeam Null || StartTimeRegister Null " +
-                                                    " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null || SeedsDeposited Null || ClubId Null");
+                                                    " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
                 //------------- CHECK Club in system
                 Club club = await _clubRepo.Get(model.ClubId);
                 if (club != null)
@@ -209,18 +212,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                                     //List Influencer ID
                                     bool insertInfluencer;
-                                    if (model.ListInfluencerId.Count > 0)
+                                    if (model.ListInfluencer.Count > 0)
                                     {
+                                        insertInfluencer = true;
 
-                                        bool check = await _influencerRepo.CheckInfluencerInSystem(model.ListInfluencerId);
-                                        if (check)
-                                        {
-                                            insertInfluencer = true;
-                                        }
-                                        else
-                                        {
-                                            throw new ArgumentException("Influencer Id not have in University");
-                                        }
                                     }
                                     else
                                     {
@@ -237,6 +232,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     competition.Name = model.Name;
                                     competition.NumberOfTeam = model.NumberOfTeam;
                                     competition.NumberOfParticipation = model.NumberOfParticipations;
+                                    //--MaxMemberInTeam
+                                    //--MinMemberInTeam
                                     competition.CreateTime = new LocalTime().GetLocalTime().DateTime;
                                     competition.StartTime = model.StartTime;
                                     competition.EndTime = model.EndTime;
@@ -245,16 +242,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     competition.Content = model.Content;
                                     competition.Fee = model.Fee;
                                     competition.SeedsPoint = model.SeedsPoint;
-                                    competition.SeedsDeposited = model.SeedsDeposited;
+                                    competition.SeedsDeposited = Math.Round(model.SeedsPoint * percentPoint, 0); // 20%
                                     competition.SeedsCode = await CheckExistCode();
                                     competition.IsSponsor = false;
                                     competition.Status = CompetitionStatus.Launching;
-                                    competition.Public = model.Public;
+                                    competition.Public = model.Public; // change to Scope  1.InterUniversity, 2.University 3.Club
                                     competition.View = 0; // auto
                                     int competition_Id = await _competitionRepo.Insert(competition);
                                     if (competition_Id > 0)
                                     {
-                                        Competition comp = await _competitionRepo.Get(competition_Id);                                      
+                                        Competition comp = await _competitionRepo.Get(competition_Id);
 
                                         //------------ Insert Competition-In-Department  
                                         if (insertDepartment)
@@ -273,15 +270,21 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         //------------ Insert Influencer-In-Competition
                                         if (insertInfluencer)
                                         {
-                                            foreach (int influ_id in model.ListInfluencerId)
+                                            foreach (InfluencerInsertModel influ in model.ListInfluencer)
                                             {
+
+                                                //Add influencer
+                                                //After add by use FileServce to upload return Name Url
+                                                //-> create Influencer
+                                                //-> get id when insert success to add Influencer in competition
+
+                                                //add in Influencer in competition
                                                 InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                                                 {
                                                     CompetitionId = comp.Id,
-                                                    InfluencerId = influ_id,
+                                                    //InfluencerId = influ,
                                                 };
                                                 int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
-
                                             }
                                         }
                                         //------------ Insert Competition-In-Club
@@ -702,74 +705,84 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 if (model.CompetitionId == 0
                      || model.ClubId == 0
-                     || model.ListInfluencerId.Count < 0)
-                    throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Id Null");
+                     || model.ListInfluencer.Count < 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Null");
 
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
                     //------------- CHECK Influencer belong to system
-                    bool influencerBelongToSystem = await _influencerRepo.CheckInfluencerInSystem(model.ListInfluencerId);
-                    if (influencerBelongToSystem)
+                    // bool influencerBelongToSystem = await _influencerRepo.CheckInfluencerInSystem(model.ListInfluencer.);
+                    //if (influencerBelongToSystem)
+                    //{
+                    //------------- CHECK Add Influencer Id has already existed in competition
+                    //bool InfluencerIsExsited = true;
+                    //foreach (int influ_id in model.ListInfluencerId)
+                    //{
+                    //InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(influ_id, model.CompetitionId);
+                    // if (iic != null)
+                    //{
+                    //   InfluencerIsExsited = false;
+                    //}
+                    // }
+                    //if (InfluencerIsExsited)
+                    //{
+                    List<int> list_iic_Id = new List<int>();
+                    List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
+
+                    foreach (InfluencerInsertModel influ in model.ListInfluencer)
                     {
-                        //------------- CHECK Add Influencer Id has already existed in competition
-                        bool InfluencerIsExsited = true;
-                        foreach (int influ_id in model.ListInfluencerId)
-                        {
-                            InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(influ_id, model.CompetitionId);
-                            if (iic != null)
-                            {
-                                InfluencerIsExsited = false;
-                            }
-                        }
-                        if (InfluencerIsExsited)
-                        {
-                            List<int> list_iic_Id = new List<int>();
-                            List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
 
-                            foreach (int influ_id in model.ListInfluencerId)
-                            {
-                                InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
-                                {
-                                    CompetitionId = model.CompetitionId,
-                                    InfluencerId = influ_id,
-                                };
-                                int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
-                                list_iic_Id.Add(id);
-                            }
+                        //Add influencer
+                        //After add by use FileServce to upload return Name Url
+                        //-> create Influencer
+                        //-> get id when insert success to add Influencer in competition
 
-                            if (list_iic_Id.Count > 0)
-                            {
-                                foreach (int id in list_iic_Id)
-                                {
-                                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+                        //add in Influencer in competition
 
-                                    ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
-                                    {
-                                        CompetitionId = iic.CompetitionId,
-                                        InfluencerInCompetitionId = iic.Id,
-                                        Id = iic.Influencer.Id,
-                                        ImageUrl = iic.Influencer.ImageUrl,
-                                        Name = iic.Influencer.Name
-                                    };
-                                    list_result.Add(viic);
-                                }
-                                return list_result;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Add Influencer Failed");
-                            }
-                        }
-                        else
+
+                        InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                         {
-                            throw new ArgumentException("Influencer already in Competition");
+                            CompetitionId = model.CompetitionId,
+                            //InfluencerId = influ, -> này là lưu result
+                        };
+
+                        int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
+                        list_iic_Id.Add(id);
+                    }
+
+                    if (list_iic_Id.Count > 0)
+                    {
+                        foreach (int id in list_iic_Id)
+                        {
+                            InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+
+                            ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
+                            {
+                                CompetitionId = iic.CompetitionId,
+                                InfluencerInCompetitionId = iic.Id,
+                                Id = iic.Influencer.Id,
+                                ImageUrl = iic.Influencer.ImageUrl,
+                                Name = iic.Influencer.Name
+                            };
+                            list_result.Add(viic);
                         }
+                        return list_result;
                     }
                     else
                     {
-                        throw new ArgumentException("Influencer Id not have in System");
+                        throw new ArgumentException("Add Influencer Failed");
                     }
+                    //}
+                    //else
+                    // {
+                    //throw new ArgumentException("Influencer already in Competition");
+                    //}
+                    // }
+                    //else
+                    //{
+                    //   throw new ArgumentException("Influencer Id not have in System");
+                    //}
                 }//end if check
                 else
                 {
