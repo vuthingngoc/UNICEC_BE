@@ -8,7 +8,7 @@ namespace UniCEC.Business.Services.ClubHistorySvc
 {
     public interface IClubHistoryService
     {
-        public Task<PagingResult<ViewClubHistory>> GetByContitions(string token, int clubId, ClubHistoryRequestModel request);
+        public Task<PagingResult<ViewClubHistory>> GetByContitions(string token, int clubId, MemberRequestModel request);
         public Task InsertForNewTerm(string token, int clubId, TermInsertModel termModel);
 
         // ???

@@ -29,7 +29,7 @@ namespace UniCEC.Business.Services.ClubHistorySvc
             _termService = termService;
         }
 
-        public async Task<PagingResult<ViewClubHistory>> GetByContitions(string token, int clubId, ClubHistoryRequestModel request)
+        public async Task<PagingResult<ViewClubHistory>> GetByContitions(string token, int clubId, MemberRequestModel request)
         {
             var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
             var userIdClaim = tokenHandler.Claims.FirstOrDefault(claim => claim.Type.ToString().Equals("Id"));
