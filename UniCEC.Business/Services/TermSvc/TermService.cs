@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
@@ -15,12 +16,15 @@ namespace UniCEC.Business.Services.TermSvc
     {
         private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
+
+        private IMemberService _memberService;
         private JwtSecurityTokenHandler _tokenHandler;
 
-        public TermService(ITermRepo termRepo, IMemberRepo memberRepo)
+        public TermService(ITermRepo termRepo, IMemberRepo memberRepo, IMemberService memberService)
         {
             _termRepo = termRepo;
             _memberRepo = memberRepo;
+            _memberService = memberService;
         }
 
         public int DecodeToken(string token, string nameClaim)
@@ -73,8 +77,13 @@ namespace UniCEC.Business.Services.TermSvc
             return term;
         }
 
-        public async Task<ViewTerm> Insert(TermInsertModel model) // authorize in clubHistory already => no need authorize in here
+        public async Task<ViewTerm> Insert(string token, TermInsertModel model) 
         {
+            // if user is not leader or vice president
+            int userId = DecodeToken(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            
             if (string.IsNullOrEmpty(model.Name) || model.CreateTime == DateTime.MinValue
                 || model.EndTime == DateTime.MinValue) throw new ArgumentNullException("Name Null || CreateTime Null || EndTime Null");
 
@@ -89,6 +98,11 @@ namespace UniCEC.Business.Services.TermSvc
                 Status = true // default status when insert
             };
             int id = await _termRepo.Insert(term);
+
+            // insert new data for member
+            await CloseOldTermByClub(model.ClubId);
+            await _memberService.InsertForNewTerm(model.ClubId, id);
+
             return new ViewTerm()
             {
                 Id = id,

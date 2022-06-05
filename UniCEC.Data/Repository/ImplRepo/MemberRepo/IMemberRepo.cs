@@ -12,8 +12,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
     {
         public Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, int? termId, MemberStatus? status, PagingRequest request);
         public Task<List<Member>> GetMembersByClub(int clubId);
-        public Task<ViewDetailMember> GetById(int memberId);
-        public Task<List<ViewMember>> GetLeadersByClub(int clubId);
+        public Task<ViewDetailMember> GetDetailById(int memberId);
+        public Task<ViewMember> GetById(int memberId);
+        public Task<int> GetClubIdByMember(int memberId); // use to check role
+        public Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId);
         public Task<int> GetQuantityNewMembersByClub(int clubId);
         public Task<bool> CheckExistedMemberInClub(int userId, int clubId);      
         public Task<int> GetRoleMemberInClub(int userId, int clubId);

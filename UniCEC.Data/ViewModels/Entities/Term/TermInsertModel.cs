@@ -5,6 +5,8 @@ namespace UniCEC.Data.ViewModels.Entities.Term
 {
     public class TermInsertModel
     {
+        [JsonPropertyName("club_id")]
+        public int ClubId { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("create_time")]

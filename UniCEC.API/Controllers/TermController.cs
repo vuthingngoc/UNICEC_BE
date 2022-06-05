@@ -97,28 +97,33 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "Add term")]
-        //public async Task<IActionResult> InsertTerm(TermInsertModel term)
-        //{
-        //    try
-        //    {
-        //        ViewTerm viewTerm = await _itermService.Insert(term);
-        //        return Created($"api/v1/term/{viewTerm.Id}", viewTerm);
-        //    }
-        //    catch(ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
+        [HttpPost]
+        [SwaggerOperation(Summary = "Add new term in a club")]
+        public async Task<IActionResult> InsertTerm([FromBody] TermInsertModel term)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewTerm viewTerm = await _itermService.Insert(token, term);
+                return Ok(viewTerm);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
 
         [HttpPut]
         [SwaggerOperation(Summary = "Update term")]
