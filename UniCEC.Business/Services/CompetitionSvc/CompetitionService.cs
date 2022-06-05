@@ -276,13 +276,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                                 //Add influencer
                                                 //After add by use FileServce to upload return Name Url
                                                 //-> create Influencer
-                                                //-> get id when insert success to add Influencer in competition
+                                                //-> get id(result) when insert success to add Influencer in competition
 
                                                 //add in Influencer in competition
                                                 InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                                                 {
                                                     CompetitionId = comp.Id,
-                                                    //InfluencerId = influ,
+                                                    //InfluencerId = influ, -> result
                                                 };
                                                 int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
                                             }
@@ -736,11 +736,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         //Add influencer
                         //After add by use FileServce to upload return Name Url
                         //-> create Influencer
-                        //-> get id when insert success to add Influencer in competition
+                        //-> get id(result) when insert success to add Influencer in competition
 
                         //add in Influencer in competition
-
-
                         InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                         {
                             CompetitionId = model.CompetitionId,
