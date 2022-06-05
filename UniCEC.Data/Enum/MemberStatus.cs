@@ -2,7 +2,8 @@
 {
     public enum MemberStatus
     {
-        Inactive,
-        Active        
+        NotApproved,
+        Active,
+        Inactive                
     }
 }

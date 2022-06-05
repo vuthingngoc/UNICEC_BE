@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ClubHistory;
 using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.Business.Services.MemberTakesActivitySvc

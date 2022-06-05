@@ -55,12 +55,12 @@ namespace UniCEC.API.Controllers
         // GET api/<MemberController>/5
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get detail member by id")]
-        public async Task<IActionResult> GetMemberById(int id, [FromQuery, BindRequired] int clubId)
+        public async Task<IActionResult> GetMemberById(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewDetailMember member = await _memberService.GetByMemberId(token, id, clubId);
+                ViewDetailMember member = await _memberService.GetByMemberId(token, id);
                 return Ok(member);
             }
             catch (UnauthorizedAccessException ex)
@@ -78,12 +78,12 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("leaders/club/{id}")]
-        [SwaggerOperation(Summary = "Get top leader in a club")]
+        [SwaggerOperation(Summary = "Get top leaders in a club")]
         public async Task<IActionResult> GetLeaders(int id)
         {
             try
             {
-                List<ViewMember> members = await _memberService.GetLeadersByClub(id);
+                List<ViewIntroClubMember> members = await _memberService.GetLeadersByClub(id);
                 return Ok(members);
             }
             catch (NullReferenceException e)
@@ -97,7 +97,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("new/quantity/club/{id}")]
-        [SwaggerOperation(Summary = "Get new members in a club")]
+        [SwaggerOperation(Summary = "Get new members in current month of a club")]
         public async Task<IActionResult> GetQuantityNewMembers(int id)
         {
             try
@@ -128,7 +128,7 @@ namespace UniCEC.API.Controllers
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewDetailMember result = await _memberService.Insert(token, model);
+                ViewMember result = await _memberService.Insert(token, model);
                 return Ok(result);
             }
             catch (UnauthorizedAccessException ex)
@@ -153,6 +153,38 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //[HttpPost("update-new-term")]
+        //[SwaggerOperation(Summary = "Update new term of a club")]
+        //public async Task<IActionResult> UpdateNewTerm([FromBody] MemberInsertModel model)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        ViewMember result = await _memberService.Insert(token, model);
+        //        return Ok(result);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //}
+
         // PUT api/<MemberController>/5
         [HttpPut]
         [SwaggerOperation(Summary = "Update member")]
@@ -163,6 +195,10 @@ namespace UniCEC.API.Controllers
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _memberService.Update(token, model);
                 return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (ArgumentException ex)
             {
@@ -180,19 +216,26 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal server exception");
             }
-
         }
 
         // DELETE api/<MemberController>/5
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete member")]
-        public async Task<IActionResult> DeleteMember(int id, [FromQuery, BindRequired] int clubId)
+        public async Task<IActionResult> DeleteMember(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _memberService.Delete(token, clubId, id);
+                await _memberService.Delete(token, id);
                 return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NullReferenceException ex)
             {

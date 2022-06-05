@@ -13,11 +13,16 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         [JsonPropertyName("club_role_name")]
         public string ClubRoleName { get; set; }
         public string Avatar { get; set; }
-        public bool IsOnline { get; set; }       
+        [JsonPropertyName("start_time")]
         public DateTime StartTime { get; set; }
+        [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
-        public MemberStatus Status { get; set; }
+        [JsonPropertyName("term_id")]
         public int TermId { get; set; }
+        [JsonPropertyName("term_name")]
         public string TermName { get; set; }
+        public MemberStatus Status { get; set; }
+        [JsonPropertyName("is_online")]
+        public bool IsOnline { get; set; }
     }
 }

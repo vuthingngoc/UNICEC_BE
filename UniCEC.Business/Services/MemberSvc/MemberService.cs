@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.TermSvc;
+using UniCEC.Business.Services.FileSvc;
+using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
+using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
+using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.MemberSvc
 {
@@ -19,19 +22,27 @@ namespace UniCEC.Business.Services.MemberSvc
     {
         private IMemberRepo _memberRepo;
         private IClubRepo _clubRepo;
-        private ITermService _termService;
+        private IUserRepo _userRepo;
+        private ITermRepo _termRepo;
+        private IClubRoleRepo _clubRoleRepo;
+
+        private IFileService _fileService;
         private JwtSecurityTokenHandler _tokenHandler;
 
-        public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, ITermService termService)
+        public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, IFileService fileService
+                                , IUserRepo userRepo, ITermRepo termRepo, IClubRoleRepo clubRoleRepo)
         {
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
-            _termService = termService;
+            _fileService = fileService;
+            _userRepo = userRepo;
+            _termRepo = termRepo;
+            _clubRoleRepo = clubRoleRepo;
         }
 
-        public int DecodeToken(string token, string nameClaim)
+        private int DecodeToken(string token, string nameClaim)
         {
-            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
             var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
             return Int32.Parse(claim.Value);
         }
@@ -47,20 +58,26 @@ namespace UniCEC.Business.Services.MemberSvc
             return members;
         }
 
-        public async Task<ViewDetailMember> GetByMemberId(string token, int id, int clubId)
+        public async Task<ViewDetailMember> GetByMemberId(string token, int memberId)
         {
             int userId = DecodeToken(token, "Id");
+            int clubId = await _memberRepo.GetClubIdByMember(memberId);
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            ViewDetailMember member = await _memberRepo.GetById(id); //GetById(id, clubId); -> GetById(id)
+            ViewDetailMember member = await _memberRepo.GetDetailById(memberId);
             if (member == null) throw new NullReferenceException("Not found this member");
             return member;
         }
 
-        public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
+        public async Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId)
         {
-            List<ViewMember> members = await _memberRepo.GetLeadersByClub(clubId);
+            List<ViewIntroClubMember> members = await _memberRepo.GetLeadersByClub(clubId);
+            //foreach(var member in members)
+            //{
+            //    member.Avatar = (member.Avatar.Contains("firebase")) ? 
+            //        await _fileService.GetUrlFromFilenameAsync(member.Avatar) : member.Avatar;
+            //}
             if (members == null) throw new NullReferenceException("Not found any Leaders");
             return members;
         }
@@ -77,88 +94,123 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         //Insert-Member
-        public async Task<ViewDetailMember> Insert(string token, MemberInsertModel model)
+        public async Task<ViewMember> Insert(string token, MemberInsertModel model)
         {
-            Club club = await _clubRepo.Get(model.ClubId);
-            if (club == null) throw new NullReferenceException("Not found this club");
-            // check user call this api
+            // check valid data 
+            if (model.ClubId == 0 || model.UserId == 0 || model.ClubRoleId == 0 || model.StartTime.Equals(DateTime.MinValue))
+                throw new ArgumentException("ClubId Null || UserId Null || ClubRoleId Null || TermId Null || StartTime Null");
+
+            // check role
             int userId = DecodeToken(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-            // check duplicated member
-            if (model.UserId == 0) throw new ArgumentException("UserId Null");
+
+            Club club = await _clubRepo.Get(model.ClubId);
+            if (club == null) throw new NullReferenceException("Not found this club");
+
+            // check valid member
+            bool isExistedUniStudent = await _userRepo.CheckExistedUser(club.UniversityId, model.UserId);
+            if (!isExistedUniStudent) throw new UnauthorizedAccessException("This user is not in the club's university");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(model.UserId, model.ClubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
+
+            int currentTerm = (await _termRepo.GetCurrentTermByClub(model.ClubId)).Id;
+            bool isExistedClubRoleId = await _clubRoleRepo.CheckExistedClubRole(model.ClubRoleId);
+            if (!isExistedClubRoleId) throw new ArgumentException("Not found this club role");
 
             Member member = new Member()
             {
                 UserId = model.UserId,
                 ClubId = model.ClubId,
-                ClubRoleId = 4, // default role is member
+                ClubRoleId = model.ClubRoleId,
                 Status = MemberStatus.Active, // default status
                 StartTime = DateTime.Now,
-                TermId = model.TermId,
+                TermId = currentTerm,
             };
             int memberId = await _memberRepo.Insert(member);
             if (memberId == 0) throw new DbUpdateException();
 
             club.TotalMember += 1;
-           
             await _clubRepo.Update();
-            return await _memberRepo.GetById(memberId);//GetById(id, clubId); -> GetById(id)
+
+            return await _memberRepo.GetById(memberId);
         }
 
         //Update-Member
         public async Task Update(string token, MemberUpdateModel model)
         {
-            if (!model.ClubRoleId.HasValue) throw new ArgumentException("ClubRole Null");
+            Member member = await _memberRepo.Get(model.Id);
+            if (member == null) throw new NullReferenceException("Not found this member");
+
+            bool isValid = await _clubRoleRepo.CheckExistedClubRole(model.ClubRoleId);
+            if (!isValid) throw new ArgumentException("Not found this club role");
+
+            // if user is not leader or vice president
             int userId = DecodeToken(token, "Id");
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            ViewDetailMember member = await _memberRepo.GetById(model.Id); //GetById(id, clubId); -> GetById(id)
-            if (member == null) throw new NullReferenceException("Not found this member");
+            if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            int currentTerm = (await _termRepo.GetCurrentTermByClub(member.ClubId)).Id;
+            if (currentTerm != member.TermId || member.Status.Equals(MemberStatus.Inactive)) throw new ArgumentException("Can not update member in the past");
+
+            if (member.ClubRoleId.Equals(model.ClubRoleId)) return;
+
+            var currentTime = new LocalTime().GetLocalTime().DateTime;            
+            member.EndTime = currentTime;
+            member.Status = MemberStatus.Inactive;
+            await _memberRepo.Update();
+
+            Member newRecord = new Member()
+            {
+                ClubId = member.ClubId,
+                ClubRoleId = model.ClubRoleId,
+                StartTime = currentTime,
+                TermId = member.TermId,
+                UserId = member.UserId,
+                Status = MemberStatus.Active
+            };
+            await _memberRepo.Insert(newRecord);
         }
 
-        public async Task Delete(string token, int clubId, int id)
+        public async Task Delete(string token, int memberId)
         {
-            ViewDetailMember member = await _memberRepo.GetById(id);//GetById(id, clubId); -> GetById(id)
+            Member member = await _memberRepo.Get(memberId);
             if (member == null) throw new NullReferenceException("Not found this member");
+
+            // if user is not leader or vice president
             int userId = DecodeToken(token, "Id");
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-            
-            Club club = await _clubRepo.Get(clubId);
+
+            if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            if (member.Status.Equals(MemberStatus.Inactive)) throw new ArgumentException("This member is inactive already");
+
+            member.Status = MemberStatus.Inactive;
+            member.EndTime = new LocalTime().GetLocalTime().DateTime;
+            await _memberRepo.Update();
+
+            Club club = await _clubRepo.Get(member.ClubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();
         }
 
-        public async Task InsertForNewTerm(string token, int clubId, TermInsertModel termModel)
+        public async Task InsertForNewTerm(int clubId, int termId)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var userIdClaim = tokenHandler.Claims.FirstOrDefault(claim => claim.Type.ToString().Equals("Id"));
-            int userId = Int32.Parse(userIdClaim.Value);
+            // check role in term service already 
+            // if use for another => please check role in here
 
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
-            // if user is not leader or vice president
-            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-
-            ViewTerm term = await _termService.Insert(termModel);
-            if (term != null)
+            List<Member> members = await _memberRepo.GetMembersByClub(clubId);
+            if (members != null)
             {
-                // update endtime of old term
-                await _termService.CloseOldTermByClub(clubId);
-
-                List<Member> members = await _memberRepo.GetMembersByClub(clubId);
-                if (members != null)
+                await _memberRepo.UpdateEndTerm(clubId);
+                // insert new records
+                foreach (Member record in members)
                 {
-                    await _memberRepo.UpdateEndTerm(clubId);
-                    // insert new records
-                    foreach (Member record in members)
-                    {
-                        record.TermId = term.Id;
-                        await _memberRepo.Insert(record);
-                    }
+                    record.TermId = termId;
+                    await _memberRepo.Insert(record);
                 }
             }
         }

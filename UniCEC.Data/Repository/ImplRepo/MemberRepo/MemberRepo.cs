@@ -85,7 +85,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             }).ToListAsync();
         }
 
-        public async Task<ViewDetailMember> GetById(int memberId)
+        public async Task<ViewDetailMember> GetDetailById(int memberId)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
@@ -110,6 +110,41 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (query.Count() > 0) ? member : null;
         }
 
+        public async Task<ViewMember> GetById(int memberId)
+        {
+            var query = from m in context.Members
+                        join u in context.Users on m.UserId equals u.Id
+                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
+                        join t in context.Terms on m.TermId equals t.Id
+                        where m.Id.Equals(memberId)
+                        select new { m, u, cr, t };
+
+            DateTime joinDate = await GetJoinDate(memberId);
+            ViewMember member = await query.Select(selector => new ViewMember()
+            {
+                Id = memberId,
+                Name = selector.u.Fullname,
+                Avatar = selector.u.Avatar,
+                ClubRoleId = selector.cr.Id,
+                ClubRoleName = selector.cr.Name,
+                TermId = selector.m.TermId,
+                TermName = selector.t.Name,
+                StartTime = selector.m.StartTime,
+                EndTime = selector.m.EndTime,
+                Status = selector.m.Status,
+                IsOnline = selector.u.IsOnline,                
+            }).FirstOrDefaultAsync();
+
+            return (query.Count() > 0) ? member : null;
+        }
+
+        public async Task<int> GetClubIdByMember(int memberId)
+        {
+            return await (from m in context.Members
+                        where m.Id.Equals(memberId)
+                        select m.ClubId).FirstOrDefaultAsync();            
+        }
+
         public async Task<bool> CheckExistedMemberInClub(int userId, int clubId)
         {
             var query = from m in context.Members
@@ -121,16 +156,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (memberId > 0) ? true : false;
         }
 
-        public async Task<List<ViewMember>> GetLeadersByClub(int clubId)
+        public async Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
-                        where m.ClubId.Equals(clubId)
-                                && (m.ClubRoleId == 1 || m.ClubRoleId == 2 || m.ClubRoleId == 3) // Leader, Vice President, Manager
-                        select new { m, u, cr };
+                        where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
+                                && (m.ClubRoleId.Equals(1) || m.ClubRoleId.Equals(2) || m.ClubRoleId.Equals(3) || m.ClubRoleId.Equals(4)) // Leader, Vice President, Manager, member
+                        select new { m, u, cr }; // if the club don't have enough 3 leaders => replace by member            
 
-            List<ViewMember> members = await query.Take(3).Select(x => new ViewMember()
+            List<ViewIntroClubMember> members = await query.Take(3).Select(x => new ViewIntroClubMember()
             {
                 Id = x.m.Id,
                 Name = x.u.Fullname,

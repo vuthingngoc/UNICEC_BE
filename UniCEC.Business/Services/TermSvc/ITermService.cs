@@ -10,7 +10,7 @@ namespace UniCEC.Business.Services.TermSvc
         public Task<ViewTerm> GetById(string token, int clubId, int id);
         public Task<ViewTerm> GetCurrentTermByClub(string token, int clubId);        
         public Task<PagingResult<ViewTerm>> GetByConditions(string token, int clubId, TermRequestModel request);
-        public Task<ViewTerm> Insert(TermInsertModel term);
+        public Task<ViewTerm> Insert(string token, TermInsertModel term);
         public Task Update(string token, TermUpdateModel term, int clubId);
         //public Task Delete(int id);
         public Task CloseOldTermByClub(int clubId);
