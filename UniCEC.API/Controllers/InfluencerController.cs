@@ -49,29 +49,29 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert a new influencer to the competition")]
-        public async Task<IActionResult> InsertInfluencer([FromBody] InfluencerInsertModel model)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewInfluencer influencer = await _influencerService.Insert(model, token);
-                return Ok(influencer);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "Insert a new influencer to the competition")]
+        //public async Task<IActionResult> InsertInfluencer([FromBody] InfluencerInsertModel model)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        ViewInfluencer influencer = await _influencerService.Insert(model, token);
+        //        return Ok(influencer);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (NullReferenceException)
+        //    {
+        //        return Ok(new List<object>());
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //}
 
         [HttpPut("{id}/upload-image")]
         [SwaggerOperation(Summary = "Update image for influencer in the competition")]
