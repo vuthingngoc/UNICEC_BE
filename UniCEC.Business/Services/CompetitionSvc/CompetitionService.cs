@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -55,9 +56,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IInfluencerInCompetitionRepo _influencerInCompetitionRepo;
         private ITermRepo _termRepo;
         private JwtSecurityTokenHandler _tokenHandler;
+        private readonly IConfiguration _configuration;
 
-        //20% for Seed Deposited
-        private double percentPoint = 0.2;
+       
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -73,6 +74,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IInfluencerRepo influencerRepo,
                                   IInfluencerInCompetitionRepo influencerInCompetitionRepo,
                                   ITermRepo termRepo,
+                                  IConfiguration configuration,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -90,6 +92,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _influencerInCompetitionRepo = influencerInCompetitionRepo;
             _termRepo = termRepo;
             _influencerRepo = influencerRepo;
+            _configuration = configuration;
+
+            
+            
         }
 
         public CompetitionService()
@@ -145,19 +151,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 bool roleLeader = false;
 
+
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+                double percentPoint = Double.Parse(_configuration.GetSection("StandardDifferenceInTeam:Difference").Value);
+                
+
                 if (string.IsNullOrEmpty(model.Name)
                     || string.IsNullOrEmpty(model.Content)
                     || string.IsNullOrEmpty(model.Address)
                     || string.IsNullOrEmpty(model.AddressName)
                     || model.CompetitionTypeId == 0
-                    || model.NumberOfParticipations == 0
-                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                    || model.NumberOfParticipations == 0                   
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.SeedsPoint == 0
                     || model.ClubId == 0)
-                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || StartTimeRegister Null " +
+                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null" +
                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
                 //------------- CHECK Club in system
                 Club club = await _clubRepo.Get(model.ClubId);
@@ -183,7 +193,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (roleLeader)
                         {
                             //------------ Check Date
-                            bool checkDate = CheckDate(model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
+                            bool checkDate = CheckDate(localTime, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                             if (checkDate)
                             {
                                 //------------ Check FK
@@ -291,10 +301,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     //--MinMemberInTeam
                                     competition.MinNumber =  0;
                                 }                              
-                                competition.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                                competition.CreateTime = localTime;
                                 competition.StartTime = model.StartTime;
                                 competition.EndTime = model.EndTime;
-                                competition.StartTimeRegister = model.StartTimeRegister;
+                                competition.StartTimeRegister = localTime; 
                                 competition.EndTimeRegister = model.EndTimeRegister;
                                 competition.Content = model.Content;
                                 competition.Fee = model.Fee;
