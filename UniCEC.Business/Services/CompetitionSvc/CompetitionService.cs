@@ -58,7 +58,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private JwtSecurityTokenHandler _tokenHandler;
         private readonly IConfiguration _configuration;
 
-       
+
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -94,8 +94,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _influencerRepo = influencerRepo;
             _configuration = configuration;
 
-            
-            
+
+
         }
 
         public CompetitionService()
@@ -154,14 +154,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
                 double percentPoint = Double.Parse(_configuration.GetSection("StandardDifferenceInTeam:Difference").Value);
-                
+
 
                 if (string.IsNullOrEmpty(model.Name)
                     || string.IsNullOrEmpty(model.Content)
                     || string.IsNullOrEmpty(model.Address)
                     || string.IsNullOrEmpty(model.AddressName)
                     || model.CompetitionTypeId == 0
-                    || model.NumberOfParticipations == 0                   
+                    || model.NumberOfParticipations == 0
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
@@ -273,7 +273,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 competition.Name = model.Name;
                                 if (model.IsEvent)
                                 {
-                                    competition.NumberOfTeam = 0;    // 
+                                    competition.NumberOfTeam = 0;// 
                                 }
                                 else
                                 {
@@ -297,14 +297,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 else
                                 {
                                     //--MaxMemberInTeam
-                                    competition.MaxNumber =  0;
+                                    competition.MaxNumber = 0;
                                     //--MinMemberInTeam
-                                    competition.MinNumber =  0;
-                                }                              
+                                    competition.MinNumber = 0;
+                                }
                                 competition.CreateTime = localTime;
                                 competition.StartTime = model.StartTime;
                                 competition.EndTime = model.EndTime;
-                                competition.StartTimeRegister = localTime; 
+                                competition.StartTimeRegister = localTime;
                                 competition.EndTimeRegister = model.EndTimeRegister;
                                 competition.Content = model.Content;
                                 competition.Fee = model.Fee;
@@ -1531,6 +1531,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (max < min)
             {
                 throw new ArgumentException("Max number can't lower than Min number !!!");
+            }
+
+            if (max - min > 3)
+            {
+                throw new ArgumentException("Difference the number of between another team is <= 3");
             }
             return true;
         }
