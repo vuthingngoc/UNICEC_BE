@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
@@ -24,9 +25,9 @@ namespace UniCEC.Business.Services.TeamSvc
         private IParticipantInTeamRepo _participantInTeamRepo;
         private JwtSecurityTokenHandler _tokenHandler;
 
-        public TeamService(ITeamRepo teamRepo, 
-            IParticipantRepo participantRepo, 
-            ICompetitionRepo competitionRepo, 
+        public TeamService(ITeamRepo teamRepo,
+            IParticipantRepo participantRepo,
+            ICompetitionRepo competitionRepo,
             ITeamRoleRepo teamRoleRepo,
             IParticipantInTeamRepo participantInTeamRepo)
         {
@@ -55,7 +56,6 @@ namespace UniCEC.Business.Services.TeamSvc
         public async Task<ViewTeam> InsertTeam(TeamInsertModel model, string token)
         {
 
-
             //đã vào thấy screen này thì có nghĩa là đã trở thành Paricipant Check phase
 
             //---------------------------------------------------------------------INSERT
@@ -81,7 +81,7 @@ namespace UniCEC.Business.Services.TeamSvc
 
             //ROLE OF Team Member
             //1.Leader
-            //2.Member
+            //2.Member       
             try
             {
                 int UserId = DecodeToken(token, "Id");
@@ -91,17 +91,17 @@ namespace UniCEC.Business.Services.TeamSvc
                  || string.IsNullOrEmpty(model.Description)) throw new ArgumentNullException("Competition Id Null || Name Null || Description Null");
 
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
-
+                //Check Competition
                 if (competition != null)
                 {
-                    //check competition is Event or not -> if event can't create team
-                    if (competition.NumberOfTeam != 0)
+                    //Check Competition can create Team EndTimeRegister < local time < StartTime
+                    if (CheckDate(competition.EndTimeRegister, competition.StartTime))
                     {
-                        if (await _participantRepo.Participant_In_Competition(UserId, model.CompetitionId) != null)
+                        //check competition is Event or not -> if event can't create team
+                        if (competition.NumberOfTeam != 0)
                         {
-                            if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
+                            if (await _participantRepo.Participant_In_Competition(UserId, model.CompetitionId) != null) // Check xem có phải là Participant kh 
                             {
-                                int numberStuOfTeam = (int)(competition.NumberOfParticipation / competition.NumberOfTeam);
                                 //-----------------Add Team
                                 Team team = new Team()
                                 {
@@ -109,8 +109,8 @@ namespace UniCEC.Business.Services.TeamSvc
                                     Name = model.Name,
                                     Description = model.Description,
                                     //number of student in team
-                                    NumberOfStudentInTeam = numberStuOfTeam,
-                                    //generate code
+                                    NumberOfStudentInTeam = 0,// auto vừa tạo là 0
+                                                              //generate code
                                     InvitedCode = await CheckExistCode(),
                                     //status available
                                     Status = TeamStatus.Available
@@ -130,32 +130,39 @@ namespace UniCEC.Business.Services.TeamSvc
                                         //auto status 
                                         Status = ParticipantInTeamStatus.InTeam
                                     };
-                                    await _participantInTeamRepo.Insert(pit);
-                                    return TransformViewTeam(getTeam);
-
+                                    int result = await _participantInTeamRepo.Insert(pit);
+                                    if (result > 0)
+                                    {
+                                        getTeam.NumberOfStudentInTeam++;
+                                        await _teamRepo.Update();
+                                        return TransformViewTeam(getTeam);
+                                    }
+                                    else
+                                    {
+                                        throw new ArgumentException("Add Team Leader Failed");
+                                    }
                                 }//end add team
                                 else
                                 {
                                     throw new ArgumentException("Add Team Failed");
                                 }
                             }
-                            //end check Number Of Team
+                            //end check is Participant
                             else
                             {
-                                throw new ArgumentException("Can't create Team beacause it's full");
+                                throw new UnauthorizedAccessException("You aren't participant in Competition");
                             }
                         }
-                        //end check is Participant
+                        //end check Event
                         else
                         {
-                            throw new UnauthorizedAccessException("You aren't participant in Competition");
+                            throw new ArgumentException("Event can't not create team !");
                         }
                     }
-                    //end check Event
                     else
                     {
-                        throw new ArgumentException("Event can't not create team !");
-                    }
+                        throw new ArgumentException("Can't create Team at this moment !!!");
+                    }             
                 }
                 //end check competition != null
                 else
@@ -226,7 +233,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                     }
                                     else
                                     {
-                                        t.Status = TeamStatus.Full;
+                                        t.Status = TeamStatus.IsLocked;
                                     }
 
                                     await _teamRepo.Update();
@@ -432,7 +439,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-               
+
 
                 int UserId = DecodeToken(token, "Id");
 
@@ -534,6 +541,37 @@ namespace UniCEC.Business.Services.TeamSvc
             var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
             return Int32.Parse(claim.Value);
         }
+
+        private bool CheckDate(DateTime EndTimeRegister, DateTime StartTime)
+        {
+            bool check = false;
+            DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+            //ETR < LT < ST
+            //ETR < LT
+            int resultLT1 = DateTime.Compare(localTime, EndTimeRegister);
+            if (resultLT1 > 0)
+            {
+                // LT < ST
+                int resultLT2 = DateTime.Compare(localTime, StartTime);
+                if (resultLT2 < 0)
+                {
+                    check = true;
+                    return check;
+                }
+            }
+            return check;
+        }
+
+
+
+        //if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
+        //{
+        //}
+        //end check Number Of Team
+        //else
+        //{
+        //throw new ArgumentException("Can't create Team beacause it's full");
+        //}
 
 
     }
