@@ -32,7 +32,7 @@ namespace UniCEC.API.Controllers
         //[AllowAnonymous]
         //[HttpGet("update-image")]
         //[SwaggerOperation(Summary = "update image")]
-        //public async Task<IActionResult> CreateImage(string filename)
+        //public async Task<IActionResult> CreateImage([FromQuery] string filename)
         //{
         //    try
         //    {

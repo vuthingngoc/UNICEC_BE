@@ -20,6 +20,5 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         // Nhat
         public Task<bool> CheckIsPublic(int id);
-        public Task<List<int>> GetUniversityByCompetition(int id);
     }
 }
