@@ -18,7 +18,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime CreateTime { get; set; }
         [JsonPropertyName("is_sponsor")]
         public bool IsSponsor { get; set; }
-        public bool Public { get; set; }      
+        public CompetitionScopeStatus Scope { get; set; }      
         public int View { get; set; }
 
         //-------------ADD Field           

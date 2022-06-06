@@ -26,7 +26,9 @@ namespace UniCEC.Data.Models.DB
         public string AddressName { get; set; }
         public string Address { get; set; }
         public int NumberOfParticipation { get; set; }
-        public int NumberOfTeam { get; set; }
+        public int? NumberOfTeam { get; set; }
+        public int? MinNumber { get; set; }
+        public int? MaxNumber { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
         public DateTime EndTimeRegister { get; set; }
@@ -38,7 +40,7 @@ namespace UniCEC.Data.Models.DB
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }
         public int View { get; set; }
-        public bool Public { get; set; }
+        public CompetitionScopeStatus Scope { get; set; }
         public bool IsSponsor { get; set; }
         public CompetitionStatus Status { get; set; }
 

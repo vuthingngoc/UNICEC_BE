@@ -60,11 +60,11 @@ namespace UniCEC.API.Controllers
         // GET: api/<MemberTakesActivityController>
         [HttpGet("top3")]
         [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status, public")]
-        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "public")] bool? Public)
+        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "public")] CompetitionScopeStatus? Scope)
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, Status, Public);
+                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, Status, Scope);
                 return Ok(result);
             }
             catch (NullReferenceException)
