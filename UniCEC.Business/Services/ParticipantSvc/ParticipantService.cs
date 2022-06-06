@@ -15,6 +15,7 @@ using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.Participant;
 
@@ -25,6 +26,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
         private IParticipantRepo _participantRepo;
         private ICompetitionRepo _competitionRepo;
         private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
+
         private IDepartmentInUniversityRepo _departmentInUniversityRepo;
         private IClubRepo _clubRepo;
         private JwtSecurityTokenHandler _tokenHandler;
@@ -98,55 +100,70 @@ namespace UniCEC.Business.Services.ParticipantSvc
                     if (await _participantRepo.CheckAddDuplicateUser(studentInfo, model.CompetitionId) == false)
                     {
                         //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
-                        bool round1 = false;                                                 
-                            //Pulic
-                            if (competition.Public)
+                        bool round1 = false;
+                        //Inter University
+                        if (competition.Scope == CompetitionScopeStatus.interUniversity)
+                        {
+                            //ai cũng có thể join
+                            round1 = true;
+                        }
+
+                        //NoPublic -- dành cho nội bộ trường
+                        if (competition.Scope == CompetitionScopeStatus.University)
+                        {
+                            //get Club in Competition to check university id
+                            List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
+                            int clubId = listComp_In_Club[0].ClubId;
+                            Club club = await _clubRepo.Get(clubId);
+                            int UniversityIdOfCompetition = club.UniversityId;
+
+                            if (studentInfo.UniversityId == UniversityIdOfCompetition)
                             {
-                                //ai cũng có thể join
                                 round1 = true;
                             }
-
-                            //NoPublic -- dành cho nội bộ trường
-
-
-                            //NoPublic -- dành riêng 1 hoặc nhiều Club
-                            if (competition.Public == false)
+                            else
                             {
-                                //chỉ kiểm tra trong trường                                
-                                //Khác university thì kh join đc 
-                                List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
-
-                                List<Club> listClub = new List<Club>();
-                                List<int> listClub_Id = new List<int>();
-
-                                foreach (CompetitionInClub cic in listComp_In_Club)
-                                {
-                                    listClub.Add(cic.Club);
-                                    listClub_Id.Add(cic.Club.Id);
-                                }
-
-                                int uniId_In_Comp = listClub.FirstOrDefault().UniversityId;
-
-                                //kiểm tra có trùng Uni hay không
-                                if (uniId_In_Comp == UniversityId)
-                                {
-                                    //kiểm tra xem có là thành viên trong CLB                                   
-                                    Member stuIsMember = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
-                                    if (stuIsMember != null)
-                                    {
-                                        round1 = true;
-                                    }
-                                    else
-                                    {
-                                        throw new ArgumentException("User isn't a Member, Competition can't support");
-                                    }
-                                }//end if uniId_In_Comp
-                                else
-                                {
-                                    throw new ArgumentException("User isn't a student in this University, Competition can't support");
-                                }
+                                throw new ArgumentException("User isn't a student in this University, Competition can't support");
                             }
-                        
+                        }
+
+                        //Scope = Club -- dành riêng 1 hoặc nhiều Club
+                        if (competition.Scope == CompetitionScopeStatus.Club)
+                        {
+                            //chỉ kiểm tra trong trường                                
+                            //Khác university thì kh join đc 
+                            List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
+
+                            //List<Club> listClub = new List<Club>();
+                            List<int> listClub_Id = new List<int>();
+
+                            foreach (CompetitionInClub cic in listComp_In_Club)
+                            {
+                                //listClub.Add(cic.Club);
+                                listClub_Id.Add(cic.Club.Id);
+                            }
+                            //kiểm tra xem có là thành viên trong CLB                                   
+                            Member stuIsMember = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
+                            if (stuIsMember != null)
+                            {
+                                round1 = true;
+                            }
+                            else
+                            {
+                                throw new ArgumentException("User isn't a Member, Competition can't support");
+                            }
+                            //int uniId_In_Comp = listClub.FirstOrDefault().UniversityId;
+
+                            //kiểm tra có trùng Uni hay không
+                            //if (uniId_In_Comp == UniversityId)
+                            //{
+                            //}//end if uniId_In_Comp
+                            // else
+                            // {
+                            //throw new ArgumentException("User isn't a student in this University, Competition can't support");
+                            //}
+                        }
+
                         //ROUND 2 - Check xem Competition is RegisterTime
                         bool round2 = false;
                         if (round1)
@@ -201,7 +218,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                             {
                                 participant.MemberId = member.Id;
                             }
-                            
+
                             //-------------- INSERT PARTICIPANT
                             int result = await _participantRepo.Insert(participant);
                             if (result != 0)

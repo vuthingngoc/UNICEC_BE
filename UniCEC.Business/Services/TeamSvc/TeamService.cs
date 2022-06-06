@@ -101,7 +101,7 @@ namespace UniCEC.Business.Services.TeamSvc
                         {
                             if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
                             {
-                                int numberStuOfTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
+                                int numberStuOfTeam = (int)(competition.NumberOfParticipation / competition.NumberOfTeam);
                                 //-----------------Add Team
                                 Team team = new Team()
                                 {
@@ -200,7 +200,7 @@ namespace UniCEC.Business.Services.TeamSvc
                             {
                                 //check number of member in team 
                                 Competition competition = await _competitionRepo.Get(team.CompetitionId);
-                                int NumberOfStudentInTeam = competition.NumberOfParticipation / competition.NumberOfTeam;
+                                int NumberOfStudentInTeam = (int)(competition.NumberOfParticipation / competition.NumberOfTeam);
                                 if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, NumberOfStudentInTeam))
                                 {
                                     //------ Add Participant in team

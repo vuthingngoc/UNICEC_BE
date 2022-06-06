@@ -12,7 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
         
         public Task<List<ViewClubInComp>> GetListClub_In_Competition(int competitionId);
         public Task<ViewCompetitionInClub> GetCompetitionInClub(int clubId, int competitionId);
-
+        
         // Nhat
         public Task<int> GetTotalEventOrganizedByClub(int clubId);
     }

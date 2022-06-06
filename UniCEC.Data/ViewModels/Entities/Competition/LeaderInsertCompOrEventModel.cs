@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
@@ -15,8 +17,13 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int CompetitionTypeId { get; set; }
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipations { get; set; }
-        [JsonPropertyName("number_of_team")]
-        public int NumberOfTeam { get; set; }
+
+        [JsonPropertyName("max_number_member_in_team")]
+        public int? MaxNumberMemberInTeam { get; set; }
+
+        [JsonPropertyName("min_number_member_in_team")]
+        public int? MinNumberMemberInTeam { get; set; }
+
         [JsonPropertyName("start_time_register")]
         public DateTime StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
@@ -27,19 +34,22 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime EndTime { get; set; }
         public string Content { get; set; }
         public double Fee { get; set; }
-        public bool Public { get; set; }
+        public CompetitionScopeStatus Scope { get; set; }
+        [JsonPropertyName("is_event")]
+        public bool IsEvent { get; set; }
         [JsonPropertyName("address_name")]
         public string AddressName { get; set; }
         public string Address { get; set; }
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
-        //[JsonPropertyName("seeds_deposited")]
-        //public double SeedsDeposited { get; set; }
 
         //List Department Id Belong To University
         [JsonPropertyName("list_department_id")]
         public List<int>? ListDepartmentId { get; set; }
         
+        //Add competition entity
+        public AddCompetitionEntity? CompetitionEntity { get; set; }
+
         //List Influencer Id Belong To System
         [JsonPropertyName("list_influencer")]
         public List<InfluencerInsertModel>? ListInfluencer { get; set; }

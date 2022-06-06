@@ -16,7 +16,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
         //Get top 3 EVENT or COMPETITION by Status
-        public Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId , bool? Event, CompetitionStatus? Status, bool? Public);
+        public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId , bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
 
         // Nhat
         public Task<bool> CheckIsPublic(int id);

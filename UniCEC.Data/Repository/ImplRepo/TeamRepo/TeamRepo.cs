@@ -36,7 +36,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                                    select c;
 
             Competition comp = queryCompetition.FirstOrDefault();
-            int numberOfTeam = comp.NumberOfTeam;
+            int numberOfTeam = (int)comp.NumberOfTeam;
             int count = await query.CountAsync();
             if (count < numberOfTeam)
             {

@@ -11,7 +11,11 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     {
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
-        public string Name { get; set; }    
+        public string Name { get; set; }
+        
+        //IMG file convert base 64 string
+        [JsonPropertyName("base64_string")]
+        public string Base64String { get; set; }
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }

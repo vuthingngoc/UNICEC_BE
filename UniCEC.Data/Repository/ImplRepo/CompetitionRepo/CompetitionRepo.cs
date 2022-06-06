@@ -44,7 +44,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //status
             if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
             //Public
-            if (request.Public.HasValue) query = query.Where(comp => comp.Public == request.Public);
+            if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope);
             //Serach Event
             if (request.Event.HasValue)
             {
@@ -109,15 +109,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 ViewCompetition vc = new ViewCompetition()
                 {
                     CompetitionId = compe.Id,
+                    CompetitionTypeName = compe.CompetitionType.TypeName,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
-                    Public = compe.Public,
+                    Scope = compe.Scope,
                     View = compe.View,
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = list_View_DeparmentInComp,
                     ClubInCompetition = List_vcip
-
                 };
                 Competitions.Add(vc);
             }//end each competition
@@ -128,7 +128,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //Get top 3 EVENT or COMPETITION by Status
         //gần ngày hiện tại
         //Thuộc Club
-        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, bool? Public)
+        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope)
         {
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
@@ -158,8 +158,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             {
                 if (Event.Value == true) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.NumberOfTeam == 0);
             }
-            //Public
-            if (Public.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Public == Public);
+            //Scope
+            if (Scope.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Scope == Scope);
             //Status
             if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
 
@@ -232,11 +232,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
                     CompetitionTypeName = competitionTypeName,
-                    Public = compe.Public,
+                    Scope = compe.Scope,
                     View = compe.View,
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = list_View_DeparmentInComp,
+                    DepartmentInCompetition = list_View_DeparmentInComp,                   
                     ClubInCompetition = List_vcip
                 };
                 competitions.Add(vc);
@@ -250,7 +250,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         {
             var query = from c in context.Competitions
                         where c.Id.Equals(id)
-                        select c.Public;
+                        select c.Scope == CompetitionScopeStatus.interUniversity;
 
             return await query.FirstOrDefaultAsync();
         }
