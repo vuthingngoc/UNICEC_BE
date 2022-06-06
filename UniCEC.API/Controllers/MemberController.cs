@@ -19,17 +19,17 @@ namespace UniCEC.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
-    public class MemberController : ControllerBase // not authorize role in club yet !!!
+    public class MemberController : ControllerBase 
     {
         private IMemberService _memberService;
 
-        public MemberController(IMemberService ImemberService)
+        public MemberController(IMemberService memberService)
         {
-            _memberService = ImemberService;
+            _memberService = memberService;
         }
 
         [HttpGet("club/{id}")]
-        [SwaggerOperation(Summary = "Get all members in a club")]
+        [SwaggerOperation(Summary = "Get all members in a club - club member")]
         public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] PagingRequest request)
         {
             try
@@ -54,7 +54,7 @@ namespace UniCEC.API.Controllers
 
         // GET api/<MemberController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get detail member by id")]
+        [SwaggerOperation(Summary = "Get detail member by id - club member")]
         public async Task<IActionResult> GetMemberById(int id)
         {
             try
@@ -78,7 +78,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("leaders/club/{id}")]
-        [SwaggerOperation(Summary = "Get top leaders in a club")]
+        [SwaggerOperation(Summary = "Get top leaders in a club - authenticated user")]
         public async Task<IActionResult> GetLeaders(int id)
         {
             try
@@ -97,7 +97,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("new/quantity/club/{id}")]
-        [SwaggerOperation(Summary = "Get new members in current month of a club")]
+        [SwaggerOperation(Summary = "Get new members in current month of a club - club member")]
         public async Task<IActionResult> GetQuantityNewMembers(int id)
         {
             try
@@ -122,7 +122,7 @@ namespace UniCEC.API.Controllers
 
         // Add Member In Club
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert member")]
+        [SwaggerOperation(Summary = "Insert member - leader or vice president")]
         public async Task<IActionResult> InsertMember([FromBody] MemberInsertModel model)
         {
             try
@@ -187,7 +187,7 @@ namespace UniCEC.API.Controllers
 
         // PUT api/<MemberController>/5
         [HttpPut]
-        [SwaggerOperation(Summary = "Update member")]
+        [SwaggerOperation(Summary = "Update member - leader or vice president")]
         public async Task<IActionResult> UpdateMember([FromBody] MemberUpdateModel model)
         {
             try
@@ -220,7 +220,7 @@ namespace UniCEC.API.Controllers
 
         // DELETE api/<MemberController>/5
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete member")]
+        [SwaggerOperation(Summary = "Delete member - leader or vice president")]
         public async Task<IActionResult> DeleteMember(int id)
         {
             try

@@ -17,7 +17,7 @@ namespace UniCEC.Business.Services.FileSvc
         public FileService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;
+            _bucket = _configuration.GetSection("Firebase:Bucket").Value;
         }
 
         public bool ValidationFile(IFormFile file)

@@ -74,7 +74,7 @@ namespace UniCEC.Business.Services.CitySvc
         //{
         //    Stream stream = ConvertBase64ToStream(base64String);
 
-        //    string bucket = _configuration.GetSection("Firebase").GetSection("Bucket").Value;//"unics-e46a4.appspot.com";
+        //    string bucket = _configuration.GetSection("Firebase:Bucket").Value;//"unics-e46a4.appspot.com";
 
         //    var cancellationToken = new CancellationTokenSource().Token;
         //    var firebaseStorage = new FirebaseStorage(bucket);
@@ -85,7 +85,7 @@ namespace UniCEC.Business.Services.CitySvc
 
         //public async Task<string> GetUrlFromFilenameAsync(string filename)
         //{
-        //    return await new FirebaseStorage("unics-e46a4.appspot.com").Child("assets").Child($"{filename}").GetDownloadUrlAsync();
+        //    return await new FirebaseStorage(_configuration.GetSection("Firebase:Bucket").Value).Child("assets").Child($"{filename}").GetDownloadUrlAsync();
         //}
 
 

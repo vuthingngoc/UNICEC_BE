@@ -33,7 +33,7 @@ namespace UniCEC.API.Controllers
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewClub club = await _clubService.GetByClub(token, id, universityId);
+                ViewClub club = await _clubService.GetByClub(token, id);
                 return Ok(club);
             }
             catch(UnauthorizedAccessException ex)

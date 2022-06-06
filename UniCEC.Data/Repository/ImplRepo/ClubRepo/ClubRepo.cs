@@ -17,15 +17,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
         }
 
-        public async Task<ViewClub> GetById(int id, int roleId, int universityId)
+        public async Task<ViewClub> GetById(int id, int roleId)
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
-                        where c.Id.Equals(id) && c.UniversityId.Equals(universityId)
+                        where c.Id.Equals(id)
                         select new { c, u };
 
             // student and sponsor role
-            if (roleId != 1) query = query.Where(x => x.c.Status.Equals(true));
+            if (roleId != 1 && roleId != 4) query = query.Where(x => x.c.Status.Equals(true));
 
             ViewClub club = await query.Select(x => new ViewClub()
             {
@@ -79,7 +79,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                         select new { c, u };
 
             // student and sponsor role
-            if (roleId != 1) query = query.Where(x => x.c.Status.Equals(true));
+            if (roleId != 1 && roleId != 4) query = query.Where(x => x.c.Status.Equals(true));
 
             int totalCount = query.Count();
 

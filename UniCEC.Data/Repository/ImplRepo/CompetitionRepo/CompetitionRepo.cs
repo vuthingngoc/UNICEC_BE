@@ -254,17 +254,5 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             return await query.FirstOrDefaultAsync();
         }
-
-        public async Task<List<int>> GetUniversityByCompetition(int id)
-        {
-            var query = from cic in context.CompetitionInClubs
-                        join c in context.Clubs on cic.ClubId equals c.Id
-                        where cic.CompetitionId.Equals(id)
-                        select new { c };
-
-            List<int> universityIds = await query.Select(x => x.c.UniversityId).ToListAsync();
-
-            return (universityIds.Count() > 0) ? universityIds : null;
-        }
     }
 }
