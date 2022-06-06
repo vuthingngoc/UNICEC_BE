@@ -23,9 +23,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         [JsonPropertyName("min_number_member_in_team")]
         public int? MinNumberMemberInTeam { get; set; }
-
-        [JsonPropertyName("start_time_register")]
-        public DateTime StartTimeRegister { get; set; }
+        
         [JsonPropertyName("end_time_register")]
         public DateTime EndTimeRegister { get; set; }
         [JsonPropertyName("start_time")]
