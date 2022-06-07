@@ -64,8 +64,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                                                   TotalMember = x.c.TotalMember,
                                                   UniversityId = x.c.UniversityId,
                                                   UniversityName = x.u.Name,
+                                                  Image = x.c.Image,
+                                                  ClubContact = x.c.ClubContact,
+                                                  ClubFanpage = x.c.ClubFanpage,
                                                   Status = x.c.Status,
-                                                  Image = x.c.Image
                                               }).ToListAsync();
 
             return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -93,8 +95,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                     TotalMember = x.c.TotalMember,
                     UniversityId = x.c.UniversityId,
                     UniversityName = x.u.Name,
+                    Image = x.c.Image,
+                    ClubContact = x.c.ClubContact,
+                    ClubFanpage = x.c.ClubFanpage,
                     Status = x.c.Status,
-                    Image = x.c.Image
                 }
             ).ToListAsync();
 
@@ -119,8 +123,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                 TotalMember = x.c.TotalMember,
                 UniversityId = x.c.UniversityId,
                 UniversityName = x.u.Name,
+                Image = x.c.Image,
+                ClubContact = x.c.ClubContact,
+                ClubFanpage = x.c.ClubFanpage,
                 Status = x.c.Status,
-                Image = x.c.Image
             }).ToListAsync();
 
             return (clubs.Count > 0) ? clubs : null;
@@ -144,8 +150,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                                                   TotalMember = x.c.TotalMember,
                                                   UniversityId = x.c.UniversityId,
                                                   UniversityName = x.u.Name,
+                                                  Image = x.c.Image,
+                                                  ClubContact = x.c.ClubContact,
+                                                  ClubFanpage = x.c.ClubFanpage,
                                                   Status = x.c.Status,
-                                                  Image = x.c.Image
                                               }).ToListAsync();
 
             return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;

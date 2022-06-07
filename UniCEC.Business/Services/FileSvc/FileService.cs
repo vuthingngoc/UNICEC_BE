@@ -69,6 +69,12 @@ namespace UniCEC.Business.Services.FileSvc
             await new FirebaseStorage(_bucket).Child("assets").Child($"{oldFilename}").PutAsync(stream, cancellationToken);
         }
 
+        public async Task UploadFile(string oldFilename, string base64String)
+        {
+            Stream stream = ConvertBase64ToStream(base64String);
+            await Upload(Guid.Parse(oldFilename), stream);
+        }
+
         public async Task<string> UploadFile(string base64String)
         {
             Stream stream = ConvertBase64ToStream(base64String);
