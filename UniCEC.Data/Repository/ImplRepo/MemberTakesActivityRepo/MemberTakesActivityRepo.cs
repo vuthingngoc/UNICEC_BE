@@ -19,10 +19,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         }
 
-        public async Task<int> GetNumOfMemInTask_Status(int ClubActivityId, MemberTakesActivityStatus Status)
+        public async Task<int> GetNumOfMemInTask_Status(int competitionActivityId, MemberTakesActivityStatus Status)
         {
             var query = from mta in context.MemberTakesActivities
-                        where mta.ClubActivityId == ClubActivityId
+                        where mta.CompetitionActivityId == competitionActivityId
                         select mta;
 
             query = query.Where(m => m.Status == Status);
@@ -34,11 +34,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return totalMemTakesTask_Status;
         }
 
-        public async Task<int> GetNumOfMemInTask(int ClubActivityId)
+        public async Task<int> GetNumOfMemInTask(int competitionActivityId)
         {
             //
             var query = from mta in context.MemberTakesActivities
-                        where mta.ClubActivityId == ClubActivityId
+                        where mta.CompetitionActivityId == competitionActivityId
                         select mta;
 
             List<MemberTakesActivity> list = await query.ToListAsync();
@@ -48,11 +48,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return totalMemTakesTask;
         }
 
-        public async Task<bool> CheckMemberTakesTask(int clubActivityId, int memberId)
+        public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
         {
             //
             var query = from mta in context.MemberTakesActivities
-                        where mta.ClubActivityId == clubActivityId && mta.MemberId == memberId
+                        where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
                         select mta;
             int check = query.Count();
             if (check > 0)
@@ -108,7 +108,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             {
                 Id = mta.Id,
                 MemberId = mta.MemberId,
-                ClubActivityId = mta.ClubActivityId,
+                CompetitionActivityId = mta.CompetitionActivityId,
                 StartTime = mta.StartTime,
                 Deadline = mta.Deadline,
                 EndTime = mta.EndTime,
@@ -122,7 +122,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public async Task UpdateDeadlineDate(int ClubActivityId, DateTime deadline)
         {
             List<MemberTakesActivity> memberTakesActivities = await (from mta in context.MemberTakesActivities
-                                                                     where mta.ClubActivityId == ClubActivityId
+                                                                     where mta.CompetitionActivityId == ClubActivityId
                                                                      select mta).ToListAsync();
 
             if (memberTakesActivities.Count != 0)
