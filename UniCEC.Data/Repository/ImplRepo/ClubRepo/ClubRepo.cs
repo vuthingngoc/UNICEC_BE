@@ -163,6 +163,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                          where cic.CompetitionId.Equals(competitionId)
                          select cic.ClubId).ToListAsync();
         }
+
+        public async Task<int> GetUniversityByClub(int clubId)
+        {
+            return await(from c in context.Clubs
+                         where c.Id.Equals(clubId)
+                         select c.UniversityId).FirstOrDefaultAsync();
+        }
     }
 }
 

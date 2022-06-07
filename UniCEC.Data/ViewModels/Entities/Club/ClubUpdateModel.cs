@@ -13,5 +13,10 @@ namespace UniCEC.Data.ViewModels.Entities.Club
         public int TotalMember { get; set; }
         public DateTime Founding { get; set; }
         public bool Status { get; set; }
+        [JsonPropertyName("club_fanpage")]
+        public string ClubFanpage { get; set; }
+        [JsonPropertyName("club_contact")]
+        public string ClubContact { get; set; }
+
     }
 }
