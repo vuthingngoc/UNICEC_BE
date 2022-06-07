@@ -120,7 +120,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException)
             {
-                return Ok(new object());
+                return Ok(new List<object>());
             }
             catch (ArgumentNullException ex)
             {

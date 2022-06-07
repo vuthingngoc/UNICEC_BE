@@ -4,8 +4,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.TeamSvc;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
 
@@ -25,6 +28,83 @@ namespace UniCEC.API.Controllers
         {
             _teamService = teamService;
         }
+
+
+        // GET api/<TeamController>
+        [Authorize(Roles = "Student")]
+        [HttpGet("all")]
+        [SwaggerOperation(Summary = "Get all list team in competition")]
+        public async Task<IActionResult> GetAllTeamInCompetition([FromQuery] TeamRequestModel request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewTeam> result = await _teamService.GetAllTeamInCompetition(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // GET api/<TeamController>
+        [Authorize(Roles = "Student")]
+        [HttpGet("detail")]
+        [SwaggerOperation(Summary = "Get detail a team in competition")]
+        public async Task<IActionResult> GetDetailTeamInCompetition([FromQuery(Name = "teamId")] int teamId, [FromQuery(Name = "competitionId")] int competititonId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewDetailTeam result = await _teamService.GetDetailTeamInCompetition(teamId, competititonId, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
 
 
         // POST api/<TeamController>
