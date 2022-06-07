@@ -119,7 +119,7 @@ namespace UniCEC.Business.Services.ClubSvc
             if (roleId == 3)// is student role
             {
                 CompetitionScopeStatus scope = await _competitionRepo.GetScopeCompetition(competitionId);
-                if (scope.Equals(CompetitionScopeStatus.interUniversity)
+                if (scope.Equals(CompetitionScopeStatus.InterUniversity)
                         && !clubs.Items[0].UniversityId.Equals(universityId))
                 {
                     throw new UnauthorizedAccessException("You do not have permission to access this resource");

@@ -14,20 +14,30 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         public CompetitionManagerRepo(UniCECContext context) : base(context)
         {
         }
+    
 
-        public Task<bool> CheckValidCompetitionManager(int userId, int competitionId)
-        {
-            //var query = from cm in context.CompetitionManagers
-            //            where 
-            throw new NotImplementedException();
-        }
+        //public async Task<CompetitionManager> GetManagerInCompetitionManager(int CompetitionId, int ClubId, int MemberId)
+        //{
+        //    var query = from cic in context.CompetitionInClubs
+        //                where cic.CompetitionId == CompetitionId && cic.ClubId == ClubId
+        //                from cm in context.CompetitionManagers
+        //                where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId                     
+        //                select cm;
 
-        public async Task<CompetitionManager> GetCompetitionManager(int CompetitionId, int ClubId, int MemberId)
+        //    CompetitionManager competitionManager = await query.FirstOrDefaultAsync();
+        //    if (competitionManager != null)
+        //    {
+        //        return competitionManager;
+        //    }
+        //    return null; 
+        //}
+
+        public async Task<CompetitionManager> GetMemberInCompetitionManager(int CompetitionId, int MemberId)
         {
             var query = from cic in context.CompetitionInClubs
-                        where cic.CompetitionId == CompetitionId && cic.ClubId == ClubId
+                        where cic.CompetitionId == CompetitionId
                         from cm in context.CompetitionManagers
-                        where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId                     
+                        where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId
                         select cm;
 
             CompetitionManager competitionManager = await query.FirstOrDefaultAsync();
@@ -35,7 +45,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             {
                 return competitionManager;
             }
-            return null; 
+            return null;
         }
     }
 }
