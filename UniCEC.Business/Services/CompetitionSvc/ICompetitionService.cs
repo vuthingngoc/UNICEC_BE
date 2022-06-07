@@ -34,17 +34,22 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //Competition - Manager
         public Task<ViewCompetitionManager> AddMemberInCompetitionManager(CompetitionManagerInsertModel model, string token);
-        //public Task<bool> UpdateMemberInCompetitionManager(CompetitionManagerUpdateModel model, string token);
+
+        public Task<bool> UpdateMemberInCompetitionManager(CompetitionManagerUpdateModel model, string token);
 
 
         //-----------------------------------------------------Sponsor       
         public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
         public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDeleteModel model, string token);
 
+
+        //-----------------------------------------------------Get       
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
         //Get top 3 EVENT or COMPETITION by Status
         public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
+        //Get All Manager in competition manager
+        public Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel model, string token);
 
     }
 }

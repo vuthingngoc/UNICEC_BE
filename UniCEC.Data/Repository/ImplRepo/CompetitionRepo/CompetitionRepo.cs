@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UniCEC.Data.Enum;
 using System;
 using UniCEC.Data.Common;
+using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 {
@@ -236,7 +237,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     View = compe.View,
                     CreateTime = compe.CreateTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = list_View_DeparmentInComp,                   
+                    DepartmentInCompetition = list_View_DeparmentInComp,
                     ClubInCompetition = List_vcip
                 };
                 competitions.Add(vc);
@@ -245,11 +246,50 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return (competitions.Count > 0) ? competitions : null;
         }
 
+
+
+
+        public async Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel request)
+        {
+            //
+            List<ViewCompetitionManager> list_viewCompetitionManagers = new List<ViewCompetitionManager>();
+
+            //CompetitionManager
+            var query = from cic in context.CompetitionInClubs
+                        where cic.CompetitionId == request.CompetitionId
+                        from cm in context.CompetitionManagers
+                        where cm.CompetitionInClubId == cic.Id
+                        select cm;
+
+            int totalCount = await query.CountAsync();
+
+            List<CompetitionManager> list_compeManager = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+
+            foreach (CompetitionManager competitionManager in list_compeManager)
+            {
+                ViewCompetitionManager vcm = new ViewCompetitionManager()
+                {
+                    Id = competitionManager.Id,
+                    CompetitionInClubId = competitionManager.CompetitionInClubId,
+                    CompetitionRoleId = competitionManager.CompetitionRoleId,
+                    MemberId = competitionManager.MemberId,
+                    FullName = competitionManager.Fullname,
+                };
+
+                list_viewCompetitionManagers.Add(vcm);
+            }
+
+            return (list_viewCompetitionManagers.Count > 0) ? new PagingResult<ViewCompetitionManager>(list_viewCompetitionManagers, totalCount, request.CurrentPage, request.PageSize) : null;
+
+        }
+
+
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
         {
             var query = from c in context.Competitions
                         where c.Id.Equals(id)
+
                         select c.Scope;
 
             return await query.FirstOrDefaultAsync();
