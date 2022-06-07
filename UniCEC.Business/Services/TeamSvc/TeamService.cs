@@ -5,14 +5,21 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
+using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
+using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.TeamSvc
 {
@@ -24,35 +31,129 @@ namespace UniCEC.Business.Services.TeamSvc
         private ITeamRoleRepo _teamRoleRepo;
         private IParticipantInTeamRepo _participantInTeamRepo;
         private JwtSecurityTokenHandler _tokenHandler;
+        private ITermRepo _termRepo;
+        private IClubRepo _clubRepo;
+        private IMemberRepo _memberRepo;
+        private ICompetitionManagerRepo _competitionManagerRepo;
+
 
         public TeamService(ITeamRepo teamRepo,
-            IParticipantRepo participantRepo,
-            ICompetitionRepo competitionRepo,
-            ITeamRoleRepo teamRoleRepo,
-            IParticipantInTeamRepo participantInTeamRepo)
+                           IParticipantRepo participantRepo,
+                           ICompetitionRepo competitionRepo,
+                           ITeamRoleRepo teamRoleRepo,
+                           ITermRepo termRepo,
+                           IClubRepo clubRepo,
+                           IMemberRepo memberRepo,
+                           ICompetitionManagerRepo competitionManagerRepo,
+                           IParticipantInTeamRepo participantInTeamRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
             _competitionRepo = competitionRepo;
             _teamRoleRepo = teamRoleRepo;
             _participantInTeamRepo = participantInTeamRepo;
+            _termRepo = termRepo;
+            _clubRepo = clubRepo;
+            _memberRepo = memberRepo;
+            _competitionManagerRepo = competitionManagerRepo;
         }
 
         public TeamService()
         {
         }
 
-        public Task<PagingResult<ViewTeam>> GetAllPaging(PagingRequest request)
+
+
+        //GET ALL TEAM IN COMPETITION
+        public async Task<PagingResult<ViewTeam>> GetAllTeamInCompetition(TeamRequestModel request, string token)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (request.CompetitionId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null");
+
+                int UserId = DecodeToken(token, "Id");
+                Competition competition = await _competitionRepo.Get(request.CompetitionId);
+                //----- Check Competition id
+                if (competition != null)
+                {
+                    //----- Check Participant 
+                    Participant p = await _participantRepo.Participant_In_Competition(UserId, request.CompetitionId);
+                    if (p != null)
+                    {
+                        PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
+                        return result;
+                    }
+                    //end check is Participant
+                    else
+                    {
+                        throw new UnauthorizedAccessException("You aren't participant in Competition");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition is not found");
+                }            
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<ViewTeam> GetByTeamId(int id)
+        public async Task<ViewDetailTeam> GetDetailTeamInCompetition(int teamId, int competitionId, string token)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (teamId == 0 || competitionId == 0) throw new ArgumentNullException("|| Competition Id Null  || Team Null");
+
+                int UserId = DecodeToken(token, "Id");
+                Competition competition = await _competitionRepo.Get(competitionId);
+                //----- Check Competition id
+                if (competition != null)
+                {
+                    //----- Check Team id
+                    Team team = await _teamRepo.Get(teamId);
+                    if (team != null)
+                    {
+                        //----- Check Team id is belong to this competition
+                        if (competition.Id == team.CompetitionId)
+                        {
+                            //----- Check Participant  
+                            Participant p = await _participantRepo.Participant_In_Competition(UserId, competitionId);
+                            if (p != null)
+                            {
+                                ViewDetailTeam vdt = await _teamRepo.GetDetailTeamInCompetition(teamId, competitionId);
+                                return vdt;                             
+                            }
+                            //end check is Participant
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You aren't participant in Competition");
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Team is not belong to this competition");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Team is not found");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Competition is not found");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-
+        //INSERT
         public async Task<ViewTeam> InsertTeam(TeamInsertModel model, string token)
         {
 
@@ -110,7 +211,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                     Description = model.Description,
                                     //number of student in team
                                     NumberOfStudentInTeam = 0,// auto vừa tạo là 0
-                                                              //generate code
+                                    //generate code
                                     InvitedCode = await CheckExistCode(),
                                     //status available
                                     Status = TeamStatus.Available
@@ -162,12 +263,12 @@ namespace UniCEC.Business.Services.TeamSvc
                     else
                     {
                         throw new ArgumentException("Can't create Team at this moment !!!");
-                    }             
+                    }
                 }
                 //end check competition != null
                 else
                 {
-                    throw new ArgumentException("Competition Or Event is not found");
+                    throw new ArgumentException("Competition is not found");
                 }
             }
             catch (Exception)
@@ -321,7 +422,6 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
-
         public async Task<bool> UpdateTeamRole(ParticipantInTeamUpdateModel model, string token)
         {
             try
@@ -384,7 +484,6 @@ namespace UniCEC.Business.Services.TeamSvc
                 throw;
             }
         }
-
 
         public async Task<bool> DeleteByLeader(int TeamId, string token)
         {
@@ -519,6 +618,7 @@ namespace UniCEC.Business.Services.TeamSvc
             }
             return code;
         }
+
         //----------------------------------------------------------------------------------------Check
         //check exist code
         private async Task<string> CheckExistCode()
@@ -562,16 +662,6 @@ namespace UniCEC.Business.Services.TeamSvc
             return check;
         }
 
-
-
-        //if (await _teamRepo.CheckNumberOfTeam(model.CompetitionId))
-        //{
-        //}
-        //end check Number Of Team
-        //else
-        //{
-        //throw new ArgumentException("Can't create Team beacause it's full");
-        //}
 
 
     }

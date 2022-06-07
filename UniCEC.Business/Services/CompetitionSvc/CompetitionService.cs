@@ -170,7 +170,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-
         public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
