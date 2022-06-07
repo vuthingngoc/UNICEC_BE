@@ -246,11 +246,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         }
 
         // Nhat
-        public async Task<bool> CheckIsPublic(int id)
+        public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
         {
             var query = from c in context.Competitions
                         where c.Id.Equals(id)
-                        select c.Scope == CompetitionScopeStatus.interUniversity;
+                        select c.Scope;
 
             return await query.FirstOrDefaultAsync();
         }

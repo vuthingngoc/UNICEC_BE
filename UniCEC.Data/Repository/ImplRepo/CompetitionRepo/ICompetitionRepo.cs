@@ -19,6 +19,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId , bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
 
         // Nhat
-        public Task<bool> CheckIsPublic(int id);
+        public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
     }
 }
