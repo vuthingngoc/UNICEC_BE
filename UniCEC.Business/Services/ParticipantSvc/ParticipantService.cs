@@ -202,6 +202,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                             participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
                             participant.StudentId = UserId;
                             participant.CompetitionId = competition.Id;
+                            
 
                             //IsMember
                             List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
@@ -224,7 +225,8 @@ namespace UniCEC.Business.Services.ParticipantSvc
                             if (result != 0)
                             {
                                 Participant p = await _participantRepo.Get(result);
-                                return TransformViewModel(p);
+                                //                              
+                                return TransformViewModel(p, studentInfo);
                             }
                         }
                         return null;
@@ -247,7 +249,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             }
         }
 
-        private ViewParticipant TransformViewModel(Participant participant)
+        private ViewParticipant TransformViewModel(Participant participant, User student)
         {
             return new ViewParticipant()
             {
@@ -255,7 +257,8 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 CompetitionId = participant.CompetitionId,
                 MemberId = participant.MemberId,
                 RegisterTime = participant.RegisterTime,
-                StudentId = participant.StudentId
+                StudentId = participant.StudentId,
+                Avatar = student.Avatar,
             };
         }
 
