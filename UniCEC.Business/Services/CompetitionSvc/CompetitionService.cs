@@ -1566,10 +1566,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw new ArgumentException("Max number can't lower than Min number !!!");
             }
 
-            if (max - min > 3)
-            {
-                throw new ArgumentException("Difference the number of between another team is <= 3");
-            }
+            //if (max - min > 3)
+            //{
+            //    throw new ArgumentException("Difference the number of between another team is <= 3");
+            //}
             return true;
         }
 

@@ -143,13 +143,21 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             {
                 foreach (Participant participant in participants)
                 {
+                    //get avatar
+                    User user = await (from u in context.Users
+                                      from p in context.Participants
+                                      where p.StudentId == u.Id
+                                      select u).FirstOrDefaultAsync();
+
+
                     ViewParticipant vp = new ViewParticipant()
                     {
                         Id = participant.Id,
                         CompetitionId = participant.CompetitionId,
                         MemberId = participant.MemberId,
                         RegisterTime = participant.RegisterTime,
-                        StudentId = participant.StudentId,                        
+                        StudentId = participant.StudentId,
+                        Avatar = user.Avatar,
                     };
 
                     viewParticipants.Add(vp);   
