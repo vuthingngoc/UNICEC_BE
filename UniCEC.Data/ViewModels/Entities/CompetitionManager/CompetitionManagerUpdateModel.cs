@@ -15,10 +15,11 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionManager
         [JsonPropertyName("member_id")]
         public int MemberId { get; set; }
 
-        [JsonPropertyName("club_id")]
-        public int ClubId { get; set; }
-
         [JsonPropertyName("role_competition_id")]
         public int RoleCompetitionId { get; set; }
+
+        //---------Author to check user is Leader of Club   
+        [JsonPropertyName("club_id")]
+        public int ClubId { get; set; }
     }
 }

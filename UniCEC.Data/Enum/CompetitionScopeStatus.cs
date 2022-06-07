@@ -8,7 +8,7 @@ namespace UniCEC.Data.Enum
 {
     public enum CompetitionScopeStatus
     {
-        interUniversity,
+        InterUniversity,
         University,
         Club
     }

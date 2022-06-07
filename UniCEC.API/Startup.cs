@@ -47,6 +47,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
@@ -140,6 +141,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionRepo, CompetitionRepo>();
             services.AddTransient<ICompetitionTypeRepo, CompetitionTypeRepo>();
             services.AddTransient<ICompetitionManagerRepo, CompetitionManagerRepo>();
+            services.AddTransient<ICompetitionRoleRepo, CompetitionRoleRepo>();
             services.AddTransient<IDepartmentInUniversityRepo, DepartmentInUniversityRepo>();
             services.AddTransient<IDepartmentRepo, DepartmentRepo>();
             services.AddTransient<IInfluencerInCompetitionRepo, InfluencerInCompetitionRepo>();

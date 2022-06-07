@@ -102,7 +102,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                         //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
                         bool round1 = false;
                         //Inter University
-                        if (competition.Scope == CompetitionScopeStatus.interUniversity)
+                        if (competition.Scope == CompetitionScopeStatus.InterUniversity)
                         {
                             //ai cũng có thể join
                             round1 = true;
