@@ -364,5 +364,20 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             await Update();
         }
+
+        // use when insert club
+        public int CheckValidNewLeader(int userId, int universityId)
+        {
+            var query = from m in context.Members
+                        join u in context.Users on m.UserId equals u.Id
+                        where m.UserId.Equals(userId) && u.UniversityId.Equals(universityId)
+                        select m;
+
+            if (!query.Any()) return -1;
+
+            query = query.Where(member => member.Status.Equals(MemberStatus.Active) && member.ClubRoleId.Equals(1)); // club role leader
+
+            return (query.Any()) ? 1 : 0;
+        }
     }
 }
