@@ -23,7 +23,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel request);
 
         // Nhat
-        public Task<bool> CheckIsPublic(int id);
-        public Task<List<int>> GetUniversityByCompetition(int id);
+        public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
     }
 }

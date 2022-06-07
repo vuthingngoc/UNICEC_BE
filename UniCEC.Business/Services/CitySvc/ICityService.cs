@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.CitySvc
         //public Task DeleteFile(string url);
         //public Task UpdateFile(string oldFileName, IFormFile file, string token);
         //public Task<string> UploadFile(string base64String);
-        //public Task<string> GetUrlFromFilenameAsync(string filename);     
+        //public Task<string> GetUrlFromFilenameAsync(string filename);
         public Task<PagingResult<ViewCity>> SearchCitiesByName(string name, string token, PagingRequest request);
         public Task<ViewCity> GetByCityId(int id, string token);
         public Task<ViewCity> Insert(CityInsertModel city);

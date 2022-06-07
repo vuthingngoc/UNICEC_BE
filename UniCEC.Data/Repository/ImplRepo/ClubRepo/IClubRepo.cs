@@ -9,13 +9,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
     public interface IClubRepo : IRepository<Club>
     {
-        public Task<ViewClub> GetById(int id, int roleId, int universityId);
+        public Task<ViewClub> GetById(int id, int roleId);
         public Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request);
         public Task<List<int>> GetByCompetition(int competitionId);
         public Task<PagingResult<ViewClub>> GetByName(int universityId, int roleId, string name, PagingRequest request);
         public Task<List<ViewClub>> GetByUser(int userId);
         public Task<PagingResult<ViewClub>> GetByUniversity(int universityId, PagingRequest request);
         public Task<int> CheckExistedClubName(int universityId, string name);
+        public Task<int> GetUniversityByClub(int clubId);
        
     }
 }

@@ -26,6 +26,8 @@ namespace UniCEC.Business.Services.ClubSvc
         private ICompetitionRepo _competitionRepo;
         private ITermRepo _termRepo;
 
+        private JwtSecurityTokenHandler _tokenHandler;
+
         public ClubService(IClubRepo clubRepo, ICompetitionActivityRepo clubActivityRepo, ITermRepo termRepo
                             , IMemberRepo memberRepo, ICompetitionInClubRepo competitionInClubRepo
                                 , ICompetitionRepo competitionRepo)
@@ -38,23 +40,27 @@ namespace UniCEC.Business.Services.ClubSvc
             _termRepo = termRepo;
         }
 
-        public async Task<ViewClub> GetByClub(string token, int id, int universityId)
+        private int DecodeToken(string token, string nameClaim)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
-            var universityClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            int roleId = Int32.Parse(roleClaim.Value);
-            int uniId = Int32.Parse(universityClaim.Value);
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
+        }
+
+        public async Task<ViewClub> GetById(string token, int id)
+        {
+            int roleId = DecodeToken(token, "RoleId");
+            int uniId = DecodeToken(token, "UniversityId");
+
+            ViewClub club = await _clubRepo.GetById(id, roleId);
+            if (club == null) throw new NullReferenceException("Not found this club");
 
             // is student role
-            if (roleId.Equals(3) && !uniId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");  
-
-            ViewClub club = await _clubRepo.GetById(id, roleId, universityId);
-            if (club == null) throw new NullReferenceException("Not found this club");
+            if (roleId.Equals(3) && !uniId.Equals(club.UniversityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
 
             // add more info
             club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(id);
-            club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(id) + club.TotalActivity;
+            club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(id);
             club.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(id);
 
             return club;
@@ -62,59 +68,41 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
-            var universityClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            int roleId = Int32.Parse(roleClaim.Value);
-            int universityId = Int32.Parse(universityClaim.Value);
-
-            if(roleId == 3)// is student role
-            {
-                bool isPublic = await _competitionRepo.CheckIsPublic(competitionId);
-                if (!isPublic)
-                {
-                    List<int> universityIds = await _competitionRepo.GetUniversityByCompetition(competitionId);
-                    if (universityIds == null) throw new NullReferenceException("Not found this competition");
-
-                    bool isSameUni = false;
-                    foreach(int id in universityIds)
-                    {
-                        if (id.Equals(universityId))
-                        {
-                            isSameUni = true;
-                            break;
-                        }
-                    }
-
-                    if (isSameUni == false) throw new UnauthorizedAccessException("You do not have permission to access this competition");
-                }
-            }
+            int roleId = DecodeToken(token, "RoleId");
+            int universityId = DecodeToken(token, "UniversityId");
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByCompetition(competitionId, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
+
+            if (roleId == 3)// is student role
+            {
+                CompetitionScopeStatus scope = await _competitionRepo.GetScopeCompetition(competitionId);
+                if (scope.Equals(CompetitionScopeStatus.interUniversity)
+                        && !clubs.Items[0].UniversityId.Equals(universityId))
+                {
+                    throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                }
+            }
+
             return clubs;
         }
-
-        // not finish yet
+        
         public async Task<PagingResult<ViewClub>> GetByName(string token, int universityId, string name, PagingRequest request)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var universityIdClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
-            int uniId = Int32.Parse(universityIdClaim.Value);
-            int roleId = Int32.Parse(roleClaim.Value);
-
-            // student and sponsor
-            if (roleId != 1 && !uniId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            int roleId = DecodeToken(token, "RoleId");
+            int uniId = DecodeToken(token, "UniversityId");
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByName(universityId, roleId, name, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this name");
+
+            // student and sponsor
+            if (roleId != 1 && roleId != 4 && !universityId.Equals(uniId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
 
             // add more info
             foreach (ViewClub element in clubs.Items)
             {
                 element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
             }
 
@@ -123,9 +111,7 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<List<ViewClub>> GetByUser(string token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var claim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            int userId = Int32.Parse(claim.Value);
+            int userId = DecodeToken(token, "Id");
 
             List<ViewClub> clubs = await _clubRepo.GetByUser(userId);
             if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
@@ -134,7 +120,7 @@ namespace UniCEC.Business.Services.ClubSvc
             foreach (ViewClub element in clubs)
             {
                 element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
             }
 
@@ -143,11 +129,9 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var universityClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
-            int universityId = Int32.Parse((universityClaim.Value).ToString());
-            int roleId = Int32.Parse((roleClaim.Value).ToString());
+
+            int roleId = DecodeToken(token, "RoleId");
+            int universityId = DecodeToken(token, "UniversityId");
 
             // student role
             if (roleId == 3 && !universityId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this club");
@@ -159,7 +143,7 @@ namespace UniCEC.Business.Services.ClubSvc
             foreach (ViewClub element in clubs.Items)
             {
                 element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id) + element.TotalActivity;
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseLastMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
             }
 
@@ -168,100 +152,117 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<ViewClub> Insert(string token, ClubInsertModel model)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var roleClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("RoleId"));
-            var userIdClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            if (roleClaim == null || userIdClaim == null) throw new ArgumentException();
-            int roleId = Int32.Parse(roleClaim.Value);
-            int userId = Int32.Parse(userIdClaim.Value);
-            if (roleId == 2) throw new UnauthorizedAccessException("You do not have permission to add new club");
+            int roleId = DecodeToken(token, "RoleId");
+            int universityId = DecodeToken(token, "UniversityId");
 
-            if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 || model.TotalMember == 0
-                || string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.MinValue)
-                throw new ArgumentNullException("Description Null || UniversityId Null || TotalMember Null || Name Null || Founding Null");
+            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !universityId.Equals(model.UniversityId))) 
+                throw new UnauthorizedAccessException("You do not have permission to add new club");
 
-            int clubId = await _clubRepo.CheckExistedClubName(model.UniversityId, model.Name);
-            if (clubId > 0) throw new ArgumentException("Duplicated club name");
+            if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 || 
+                    string.IsNullOrEmpty(model.Name) || model.Founding == DateTime.MinValue)
+                throw new ArgumentNullException("Description Null || UniversityId Null || Name Null || Founding Null");
+
+            int checkClubId = await _clubRepo.CheckExistedClubName(model.UniversityId, model.Name);
+            if (checkClubId > 0) throw new ArgumentException("Duplicated club name");            
 
             Club club = new Club()
             {
                 Description = model.Description,
                 Founding = model.Founding,
                 Name = model.Name,
-                TotalMember = model.TotalMember,
+                TotalMember = 1, // default number member 
                 UniversityId = model.UniversityId,
-                Status = true, // default status when insert
+                Status = true, // default status 
                 Image = model.Image,
+                ClubContact = model.ClubContact,
+                ClubFanpage = model.ClubFanpage
             };
-            int id = await _clubRepo.Insert(club);
+            int clubId = await _clubRepo.Insert(club);
 
             DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
-            Member member = new Member()
-            {
-                //StudentId = userId,
-                //JoinDate = currentTime
-            };
-            int memberId = await _memberRepo.Insert(member);
-
             Term term = new Term()
             {
                 Name = "First Term", // default name
                 CreateTime = currentTime,
-                EndTime = currentTime.AddYears(1),
+                EndTime = currentTime.AddYears(1), // default distance of time
                 Status = true // default status
             };
             int termId = await _termRepo.Insert(term);
+            
+            Member member = new Member()
+            {
+                ClubId = clubId,
+                ClubRoleId = 1, // leader
+                StartTime = currentTime,
+                TermId = termId,
+                UserId = model.UserId,
+                Status = MemberStatus.Active // default status 
+            };
+            await _memberRepo.Insert(member);
 
-            //ClubHistory clubHistory = new ClubHistory()
-            //{
-            //    ClubId = id,
-            //    ClubRoleId = 1, // leader
-            //    MemberId = memberId,
-            //    TermId = termId,
-            //    StartTime = currentTime,
-            //    Status = MemberStatus.Active
-            //};
-            //int clubHistoryId = await _clubHistoryRepo.Insert(clubHistory);
-
-            return await _clubRepo.GetById(clubId, roleId, model.UniversityId);
+            return await _clubRepo.GetById(clubId, roleId);
         }
 
         public async Task Update(string token, ClubUpdateModel model)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var claim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            int userId = Int32.Parse(claim.Value);
+            int userId = DecodeToken(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.Id);
+
             // if role is not leader or vice president
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to update this club");
 
             Club club = await _clubRepo.Get(model.Id);
             if (club == null) throw new NullReferenceException("Not found this club");
-            int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, model.Name);
-            if (clubId > 0 && clubId != club.Id) throw new ArgumentException("Duplicated club name");
+            
+            if(!string.IsNullOrEmpty(model.Name))
+            {
+                int clubId = await _clubRepo.CheckExistedClubName(club.UniversityId, model.Name);
+                if (clubId > 0 && clubId != club.Id) throw new ArgumentException("Duplicated club name");
+                club.Name = model.Name;
+            }
 
             if (!string.IsNullOrEmpty(model.Description)) club.Description = model.Description;
-            if (model.Founding != DateTime.MinValue) club.Founding = model.Founding;
-            if (!string.IsNullOrEmpty(model.Name)) club.Name = model.Name;
+            
+            if (model.Founding != DateTime.MinValue) club.Founding = model.Founding;           
+            
             if (model.TotalMember != 0) club.TotalMember = model.TotalMember;
-            club.Status = model.Status;
+            
+            if(model.Status != false) club.Status = model.Status;
+            
             if (!string.IsNullOrEmpty(model.Image)) club.Image = model.Image;
 
+            if(!string.IsNullOrEmpty(model.ClubContact)) club.ClubContact = model.ClubContact;
+
+            if(!string.IsNullOrEmpty(model.ClubFanpage)) club.ClubFanpage = model.ClubFanpage;
+
+            await _clubRepo.Update();
+        }
+
+        public async Task Update(string token, int clubId, bool status) // for admin
+        {
+            int roleId = DecodeToken(token, "RoleId");
+            int uniId = DecodeToken(token, "UniversityId");
+            int universityId = await _clubRepo.GetUniversityByClub(clubId);
+
+            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !uniId.Equals(universityId))) 
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            Club club = await _clubRepo.Get(clubId);
+            if (club == null) throw new NullReferenceException("Not found this club");
+            club.Status = status;
             await _clubRepo.Update();
         }
 
         public async Task Delete(string token, int id)
         {
-            var tokenHandler = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var userIdClaim = tokenHandler.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = DecodeToken(token, "Id");
 
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, id);
             if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to delete this club");
 
             Club clubObject = await _clubRepo.Get(id);
             if (clubObject == null) throw new NullReferenceException("Not found this club");
-            clubObject.Status = false;
+            clubObject.Status = false; // default status for delete
             await _clubRepo.Update();
         }
     }

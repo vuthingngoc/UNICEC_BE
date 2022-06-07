@@ -28,12 +28,12 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get club by id")]
-        public async Task<IActionResult> GetClubById(int id, [FromQuery, BindRequired] int universityId)
+        public async Task<IActionResult> GetClubById(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewClub club = await _clubService.GetByClub(token, id, universityId);
+                ViewClub club = await _clubService.GetById(token, id);
                 return Ok(club);
             }
             catch(UnauthorizedAccessException ex)
@@ -143,7 +143,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert club")]
+        [SwaggerOperation(Summary = "Insert club - Admin")]
         public async Task<IActionResult> InsertClub([FromBody] ClubInsertModel club)
         {
             try
@@ -175,13 +175,49 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        [SwaggerOperation(Summary = "Update club")]
+        [SwaggerOperation(Summary = "Update club - leader and vice president")]
         public async Task<IActionResult> UpdateClub([FromBody] ClubUpdateModel club)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _clubService.Update(token, club);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        [HttpPut("{id}/status")]
+        [SwaggerOperation(Summary = "Update status of a club - Admin")]
+        public async Task<IActionResult> UpdateStatusClub(int id, [FromQuery, BindRequired] bool status)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _clubService.Update(token, id, status);
                 return Ok();
             }
             catch (UnauthorizedAccessException ex)
