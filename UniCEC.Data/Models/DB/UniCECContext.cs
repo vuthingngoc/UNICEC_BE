@@ -68,7 +68,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.ClubActivityId).HasColumnName("ClubActivityID");
+                entity.Property(e => e.CompetitionActivityId).HasColumnName("CompetitionActivityID");
 
                 entity.Property(e => e.ImageUrl)
                     .IsRequired()
@@ -79,11 +79,11 @@ namespace UniCEC.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(255);
 
-                entity.HasOne(d => d.ClubActivity)
+                entity.HasOne(d => d.CompetitionActivity)
                     .WithMany(p => p.ActivitiesEntities)
-                    .HasForeignKey(d => d.ClubActivityId)
+                    .HasForeignKey(d => d.CompetitionActivityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Activitie__ClubA__5DCAEF64");
+                    .HasConstraintName("FK__Activitie__Compe__5DCAEF64");
             });
 
             modelBuilder.Entity<City>(entity =>
@@ -165,9 +165,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.CompetitionTypeId).HasColumnName("CompetitionTypeID");
 
-                entity.Property(e => e.Content)
-                    .IsRequired()
-                    .HasMaxLength(1000);
+                entity.Property(e => e.Content).IsRequired();
 
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
 
@@ -505,7 +503,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.ClubActivityId).HasColumnName("ClubActivityID");
+                entity.Property(e => e.CompetitionActivityId).HasColumnName("CompetitionActivityID");
 
                 entity.Property(e => e.Deadline).HasColumnType("datetime");
 
@@ -515,11 +513,11 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
 
-                entity.HasOne(d => d.ClubActivity)
+                entity.HasOne(d => d.CompetitionActivity)
                     .WithMany(p => p.MemberTakesActivities)
-                    .HasForeignKey(d => d.ClubActivityId)
+                    .HasForeignKey(d => d.CompetitionActivityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MemberTak__ClubA__71D1E811");
+                    .HasConstraintName("FK__MemberTak__Compe__71D1E811");
 
                 entity.HasOne(d => d.Member)
                     .WithMany(p => p.MemberTakesActivities)

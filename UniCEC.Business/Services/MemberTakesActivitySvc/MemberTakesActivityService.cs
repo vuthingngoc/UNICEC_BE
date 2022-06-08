@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             return new ViewMemberTakesActivity()
             {
                 Id = mta.Id,
-                ClubActivityId = mta.ClubActivityId,
+                CompetitionActivityId = mta.CompetitionActivityId,
                 MemberId = mta.MemberId,
                 StartTime = mta.StartTime,
                 EndTime = mta.EndTime,

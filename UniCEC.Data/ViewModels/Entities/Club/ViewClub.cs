@@ -23,8 +23,8 @@ namespace UniCEC.Data.ViewModels.Entities.Club
         public int TotalActivity { get; set; }
         [JsonPropertyName("total_member")]
         public int TotalMember { get; set; }
-        [JsonPropertyName("member_increase_last_month")]
-        public int MemberIncreaseLastMonth { get; set; }
+        [JsonPropertyName("member_increase_this_month")]
+        public int MemberIncreaseThisMonth { get; set; }
         public DateTime Founding { get; set; }
         public bool Status { get; set; }
 

@@ -2,7 +2,7 @@
 {
     public enum CompetitionScopeStatus
     {
-        interUniversity,
+        InterUniversity,
         University,
         Club
     }

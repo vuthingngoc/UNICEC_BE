@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace UniCEC.Business.Services.FileSvc
         public bool ValidationFile(IFormFile file)
         {
             const int MAX_SIZE = 5 * 1024 * 1024; // 5MB
-            string[] listExtensions = { ".png", ".jpeg", ".jpg", ".jfif", ".gif", ".webp" }; 
+            string[] listExtensions = { ".png", ".jpeg", ".jpg", ".jfif", ".gif", ".webp" };
 
             bool isValid = false;
 
@@ -44,7 +45,7 @@ namespace UniCEC.Business.Services.FileSvc
                     }
                 }
             }
-            
+
             return isValid;
         }
 
@@ -55,7 +56,7 @@ namespace UniCEC.Business.Services.FileSvc
 
             Stream stream = file.OpenReadStream();
             var filename = Guid.NewGuid();
-            
+
             return await Upload(filename, stream);
         }
 
@@ -69,6 +70,12 @@ namespace UniCEC.Business.Services.FileSvc
             await new FirebaseStorage(_bucket).Child("assets").Child($"{oldFilename}").PutAsync(stream, cancellationToken);
         }
 
+        public async Task UploadFile(string oldFilename, string base64String)
+        {
+            Stream stream = ConvertBase64ToStream(base64String);
+            await Upload(Guid.Parse(oldFilename), stream);
+        }
+
         public async Task<string> UploadFile(string base64String)
         {
             Stream stream = ConvertBase64ToStream(base64String);
@@ -78,6 +85,8 @@ namespace UniCEC.Business.Services.FileSvc
 
         private Stream ConvertBase64ToStream(string base64)
         {
+            base64 = base64.Trim();
+            if ((base64.Length % 4 != 0) || !Regex.IsMatch(base64, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None)) throw new ArgumentException("Invalid image");
             byte[] bytes = Convert.FromBase64String(base64);
             return new MemoryStream(bytes);
         }

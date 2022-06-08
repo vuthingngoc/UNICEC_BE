@@ -53,7 +53,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
                         from p in context.Participants
                         where us.Id == p.StudentId
                         from pit in context.ParticipantInTeams
-                        //where pit.ParticipantId == p.Id && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
+                        where pit.ParticipantId == p.Id && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
                         select pit;
 
             ParticipantInTeam participant_in_team = await query.FirstOrDefaultAsync();
@@ -80,7 +80,20 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
                 context.ParticipantInTeams.Remove(participant);
                 await Update();
             }
-           
+
+        }
+
+        public async Task<int> GetNumberOfMemberInTeam(int teamId, int competitionId)
+        {
+            var query = from t in context.Teams
+                        where t.CompetitionId == competitionId
+                        from pit in context.ParticipantInTeams
+                        where pit.TeamId == teamId && pit.TeamId == t.Id
+                        select pit;
+
+            int count = await query.CountAsync();
+
+            return count;
         }
     }
 }

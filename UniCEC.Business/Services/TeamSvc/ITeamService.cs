@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
@@ -7,9 +8,11 @@ namespace UniCEC.Business.Services.TeamSvc
 {
     public interface ITeamService
     {
-        public Task<PagingResult<ViewTeam>> GetAllPaging(PagingRequest request);
-        public Task<ViewTeam> GetByTeamId(int id);    
-                
+               
+        public Task<PagingResult<ViewTeam>> GetAllTeamInCompetition(TeamRequestModel request, string token);
+
+        public Task<ViewDetailTeam> GetDetailTeamInCompetition(int teamId, int competitionId, string token);
+
         //-------------------------------------INSERT
         public Task<ViewTeam> InsertTeam(TeamInsertModel model, string Token);
         public Task<ViewParticipantInTeam> InsertMemberInTeam(ParticipantInTeamInsertModel model, string Token);

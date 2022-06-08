@@ -12,6 +12,10 @@ namespace UniCEC.Data.ViewModels.Entities.Participant
         public int? MemberId { get; set; }
         [JsonPropertyName("student_id")]
         public int StudentId { get; set; }
+
+        [JsonPropertyName("student_avatar")]
+        public string Avatar { get; set; }
+
         [JsonPropertyName("register_time")]
         public DateTime RegisterTime { get; set; }
     }
