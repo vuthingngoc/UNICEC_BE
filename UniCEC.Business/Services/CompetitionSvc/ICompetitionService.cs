@@ -24,7 +24,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
-        public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file);
+        public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token);
         public Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
