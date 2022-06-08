@@ -62,7 +62,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 //lấy department ID
                 List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
 
-                List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
+                //              
+                var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
+                List<CompetitionInDepartment> list_CompetitionInDepartment =  query_List_CompetitionInDepartment.ToList();
 
                 //lấy Club Owner
                 List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
@@ -83,7 +85,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         {
                             Id = club.Id,
                             Name = club.Name,
-                            Image = club.Image
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage
                         };
 
                         List_vcip.Add(vcip);
@@ -173,7 +176,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 //lấy department ID
                 List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
 
-                List<CompetitionInDepartment> list_CompetitionInDepartment = (List<CompetitionInDepartment>)compe.CompetitionInDepartments;
+                var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
+                List<CompetitionInDepartment> list_CompetitionInDepartment = query_List_CompetitionInDepartment.ToList();
 
                 //lấy Club Owner
                 List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
@@ -194,7 +198,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         {
                             Id = club.Id,
                             Name = club.Name,
-                            Image = club.Image
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage
                         };
 
                         List_vcip.Add(vcip);

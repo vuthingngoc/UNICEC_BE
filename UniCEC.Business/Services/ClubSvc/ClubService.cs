@@ -239,7 +239,8 @@ namespace UniCEC.Business.Services.ClubSvc
             await _memberRepo.Insert(member);
 
             ViewClub viewClub = await _clubRepo.GetById(clubId, roleId);
-            return await AddMoreInfoClub(viewClub);            
+
+            return await AddMoreInfoClub(viewClub);
         }
 
         public async Task Update(string token, ClubUpdateModel model)

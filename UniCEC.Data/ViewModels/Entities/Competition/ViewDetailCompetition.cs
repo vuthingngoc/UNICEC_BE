@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
+using UniCEC.Data.ViewModels.Entities.Influencer;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -20,7 +22,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipation { get; set; }
         [JsonPropertyName("number_of_team")]
-        public int NumberOfTeam { get; set; }
+        public int? NumberOfTeam { get; set; }
 
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }
@@ -66,11 +68,12 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
 
         //------------- ADD Field Infuencer   -> Object Array
+        [JsonPropertyName("influencers_in_competition")]
+        public List<ViewInfluencerInCompetition> InfluencerInCompetition { get; set; }
 
-
-        //------------- ADD Field Competition Entity   
-        [JsonPropertyName("img_url")]
-        public string ImgUrl { get; set; }
+        //------------- ADD Field Competition Entity -> Object Array  
+        [JsonPropertyName("competition_entities")]
+        public List<ViewCompetitionEntity> CompetitionEntities { get; set; }
 
         //------------- ADD number of participant joining
         [JsonPropertyName("number_of_participant_join")]

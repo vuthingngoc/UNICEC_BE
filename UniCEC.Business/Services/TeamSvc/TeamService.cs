@@ -179,8 +179,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 //Check Competition
                 if (competition != null)
                 {
-                    //Check Competition can create Team EndTimeRegister < local time < StartTime
-                    if (CheckDate(competition.EndTimeRegister, competition.StartTime))
+                    //Check Competition can create Team StartTimeRegister < local time < StartTime
+                    if (CheckDate(competition.StartTimeRegister, competition.StartTime))
                     {
                         //check competition is Event or not -> if event can't create team
                         if (competition.NumberOfTeam != 0)
@@ -648,13 +648,13 @@ namespace UniCEC.Business.Services.TeamSvc
             return Int32.Parse(claim.Value);
         }
 
-        private bool CheckDate(DateTime EndTimeRegister, DateTime StartTime)
+        private bool CheckDate(DateTime StartTimeRegister, DateTime StartTime)
         {
             bool check = false;
             DateTime localTime = new LocalTime().GetLocalTime().DateTime;
-            //ETR < LT < ST
-            //ETR < LT
-            int resultLT1 = DateTime.Compare(localTime, EndTimeRegister);
+            //STR < LT < ST
+            //STR < LT
+            int resultLT1 = DateTime.Compare(localTime, StartTimeRegister);
             if (resultLT1 > 0)
             {
                 // LT < ST

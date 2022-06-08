@@ -138,9 +138,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get EVENT or COMPETITION by conditions
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
         {
-            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
-            if (result == null) throw new NullReferenceException();
-            return result;
+            
+            
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
+                if (result == null) throw new NullReferenceException();
+                return result;
+            
+            
+            
         }
 
         //Get All Manager In Competition
@@ -169,7 +174,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-
         public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
@@ -181,8 +185,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
-                double percentPoint = Double.Parse(_configuration.GetSection("StandardDifferenceInTeam:Difference").Value);
-
+                double percentPoint = Double.Parse(_configuration.GetSection("StandardDepositedPoint:Difference").Value);
 
                 if (string.IsNullOrEmpty(model.Name)
                     || string.IsNullOrEmpty(model.Content)
@@ -221,7 +224,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (roleLeader)
                         {
                             //------------ Check Date
-                            bool checkDate = CheckDate(localTime, model.EndTimeRegister, model.StartTime, model.EndTime, false);
+                            //StartTimeRegister == local time
+                            bool checkDate = CheckDate(localTime, localTime, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                             if (checkDate)
                             {
                                 //------------ Check FK
@@ -274,21 +278,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                                 //Add Competition Entity
                                 bool insertCompetitionEntity;
-                                if (model.CompetitionEntity != null)
+                                if (!string.IsNullOrEmpty(model.CompetitionEntity.NameEntity) && !string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
                                 {
-                                    if (string.IsNullOrEmpty(model.CompetitionEntity.NameEntity) || string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
-                                    {
-                                        throw new ArgumentException("Name or Base64 can not null");
-                                    }
-                                    else
-                                    {
-                                        insertCompetitionEntity = true;
-                                    }
+                                    insertCompetitionEntity = true;
                                 }
                                 else
                                 {
                                     insertCompetitionEntity = false;
-
                                 }
 
                                 //------------ Insert Competition
@@ -305,7 +301,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 }
                                 else
                                 {
-                                    competition.NumberOfTeam = null; // Offical Team is shown when Competition is in starting time
+                                    competition.NumberOfTeam = -1; // Offical Team is shown when Competition is in starting time
                                 }
                                 competition.NumberOfParticipation = model.NumberOfParticipations;
 
@@ -394,7 +390,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                                 InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                                                 {
                                                     CompetitionId = comp.Id,
-                                                    //InfluencerId = influ, -> result
+                                                    InfluencerId = result                                                
                                                 };
                                                 await _influencerInCompetitionRepo.Insert(influ_in_comp);
                                             }
@@ -462,7 +458,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file)
+        public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token)
         {
             try
             {
@@ -485,10 +481,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
 
                     int id = await _competitionEntityRepo.Insert(competitionEntity);
-                                 
+
                     if (id > 0)
                     {
-                       
                         CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
                         //get IMG from Firebase                        
@@ -508,7 +503,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Id = entity.Id,
                             Name = entity.Name,
                             CompetitionId = entity.CompetitionId,
-                            ImageUrl = entity.ImageUrl,
+                            ImageUrl = imgUrl,
                         };
                     }
                     return null;
@@ -623,6 +618,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                    || model.ClubId == 0)
                     throw new ArgumentNullException("|| Competition Id Null  " +
                                                      " ClubId Null");
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
                 if (Check)
@@ -634,27 +630,27 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //TH1 STR
                     if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate((DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                     }
                     //TH2 ETR
                     if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
                     }
                     //TH3 ST
                     if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
                     }
                     //TH4 ET
                     if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate(comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
                     }
                     //TH5 new STR ETR ST ET
                     if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
                     {
-                        checkDate = CheckDate((DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
+                        checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
                     }
                     if (checkDate)
                     {
@@ -836,7 +832,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-                 
                     List<int> list_iic_Id = new List<int>();
                     List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
 
@@ -857,7 +852,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                             {
                                 CompetitionId = model.CompetitionId,
-                                //InfluencerId = influ, -> này là lưu result
+                                InfluencerId = result
                             };
 
                             int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
@@ -1245,7 +1240,39 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<ViewDetailCompetition> TransformViewDetailCompetition(Competition competition)
         {
             //List Influencer In Competition (id img)
+            List<ViewInfluencerInCompetition> list_InfluencerInCompetition = new List<ViewInfluencerInCompetition>();
 
+            List<int> list_InfluencerInCompetition_Id = await _influencerInCompetitionRepo.GetListInfluencer_In_Competition_Id(competition.Id);
+
+            if (list_InfluencerInCompetition_Id != null)
+            {
+                foreach (int id in list_InfluencerInCompetition_Id)
+                {
+                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+
+                    //get IMG from Firebase                        
+                    string imgUrl_Influencer;
+
+                    try
+                    {
+                        imgUrl_Influencer = await _fileService.GetUrlFromFilenameAsync(iic.Influencer.ImageUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        imgUrl_Influencer = "";
+                    }
+
+                    ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
+                    {
+                        CompetitionId = iic.CompetitionId,
+                        InfluencerInCompetitionId = iic.Id,
+                        Id = iic.Influencer.Id,
+                        ImageUrl = imgUrl_Influencer,
+                        Name = iic.Influencer.Name
+                    };
+                    list_InfluencerInCompetition.Add(viic);
+                }
+            }
 
             //List Sponsors in Competition
             List<ViewSponsorInComp> SponsorsInCompetition = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(competition.Id);
@@ -1256,24 +1283,44 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //List Department in Competition
             List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
 
+            //List Competition Entity
+            List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+            List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(competition.Id);
+
+            if (CompetitionEntities != null)
+            {
+                foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                {
+                    //get IMG from Firebase                        
+                    string imgUrl_CompetitionEntity;
+                    try
+                    {
+                        imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        imgUrl_CompetitionEntity = "";
+                    }
+
+                    ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                    {
+                        Id = competitionEntity.Id,
+                        CompetitionId = competitionEntity.CompetitionId,
+                        Name = competitionEntity.Name,
+                        ImageUrl = imgUrl_CompetitionEntity,
+                    };
+                    //
+                    ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                }
+            }
+
             //Number Of Participant Join This Competition
             int NumberOfParticipantJoin = await _participantRepo.NumOfParticipant(competition.Id);
 
             //Competition type name
-            CompetitionType competitionType = await _competitionTypeRepo.Get(competition.Id);
-            string competitionTypeName = competitionType.TypeName;           
-            CompetitionEntity compeEntity = await _competitionEntityRepo.Get(competition.Id);
-
-            string imgUrl;
-
-            try
-            {
-                 imgUrl = await _fileService.GetUrlFromFilenameAsync(compeEntity.ImageUrl);
-            }
-            catch (Exception ex)
-            {
-                 imgUrl = "";
-            }
+            CompetitionType competitionType = await _competitionTypeRepo.Get(competition.CompetitionTypeId);
+            string competitionTypeName = competitionType.TypeName;
 
             return new ViewDetailCompetition()
             {
@@ -1300,15 +1347,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Status = competition.Status,
                 View = competition.View,
                 //
-                ClubInCompetition = ClubsInCompetition,
+                InfluencerInCompetition = (list_InfluencerInCompetition != null) ? list_InfluencerInCompetition : new List<ViewInfluencerInCompetition>(),
                 //
-                SponsorInCompetition = SponsorsInCompetition,
+                ClubInCompetition = (ClubsInCompetition != null) ? ClubsInCompetition : new List<ViewClubInComp>(),
                 //
-                DepartmentInCompetition = DepartmentsInCompetition_Id,
+                SponsorInCompetition = (SponsorsInCompetition != null) ? SponsorsInCompetition : new List<ViewSponsorInComp>(),
+                //
+                DepartmentInCompetition = (DepartmentsInCompetition_Id != null) ? DepartmentsInCompetition_Id : new List<ViewDeparmentInComp>(),
+                // 
+                CompetitionEntities = (ListView_CompetitionEntities != null) ? ListView_CompetitionEntities : new List<ViewCompetitionEntity>(),
                 //
                 NumberOfParticipantJoin = NumberOfParticipantJoin,
-                //
-                ImgUrl = imgUrl
+
             };
         }
 
@@ -1364,7 +1414,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Check Date Insert - Update
-        private bool CheckDate(DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime, bool Update)
+        private bool CheckDate(DateTime localTime, DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime, bool Update)
         {
 
             //condition
@@ -1385,10 +1435,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 //ROUND 1 
                 //CHECK LOCALTIME < STR < ETR < ST < ET -> LocalTime
-                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+                //DateTime localTime = new LocalTime().GetLocalTime().DateTime;
                 // resultLT1 < STR (sớm hơn)
                 int resultLT1 = DateTime.Compare(localTime, StartTimeRegister);
-                if (resultLT1 < 0)
+                if (resultLT1 <= 0)
                 {
                     //resultLT2 < ETR (sớm hơn)
                     int resultLT2 = DateTime.Compare(localTime, EndTimeRegister);
@@ -1412,6 +1462,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //ROUND 2
             if (round1)
             {
+                //STR == LocalTime 
                 //STR < ETR < ST < ET -> STR true
                 //kq 1 < 0 -> STR < ETR (sớm hơn)
                 int kq1 = DateTime.Compare(StartTimeRegister, EndTimeRegister);
@@ -1468,8 +1519,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             return result;
         }
-
-
+        
         private int DecodeToken(string token, string nameClaim)
         {
             if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();

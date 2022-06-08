@@ -112,7 +112,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                 StartTime = mta.StartTime,
                 Deadline = mta.Deadline,
                 EndTime = mta.EndTime,
-                //Status = mta.Status,
+                Status = mta.Status,
             }).ToListAsync();
 
             //
@@ -133,10 +133,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
                 }
             }
             context.SaveChanges();
-
-
         }
-
-
     }
 }

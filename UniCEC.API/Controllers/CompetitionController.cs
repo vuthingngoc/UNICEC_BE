@@ -38,7 +38,7 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<CompetitionController>
         [HttpGet]
-        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.Launching, 1.HappenningSoon, 2.Registering, 3.Happening, 4.Ending, 5.Canceling")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by conditions, 0.Launching, 1.Registering, 2.HappenningSoon, 3.Happening, 4.Ending, 5.Canceling")]
         public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
         {
             try
@@ -105,7 +105,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("manager")]
         [SwaggerOperation(Summary = "Get all manager in competition")]
-        public async Task<IActionResult> GetAllManagerInCompetition(CompetitionManagerRequestModel model)
+        public async Task<IActionResult> GetAllManagerInCompetition([FromQuery]CompetitionManagerRequestModel model)
         {
             try
             {
@@ -293,10 +293,9 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                //
-                IFormFile file = Request.Form.Files[0];
+                
 
-                ViewCompetitionEntity result = await _competitionService.AddCompetitionEntity(model, token, file);
+                ViewCompetitionEntity result = await _competitionService.AddCompetitionEntity(model, token);
 
                 if (result != null)
                 {
