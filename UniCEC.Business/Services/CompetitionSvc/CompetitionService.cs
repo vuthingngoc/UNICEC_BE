@@ -643,62 +643,70 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
                 if (Check)
                 {
-                    //check date
-                    bool checkDate = false;
-                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    //------------- CHECK Date Update
-                    //TH1 STR
-                    if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    Competition c = await _competitionRepo.Get(model.CompetitionId);
+                    if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
                     {
-                        checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                    }
-                    //TH2 ETR
-                    if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                    {
-                        checkDate = CheckDate(localTime, comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                    }
-                    //TH3 ST
-                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
-                    {
-                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
-                    }
-                    //TH4 ET
-                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
-                    {
-                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
-                    }
-                    //TH5 new STR ETR ST ET
-                    if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
-                    {
-                        checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
-                    }
-                    //TH6 not thing happen with date
-                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                    {
-                        checkDate = true;
-                    }
-                    if (checkDate)
-                    {
-                        comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
-                        comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
-                        comp.AddressName = (model.AddressName.Length > 0) ? model.AddressName : comp.AddressName;
-                        comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
-                        comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
-                        comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                        comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                        comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                        comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-                        comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
-                        comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
-                        //
-                        await _competitionRepo.Update();
-                        return true;
+                        //check date
+                        bool checkDate = false;
+                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                        //------------- CHECK Date Update
+                        //TH1 STR
+                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        }
+                        //TH2 ETR
+                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        }
+                        //TH3 ST
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
+                        }
+                        //TH4 ET
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
+                        }
+                        //TH5 new STR ETR ST ET
+                        if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
+                        }
+                        //TH6 not thing happen with date
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = true;
+                        }
+                        if (checkDate)
+                        {
+                            comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
+                            comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
+                            comp.AddressName = (model.AddressName.Length > 0) ? model.AddressName : comp.AddressName;
+                            comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
+                            comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
+                            comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                            comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                            comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                            comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                            comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                            comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
+                            //
+                            await _competitionRepo.Update();
+                            return true;
 
-                    }//end check date
+                        }//end check date
+                        else
+                        {
+                            throw new ArgumentException("Date not suitable");
+                        }
+                    }
                     else
                     {
-                        throw new ArgumentException("Date not suitable");
-                    }
+                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
+                    }           
                 }//end if check
                 else
                 {
