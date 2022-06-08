@@ -12,6 +12,8 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo
     {
         public Task<InfluencerInCompetition> GetInfluencerInCompetition(int influencerId, int competitionId);
 
+        public Task<List<int>> GetListInfluencer_In_Competition_Id(int competitionId);
+
         public Task DeleteInfluencerInCompetition(int id);
     }
 }

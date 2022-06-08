@@ -38,5 +38,13 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo
             }
             return null;
         }
+
+        public async Task<List<int>> GetListInfluencer_In_Competition_Id(int competitionId)
+        {
+            List<int> list_InfluencerInCompetitionId = await (from iic in context.InfluencerInCompetitions
+                                                              where competitionId == iic.CompetitionId
+                                                              select iic.Id).ToListAsync();
+            return (list_InfluencerInCompetitionId.Count > 0) ? list_InfluencerInCompetitionId : null;
+        }
     }
 }
