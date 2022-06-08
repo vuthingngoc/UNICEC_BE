@@ -293,10 +293,9 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                //
-                IFormFile file = Request.Form.Files[0];
+                
 
-                ViewCompetitionEntity result = await _competitionService.AddCompetitionEntity(model, token, file);
+                ViewCompetitionEntity result = await _competitionService.AddCompetitionEntity(model, token);
 
                 if (result != null)
                 {

@@ -391,7 +391,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                                 InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                                                 {
                                                     CompetitionId = comp.Id,
-                                                    //InfluencerId = influ, -> result
+                                                    InfluencerId = result                                                
                                                 };
                                                 await _influencerInCompetitionRepo.Insert(influ_in_comp);
                                             }
@@ -459,7 +459,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token, IFormFile file)
+        public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token)
         {
             try
             {
@@ -505,7 +505,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Id = entity.Id,
                             Name = entity.Name,
                             CompetitionId = entity.CompetitionId,
-                            ImageUrl = entity.ImageUrl,
+                            ImageUrl = imgUrl,
                         };
                     }
                     return null;
@@ -1523,7 +1523,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             return result;
         }
-
 
         private int DecodeToken(string token, string nameClaim)
         {
