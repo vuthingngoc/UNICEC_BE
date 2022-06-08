@@ -485,10 +485,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
 
                     int id = await _competitionEntityRepo.Insert(competitionEntity);
-                                 
+
                     if (id > 0)
                     {
-                       
+
                         CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
                         //get IMG from Firebase                        
@@ -836,7 +836,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-                 
+
                     List<int> list_iic_Id = new List<int>();
                     List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
 
@@ -1245,7 +1245,36 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<ViewDetailCompetition> TransformViewDetailCompetition(Competition competition)
         {
             //List Influencer In Competition (id img)
+            List<ViewInfluencerInCompetition> list_InfluencerInCompetition = new List<ViewInfluencerInCompetition>();
 
+            List<int> list_InfluencerInCompetition_Id = await _influencerInCompetitionRepo.GetListInfluencer_In_Competition_Id(competition.Id);
+
+            foreach (int id in list_InfluencerInCompetition_Id)
+            {
+                InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+
+                //get IMG from Firebase                        
+                string imgUrl_Influencer;
+
+                try
+                {
+                    imgUrl_Influencer = await _fileService.GetUrlFromFilenameAsync(iic.Influencer.ImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    imgUrl_Influencer = "";
+                }
+
+                ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
+                {
+                    CompetitionId = iic.CompetitionId,
+                    InfluencerInCompetitionId = iic.Id,
+                    Id = iic.Influencer.Id,
+                    ImageUrl = imgUrl_Influencer,
+                    Name = iic.Influencer.Name
+                };
+                list_InfluencerInCompetition.Add(viic);
+            }
 
             //List Sponsors in Competition
             List<ViewSponsorInComp> SponsorsInCompetition = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(competition.Id);
@@ -1256,25 +1285,43 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //List Department in Competition
             List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
 
+            //List Competition Entity
+            List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+            List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(competition.Id);
+
+            foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+            {
+                //get IMG from Firebase                        
+                string imgUrl_CompetitionEntity;
+                try
+                {
+                    imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    imgUrl_CompetitionEntity = "";
+                }
+
+                ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                {
+                    Id = competitionEntity.Id,
+                    CompetitionId = competitionEntity.CompetitionId,
+                    Name = competitionEntity.Name,
+                    ImageUrl = imgUrl_CompetitionEntity,
+                };
+                //
+                ListView_CompetitionEntities.Add(viewCompetitionEntity);
+            }
+
             //Number Of Participant Join This Competition
             int NumberOfParticipantJoin = await _participantRepo.NumOfParticipant(competition.Id);
 
             //Competition type name
             CompetitionType competitionType = await _competitionTypeRepo.Get(competition.Id);
-            string competitionTypeName = competitionType.TypeName;           
-            CompetitionEntity compeEntity = await _competitionEntityRepo.Get(competition.Id);
+            string competitionTypeName = competitionType.TypeName;
 
-            string imgUrl;
-
-            try
-            {
-                 imgUrl = await _fileService.GetUrlFromFilenameAsync(compeEntity.ImageUrl);
-            }
-            catch (Exception ex)
-            {
-                 imgUrl = "";
-            }
-
+                     
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
@@ -1300,15 +1347,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Status = competition.Status,
                 View = competition.View,
                 //
+                InfluencerInCompetition = list_InfluencerInCompetition,
+                //
                 ClubInCompetition = ClubsInCompetition,
                 //
                 SponsorInCompetition = SponsorsInCompetition,
                 //
                 DepartmentInCompetition = DepartmentsInCompetition_Id,
+                // 
+                CompetitionEntities = ListView_CompetitionEntities,
                 //
                 NumberOfParticipantJoin = NumberOfParticipantJoin,
-                //
-                ImgUrl = imgUrl
+                
             };
         }
 

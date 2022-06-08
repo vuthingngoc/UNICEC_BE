@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -8,13 +9,15 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
+        private readonly IConfiguration _configuration;
         public UniCECContext()
         {
         }
 
-        public UniCECContext(DbContextOptions<UniCECContext> options)
-            : base(options)
+        public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
+           : base(options)
         {
+            _configuration = configuration;
         }
 
         public virtual DbSet<ActivitiesEntity> ActivitiesEntities { get; set; }

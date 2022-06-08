@@ -11,7 +11,7 @@ namespace UniCEC.Data.ViewModels.Entities.Influencer
     {
         [JsonPropertyName("influencer_in_competition_id")]
         public int InfluencerInCompetitionId { get; set; }
-        [JsonPropertyName("influencer_id")]
+        [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
         
     }
