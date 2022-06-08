@@ -140,8 +140,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-
-
         //ClubLeader
         // POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
