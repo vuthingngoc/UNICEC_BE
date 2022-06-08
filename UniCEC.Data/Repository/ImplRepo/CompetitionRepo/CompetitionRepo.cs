@@ -85,7 +85,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         {
                             Id = club.Id,
                             Name = club.Name,
-                            Image = club.Image
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage
                         };
 
                         List_vcip.Add(vcip);
@@ -197,7 +198,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         {
                             Id = club.Id,
                             Name = club.Name,
-                            Image = club.Image
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage
                         };
 
                         List_vcip.Add(vcip);
