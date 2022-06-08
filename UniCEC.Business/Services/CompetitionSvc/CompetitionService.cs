@@ -196,7 +196,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
-                    || model.SeedsPoint == 0
+                    || model.SeedsPoint < 0
                     || model.ClubId == 0)
                     throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null" +
                                                     " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
