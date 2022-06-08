@@ -39,7 +39,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 StartTime = mta.StartTime,
                 EndTime = mta.EndTime,
                 Deadline = mta.Deadline,
-                //Status = mta.Status
+                Status = mta.Status
             };
 
         }
