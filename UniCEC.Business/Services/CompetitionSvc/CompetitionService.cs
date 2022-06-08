@@ -855,7 +855,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
                             {
                                 CompetitionId = model.CompetitionId,
-                                //InfluencerId = influ, -> này là lưu result
+                                InfluencerId = result
                             };
 
                             int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
