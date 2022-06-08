@@ -105,7 +105,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("manager")]
         [SwaggerOperation(Summary = "Get all manager in competition")]
-        public async Task<IActionResult> GetAllManagerInCompetition(CompetitionManagerRequestModel model)
+        public async Task<IActionResult> GetAllManagerInCompetition([FromQuery]CompetitionManagerRequestModel model)
         {
             try
             {
