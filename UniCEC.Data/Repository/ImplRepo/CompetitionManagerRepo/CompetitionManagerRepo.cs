@@ -32,10 +32,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         //    return null; 
         //}
 
-        public async Task<CompetitionManager> GetMemberInCompetitionManager(int CompetitionId, int MemberId)
+        public async Task<CompetitionManager> GetMemberInCompetitionManager(int CompetitionId, int MemberId, int ClubId)
         {
             var query = from cic in context.CompetitionInClubs
-                        where cic.CompetitionId == CompetitionId
+                        where cic.CompetitionId == CompetitionId && cic.ClubId == ClubId
                         from cm in context.CompetitionManagers
                         where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId
                         select cm;
