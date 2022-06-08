@@ -187,7 +187,19 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
                                 && m.StartTime.Month.Equals(DateTime.Now.Month)
                                 && m.StartTime.Year.Equals(DateTime.Now.Year)
-                        select new { m };
+                        select m;
+
+            return await query.CountAsync();
+        }
+
+        public async Task<int> GetTotalMembersByClub(int clubId)
+        {
+            var club = await context.Clubs.FirstOrDefaultAsync(c => c.Id.Equals(clubId));
+            if (club == null) return -1;
+
+            var query = from m in context.Members
+                        where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
+                        select m;
 
             return await query.CountAsync();
         }

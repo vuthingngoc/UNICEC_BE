@@ -239,6 +239,7 @@ namespace UniCEC.Business.Services.ClubSvc
             await _memberRepo.Insert(member);
 
             ViewClub viewClub = await _clubRepo.GetById(clubId, roleId);
+
             return await AddMoreInfoClub(viewClub);
         }
 
@@ -264,11 +265,11 @@ namespace UniCEC.Business.Services.ClubSvc
 
             if (model.Founding != DateTime.MinValue) club.Founding = model.Founding;
 
-            if (model.TotalMember != 0) club.TotalMember = model.TotalMember;
+            club.TotalMember = await _memberRepo.GetTotalMembersByClub(club.Id);
 
             if (model.Status != false) club.Status = model.Status;
 
-            //if (!string.IsNullOrEmpty(model.Image)) club.Image = _fileService.UploadFile() model.Image;
+            if (!string.IsNullOrEmpty(model.Image)) await _fileService.UploadFile(club.Image, model.Image);
 
             if (!string.IsNullOrEmpty(model.ClubContact)) club.ClubContact = model.ClubContact;
 
@@ -294,15 +295,24 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task Delete(string token, int id)
         {
-            int userId = DecodeToken(token, "Id");
+            //int userId = DecodeToken(token, "Id");
+            int roleId = DecodeToken(token, "RoleId");
+            int universityId = DecodeToken(token, "UniversityId");
 
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, id);
-            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to delete this club");
+            Club club = await _clubRepo.Get(id);
+            if (club == null) throw new NullReferenceException("Not found this club");
 
-            Club clubObject = await _clubRepo.Get(id);
-            if (clubObject == null) throw new NullReferenceException("Not found this club");
-            clubObject.Status = false; // default status for delete
+            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !universityId.Equals(club.UniversityId))) 
+                        throw new UnauthorizedAccessException("You do not have permission to delete this club");
+
+            //int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, id);
+            //if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to delete this club");
+            
+            club.Status = false; // default status for delete
             await _clubRepo.Update();
+
+            await _termRepo.CloseOldTermByClub(id);
+            await _memberRepo.UpdateEndTerm(id);
         }
     }
 }
