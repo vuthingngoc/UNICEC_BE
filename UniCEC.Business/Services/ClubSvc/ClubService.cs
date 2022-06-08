@@ -268,7 +268,7 @@ namespace UniCEC.Business.Services.ClubSvc
 
             if (model.Status != false) club.Status = model.Status;
 
-            if (!string.IsNullOrEmpty(model.Image)) club.Image = _fileService.UploadFile() model.Image;
+            //if (!string.IsNullOrEmpty(model.Image)) club.Image = _fileService.UploadFile() model.Image;
 
             if (!string.IsNullOrEmpty(model.ClubContact)) club.ClubContact = model.ClubContact;
 

@@ -73,7 +73,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //------------- ADD Field Competition Entity -> Object Array  
         [JsonPropertyName("competition_entities")]
-        public List<ViewCompetitionEntity> CompetitionEntity { get; set; }
+        public List<ViewCompetitionEntity> CompetitionEntities { get; set; }
 
         //------------- ADD number of participant joining
         [JsonPropertyName("number_of_participant_join")]

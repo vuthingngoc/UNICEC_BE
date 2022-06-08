@@ -8,6 +8,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo
 {
     public interface ICompetitionEntityRepo : IRepository<CompetitionEntity>
     {
-        public Task<List<ViewCompetitionEntity>> GetListCompetitionEntity(int competitionId);
+        public Task<List<CompetitionEntity>> GetListCompetitionEntity(int competitionId);
     }
 }
