@@ -27,7 +27,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get club by id")]
+        [SwaggerOperation(Summary = "Get club by id - Authenticated user int the university")]
         public async Task<IActionResult> GetClubById(int id)
         {
             try
@@ -51,7 +51,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("university/{id}/search")]
-        [SwaggerOperation(Summary = "Get club by name")]
+        [SwaggerOperation(Summary = "Get club by name - Authenticated user in the university")]
         public async Task<IActionResult> GetClubByName(int id, [FromQuery] string name, [FromQuery] PagingRequest request)
         {
             try
@@ -75,7 +75,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("user")]
-        [SwaggerOperation(Summary = "Get club by user")]
+        [SwaggerOperation(Summary = "Get club by user - Student")]
         public async Task<IActionResult> GetClubByUser()
         {
             try
@@ -95,7 +95,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("university/{id}")]
-        [SwaggerOperation(Summary = "Get club by university of user")]
+        [SwaggerOperation(Summary = "Get club by university of user - Authenticated user in the university")]
         public async Task<IActionResult> GetClubByUniversity(int id, [FromQuery] PagingRequest request)
         {
             try
@@ -150,15 +150,11 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 ViewClub viewClub = await _clubService.Insert(token, club);
-                return Ok(club);
+                return Ok(viewClub);
             }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (ArgumentException ex)
             {
@@ -247,7 +243,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete club")]
+        [SwaggerOperation(Summary = "Delete club - Admin")]
         public async Task<IActionResult> DeleteClub(int id)
         {
             try

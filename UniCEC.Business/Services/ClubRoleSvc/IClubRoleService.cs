@@ -1,15 +1,15 @@
-﻿using System.Threading.Tasks;
-using UniCEC.Data.ViewModels.Common;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.ViewModels.Entities.ClubRole;
 
 namespace UniCEC.Business.Services.ClubRoleSvc
 {
     public interface IClubRoleService
     {
-        public Task<PagingResult<ViewClubRole>> GetAllPaging(PagingRequest request);
-        public Task<ViewClubRole> GetByClubRoleId(int id);
-        public Task<ViewClubRole> Insert(ClubRoleInsertModel clubRole);
-        public Task<bool> Update(ViewClubRole clubRole);
-        public Task<bool> Delete(int id);
+        public Task<List<ViewClubRole>> GetAll();
+        public Task<ViewClubRole> GetById(int id);
+        public Task<ViewClubRole> Insert(string name, string token);
+        public Task Update(ViewClubRole model, string token);
+        public Task Delete(int id, string token);
     }
 }

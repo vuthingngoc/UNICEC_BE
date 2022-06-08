@@ -484,7 +484,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     if (id > 0)
                     {
-
                         CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
                         //get IMG from Firebase                        
@@ -833,7 +832,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-
                     List<int> list_iic_Id = new List<int>();
                     List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
 
@@ -1324,7 +1322,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             CompetitionType competitionType = await _competitionTypeRepo.Get(competition.CompetitionTypeId);
             string competitionTypeName = competitionType.TypeName;
 
-
             return new ViewDetailCompetition()
             {
                 CompetitionId = competition.Id,
@@ -1522,7 +1519,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             return result;
         }
-
+        
         private int DecodeToken(string token, string nameClaim)
         {
             if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
