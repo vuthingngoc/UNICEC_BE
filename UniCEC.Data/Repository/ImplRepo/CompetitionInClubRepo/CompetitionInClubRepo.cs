@@ -31,6 +31,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
                     Id = query.Id,
                     CompetitionId = query.CompetitionId,
                     ClubId = query.ClubId,
+                    IsOwner = query.IsOwner,
                 };
             }
             else
@@ -60,7 +61,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
                         Id = club.Id,
                         Name = club.Name,
                         Image = club.Image,
-                        Fanpage = club.ClubFanpage                     
+                        Fanpage = club.ClubFanpage,
+                        IsOwner = competitionInClub.IsOwner,
                     };
 
                     List_vcip.Add(vcip);

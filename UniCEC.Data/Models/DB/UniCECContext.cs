@@ -179,7 +179,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(500);
 
                 entity.Property(e => e.SeedsCode)
                     .IsRequired()

@@ -17,7 +17,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionManager
         public int CompetitionRoleId { get; set; }
         [JsonPropertyName("member_id")]
         public int MemberId { get; set; }
-        [JsonPropertyName("name")]
+        [JsonPropertyName("fullname")]
         public string FullName { get; set; }
     }
 }
