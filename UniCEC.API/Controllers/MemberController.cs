@@ -15,7 +15,7 @@ using UniCEC.Data.ViewModels.Entities.Member;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/member")]
+    [Route("api/v1/members")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]

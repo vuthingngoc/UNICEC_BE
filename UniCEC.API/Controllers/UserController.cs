@@ -6,7 +6,6 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
@@ -16,7 +15,7 @@ using UniCEC.Data.ViewModels.Entities.User;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/user")]
+    [Route("api/v1/users")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]

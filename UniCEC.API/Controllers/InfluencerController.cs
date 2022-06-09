@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.Influencer;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/influencer")]
+    [Route("api/v1/influencers")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]

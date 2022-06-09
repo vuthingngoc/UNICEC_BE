@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.Sponsor;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/sponsors")]
     [ApiController]
     [Authorize(Roles = "Admin")]
     public class SponsorController : ControllerBase

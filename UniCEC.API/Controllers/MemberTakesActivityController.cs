@@ -15,7 +15,7 @@ using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/member-takes-activity")]
+    [Route("api/v1/member-takes-activities")]
     [ApiController]
     [ApiVersion("1.0")]
     public class MemberTakesActivityController : ControllerBase
