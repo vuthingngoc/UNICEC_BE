@@ -21,13 +21,13 @@ namespace UniCEC.Business.Services.CitySvc
         private ICityRepo _cityRepo;
         private IUniversityRepo _universityRepo;
         private JwtSecurityTokenHandler _tokenHandler;
-        private IConfiguration _configuration;
+        //private IConfiguration _configuration;
 
-        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo, IConfiguration configuration)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)//, IConfiguration configuration)
         {
             _cityRepo = cityRepo;
             _universityRepo = universityRepo;
-            _configuration = configuration;
+            //_configuration = configuration;
         }
         // Test upload file 
         //public async Task<string> UploadFile(IFormFile file, string token)
@@ -103,7 +103,6 @@ namespace UniCEC.Business.Services.CitySvc
             int roleId = DecodeToken(token, "RoleId");
             PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(name, roleId, request);
 
-
             if (result == null) throw new NullReferenceException();
             return result;
         }
@@ -125,6 +124,7 @@ namespace UniCEC.Business.Services.CitySvc
             }
 
         }
+
         //Insert-City
         public async Task<ViewCity> Insert(CityInsertModel model)
         {

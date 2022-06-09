@@ -14,7 +14,7 @@ using UniCEC.Data.ViewModels.Entities.City;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/city")]
+    [Route("api/v1/cities")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
@@ -55,8 +55,8 @@ namespace UniCEC.API.Controllers
 
         // Search cities
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Search cities by name - All roles")]
-        public async Task<IActionResult> SearchCitiesByName([FromQuery] string name, PagingRequest request)
+        [SwaggerOperation(Summary = "Search cities by name - Authenticated user")]
+        public async Task<IActionResult> SearchCitiesByName([FromQuery] string name, [FromQuery] PagingRequest request)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace UniCEC.API.Controllers
 
         //GET CITY BY ID
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get city by id - All roles")]
+        [SwaggerOperation(Summary = "Get city by id - Authenticated user")]
         public async Task<IActionResult> GetCityById(int id)
         {
             try
@@ -167,11 +167,7 @@ namespace UniCEC.API.Controllers
                 await _cityService.Delete(id);
                 return Ok();
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
+            catch (NullReferenceException ex)
             {
                 return BadRequest(ex.Message);
             }

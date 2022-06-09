@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Entities.Department;
 using System.Collections.Generic;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
+using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
@@ -20,117 +21,83 @@ namespace UniCEC.Business.Services.DepartmentSvc
             _majorRepo = majorRepo;
         }
 
-        private ViewDepartment TranformViewDepartment(Department department)
+        public async Task<ViewDepartment> GetById(int id)
         {
-            return new ViewDepartment()
-            {
-                Id = department.Id,
-                Name = department.Name,
-                Status = department.Status,                
-            };
+            ViewDepartment department = await _departmentRepo.GetById(id);
+            return (department != null) ? department : throw new NullReferenceException("Not found this department");
         }
 
-        public async Task<ViewDepartment> GetByDepartment(int id)
+        public async Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request)
         {
-            Department department = await _departmentRepo.Get(id);            
-            return (department != null) ? TranformViewDepartment(department) : throw new NullReferenceException("Not found this department");
-        }
-
-        public async Task<PagingResult<ViewDepartment>> GetAllPaging(PagingRequest request)
-        {
-            PagingResult<Department> departments = await _departmentRepo.GetAllPaging(request);
-            if (departments == null) throw new NullReferenceException("Not Found");
-
-            List<ViewDepartment> items = new List<ViewDepartment>();
-            departments.Items.ForEach(item =>
-            {
-                ViewDepartment department = TranformViewDepartment(item);
-                items.Add(department);
-            });
-            return new PagingResult<ViewDepartment>(items, departments.TotalCount, departments.CurrentPage, departments.PageSize);
-        }
-
-        public async Task<PagingResult<ViewDepartment>> GetByName(string name, PagingRequest request)
-        {
-            PagingResult<Department> listDepartment = await _departmentRepo.GetByName(name, request);
-            if (listDepartment == null) throw new NullReferenceException("Not found any departments");
-
-            List<ViewDepartment> departments = new List<ViewDepartment>();
-            listDepartment.Items.ForEach(element =>
-            {
-                ViewDepartment department = TranformViewDepartment(element);
-                departments.Add(department);
-            });
-            return new PagingResult<ViewDepartment>(departments, listDepartment.TotalCount, listDepartment.CurrentPage, listDepartment.PageSize);
+            PagingResult<ViewDepartment> departments = await _departmentRepo.GetByConditions(request);
+            if (departments == null) throw new NullReferenceException("Not found any departments");
+            return (departments != null) ? departments : throw new NullReferenceException();
         }
 
         public async Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request)
         {
-            PagingResult<Department> listDepartment = await _departmentRepo.GetByCompetition(competitionId, request);
-            if (listDepartment == null) throw new NullReferenceException("Not found any departments");
-
-            List<ViewDepartment> departments = new List<ViewDepartment>();
-            listDepartment.Items.ForEach(element =>
-            {
-                ViewDepartment department = TranformViewDepartment(element);
-                departments.Add(department);
-            });
-            return new PagingResult<ViewDepartment>(departments, listDepartment.TotalCount, listDepartment.CurrentPage, listDepartment.PageSize);
+            PagingResult<ViewDepartment> departments = await _departmentRepo.GetByCompetition(competitionId, request);
+            return (departments != null) ? departments : throw new NullReferenceException();
         }
 
-        public async Task<ViewDepartment> Insert(DepartmentInsertModel department)
+        public async Task<ViewDepartment> Insert(string name)
         {
-            if (string.IsNullOrEmpty(department.Name)) throw new ArgumentNullException("Name Null");
-            // default inserted status is true
-            bool status = true;
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("Name Null");
+
             Department element = new Department()
             {
-                Name = department.Name,
-                Status = status
+                Name = name,
+                Status = true // default inserted status is true 
             };
             int id = await _departmentRepo.Insert(element);
-            if (id > 0)
-            {
-                element.Id = id;
-                return TranformViewDepartment(element);
-            }
-
-            return null;
+            return (id > 0) ? await _departmentRepo.GetById(id) : null;
         }
 
-        public async Task Update(ViewDepartment department)
+        public async Task Update(DepartmentUpdateModel model)
         {
-            Department element = await _departmentRepo.Get(department.Id);
-            if(element == null) throw new NullReferenceException("Not found this element");
-            if(department.Status != element.Status)
+            Department department = await _departmentRepo.Get(model.Id);
+            if (department == null) throw new NullReferenceException("Not found this element");
+            if (model.Status.HasValue && model.Status.Value.Equals(true))
             {
-                List<int> majorIds = await _majorRepo.GetByDepartment(department.Id);
-                foreach(int majorId in majorIds)
+                List<int> majorIds = await _majorRepo.GetByDepartment(model.Id);
+                if (majorIds != null)
                 {
-                    Major major = await _majorRepo.Get(majorId);
-                    major.Status = department.Status;
+                    foreach (int majorId in majorIds)
+                    {
+                        Major major = await _majorRepo.Get(majorId);
+                        major.Status = model.Status.Value;
+                    }
+                    await _majorRepo.Update();
                 }
-                await _majorRepo.Update();
+
+                department.Status = model.Status.Value;
             }
 
-            if(!string.IsNullOrEmpty(department.Name)) element.Name = department.Name;
-            element.Status = department.Status;
+            if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
+
             await _departmentRepo.Update();
         }
 
         public async Task Delete(int id)
         {
-            Department element = await _departmentRepo.Get(id);
-            if(element == null) throw new NullReferenceException("Not found this element");
-            element.Status = false;
+            Department department = await _departmentRepo.Get(id);
+            if (department == null) throw new NullReferenceException("Not found this element");
+
+            if (department.Status.Equals(false)) return; // already deleted 
+
+            department.Status = false;
             // delete concerned major
             List<int> majorIds = await _majorRepo.GetByDepartment(id);
-            foreach (int majorId in majorIds)
+            if (majorIds != null)
             {
-                Major major = await _majorRepo.Get(majorId);
-                major.Status = false;
+                foreach (int majorId in majorIds)
+                {
+                    Major major = await _majorRepo.Get(majorId);
+                    major.Status = false;
+                }
+                await _majorRepo.Update();
             }
-            await _majorRepo.Update();
+
             await _departmentRepo.Update();
         }
     }

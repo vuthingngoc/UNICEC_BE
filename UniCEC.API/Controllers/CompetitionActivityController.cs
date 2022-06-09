@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionActivitySvc;
-using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
@@ -16,16 +15,16 @@ using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/competition-activity")]
+    [Route("api/v1/competition-activities")]
     [ApiController]
     [ApiVersion("1.0")]
     public class CompetitionActivityController : ControllerBase
     {
-        private ICompetitionActivityService _clubActivityService;
+        private ICompetitionActivityService _competitionActivityService;
 
-        public CompetitionActivityController(ICompetitionActivityService clubActivityService)
+        public CompetitionActivityController(ICompetitionActivityService competitionActivityService)
         {
-            _clubActivityService = clubActivityService;
+            _competitionActivityService = competitionActivityService;
         }
 
 
@@ -41,7 +40,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewProcessCompetitionActivity> result = await _clubActivityService.GetTop4_Process(ClubId, token);
+                List<ViewProcessCompetitionActivity> result = await _competitionActivityService.GetTop4_Process(ClubId, token);
                     return Ok(result);
             }
             catch (NullReferenceException)
@@ -59,15 +58,13 @@ namespace UniCEC.API.Controllers
 
         }
 
-
-
         [HttpGet]
         [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
         public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
         {
             try
             {
-                PagingResult<ViewCompetitionActivity> result = await _clubActivityService.GetListClubActivitiesByConditions(conditions);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListClubActivitiesByConditions(conditions);
 
                     return Ok(result);
                                         
@@ -90,7 +87,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCompetitionActivity result = await _clubActivityService.GetByClubActivityId(id);                  
+                ViewCompetitionActivity result = await _competitionActivityService.GetByClubActivityId(id);                  
                     return Ok(result);
                 
             }
@@ -116,7 +113,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetitionActivity result = await _clubActivityService.Insert(model, token);
+                ViewCompetitionActivity result = await _competitionActivityService.Insert(model, token);
                 if (result != null)
                 {
 
@@ -163,7 +160,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 Boolean check = false;
-                check = await _clubActivityService.Update(model, token);
+                check = await _competitionActivityService.Update(model, token);
                 if (check)
                 {
                     return Ok();
@@ -204,7 +201,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 bool result = false;
-                result = await _clubActivityService.Delete(model, token);
+                result = await _competitionActivityService.Delete(model, token);
                 if (result)
                 {
                     return Ok();

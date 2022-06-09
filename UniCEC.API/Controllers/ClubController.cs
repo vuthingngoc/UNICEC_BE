@@ -13,7 +13,7 @@ using UniCEC.Data.ViewModels.Entities.Club;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/club")]
+    [Route("api/v1/clubs")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
@@ -27,7 +27,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get club by id - Authenticated user int the university")]
+        [SwaggerOperation(Summary = "Get club by id - Authenticated user in the university")]
         public async Task<IActionResult> GetClubById(int id)
         {
             try
@@ -119,7 +119,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
-        [SwaggerOperation(Summary = "Get club by competition")]
+        [SwaggerOperation(Summary = "Get club by competition - Authenticated user in scope")]
         public async Task<IActionResult> GetClubByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
