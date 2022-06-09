@@ -10,7 +10,7 @@ using UniCEC.Data.ViewModels.Entities.Major;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/major")]
+    [Route("api/v1/majors")]
     [ApiController]
     [ApiVersion("1.0")]
     public class MajorController : ControllerBase

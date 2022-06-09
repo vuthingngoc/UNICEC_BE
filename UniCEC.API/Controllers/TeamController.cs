@@ -16,7 +16,7 @@ using UniCEC.Data.ViewModels.Entities.Team;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/team")]
+    [Route("api/v1/teams")]
     [ApiController]
     public class TeamController : ControllerBase
     {

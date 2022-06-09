@@ -13,7 +13,7 @@ using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/term")]
+    [Route("api/v1/terms")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]

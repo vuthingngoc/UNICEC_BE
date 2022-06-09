@@ -13,7 +13,7 @@ using UniCEC.Data.ViewModels.Entities.University;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/university")]
+    [Route("api/v1/universities")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
