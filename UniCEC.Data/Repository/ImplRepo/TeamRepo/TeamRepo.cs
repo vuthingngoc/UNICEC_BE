@@ -145,9 +145,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 {
                     //get avatar
                     User user = await (from u in context.Users
-                                      from p in context.Participants
-                                      where p.StudentId == u.Id
-                                      select u).FirstOrDefaultAsync();
+                                       from p in context.Participants
+                                       where p.StudentId == u.Id
+                                       select u).FirstOrDefaultAsync();
 
 
                     ViewParticipant vp = new ViewParticipant()
@@ -160,8 +160,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                         Avatar = user.Avatar,
                     };
 
-                    viewParticipants.Add(vp);   
-                }               
+                    viewParticipants.Add(vp);
+                }
             }
 
             return (team != null) ? new ViewDetailTeam()
@@ -175,6 +175,26 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 Status = team.Status
             } : null;
 
+        }
+
+        public async Task<bool> UpdateStatusAvailableForAllTeam(int CompetitionId)
+        {
+            List<Team> list_team = await (from t in context.Teams
+                                          where t.CompetitionId == CompetitionId
+                                          select t).ToListAsync();
+            if (list_team.Count > 0)
+            {
+                foreach (Team team in list_team)
+                {
+                    team.Status = Enum.TeamStatus.Available;
+                }
+                await Update();
+                return true;
+            }
+            else
+            {
+                return true; // vẫn là true nếu không có team để update thì thôi
+            }
         }
     }
 }

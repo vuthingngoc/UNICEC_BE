@@ -126,13 +126,13 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (uni != null)
                 {
                     //update name-des-phone-opening-closing-founding-cityId-unicode
-                    uni.Name = (university.Name.Length > 0) ? university.Name : uni.Name;
-                    uni.Description = (university.Description.Length > 0) ? university.Description : uni.Description;
-                    uni.Phone = (university.Phone.Length > 0) ? university.Phone : uni.Phone;
-                    uni.Openning = (university.Openning.Length > 0) ? university.Openning : uni.Openning;
-                    uni.Closing = (university.Closing.Length > 0) ? university.Closing : uni.Closing;
-                    uni.CityId = (university.CityId != 0) ? university.CityId : uni.CityId;
-                    uni.UniCode = (university.UniCode.Length > 0) ? university.UniCode : uni.UniCode;
+                    uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
+                    uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
+                    uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
+                    uni.Openning = (!string.IsNullOrEmpty(university.Openning)) ? university.Openning : uni.Openning;
+                    uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
+                    uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
+                    uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;
                     uni.Status = university.Status;
                     await _universityRepo.Update();
                     return true;
@@ -159,10 +159,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 University university = await _universityRepo.Get(id);
                 if (university != null)
                 {
-                    //
-                    //university.Status = false;
-                    //await _universityRepo.Update();
-                    //return true;
+                    
                     await _universityRepo.DeleteUniversity(id);
                     return true;    
                 }

@@ -24,6 +24,7 @@ using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -59,10 +60,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ITermRepo _termRepo;
         private ICompetitionRoleRepo _competitionRoleRepo;
         private IDepartmentRepo _departmentRepo;
+        private ITeamRepo _teamRepo;
         private JwtSecurityTokenHandler _tokenHandler;
         private readonly IConfiguration _configuration;
-
-
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -81,6 +81,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IConfiguration configuration,
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IDepartmentRepo departmentRepo,
+                                  ITeamRepo teamRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -101,16 +102,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _configuration = configuration;
             _competitionRoleRepo = competitionRoleRepo;
             _departmentRepo = departmentRepo;
+            _teamRepo = teamRepo;
         }
 
         public CompetitionService()
         {
-        }
-
-        public Task<PagingResult<ViewCompetition>> GetAllPaging(PagingRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        }      
 
         //Get
         public async Task<ViewDetailCompetition> GetById(int id)
@@ -323,12 +320,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 {
                                     competition.NumberOfTeam = -2; // Offical Team is shown when Competition is in starting time
                                 }
-                                competition.NumberOfParticipation = model.NumberOfParticipations;
 
                                 //Create Competition
                                 if (model.MaxNumberMemberInTeam.HasValue && model.MinNumberMemberInTeam.HasValue && model.IsEvent == false)
                                 {
-                                    bool checkMinMax = CheckMaxMin((int)model.MaxNumberMemberInTeam, (int)model.MinNumberMemberInTeam);
+                                    bool checkMinMax = CheckMaxMin((int)model.MaxNumberMemberInTeam, (int)model.MinNumberMemberInTeam, model.NumberOfParticipations);
                                     if (checkMinMax)
                                     {
                                         //--MaxMemberInTeam
@@ -345,6 +341,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     //--MinMemberInTeam
                                     competition.MinNumber = 0;
                                 }
+                                competition.NumberOfParticipation = model.NumberOfParticipations;
                                 competition.CreateTime = localTime;
                                 competition.StartTime = model.StartTime;
                                 competition.EndTime = model.EndTime;
@@ -643,60 +640,281 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
                 if (Check)
                 {
+                    //------------- CHECK Status Competition
                     Competition c = await _competitionRepo.Get(model.CompetitionId);
                     if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
                     {
-                        //check date
+
                         bool checkDate = false;
                         Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                        //------------- CHECK Date Update
-                        //TH1 STR
-                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH2 ETR
-                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, (DateTime)model.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH3 ST
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, (DateTime)model.StartTime, comp.EndTime, true);
-                        }
-                        //TH4 ET
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, (DateTime)model.EndTime, true);
-                        }
-                        //TH5 new STR ETR ST ET
+                        //------------- CHECK Date Update  
+                        //------------- FE,MOBILE TEST                       
+                        //TH CHung
                         if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
                         {
-                            checkDate = CheckDate(localTime, (DateTime)model.StartTimeRegister, (DateTime)model.EndTimeRegister, (DateTime)model.StartTime, (DateTime)model.EndTime, true);
+                            bool STR = false;
+                            bool ETR = false;
+                            bool ST = false;
+                            bool ET = false;
+                            //STR Update = STR 
+                            if (DateTime.Compare(model.StartTimeRegister.Value, comp.StartTimeRegister) != 0) // data mới
+                            {
+                                STR = true;
+                            }
+                            //ETR Update = ETR 
+                            if (DateTime.Compare(model.EndTimeRegister.Value, comp.EndTimeRegister) != 0) // data mới
+                            {
+                                ETR = true;
+                            }
+                            //ST Update = ST
+                            if (DateTime.Compare(model.StartTime.Value, comp.StartTime) != 0) // data mới
+                            {
+                                ST = true;
+                            }
+                            //ET Update = ET
+                            if (DateTime.Compare(model.EndTime.Value, comp.EndTime) != 0) // data mới
+                            {
+                                ST = true;
+                            }
+
+                            // STR - ETR - ST - ET
+                            //  1  -  1  - 1  - 1   all true
+                            //  1  -  1  - 1  - 2
+                            //  1  -  1  - 2  - 1
+                            //  1  -  1  - 2  - 2
+                            //  1  -  2  - 1  - 1
+                            //  1  -  2  - 1  - 2
+                            //  1  -  2  - 2  - 1
+                            //  1  -  2  - 2  - 2
+                            //  2  -  1  - 1  - 1
+                            //  2  -  1  - 1  - 2
+                            //  2  -  1  - 2  - 1
+                            //  2  -  1  - 2  - 2  
+                            //  2  -  2  - 1  - 1
+                            //  2  -  2  - 1  - 2
+                            //  2  -  2  - 2  - 1
+                            //  2  -  2  - 2  - 2   all false
+
+                            //All true
+                            if (STR && ETR && ST && ET)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
+                            }
+
+                            //  1  -  1  - 1  - 2
+                            if (STR && ETR && ST && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                            }
+
+                            //  1  -  1  - 2  - 1
+                            if (STR && ETR && ST == false && ET)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, true);
+                            }
+
+                            //  1  -  1  - 2  - 2
+                            if (STR && ETR && ST == false && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                            }
+
+                            //  1  -  2  - 1  - 1
+                            if (STR && ETR == false && ST && ET)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, true);
+                            }
+
+                            //  1  -  2  - 1  - 2
+                            if (STR && ETR == false && ST && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                            }
+
+                            //  1  -  2  - 2  - 1
+                            if (STR && ETR == false && ST && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                            }
+
+                            //  1  -  2  - 2  - 2
+                            if (STR && ETR == false && ST == false && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                            }
+
+                            //  2  -  1  - 1  - 1
+                            if (STR == false && ETR && ST && ET)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
+                            }
+
+                            //  2  -  1  - 1  - 2
+                            if (STR == false && ETR && ST && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                            }
+
+                            //  2  -  1  - 2  - 1
+                            if (STR == false && ETR && ST == false && ET)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value,comp.StartTime, model.EndTime.Value, true);
+                            }
+
+                            //  2  -  1  - 2  - 2  
+                            if (STR == false && ETR && ST == false && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                            }
+
+                            //  2  -  2  - 1  - 1
+                            if (STR == false && ETR == false && ST && ET)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, true);
+                            }
+
+                            //  2  -  2  - 1  - 2
+                            if (STR == false && ETR == false && ST && ET == false)
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                            }
+
+                            //  2  -  2  - 2  - 1
+                            if (STR == false && ETR == false && ST == false  && ET )
+                            {
+                                checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                            }
+
+                            //All false
+                            if (STR == false && ETR == false && ST == false && ET == false)
+                            {
+                                checkDate = true;
+                            }
+
                         }
-                        //TH6 not thing happen with date
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        else
                         {
-                            checkDate = true;
+                            throw new ArgumentException("Missing Field Date");
                         }
                         if (checkDate)
                         {
-                            comp.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : comp.SeedsPoint;
-                            comp.SeedsDeposited = (model.SeedsDeposited != 0) ? model.SeedsDeposited : comp.SeedsDeposited;
-                            comp.AddressName = (model.AddressName.Length > 0) ? model.AddressName : comp.AddressName;
-                            comp.Address = (model.Address.Length > 0) ? model.Address : comp.Address;
-                            comp.Name = (model.Name.Length > 0) ? model.Name : comp.Name;
-                            comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                            comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                            comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                            comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-                            comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
-                            comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
-                            //
-                            await _competitionRepo.Update();
-                            return true;
+                            //------------- CHECK Max,Min,NumberOfParticipant Update                          
+                            bool checkMaxMin = false;
+                            bool SetStatusAllTeam_Available = false;
 
+                            //------------- FE,MOBILE TEST
+                            //TH CHung
+                            if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                            {
+                                bool Max = false;
+                                bool Min = false;
+                                bool NumOfParticipant = false;
+
+                                //Max Update = Max
+                                if (model.MaxNumber.Value != comp.MaxNumber)                // data mới
+                                {
+                                    Max = true;
+                                }
+                                //Min Update = Min
+                                if (model.MinNumber.Value != comp.MinNumber)                // data mới
+                                {
+                                    Min = true;
+                                }
+                                //Number Of Participant Update = Number Of Participant
+                                if (model.NumberOfParticipant.Value != comp.NumberOfParticipation)  // data mới
+                                {
+                                    NumOfParticipant = true;
+                                }
+
+                                // Max  Min  Num
+                                // 1    1     1     //All True
+                                // 1    1     0
+                                // 1    0     0     //Max Update
+                                // 0    1     1
+                                // 0    1     0     //Min Update
+                                // 0    0     1     //Number Of Participant Update 
+                                // 0    0     0     //All False
+
+
+                                // 1    1     1
+                                if (Max && Min && NumOfParticipant)
+                                {
+                                    checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
+                                    SetStatusAllTeam_Available = true;
+                                }
+
+                                // 1    1     0
+                                if (Max && Min && NumOfParticipant == false)
+                                {
+                                    checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, comp.NumberOfParticipation);
+                                    SetStatusAllTeam_Available = true;
+                                }
+
+                                // 1    0     0
+                                if (Max && Min == false && NumOfParticipant == false)
+                                {
+                                    checkMaxMin = CheckMaxMin(model.MaxNumber.Value, comp.MinNumber.Value, comp.NumberOfParticipation);
+                                    SetStatusAllTeam_Available = true;
+                                }
+
+                                // 0    1     1                              
+                                if (Max == false && Min && NumOfParticipant)
+                                {
+                                    checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, model.NumberOfParticipant.Value);
+                                    SetStatusAllTeam_Available = true;
+                                }
+
+                                // 0    1     0 
+                                if (Max == false && Min && NumOfParticipant == false)
+                                {
+                                    checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
+                                    SetStatusAllTeam_Available = true;
+                                }
+
+                                // 0    0     1
+                                if (Max == false && Min == false && NumOfParticipant)
+                                {
+                                    checkMaxMin = CheckMaxMin((int)comp.MaxNumber, (int)comp.MinNumber, model.NumberOfParticipant.Value);
+                                }
+
+                                // 0    0     0 
+                                if (Max == false && Min == false && NumOfParticipant == false)
+                                {
+                                    checkMaxMin = true;
+                                }
+                            }
+                            else
+                            {
+                                throw new ArgumentException("Missing Field Max or Min or Number Of Participant");
+                            }
+                            if (checkMaxMin)
+                            {
+                                comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
+                                comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
+                                comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
+                                comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
+                                comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
+                                comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                                comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                                comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                                comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                                comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
+                                // nếu có thay đổi về Max Min thì sẽ cập nhật Team Status của tất cả team là Available
+                                if (SetStatusAllTeam_Available)
+                                {
+                                    await _teamRepo.UpdateStatusAvailableForAllTeam(comp.Id);
+                                }
+                                comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
+                                comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
+                                comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+                                await _competitionRepo.Update();
+                                return true;
+                            }
+                            else
+                            {
+                                throw new ArgumentException("Max Number or Min Number or Number Of Participant is not suitable");
+                            }
                         }//end check date
                         else
                         {
@@ -706,7 +924,142 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     else
                     {
                         throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-                    }           
+                    }
+                }//end if check
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateBE(LeaderUpdateCompOrEventModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0
+                   || model.ClubId == 0)
+                    throw new ArgumentNullException("|| Competition Id Null  " +
+                                                     " ClubId Null");
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+
+                bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+                if (Check)
+                {
+                    //------------- CHECK Status Competition
+                    Competition c = await _competitionRepo.Get(model.CompetitionId);
+                    if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
+                    {
+                        bool checkDate = false;
+                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                        //------------- CHECK Date Update
+                        //------------- BE TEST
+                        //TH1 STR
+                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        }
+                        //TH2 ETR
+                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                        }
+                        //TH3 ST
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                        }
+                        //TH4 ET
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                        }
+                        //TH5 not thing happen with date
+                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                        {
+                            checkDate = true;
+                        }
+                        //TH 6 All
+                        if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
+                        }
+                        if (checkDate)
+                        {
+                            //------------- CHECK Max,Min,NumberOfParticipant Update                          
+                            bool checkMaxMin = false;
+                            bool SetStatusAllTeam_Available = false;
+                            //------------- BE TEST
+                            //Max
+                            if (model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                            {
+                                checkMaxMin = CheckMaxMin(model.MaxNumber.Value, (int)comp.MinNumber, comp.NumberOfParticipation);
+                                SetStatusAllTeam_Available = true;
+                            }
+                            //Min
+                            if (!model.MaxNumber.HasValue && model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                            {
+                                checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
+                                SetStatusAllTeam_Available = true;
+                            }
+                            //NumberOfParticipant
+                            if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                            {
+                                checkMaxMin = CheckMaxMin((int)comp.MaxNumber, (int)comp.MinNumber, model.NumberOfParticipant.Value);
+                            }
+                            //Max,Min,NumberOfParticipant no Update
+                            if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                            {
+                                checkMaxMin = true;
+                            }
+                            //Max Min Num Update
+                            if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                            {
+                                checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
+                                SetStatusAllTeam_Available = true;
+                            }
+                            if (checkMaxMin)
+                            {
+                                comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
+                                comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
+                                comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
+                                comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
+                                comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
+                                comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                                comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                                comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                                comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                                comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
+                                // nếu có thay đổi về Max Min thì sẽ cập nhật Team Status của tất cả team là Available
+                                if (SetStatusAllTeam_Available)
+                                {
+                                    await _teamRepo.UpdateStatusAvailableForAllTeam(comp.Id);
+                                }
+                                comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
+                                comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
+                                comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+                                await _competitionRepo.Update();
+                                return true;
+                            }
+                            else
+                            {
+                                throw new ArgumentException("Max Number or Min Number or Number Of Participant is not suitable");
+                            }
+                        }//end check date
+                        else
+                        {
+                            throw new ArgumentException("Date not suitable");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
+                    }
                 }//end if check
                 else
                 {
@@ -927,32 +1280,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         throw new ArgumentException("Add Influencer Failed");
                     }
-                    //------------- CHECK Influencer belong to system
-                    // bool influencerBelongToSystem = await _influencerRepo.CheckInfluencerInSystem(model.ListInfluencer.);
-                    //if (influencerBelongToSystem)
-                    //{
-                    //------------- CHECK Add Influencer Id has already existed in competition
-                    //bool InfluencerIsExsited = true;
-                    //foreach (int influ_id in model.ListInfluencerId)
-                    //{
-                    //InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(influ_id, model.CompetitionId);
-                    // if (iic != null)
-                    //{
-                    //   InfluencerIsExsited = false;
-                    //}
-                    // }
-                    //if (InfluencerIsExsited)
-                    //{
-                    //}
-                    //else
-                    // {
-                    //throw new ArgumentException("Influencer already in Competition");
-                    //}
-                    // }
-                    //else
-                    //{
-                    //   throw new ArgumentException("Influencer Id not have in System");
-                    //}
                 }//end if check
                 else
                 {
@@ -1697,7 +2024,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        private bool CheckMaxMin(int max, int min)
+        private bool CheckMaxMin(int max, int min, int NumberOfParticipant)
         {
             if (max < 0)
             {
@@ -1714,10 +2041,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw new ArgumentException("Max number can't lower than Min number !!!");
             }
 
-            //if (max - min > 3)
-            //{
-            //    throw new ArgumentException("Difference the number of between another team is <= 3");
-            //}
+            if (NumberOfParticipant <= 0)
+            {
+                throw new ArgumentException("Number Of Participant > 0");
+            }
             return true;
         }
 
