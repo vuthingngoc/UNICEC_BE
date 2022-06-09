@@ -184,7 +184,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 bool roleLeader = false;
 
-
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
                 double percentPoint = Double.Parse(_configuration.GetSection("StandardDepositedPoint:Difference").Value);
 
@@ -295,7 +294,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                                 //Add Competition Entity
                                 bool insertCompetitionEntity;
-                                if (!string.IsNullOrEmpty(model.CompetitionEntity.NameEntity) && !string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
+                                if (!string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
                                 {
                                     insertCompetitionEntity = true;
                                 }
@@ -480,9 +479,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             try
             {
                 if (model.CompetitionId == 0
-                  || model.ClubId == 0
-                  || string.IsNullOrEmpty(model.Name))
-                    throw new ArgumentNullException("|| Competition Id Null  || Name Null" +
+                  || model.ClubId == 0                 )
+                    throw new ArgumentNullException("|| Competition Id Null" +
                                                      " ClubId Null");
 
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
