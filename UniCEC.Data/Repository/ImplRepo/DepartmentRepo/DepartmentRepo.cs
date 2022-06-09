@@ -5,6 +5,8 @@ using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Department;
+using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 {
@@ -15,37 +17,45 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 
         }
 
-        public async Task<PagingResult<Department>> GetByName(string name, PagingRequest request)
+        public async Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request)
         {
             var query = from d in context.Departments
-                        where d.Name.Contains(name)
-                        select new { d };
-            int totalCount = query.Count();
-            List<Department> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Department()
-            {
-                Id = x.d.Id,
-                Name = x.d.Name
-            }).ToListAsync();
+                        select d;
 
-            return (departments.Count > 0) ? new PagingResult<Department>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
+            if(!string.IsNullOrEmpty(request.Name)) query = query.Where(department => department.Name.Contains(request.Name));
+
+            if (request.Status.HasValue) query = query.Where(department => department.Status.Equals(request.Status.Value));
+
+            int totalCount = query.Count();
+            List<ViewDepartment> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                        .Select(department => new ViewDepartment()
+                                                        {
+                                                            Id = department.Id,
+                                                            Name = department.Name,
+                                                            Status = department.Status
+                                                        }).ToListAsync();
+
+            return (departments.Count > 0) ? new PagingResult<ViewDepartment>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<Department>> GetByCompetition(int competitionId, PagingRequest request)
+        public async Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request)
         {
             var query = from cid in context.CompetitionInDepartments
                         join d in context.Departments on cid.DepartmentId equals d.Id
                         where cid.CompetitionId == competitionId
-                        select new { d };
+                        select d;
+
             int totalCount = query.Count();
 
-            List<Department> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x =>
-                new Department()
-                {
-                    Id = x.d.Id,
-                    Name = x.d.Name
-                }
-            ).ToListAsync();
-            return (departments.Count > 0) ? new PagingResult<Department>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
+            List<ViewDepartment> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                            .Select(department => new ViewDepartment()
+                                                            {
+                                                                Id = department.Id,
+                                                                Name = department.Name,
+                                                                Status = department.Status
+                                                            }).ToListAsync();
+
+            return (departments.Count > 0) ? new PagingResult<ViewDepartment>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         //
@@ -54,9 +64,9 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             bool result = true;
             foreach (int DepId in listDepartmentId)
             {
-                var query = await(from dep in context.Departments
-                                  where dep.Id == DepId 
-                                  select dep).FirstOrDefaultAsync();
+                var query = await (from dep in context.Departments
+                                   where dep.Id == DepId
+                                   select dep).FirstOrDefaultAsync();
 
                 if (query == null)
                 {
@@ -64,6 +74,18 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                 }
             }
             return result;
+        }
+
+        public async Task<ViewDepartment> GetById(int id)
+        {
+            return await (from d in context.Departments
+                          where d.Id.Equals(id)
+                          select new ViewDepartment()
+                          {
+                              Id = d.Id,
+                              Name = d.Name,
+                              Status = d.Status,
+                          }).FirstOrDefaultAsync();
         }
     }
 }

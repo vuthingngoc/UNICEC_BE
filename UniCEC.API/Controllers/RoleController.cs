@@ -7,17 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Role;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/role")]
+    [Route("api/v1/roles")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize(Roles = "System Admin")]
     public class RoleController : ControllerBase
     {
         IRoleService _roleService;
@@ -27,16 +26,14 @@ namespace UniCEC.API.Controllers
             _roleService = roleService;
         }
 
-
-
         //Get List Roles
-        [HttpGet("roles")]
-        [SwaggerOperation(Summary = "Get list roles")]
-        public async Task<IActionResult> GetRoles([FromQuery] PagingRequest request)
+        [HttpGet()]
+        [SwaggerOperation(Summary = "Get all roles - System admin")]
+        public async Task<IActionResult> GetAllRoles()
         {
             try
             {
-                PagingResult<ViewRole> result = await _roleService.GetAllPaging(request);
+                List<ViewRole> result = await _roleService.GetAll();
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -58,7 +55,6 @@ namespace UniCEC.API.Controllers
             {
                 ViewRole result = await _roleService.GetByRoleId(id);
                 return Ok(result);
-
             }
             catch (NullReferenceException)
             {
@@ -72,23 +68,15 @@ namespace UniCEC.API.Controllers
         }
 
         //InsertRoleModel
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         [SwaggerOperation(Summary = "Insert role")]
-        public async Task<IActionResult> InsertRoleId([FromBody] RoleInsertModel model)
+        public async Task<IActionResult> InsertRoleId(string roleName)
         {
             try
             {
-                ViewRole result = await _roleService.Insert(model);
-                if (result != null)
-                {
-
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                ViewRole result = await _roleService.Insert(roleName);
+                return Ok(result);
+                
             }
             catch (ArgumentNullException ex)
             {
@@ -111,22 +99,15 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                Boolean check = false;
-                check = await _roleService.Update(model);
-                if (check)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                await _roleService.Update(model);
+                return Ok();
+                
             }
-            catch (ArgumentNullException ex)
+            catch (NullReferenceException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentNullException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -140,6 +121,28 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete role - System admin")]
+        public async Task<IActionResult> DeleteRole(int id)
+        {
+            try
+            {
+                await _roleService.Delete(id);
+                return Ok();
 
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
     }
 }

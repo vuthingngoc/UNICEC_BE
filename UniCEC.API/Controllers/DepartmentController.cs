@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.DepartmentSvc;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Department;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/department")]
+    [Route("api/v1/departments")]
     [ApiController]
     [ApiVersion("1.0")]
+    [Authorize]
     public class DepartmentController : ControllerBase
     {
         IDepartmentService _departmentService;
@@ -26,30 +31,12 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewDepartment department = await _departmentService.GetByDepartment(id);
+                ViewDepartment department = await _departmentService.GetById(id);
                 return Ok(department);
             }
-            catch(NullReferenceException ex)
+            catch(NullReferenceException)
             {
-                return NotFound(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllDepartment([FromQuery] PagingRequest request)
-        {
-            try
-            {
-                PagingResult<ViewDepartment> departments = await _departmentService.GetAllPaging(request);
-                return Ok(departments);
-            }
-            catch(NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
+                return Ok(new object());
             }
             catch (SqlException)
             {
@@ -58,20 +45,20 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetDepartmentByName(string name, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetDepartmentByConditions([FromQuery] DepartmentRequestModel request)
         {
             try 
             {
-                PagingResult<ViewDepartment> departments = await _departmentService.GetByName(name, request);
+                PagingResult<ViewDepartment> departments = await _departmentService.GetByConditions(request);
                 return Ok(departments);
             }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            catch(NullReferenceException ex)
+            catch(NullReferenceException)
             {
-                return NotFound(ex.Message);
+                return Ok(new List<object>());
             }
         }
 
@@ -87,19 +74,24 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return NotFound(ex.Message);
+                return Ok(new List<object>());
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertDepartment([FromBody] DepartmentInsertModel department)
+        [Authorize(Roles = "System Admin")]
+        public async Task<IActionResult> InsertDepartment(string name)
         {
             try 
             {
-                ViewDepartment viewDepartment = await _departmentService.Insert(department);
-                return Created($"api/v1/[controller]/{viewDepartment.Id}", viewDepartment);
+                ViewDepartment viewDepartment = await _departmentService.Insert(name);
+                return Ok(viewDepartment);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (SqlException)
             {
@@ -116,12 +108,17 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateDepartment([FromBody] ViewDepartment department)
+        [Authorize(Roles = "System Admin")]
+        public async Task<IActionResult> UpdateDepartment([FromBody] DepartmentUpdateModel department)
         {
             try
             {
                 await _departmentService.Update(department);
                 return Ok(); 
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (SqlException)
             {
@@ -137,12 +134,13 @@ namespace UniCEC.API.Controllers
             }
             catch(NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
 
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "System Admin")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             try
@@ -160,7 +158,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
         }       
     }
