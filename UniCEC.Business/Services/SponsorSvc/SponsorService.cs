@@ -126,11 +126,11 @@ namespace UniCEC.Business.Services.SponsorSvc
                 //
                 if (sp != null)
                 {
-                    sp.Name = (sponsor.Name.Length > 0) ? sponsor.Name : sp.Name;
-                    sp.Description = (sponsor.Description.Length > 0) ? sponsor.Description : sp.Description;
-                    sp.Logo = (sponsor.Logo.Length > 0) ? sponsor.Logo : sp.Logo;
-                    sp.Phone = (sponsor.Phone.Length > 0) ? sponsor.Phone : sp.Phone;
-                    sp.Address = (sponsor.Address.Length > 0) ? sponsor.Address : sp.Address;
+                    sp.Name = (!string.IsNullOrEmpty(sponsor.Name)) ? sponsor.Name : sp.Name;
+                    sp.Description = (!string.IsNullOrEmpty(sponsor.Description)) ? sponsor.Description : sp.Description;
+                    sp.Logo = (!string.IsNullOrEmpty(sponsor.Logo)) ? sponsor.Logo : sp.Logo;
+                    sp.Phone = (!string.IsNullOrEmpty(sponsor.Phone)) ? sponsor.Phone : sp.Phone;
+                    sp.Address = (!string.IsNullOrEmpty(sponsor.Address)) ? sponsor.Address : sp.Address;
 
                     await _sponsorRepo.Update();
                     return true;

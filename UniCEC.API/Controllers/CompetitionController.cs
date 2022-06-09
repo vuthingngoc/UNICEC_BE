@@ -233,7 +233,53 @@ namespace UniCEC.API.Controllers
             }
         }
 
-  
+
+
+        // PUT api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("test-be")]
+        [SwaggerOperation(Summary = "Update detail EVENT or COMPETITON")]
+        public async Task<IActionResult> Update_BE([FromBody] LeaderUpdateCompOrEventModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionService.UpdateBE(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete()]

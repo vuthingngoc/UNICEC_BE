@@ -375,8 +375,8 @@ namespace UniCEC.Business.Services.TeamSvc
                         //3.check teamRole of user is Leader 
                         if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
                         {
-                            team.Name = (model.Name.Length > 0) ? model.Name : team.Name;
-                            team.Description = (model.Description.Length > 0) ? model.Description : team.Description;
+                            team.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : team.Name;
+                            team.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : team.Description;
 
                             if (model.Status.HasValue)
                             {
@@ -561,12 +561,12 @@ namespace UniCEC.Business.Services.TeamSvc
                     if (Participant_In_Team != null)
                     {                     
                         //Delete Participant In Team
-                        await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);                      
+                        await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
                         //---- auto Team Available
                         //------------------Update status Team
-                        //Team t = await _teamRepo.Get(team.Id);
-                        //t.Status = TeamStatus.Available;
-                        //await _teamRepo.Update();
+                        Team t = await _teamRepo.Get(team.Id);
+                        t.Status = TeamStatus.Available;
+                        await _teamRepo.Update();
                         return true;
                     }
                     else
