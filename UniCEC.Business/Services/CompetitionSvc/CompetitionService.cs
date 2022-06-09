@@ -416,6 +416,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubId;
                                     competitionInClub.CompetitionId = comp.Id;
+                                    competitionInClub.IsOwner = true;
                                     int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
 
 
@@ -1214,6 +1215,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     CompetitionInClub competitionInClub = new CompetitionInClub();
                                     competitionInClub.ClubId = model.ClubIdCollaborate;
                                     competitionInClub.CompetitionId = model.CompetitionId;
+                                    competitionInClub.IsOwner = false;
                                     int result = await _competitionInClubRepo.Insert(competitionInClub);
                                     if (result > 0)
                                     {
