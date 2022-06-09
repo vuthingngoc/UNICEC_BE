@@ -140,6 +140,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
         //ClubLeader
         // POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
@@ -232,7 +233,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
 
 
         // PUT api/<CompetitionController>/5
@@ -650,7 +650,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
 
 
         //---------------------------------------------------------------------------Sponsor in Competition

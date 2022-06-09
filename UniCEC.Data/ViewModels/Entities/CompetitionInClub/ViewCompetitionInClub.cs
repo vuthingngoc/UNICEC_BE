@@ -8,5 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionInClub
         public int ClubId { get; set; }
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
+        [JsonPropertyName("is_owner")]
+        public bool IsOwner { get; set; }
     }
 }

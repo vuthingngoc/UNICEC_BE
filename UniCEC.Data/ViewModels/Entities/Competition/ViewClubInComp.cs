@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
@@ -12,5 +13,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public string Name { get; set; }
         public string Image { get; set; }       
         public string Fanpage { get; set;}
+        [JsonPropertyName("is_owner")]
+        public bool IsOwner { get; set; }   
     }
 }
