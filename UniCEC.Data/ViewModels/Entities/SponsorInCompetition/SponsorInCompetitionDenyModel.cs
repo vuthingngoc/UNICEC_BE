@@ -7,16 +7,9 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.SponsorInCompetition
 {
-    public class SponsorInCompetitionDeleteModel
+    public class SponsorInCompetitionDenyModel
     {
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
-
-        [JsonPropertyName("sponsor_id")]
-        public int SponsorId { get; set; }
-
-        [JsonPropertyName("club_id")]
-        public int ClubId { get; set; }
-
     }
 }

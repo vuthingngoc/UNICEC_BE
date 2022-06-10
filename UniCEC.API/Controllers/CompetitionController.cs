@@ -42,18 +42,56 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);                             
-                return Ok(result);                                                          
-            }         
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);
+                return Ok(result);
+            }
             catch (NullReferenceException)
             {
-                return Ok(new List<object>());
+                return Ok(new object());
             }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
             }
         }
+
+        // GET api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpGet("sponsor-apply")]
+        [SwaggerOperation(Summary = "Get all sponsor aplly in competition or event")]
+        public async Task<IActionResult> GetAllSponsorApplyInCompOrEve([FromQuery] SponsorApplyRequestModel request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetAllSponsorApplyInCompOrEve(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
 
 
         // GET: api/<CompetitionController>
@@ -104,7 +142,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("manager")]
         [SwaggerOperation(Summary = "Get all manager in competition")]
-        public async Task<IActionResult> GetAllManagerInCompetition([FromQuery]CompetitionManagerRequestModel model)
+        public async Task<IActionResult> GetAllManagerInCompetition([FromQuery] CompetitionManagerRequestModel model)
         {
             try
             {
@@ -119,7 +157,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException)
             {
-                return Ok(new List<object>());
+                return Ok(new object());
             }
             catch (ArgumentNullException ex)
             {
@@ -153,7 +191,7 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                
+
 
                 ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
                 if (viewCompetition != null)
@@ -324,6 +362,51 @@ namespace UniCEC.API.Controllers
         }
 
 
+        // DELETE api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpDelete("remove-sponsor")]
+        [SwaggerOperation(Summary = "Club manager delete sponsor in competition or event")]
+        public async Task<IActionResult> LeaderDeleteSponsorInCompetition([FromBody] SponsorInCompetitionDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionService.LeaderDeleteSponsorInCompetition(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
         //---------------------------------------------------------------------------Competition Entity
         //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
@@ -336,7 +419,7 @@ namespace UniCEC.API.Controllers
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                
+
 
                 ViewCompetitionEntity result = await _competitionService.AddCompetitionEntity(model, token);
 
@@ -698,7 +781,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Sponsor")]
         [HttpDelete("sponsor-deny")]
         [SwaggerOperation(Summary = "Sponsor deny in Competition")]
-        public async Task<IActionResult> SponsorDeny([FromBody] SponsorInCompetitionDeleteModel model)
+        public async Task<IActionResult> SponsorDeny([FromBody] SponsorInCompetitionDenyModel model)
         {
             try
             {
