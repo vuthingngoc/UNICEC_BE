@@ -26,6 +26,7 @@ using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
@@ -61,6 +62,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionRoleRepo _competitionRoleRepo;
         private IDepartmentRepo _departmentRepo;
         private ITeamRepo _teamRepo;
+        private IUserRepo _userRepo;
         private JwtSecurityTokenHandler _tokenHandler;
         private readonly IConfiguration _configuration;
 
@@ -82,6 +84,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IDepartmentRepo departmentRepo,
                                   ITeamRepo teamRepo,
+                                  IUserRepo userRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -102,6 +105,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _configuration = configuration;
             _competitionRoleRepo = competitionRoleRepo;
             _departmentRepo = departmentRepo;
+            _userRepo = userRepo;
             _teamRepo = teamRepo;
         }
 
@@ -480,7 +484,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             try
             {
                 if (model.CompetitionId == 0
-                  || model.ClubId == 0                 )
+                  || model.ClubId == 0)
                     throw new ArgumentNullException("|| Competition Id Null" +
                                                      " ClubId Null");
 
@@ -1590,8 +1594,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-
                 int UserId = DecodeToken(token, "Id");
+
                 int SponsorId = DecodeToken(token, "SponsorId");
 
                 if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
@@ -1603,23 +1607,34 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //------------- CHECK Status Competition                    
                     if (competition.Status != CompetitionStatus.Happening && competition.Status != CompetitionStatus.Ending && competition.Status != CompetitionStatus.Canceling)
                     {
-                        //------------------------------------CHECK-sponsor-id-create-competition-or-event-duplicate                  
-                        SponsorInCompetition checkSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId);
-                        if (checkSponsorInCompetition == null)
+                        //------------------------------------CHECK Specific User(Sponsor) is aplly                 
+                        SponsorInCompetition checkSpecificSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
+                        if (checkSpecificSponsorInCompetition == null)
                         {
-                            SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                            sponsorInCompetition.SponsorId = SponsorId;
-                            sponsorInCompetition.CompetitionId = model.CompetitionId;
-                            sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
-
-                            int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
-                            if (result > 0)
+                            //------------------------------------CHECK Sponsor is aplly
+                            SponsorInCompetition checkSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId);
+                            if (checkSponsorInCompetition == null)
                             {
-                                SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
-                                ////UPDATE IsSponsor của competition -> IsSponsor true                                               
-                                //competition.IsSponsor = true;
-                                //await _competitionRepo.Update();
-                                return TransferViewSponsorInCompetition(sic);
+                                SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
+                                sponsorInCompetition.SponsorId = SponsorId;
+                                sponsorInCompetition.CompetitionId = model.CompetitionId;
+                                //add UserId Of Sponsor
+                                sponsorInCompetition.UserId = UserId;
+                                sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+
+                                int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+                                if (result > 0)
+                                {
+                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
+                                    ////UPDATE IsSponsor của competition -> IsSponsor true                                               
+                                    //competition.IsSponsor = true;
+                                    //await _competitionRepo.Update();
+                                    return await TransferViewSponsorInCompetition(sic, UserId);
+                                }
+                                else
+                                {
+                                    throw new ArgumentException("Sponsor has already submit");
+                                }
                             }
                             else
                             {
@@ -1628,7 +1643,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         }
                         else
                         {
-                            throw new ArgumentException("Sponsor has already submit");
+                            throw new ArgumentException("You has already submit");
                         }
                     }
                     else
@@ -1660,7 +1675,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (competition != null)
                 {
                     //------------- CHECK this apply is exsited
-                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId);
+                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
                     if (sponsorInCompetition != null)
                     {
                         //------------- CHECK this apply Status is Waiting 
@@ -1698,6 +1713,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Id = competitionInClub.Id,
                 ClubId = competitionInClub.ClubId,
                 CompetitionId = competitionInClub.CompetitionId,
+                IsOwner = competitionInClub.IsOwner,
             };
         }
 
@@ -1826,14 +1842,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
-        private ViewSponsorInCompetition TransferViewSponsorInCompetition(SponsorInCompetition sponsorInCompetition)
+        private async Task<ViewSponsorInCompetition> TransferViewSponsorInCompetition(SponsorInCompetition sponsorInCompetition, int userId)
         {
+
+            User sponsor = await _userRepo.Get(userId);
+
             return new ViewSponsorInCompetition()
             {
                 Id = sponsorInCompetition.Id,
                 SponsorId = sponsorInCompetition.SponsorId,
                 CompetitionId = sponsorInCompetition.CompetitionId,
-
+                UserId = userId,
+                Email = sponsor.Email,
+                Fullname = sponsor.Fullname,
+                Status = sponsorInCompetition.Status
             };
         }
 

@@ -15,11 +15,27 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 
         }
 
-        public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId)
+        public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId, int userId)
         {
             SponsorInCompetition query = await (from sic in context.SponsorInCompetitions
-                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId
+                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId && sic.UserId == userId
                                                 select sic).FirstOrDefaultAsync();
+            if (query != null)
+            {
+
+                return query;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId)
+        {
+            SponsorInCompetition query = await(from sic in context.SponsorInCompetitions
+                                               where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId
+                                               select sic).FirstOrDefaultAsync();
             if (query != null)
             {
 
