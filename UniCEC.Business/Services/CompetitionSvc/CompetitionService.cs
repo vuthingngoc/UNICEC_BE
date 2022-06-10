@@ -166,6 +166,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (Check)
                 {
                     PagingResult<ViewCompetitionManager> result = await _competitionRepo.GetAllManagerCompOrEve(request);
+                    if (result == null) throw new NullReferenceException();
                     return result;
                 }//end if check
                 else
@@ -178,6 +179,35 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw;
             }
         }
+
+        
+        //Get All Sponsor Apply In Competition
+        public async Task<PagingResult<ViewSponsorInCompetition>> GetAllSponsorApplyInCompOrEve(SponsorApplyRequestModel request, string token)
+        {
+            try
+            {
+                if (request.ClubId == 0 || request.CompetitionId == 0)throw new ArgumentNullException("|| Competition Id Null" + " ClubId Null");
+
+                bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
+                if (Check)
+                {
+                    //
+                    PagingResult<ViewSponsorInCompetition> result =  await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(request);
+                    if (result == null) throw new NullReferenceException();
+                    return result;
+                }//end if check
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
 
         public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
@@ -1167,6 +1197,64 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
+
+        public async Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0
+                    || model.ClubId == 0
+                    || model.SponsorId == 0)
+                    throw new ArgumentNullException(" Competition Id Null || ClubId Null || Sponsor Id Null");
+                bool Check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                if (Check)
+                {
+                    //
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp != null)
+                    {
+                        //Check Sponsor Id In Competition
+                        SponsorInCompetition sic = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(model.SponsorId, model.CompetitionId);
+                        if (sic != null)
+                        {
+                            bool check = false;
+                            if (sic.Status == SponsorInCompetitionStatus.Approved)
+                            {
+                                check = true;
+                            }
+                            if (check)
+                            {
+                                await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sic.Id);
+                                return true;
+                            }
+                            else
+                            {
+                                throw new ArgumentException("This Apply of sponsor is waiting for accepted !");
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException("This Apply of sponsor not found !");
+                        }
+                        return true;
+                    }//end if comp != null
+                    else
+                    {
+                        return false;
+                    }
+                }//end if check
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
         {
             try
@@ -1662,7 +1750,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDeleteModel model, string token)
+        public async Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token)
         {
             try
             {
@@ -2160,6 +2248,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return true;
         }
 
-
+        
     }
 }
