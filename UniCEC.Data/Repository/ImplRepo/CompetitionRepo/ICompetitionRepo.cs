@@ -24,5 +24,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
+        public Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId);
     }
 }

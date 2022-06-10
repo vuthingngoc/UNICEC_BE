@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ClubSvc;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Club;
 
@@ -50,14 +51,14 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("university/{id}/search")]
+        [HttpGet("universitiy/{id}/search")]
         [SwaggerOperation(Summary = "Get club by name - Authenticated user in the university")]
-        public async Task<IActionResult> GetClubByName(int id, [FromQuery] string name, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetClubByName(int id, [FromQuery] ClubRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, name, request);
+                PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, request);
                 return Ok(clubs);
             }
             catch (NullReferenceException)
@@ -74,15 +75,19 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("user")]
-        [SwaggerOperation(Summary = "Get club by user - Student")]
-        public async Task<IActionResult> GetClubByUser()
+        [HttpGet("user/{id}")]
+        [SwaggerOperation(Summary = "Get club of this user - Student")]
+        public async Task<IActionResult> GetClubByUser(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewClub> clubs = await _clubService.GetByUser(token);
+                List<ViewClub> clubs = await _clubService.GetByUser(token, id);
                 return Ok(clubs);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
@@ -144,6 +149,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Insert club - Admin")]
+        [Authorize(Roles = "University Admin")]
         public async Task<IActionResult> InsertClub([FromBody] ClubInsertModel club)
         {
             try
