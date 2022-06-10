@@ -64,7 +64,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 //              
                 var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
-                List<CompetitionInDepartment> list_CompetitionInDepartment =  query_List_CompetitionInDepartment.ToList();
+                List<CompetitionInDepartment> list_CompetitionInDepartment = query_List_CompetitionInDepartment.ToList();
 
                 //lấy Club Owner
                 List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
@@ -298,6 +298,14 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         select c.Scope;
 
             return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId)
+        {
+            return await (from cic in context.CompetitionInClubs
+                               join c in context.Clubs on cic.ClubId equals c.Id
+                               where cic.CompetitionId.Equals(competitionId) && c.UniversityId.Equals(universityId)
+                               select c.UniversityId).FirstOrDefaultAsync() > 0;
         }
     }
 }

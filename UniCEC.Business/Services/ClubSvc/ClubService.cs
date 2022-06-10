@@ -13,6 +13,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Club;
 
@@ -97,13 +98,15 @@ namespace UniCEC.Business.Services.ClubSvc
         public async Task<ViewClub> GetById(string token, int id)
         {
             int roleId = DecodeToken(token, "RoleId");
-            int uniId = DecodeToken(token, "UniversityId");
 
             ViewClub club = await _clubRepo.GetById(id, roleId);
             if (club == null) throw new NullReferenceException("Not found this club");
-
-            // is student role
-            if (roleId.Equals(3) && !uniId.Equals(club.UniversityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            
+            if(!roleId.Equals(4) && !roleId.Equals(2)) // not system admin and sponsor
+            {
+                int uniId = DecodeToken(token, "UniversityId");
+                if (!uniId.Equals(club.UniversityId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            }
 
             return await AddMoreInfoClub(club);
         }
@@ -111,42 +114,49 @@ namespace UniCEC.Business.Services.ClubSvc
         public async Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request)
         {
             int roleId = DecodeToken(token, "RoleId");
-            int universityId = DecodeToken(token, "UniversityId");
+
+            if (!roleId.Equals(4) && !roleId.Equals(2))// not system admin and sponsor
+            {
+                int universityId = DecodeToken(token, "UniversityId");
+                CompetitionScopeStatus scope = await _competitionRepo.GetScopeCompetition(competitionId);
+                if (scope.Equals(CompetitionScopeStatus.InterUniversity))
+                {
+                    bool isValid = await _competitionRepo.CheckExisteUniInCompetition(competitionId, universityId);
+                    if(!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                }
+            }
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByCompetition(competitionId, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this competition id");
 
-            if (roleId == 3)// is student role
-            {
-                CompetitionScopeStatus scope = await _competitionRepo.GetScopeCompetition(competitionId);
-                if (scope.Equals(CompetitionScopeStatus.InterUniversity)
-                        && !clubs.Items[0].UniversityId.Equals(universityId))
-                {
-                    throw new UnauthorizedAccessException("You do not have permission to access this resource");
-                }
-            }
-
             return await AddMoreInfoClub(clubs);
         }
 
-        public async Task<PagingResult<ViewClub>> GetByName(string token, int universityId, string name, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByName(string token, int universityId, ClubRequestModel request)
         {
             int roleId = DecodeToken(token, "RoleId");
-            int uniId = DecodeToken(token, "UniversityId");
 
-            PagingResult<ViewClub> clubs = await _clubRepo.GetByName(universityId, roleId, name, request);
+            if(!roleId.Equals(4) && !roleId.Equals(2) ) // not system admin and sponsor
+            {
+                int uniId = DecodeToken(token, "UniversityId");
+                if (!universityId.Equals(uniId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            }
+
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByName(universityId, request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this name");
-
-            // student and sponsor
-            if (roleId != 1 && roleId != 4 && !universityId.Equals(uniId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
 
             return await AddMoreInfoClub(clubs);
         }
 
-        public async Task<List<ViewClub>> GetByUser(string token)
+        public async Task<List<ViewClub>> GetByUser(string token, int id)
         {
+            int roleId = DecodeToken(token, "RoleId");
             int userId = DecodeToken(token, "Id");
-
+            
+            if (roleId.Equals(4) || 
+                    (!userId.Equals(id) || !roleId.Equals(1))) 
+                        throw new UnauthorizedAccessException("You can not access this resource");
+            
             List<ViewClub> clubs = await _clubRepo.GetByUser(userId);
             if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
 
@@ -156,6 +166,17 @@ namespace UniCEC.Business.Services.ClubSvc
                 element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
                 element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
+                if (!string.IsNullOrEmpty(element.Image))
+                {
+                    try
+                    {
+                        element.Image = await _fileService.GetUrlFromFilenameAsync(element.Image);
+                    }
+                    catch (Exception)
+                    {
+                        element.Image = "";
+                    }
+                }
             }
 
             return clubs;
@@ -165,31 +186,28 @@ namespace UniCEC.Business.Services.ClubSvc
         {
 
             int roleId = DecodeToken(token, "RoleId");
-            int universityId = DecodeToken(token, "UniversityId");
 
-            // student role
-            if (roleId == 3 && !universityId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            if (!roleId.Equals(4) && roleId.Equals(2)) // system admin and sponsor
+            {
+                int universityId = DecodeToken(token, "UniversityId");
+                if (!universityId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this club");
+            }
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(id, request);
             if (clubs == null) throw new NullReferenceException("This university have no any clubs");
 
             // add more info
-            foreach (ViewClub element in clubs.Items)
-            {
-                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
-                element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
-            }
-
-            return clubs;
+            return await AddMoreInfoClub(clubs);
         }
 
         public async Task<ViewClub> Insert(string token, ClubInsertModel model)
         {
             int roleId = DecodeToken(token, "RoleId");
+            if (roleId.Equals(4)) throw new UnauthorizedAccessException("You can not access this resource");// if system admin
+
             int universityId = DecodeToken(token, "UniversityId");
 
-            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !universityId.Equals(model.UniversityId)))
+            if (!roleId.Equals(1) && !universityId.Equals(model.UniversityId))
                 throw new UnauthorizedAccessException("You do not have permission to add new club");
 
             if (string.IsNullOrEmpty(model.Description) || model.UniversityId == 0 ||
@@ -269,7 +287,11 @@ namespace UniCEC.Business.Services.ClubSvc
 
             if (model.Status != false) club.Status = model.Status;
 
-            if (!string.IsNullOrEmpty(model.Image)) await _fileService.UploadFile(club.Image, model.Image);
+            if (!string.IsNullOrEmpty(model.Image))
+            {
+                if (string.IsNullOrEmpty(club.Image)) club.Image = await _fileService.UploadFile(model.Image); // insert
+                else await _fileService.UploadFile(club.Image, model.Image); // update                
+            }
 
             if (!string.IsNullOrEmpty(model.ClubContact)) club.ClubContact = model.ClubContact;
 
@@ -278,13 +300,15 @@ namespace UniCEC.Business.Services.ClubSvc
             await _clubRepo.Update();
         }
 
-        public async Task Update(string token, int clubId, bool status) // for admin
+        public async Task Update(string token, int clubId, bool status) // for university admin
         {
             int roleId = DecodeToken(token, "RoleId");
+            if (roleId.Equals(4)) throw new UnauthorizedAccessException("You can not access this resource");
+
             int uniId = DecodeToken(token, "UniversityId");
             int universityId = await _clubRepo.GetUniversityByClub(clubId);
 
-            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !uniId.Equals(universityId)))
+            if (!roleId.Equals(1) && !uniId.Equals(universityId))
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             Club club = await _clubRepo.Get(clubId);
@@ -295,18 +319,16 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task Delete(string token, int id)
         {
-            //int userId = DecodeToken(token, "Id");
             int roleId = DecodeToken(token, "RoleId");
-            int universityId = DecodeToken(token, "UniversityId");
+            if (roleId.Equals(4)) throw new UnauthorizedAccessException("You can not access this resource");// if system admin
+
+            int universityId = DecodeToken(token, "UniversityId");            
 
             Club club = await _clubRepo.Get(id);
             if (club == null) throw new NullReferenceException("Not found this club");
 
-            if ((!roleId.Equals(1) && !roleId.Equals(4)) || (roleId.Equals(1) && !universityId.Equals(club.UniversityId))) 
-                        throw new UnauthorizedAccessException("You do not have permission to delete this club");
-
-            //int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, id);
-            //if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to delete this club");
+            if (!roleId.Equals(1) && !universityId.Equals(club.UniversityId))
+                throw new UnauthorizedAccessException("You do not have permission to delete this club");            
             
             club.Status = false; // default status for delete
             await _clubRepo.Update();
