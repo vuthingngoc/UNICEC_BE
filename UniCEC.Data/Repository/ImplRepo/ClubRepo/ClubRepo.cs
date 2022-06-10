@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.Club;
+using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
@@ -73,15 +74,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByName(int universityId, int roleId, string name, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByName(int universityId, ClubRequestModel request)
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
-                        where c.Name.Contains(name) && c.UniversityId.Equals(universityId)
+                        where c.Name.Contains(request.Name) && c.UniversityId.Equals(universityId)
                         select new { c, u };
 
             // student and sponsor role
-            if (roleId != 1 && roleId != 4) query = query.Where(x => x.c.Status.Equals(true));
+            if (request.Status.HasValue) query = query.Where(x => x.c.Status.Equals(request.Status.Value));
 
             int totalCount = query.Count();
 
