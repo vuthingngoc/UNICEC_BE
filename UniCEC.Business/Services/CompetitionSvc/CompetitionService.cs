@@ -1610,15 +1610,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
                             sponsorInCompetition.SponsorId = SponsorId;
                             sponsorInCompetition.CompetitionId = model.CompetitionId;
-                            //sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+                            sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
 
                             int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
                             if (result > 0)
                             {
                                 SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
-                                //UPDATE IsSponsor của competition -> IsSponsor true                                               
-                                competition.IsSponsor = true;
-                                await _competitionRepo.Update();
+                                ////UPDATE IsSponsor của competition -> IsSponsor true                                               
+                                //competition.IsSponsor = true;
+                                //await _competitionRepo.Update();
                                 return TransferViewSponsorInCompetition(sic);
                             }
                             else
