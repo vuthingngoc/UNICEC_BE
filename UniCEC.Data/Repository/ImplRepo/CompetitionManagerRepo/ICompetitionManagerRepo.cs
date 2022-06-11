@@ -15,6 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
 
         //Get all records have all in CompetitionManger with MemberId
         public Task<CompetitionManager> GetMemberInCompetitionManager(int competitionId, int memberId, int clubId);
+        public bool CheckValidManagerByUser(int competitionId, int userId);
        
     }
 }
