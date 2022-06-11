@@ -14,7 +14,19 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         public CompetitionManagerRepo(UniCECContext context) : base(context)
         {
         }
-    
+
+        public bool CheckValidManagerByUser(int competitionId, int userId)
+        {
+            var query = from cm in context.CompetitionManagers
+                        join m in context.Members on cm.MemberId equals m.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
+                        join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
+                        where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId)
+                        select new {cm, m, c, cic};
+            
+            return query.Any();
+        }
+
 
         //public async Task<CompetitionManager> GetManagerInCompetitionManager(int CompetitionId, int ClubId, int MemberId)
         //{

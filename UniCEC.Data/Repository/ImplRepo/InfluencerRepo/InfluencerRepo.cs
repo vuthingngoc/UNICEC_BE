@@ -55,10 +55,11 @@ namespace UniCEC.Data.Repository.ImplRepo.InfluencerRepo
                         }).FirstOrDefaultAsync();
         }
 
-        public Task<int> Insert(Influencer influencer, int competitionId)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<int> Insert(Influencer influencer, int competitionId)
+        //{
+
+        //    throw new NotImplementedException();
+        //}
 
         //Tien Anh
         public async Task<bool> CheckInfluencerInSystem(List<int> listInfluencerId)

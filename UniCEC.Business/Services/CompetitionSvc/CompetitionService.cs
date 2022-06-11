@@ -307,7 +307,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                                     foreach (var influencer in model.ListInfluencer)
                                     {
-                                        if (string.IsNullOrEmpty(influencer.Name) || string.IsNullOrEmpty(influencer.Url))
+                                        if (string.IsNullOrEmpty(influencer.Name) || string.IsNullOrEmpty(influencer.ImageUrl))
                                         {
                                             check = false;
                                         }
@@ -430,7 +430,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                             Influencer influencer = new Influencer()
                                             {
                                                 Name = influ.Name,
-                                                ImageUrl = await _fileService.UploadFile(influ.Url)
+                                                ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
                                             };
 
                                             int result = await _influencerRepo.Insert(influencer);
@@ -1387,7 +1387,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Influencer influencer = new Influencer()
                             {
                                 Name = influ.Name,
-                                ImageUrl = await _fileService.UploadFile(influ.Url)
+                                ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
                             };
 
                             int result = await _influencerRepo.Insert(influencer);

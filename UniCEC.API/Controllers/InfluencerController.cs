@@ -28,7 +28,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("competition/{id}")]
         [SwaggerOperation(Summary = "Get all influencers in the competition")]
-        public async Task<IActionResult> GetAllInfluencerByCompetition(int id, PagingRequest request)
+        public async Task<IActionResult> GetAllInfluencerByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
             {
@@ -49,48 +49,23 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "Insert a new influencer to the competition")]
-        //public async Task<IActionResult> InsertInfluencer([FromBody] InfluencerInsertModel model)
-        //{
-        //    try
-        //    {
-        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-        //        ViewInfluencer influencer = await _influencerService.Insert(model, token);
-        //        return Ok(influencer);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new List<object>());
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
-
-        [HttpPut("{id}/upload-image")]
-        [SwaggerOperation(Summary = "Update image for influencer in the competition")]
-        public async Task<IActionResult> UpdateImageForInfluencer(int id)
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert a new influencer to the competition - competition managers")]
+        public async Task<IActionResult> InsertInfluencer([FromBody] InfluencerInsertModel model)
         {
             try
             {
-                var imageFile = Request.Form.Files[0];
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _influencerService.Update(id, imageFile, token);
-                return Ok();
+                ViewInfluencer influencer = await _influencerService.Insert(model, token);
+                return Ok(influencer);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
-                return Ok(ex.Message);
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -98,8 +73,33 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        //[HttpPut("{id}/upload-image")]
+        //[SwaggerOperation(Summary = "Update image for influencer in the competition")]
+        //public async Task<IActionResult> UpdateImageForInfluencer(int id) // for just upload file
+        //{
+        //    try
+        //    {
+        //        var imageFile = Request.Form.Files[0];
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        await _influencerService.Update(id, imageFile, token);
+        //        return Ok();
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return Ok(ex.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exception");
+        //    }
+        //}
+
         [HttpPut]
-        [SwaggerOperation(Summary = "Update info influencer in the competition")]
+        [SwaggerOperation(Summary = "Update info influencer in the competition - competition managers")]
         public async Task<IActionResult> UpdateInfluencer(InfluencerUpdateModel model)
         {
             try
@@ -123,7 +123,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete an influencer to the competition")]
+        [SwaggerOperation(Summary = "Delete an influencer to the competition - competition managers")]
         public async Task<IActionResult> DeleteInfluencer(int id)
         {
             try

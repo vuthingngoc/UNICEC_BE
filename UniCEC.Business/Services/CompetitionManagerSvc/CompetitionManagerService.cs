@@ -8,6 +8,5 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
 {
     public class CompetitionManagerService : ICompetitionManagerService
     {
-
     }
 }
