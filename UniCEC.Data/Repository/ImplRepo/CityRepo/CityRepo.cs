@@ -58,7 +58,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
                     Description = c.Description
                 }).ToListAsync();
 
-            return new PagingResult<ViewCity>(cities, totalCount, request.CurrentPage, request.PageSize);
+            return (totalCount > 0) 
+                ? new PagingResult<ViewCity>(cities, totalCount, request.CurrentPage, request.PageSize) : null;
         }
     }
 }

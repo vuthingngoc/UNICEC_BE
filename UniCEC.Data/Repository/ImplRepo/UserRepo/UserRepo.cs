@@ -201,19 +201,19 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
         public async Task<bool> CheckExistedUser(int universityId, string studentCode)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.StudentCode.Equals(studentCode));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.StudentCode.Equals(studentCode) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 
         public async Task<bool> CheckExistedUser(string studentCode)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.StudentCode.Equals(studentCode));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.StudentCode.Equals(studentCode) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 
         public async Task<bool> CheckExistedUser(int universityId, int userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.Id.Equals(userId) && u.UniversityId.Equals(universityId));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.Id.Equals(userId) && u.UniversityId.Equals(universityId) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 

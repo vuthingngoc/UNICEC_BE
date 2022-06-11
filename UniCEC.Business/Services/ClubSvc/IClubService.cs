@@ -9,9 +9,9 @@ namespace UniCEC.Business.Services.ClubSvc
     public interface IClubService
     {
         public Task<ViewClub> GetById(string token, int id);  
-        public Task<PagingResult<ViewClub>> GetByName(string token, int universityId, ClubRequestModel request);
+        public Task<PagingResult<ViewClub>> GetByConditions(string token, ClubRequestModel request);
         public Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request);
-        public Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request);
+        //public Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request);
         public Task<List<ViewClub>> GetByUser(string token, int id);
         public Task<ViewClub> Insert(string token, ClubInsertModel model);
         public Task Update(string token, ClubUpdateModel model);
