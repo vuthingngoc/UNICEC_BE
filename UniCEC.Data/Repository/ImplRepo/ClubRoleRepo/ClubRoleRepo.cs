@@ -30,12 +30,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRoleRepo
 
         public async Task<List<ViewClubRole>> GetAll()
         {
-            return await (from cr in context.ClubRoles
-                          select new ViewClubRole()
-                          {
-                              Id = cr.Id,
-                              Name = cr.Name
-                          }).ToListAsync();
+            var clubRoles = await (from cr in context.ClubRoles
+                                   select new ViewClubRole()
+                                   {
+                                       Id = cr.Id,
+                                       Name = cr.Name
+                                   }).ToListAsync();
+
+            return (clubRoles.Any()) ? clubRoles : null;
         }
 
         public async Task<ViewClubRole> GetById(int id)

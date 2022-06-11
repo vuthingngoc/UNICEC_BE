@@ -51,14 +51,14 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("universitiy/{id}/search")]
-        [SwaggerOperation(Summary = "Get club by name - Authenticated user in the university")]
-        public async Task<IActionResult> GetClubByName(int id, [FromQuery] ClubRequestModel request)
+        [HttpGet("search")]
+        [SwaggerOperation(Summary = "Get club by conditions - Authenticated user in the university")]
+        public async Task<IActionResult> GetClubByConditions([FromQuery] ClubRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewClub> clubs = await _clubService.GetByName(token, id, request);
+                PagingResult<ViewClub> clubs = await _clubService.GetByConditions(token, request);
                 return Ok(clubs);
             }
             catch (NullReferenceException)
@@ -92,30 +92,6 @@ namespace UniCEC.API.Controllers
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
-        [HttpGet("university/{id}")]
-        [SwaggerOperation(Summary = "Get club by university of user - Authenticated user in the university")]
-        public async Task<IActionResult> GetClubByUniversity(int id, [FromQuery] PagingRequest request)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewClub> clubs = await _clubService.GetByUniversity(token, id, request);
-                return Ok(clubs);
-            }
-            catch(UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return Ok(ex.Message);
             }
             catch (SqlException)
             {
@@ -213,6 +189,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut("{id}/status")]
+        [Authorize(Roles = "University Admin")]
         [SwaggerOperation(Summary = "Update status of a club - Admin")]
         public async Task<IActionResult> UpdateStatusClub(int id, [FromQuery, BindRequired] bool status)
         {
@@ -249,6 +226,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "University Admin")]
         [SwaggerOperation(Summary = "Delete club - Admin")]
         public async Task<IActionResult> DeleteClub(int id)
         {

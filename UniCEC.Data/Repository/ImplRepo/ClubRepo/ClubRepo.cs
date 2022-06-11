@@ -43,7 +43,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                 Status = x.c.Status,
             }).FirstOrDefaultAsync();
 
-            return (query.Count() > 0) ? club : null;
+            return (query.Any()) ? club : null;
         }
 
         public async Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request)
@@ -71,15 +71,17 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                                                   Status = x.c.Status,
                                               }).ToListAsync();
 
-            return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (query.Any()) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<ViewClub>> GetByName(int universityId, ClubRequestModel request)
+        public async Task<PagingResult<ViewClub>> GetByConditions(ClubRequestModel request)
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
-                        where c.Name.Contains(request.Name) && c.UniversityId.Equals(universityId)
+                        where c.UniversityId.Equals(request.UniversityId)
                         select new { c, u };
+
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(x => x.c.Name.Contains(request.Name));
 
             // student and sponsor role
             if (request.Status.HasValue) query = query.Where(x => x.c.Status.Equals(request.Status.Value));
@@ -103,7 +105,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                 }
             ).ToListAsync();
 
-            return (clubs.Count > 0) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (query.Any()) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<List<ViewClub>> GetByUser(int userId)
