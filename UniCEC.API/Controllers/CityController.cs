@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CitySvc;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
 
@@ -57,12 +58,12 @@ namespace UniCEC.API.Controllers
         // Search cities
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search cities by name - Authenticated user")]
-        public async Task<IActionResult> SearchCitiesByName([FromQuery] string name, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> SearchCitiesByName([FromQuery] CityRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewCity> result = await _cityService.SearchCitiesByName(name, token, request);
+                PagingResult<ViewCity> result = await _cityService.SearchCitiesByName(token, request);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -105,7 +106,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewCity result = await _cityService.Insert(model);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewCity result = await _cityService.Insert(token, model);
                 if (result != null)
                 {
                     return Ok(result);
@@ -114,6 +116,10 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (ArgumentNullException ex)
             {
@@ -137,10 +143,15 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                bool check = await _cityService.Update(city);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                bool check = await _cityService.Update(token, city);
                 return (check == true) ? Ok() : Ok(new object());
             }
-            catch (ArgumentNullException ex)
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -165,8 +176,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _cityService.Delete(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _cityService.Delete(token, id);
                 return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
