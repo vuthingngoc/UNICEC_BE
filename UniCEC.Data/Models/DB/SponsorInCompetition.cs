@@ -12,6 +12,10 @@ namespace UniCEC.Data.Models.DB
         public int CompetitionId { get; set; }
         public int SponsorId { get; set; }
         public int UserId { get; set; }
+        public DateTime? CreateTime { get; set; }
+        public string Comment { get; set; }
+        public DateTime? ReviewDate { get; set; }
+        public string Feedback { get; set; }
         public SponsorInCompetitionStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }
