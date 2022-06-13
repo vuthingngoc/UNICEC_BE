@@ -7,6 +7,7 @@ namespace UniCEC.Data.ViewModels.Entities.Influencer
     {
         public int CompetitionId { get; set; }
         public string Name { get; set; }
+        [JsonPropertyName("url")]
         public string ImageUrl { get; set; }
        
     }
