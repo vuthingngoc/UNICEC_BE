@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Entities.City;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 {
@@ -16,37 +17,32 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
 
         }
 
-        public async Task<ViewCity> GetById(int id, int roleId)
+        public async Task<ViewCity> GetById(int id, bool? status)
         {
+            var query = from c in context.Cities
+                        where c.Id.Equals(id)
+                        select c;
 
-            return (roleId.Equals(1) || roleId.Equals(4)) ? // university admin and system admin
-                await (from c in context.Cities
-                       where c.Id.Equals(id)
-                       select new ViewCity()
-                       {
-                           Id = c.Id,
-                           Name = c.Name,
-                           Description = c.Description
-                       }).FirstOrDefaultAsync()
-                :
-                await (from c in context.Cities
-                       where c.Id.Equals(id) && c.Status.Equals(true)
-                       select new ViewCity()
-                       {
-                           Id = c.Id,
-                           Name = c.Name,
-                           Description = c.Description
-                       }).FirstOrDefaultAsync();
+            if (status.HasValue) query = query.Where(city => city.Status.Equals(status.Value)); // if not system admin
+
+            return await query.Select(c => new ViewCity()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description,
+                Status = c.Status
+            }).FirstOrDefaultAsync();
         }
 
         // Search Cities
-        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, int roleId, PagingRequest request)
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(CityRequestModel request)
         {
-            var query = from c in context.Cities
-                        where c.Name.Contains(name)
+            var query = from c in context.Cities                        
                         select c;
 
-            if (roleId.Equals(2) || roleId == 3) query = query.Where(city => city.Status.Equals(true)); // student and sponsor
+            if(!string.IsNullOrEmpty(request.Name)) query = query.Where(city => city.Name.Contains(request.Name));
+
+            if(request.Status.HasValue) query = query.Where(city => city.Status.Equals(request.Status.Value));
 
             int totalCount = query.Count();
             //filter 
@@ -55,10 +51,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CityRepo
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    Description = c.Description
+                    Description = c.Description,
+                    Status = c.Status
                 }).ToListAsync();
 
-            return (totalCount > 0) 
+            return (totalCount > 0)
                 ? new PagingResult<ViewCity>(cities, totalCount, request.CurrentPage, request.PageSize) : null;
         }
     }
