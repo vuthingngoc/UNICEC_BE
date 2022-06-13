@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.RequestModels;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
@@ -15,10 +17,19 @@ namespace UniCEC.Business.Services.DepartmentSvc
         private IDepartmentRepo _departmentRepo;
         private IMajorRepo _majorRepo;
 
+        private JwtSecurityTokenHandler _tokenHandler;
+
         public DepartmentService(IDepartmentRepo departmentRepo, IMajorRepo majorRepo)
         {
             _departmentRepo = departmentRepo;
             _majorRepo = majorRepo;
+        }
+
+        private int DecodeToken(string token, string nameClaim)
+        {
+            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return Int32.Parse(claim.Value);
         }
 
         public async Task<ViewDepartment> GetById(int id)
@@ -40,9 +51,12 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return (departments != null) ? departments : throw new NullReferenceException();
         }
 
-        public async Task<ViewDepartment> Insert(string name)
+        public async Task<ViewDepartment> Insert(string token, string name)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("Name Null");
+
+            int roleId = DecodeToken(token, "RoleId");
+            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
 
             Department element = new Department()
             {
@@ -53,10 +67,14 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return (id > 0) ? await _departmentRepo.GetById(id) : null;
         }
 
-        public async Task Update(DepartmentUpdateModel model)
+        public async Task Update(string token, DepartmentUpdateModel model)
         {
+            int roleId = DecodeToken(token, "RoleId");
+            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
+
             Department department = await _departmentRepo.Get(model.Id);
             if (department == null) throw new NullReferenceException("Not found this element");
+            
             if (model.Status.HasValue && model.Status.Value.Equals(true))
             {
                 List<int> majorIds = await _majorRepo.GetByDepartment(model.Id);
@@ -78,8 +96,11 @@ namespace UniCEC.Business.Services.DepartmentSvc
             await _departmentRepo.Update();
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(string token, int id)
         {
+            int roleId = DecodeToken(token, "RoleId");
+            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
+            
             Department department = await _departmentRepo.Get(id);
             if (department == null) throw new NullReferenceException("Not found this element");
 

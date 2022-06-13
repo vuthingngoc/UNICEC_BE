@@ -1,16 +1,11 @@
-﻿using Firebase.Storage;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
 
@@ -92,16 +87,18 @@ namespace UniCEC.Business.Services.CitySvc
 
         private int DecodeToken(string token, string nameClaim)
         {
-            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
             var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
             return Int32.Parse(claim.Value);
         }
 
         // Search cities
-        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string name, string token, PagingRequest request)
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request)
         {
             int roleId = DecodeToken(token, "RoleId");
-            PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(name, roleId, request);
+            if (!roleId.Equals(4)) request.Status = true;
+            
+            PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(request);
 
             if (result == null) throw new NullReferenceException();
             return result;
@@ -110,97 +107,81 @@ namespace UniCEC.Business.Services.CitySvc
         // Get city by id
         public async Task<ViewCity> GetByCityId(int id, string token)
         {
-            try
-            {
-                int roleId = DecodeToken(token, "RoleId");
-                ViewCity city = await _cityRepo.GetById(id,roleId);
+            int roleId = DecodeToken(token, "RoleId");
+            bool? status = null;
 
-                if (city == null) throw new NullReferenceException("Not found this city");
-                return city;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            if (!roleId.Equals(4)) status = true;
 
+            ViewCity city = await _cityRepo.GetById(id, status);
+
+            if (city == null) throw new NullReferenceException("Not found this city");
+            return city;
         }
 
         //Insert-City
-        public async Task<ViewCity> Insert(CityInsertModel model)
+        public async Task<ViewCity> Insert(string token, CityInsertModel model)
         {
-            try
+            if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
+                throw new ArgumentNullException(" Name Null || Description Null ");
+
+            int roleId = DecodeToken(token, "RoleId");
+            if (roleId != 4) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // not system admin
+
+            City city = new City()
             {
-                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
-                    throw new ArgumentNullException(" Name Null || Description Null ");
+                Name = model.Name,
+                Description = model.Description,
+                Status = true // default status when inserting
+            };
 
-                City city = new City();
+            int result = await _cityRepo.Insert(city);
 
-                city.Name = model.Name;
-                city.Description = model.Description;
-
-                int result = await _cityRepo.Insert(city);
-                //view
-                ViewCity viewCity = new ViewCity();
-                //return data when insert success
-                if (result > 0)
+            //return data when insert success
+            return (result > 0)
+                ? new ViewCity()
                 {
-                    //
-                    City c = await _cityRepo.Get(result);
-                    viewCity.Id = c.Id;
-                    viewCity.Name = c.Name;
-                    viewCity.Description = c.Description;
-                    return viewCity;
+                    Id = result,
+                    Name = model.Name,
+                    Description = model.Description,
+                    Status = true
                 }
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception) { throw; }
+                : null;
         }
 
 
         //Update-City
-        public async Task<bool> Update(CityUpdateModel model)
+        public async Task<bool> Update(string token, CityUpdateModel model)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description) || model.Id == 0)
-                    throw new ArgumentNullException(" Name Null || Description Null || Id Null");
-                //get city
-                City city = await _cityRepo.Get(model.Id);
-                //
-                if (city != null)
-                {
-                    city.Name = (!model.Name.Equals("")) ? model.Name : city.Name;
-                    city.Description = (!model.Description.Equals("")) ? model.Description : city.Description;
-                    if(city.Status == false && model.Status == true) await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);               
+            int roleId = DecodeToken(token, "RoleId");
+            if (roleId != 4) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // not system admin
 
-                    await _cityRepo.Update();
-                    return true;
-                }
-                else
-                {
-                    throw new ArgumentException("City not find to update");
-                }
-                return false;
-            }
-            catch (Exception)
+            //get city
+            City city = await _cityRepo.Get(model.Id);
+            //
+            if (city != null)
             {
-                throw;
+                city.Name = (!model.Name.Equals("")) ? model.Name : city.Name;
+                city.Description = (!model.Description.Equals("")) ? model.Description : city.Description;
+                if (city.Status == false && model.Status == true) await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);
+
+                await _cityRepo.Update();
+                return true;
+            }
+            else
+            {
+                throw new NullReferenceException("City not find to update");
             }
         }
 
         //
-        public async Task Delete(int id)
+        public async Task Delete(string token, int id)
         {
             City city = await _cityRepo.Get(id);
             if (city == null) throw new NullReferenceException("Not found this city");
 
-            bool status = false; // status for delete
-            city.Status = status; 
-            
-            await _universityRepo.UpdateStatusByCityId(city.Id, status);
+            city.Status = false; // status for delete
+
+            await _universityRepo.UpdateStatusByCityId(city.Id, city.Status);
             await _cityRepo.Update();
         }
     }

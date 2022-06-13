@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -86,7 +85,8 @@ namespace UniCEC.API.Controllers
         {
             try 
             {
-                ViewDepartment viewDepartment = await _departmentService.Insert(name);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewDepartment viewDepartment = await _departmentService.Insert(token, name);
                 return Ok(viewDepartment);
             }
             catch (UnauthorizedAccessException ex)
@@ -113,7 +113,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _departmentService.Update(department);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _departmentService.Update(token, department);
                 return Ok(); 
             }
             catch (UnauthorizedAccessException ex)
@@ -145,7 +146,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                await _departmentService.Delete(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _departmentService.Delete(token, id);
                 return NoContent();
             }
             catch (SqlException)
