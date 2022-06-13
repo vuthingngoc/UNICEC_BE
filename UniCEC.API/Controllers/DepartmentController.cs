@@ -30,7 +30,8 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                ViewDepartment department = await _departmentService.GetById(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewDepartment department = await _departmentService.GetById(token, id);
                 return Ok(department);
             }
             catch(NullReferenceException)
@@ -48,7 +49,8 @@ namespace UniCEC.API.Controllers
         {
             try 
             {
-                PagingResult<ViewDepartment> departments = await _departmentService.GetByConditions(request);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewDepartment> departments = await _departmentService.GetByConditions(token, request);
                 return Ok(departments);
             }
             catch (SqlException)
