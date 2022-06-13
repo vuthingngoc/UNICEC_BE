@@ -113,7 +113,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _sponsorRepo = sponsorRepo;
         }
 
-       
+
         //Get
         public async Task<ViewDetailCompetition> GetById(int id)
         {
@@ -153,19 +153,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         }
-  
+
         //Get All Sponsor Apply In Competition
         public async Task<PagingResult<ViewSponsorInCompetition>> GetAllSponsorApplyInCompOrEve(SponsorApplyRequestModel request, string token)
         {
             try
             {
-                if (request.ClubId == 0 || request.CompetitionId == 0)throw new ArgumentNullException("|| Competition Id Null" + " ClubId Null");
+                if (request.ClubId == 0 || request.CompetitionId == 0) throw new ArgumentNullException("|| Competition Id Null" + " ClubId Null");
 
                 bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
                 if (Check)
                 {
                     //
-                    PagingResult<ViewSponsorInCompetition> result =  await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(request);
+                    PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(request);
                     if (result == null) throw new NullReferenceException();
                     return result;
                 }//end if check
@@ -233,6 +233,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             bool checkDate = CheckDate(localTime, localTime, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                             if (checkDate)
                             {
+                                //Check Competition Type 
+                                CompetitionType ct = await _competitionTypeRepo.Get(model.CompetitionTypeId);
+                                if (ct == null)
+                                {
+                                    throw new ArgumentException("Competition Type Id not have in System");
+                                }
                                 //------------ Check FK
                                 // Department ID
                                 bool insertDepartment;
@@ -480,7 +486,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-       
+
 
         public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
         {
@@ -1453,7 +1459,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
                                 if (result > 0)
                                 {
-                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);                                   
+                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
                                     return await TransferViewDetailSponsorInCompetition(sic, UserId);
                                 }
                                 else
@@ -1671,7 +1677,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
 
             User user_Sponsor = await _userRepo.Get(userId);
-            Sponsor sponsor = await _sponsorRepo.Get(userId);   
+            Sponsor sponsor = await _sponsorRepo.Get(userId);
 
             return new ViewDetailSponsorInCompetition()
             {
@@ -1684,7 +1690,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Fullname = user_Sponsor.Fullname,
                 //info Sponsor
                 SponsorName = sponsor.Name,
-                SponsorLogo = sponsor.Logo,                
+                SponsorLogo = sponsor.Logo,
                 //info detail
                 CreateTime = (DateTime)sponsorInCompetition.CreateTime,
                 Comment = sponsorInCompetition.Comment,
