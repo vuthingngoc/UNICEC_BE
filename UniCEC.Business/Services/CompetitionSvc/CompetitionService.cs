@@ -24,6 +24,7 @@ using UniCEC.Data.Repository.ImplRepo.InfluencerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
@@ -63,6 +64,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IDepartmentRepo _departmentRepo;
         private ITeamRepo _teamRepo;
         private IUserRepo _userRepo;
+        private ISponsorRepo _sponsorRepo;
         private JwtSecurityTokenHandler _tokenHandler;
         private readonly IConfiguration _configuration;
 
@@ -85,6 +87,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IDepartmentRepo departmentRepo,
                                   ITeamRepo teamRepo,
                                   IUserRepo userRepo,
+                                  ISponsorRepo sponsorRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -107,6 +110,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _departmentRepo = departmentRepo;
             _userRepo = userRepo;
             _teamRepo = teamRepo;
+            _sponsorRepo = sponsorRepo;
         }
 
        
@@ -1420,7 +1424,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 int SponsorId = DecodeToken(token, "SponsorId");
 
-                if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
+                if (model.CompetitionId == 0 || string.IsNullOrEmpty(model.Comment)) throw new ArgumentNullException("Competition Id Null || Comment Null");
 
                 //------------- CHECK Competition is have in system or not
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
@@ -1429,7 +1433,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //------------- CHECK Status Competition                    
                     if (competition.Status != CompetitionStatus.Happening && competition.Status != CompetitionStatus.Ending && competition.Status != CompetitionStatus.Canceling)
                     {
-                        //------------------------------------CHECK Specific User(Sponsor) is aplly                 
+                        //------------------------------------CHECK Specific User(Sponsor) is apply                 
                         SponsorInCompetition checkSpecificSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
                         if (checkSpecificSponsorInCompetition == null)
                         {
@@ -1442,16 +1446,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 sponsorInCompetition.CompetitionId = model.CompetitionId;
                                 //add UserId Of Sponsor
                                 sponsorInCompetition.UserId = UserId;
+                                sponsorInCompetition.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                                sponsorInCompetition.Comment = model.Comment;
                                 sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
 
                                 int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
                                 if (result > 0)
                                 {
-                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
-                                    ////UPDATE IsSponsor của competition -> IsSponsor true                                               
-                                    //competition.IsSponsor = true;
-                                    //await _competitionRepo.Update();
-                                    return await TransferViewSponsorInCompetition(sic, UserId);
+                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);                                   
+                                    return await TransferViewDetailSponsorInCompetition(sic, UserId);
                                 }
                                 else
                                 {
@@ -1664,19 +1667,29 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
-        private async Task<ViewSponsorInCompetition> TransferViewSponsorInCompetition(SponsorInCompetition sponsorInCompetition, int userId)
+        private async Task<ViewSponsorInCompetition> TransferViewDetailSponsorInCompetition(SponsorInCompetition sponsorInCompetition, int userId)
         {
 
-            User sponsor = await _userRepo.Get(userId);
+            User user_Sponsor = await _userRepo.Get(userId);
+            Sponsor sponsor = await _sponsorRepo.Get(userId);   
 
-            return new ViewSponsorInCompetition()
+            return new ViewDetailSponsorInCompetition()
             {
                 Id = sponsorInCompetition.Id,
                 SponsorId = sponsorInCompetition.SponsorId,
                 CompetitionId = sponsorInCompetition.CompetitionId,
+                //info User
                 UserId = userId,
-                Email = sponsor.Email,
-                Fullname = sponsor.Fullname,
+                Email = user_Sponsor.Email,
+                Fullname = user_Sponsor.Fullname,
+                //info Sponsor
+                SponsorName = sponsor.Name,
+                SponsorLogo = sponsor.Logo,                
+                //info detail
+                CreateTime = (DateTime)sponsorInCompetition.CreateTime,
+                Comment = sponsorInCompetition.Comment,
+                ReviewDate = (DateTime)sponsorInCompetition.ReviewDate,
+                Feedback = sponsorInCompetition.Feedback,
                 Status = sponsorInCompetition.Status
             };
         }

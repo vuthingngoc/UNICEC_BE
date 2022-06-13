@@ -5,6 +5,8 @@ namespace UniCEC.Data.ViewModels.Entities.SponsorInCompetition
     public class SponsorInCompetitionInsertModel
     {
         [JsonPropertyName("competition_id")]
-        public int CompetitionId { get; set; }       
+        public int CompetitionId { get; set; }
+        public string Comment { get; set; }
+
     }
 }

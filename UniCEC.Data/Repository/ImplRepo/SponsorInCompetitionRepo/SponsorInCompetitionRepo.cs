@@ -8,6 +8,8 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.Enum;
+using System;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 {
@@ -21,7 +23,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId, int userId)
         {
             SponsorInCompetition query = await (from sic in context.SponsorInCompetitions
-                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId && sic.UserId == userId
+                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId && sic.UserId == userId && sic.Status != Enum.SponsorInCompetitionStatus.Rejected
                                                 select sic).FirstOrDefaultAsync();
             if (query != null)
             {
@@ -37,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId)
         {
             SponsorInCompetition query = await (from sic in context.SponsorInCompetitions
-                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId
+                                                where sic.SponsorId == sponsorId && sic.CompetitionId == competitionId && sic.Status != Enum.SponsorInCompetitionStatus.Rejected
                                                 select sic).FirstOrDefaultAsync();
             if (query != null)
             {
@@ -59,11 +61,11 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
             await Update();
         }
 
-        //
+        //get sponsor is applied with status Approved - bên trong View Detail Competition
         public async Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int CompetitionId)
         {
             List<SponsorInCompetition> sponsor_In_Competition_List = await (from sic in context.SponsorInCompetitions
-                                                                            where CompetitionId == sic.CompetitionId
+                                                                            where CompetitionId == sic.CompetitionId && sic.Status == SponsorInCompetitionStatus.Approved
                                                                             select sic).ToListAsync();
 
             List<ViewSponsorInComp> listViewSponsor = new List<ViewSponsorInComp>();
@@ -94,17 +96,14 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
             return null;
         }
 
+        //get sponsor apply with status Waiting - ViewSponsorInCompetition
         public async Task<PagingResult<ViewSponsorInCompetition>> GetListSponsor_In_Competition(SponsorApplyRequestModel request)
         {
             var query = from sic in context.SponsorInCompetitions
-                        where request.CompetitionId == sic.CompetitionId
+                        where request.CompetitionId == sic.CompetitionId && sic.Status == SponsorInCompetitionStatus.Waiting
                         select sic;
 
-            if (request.Status.HasValue)
-            {
-                query = query.Where(s => s.Status == request.Status.Value);
-            }
-
+           
             int totalCount = query.Count();
 
             List<ViewSponsorInCompetition> list_vsic = new List<ViewSponsorInCompetition>();
@@ -117,6 +116,10 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
                 User user = await (from us in context.Users
                                    where us.Id == sponsorInCompetition.UserId
                                    select us).FirstOrDefaultAsync();
+                //sponsor
+                Sponsor sponsor = await (from s in context.Sponsors
+                                         where s.Id == sponsorInCompetition.SponsorId
+                                         select s).FirstOrDefaultAsync();
 
                 ViewSponsorInCompetition vsic = new ViewSponsorInCompetition()
                 {
@@ -126,6 +129,9 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
                     UserId = sponsorInCompetition.UserId,
                     Email = user.Email,
                     Fullname = user.Fullname,
+                    CreateTime = (DateTime)sponsorInCompetition.CreateTime,
+                    SponsorName = sponsor.Name,
+                    SponsorLogo = sponsor.Logo,                  
                     Status = sponsorInCompetition.Status
                 };
                 list_vsic.Add(vsic);
