@@ -10,7 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 {
     public interface IDepartmentRepo : IRepository<Department>
     {
-        public Task<ViewDepartment> GetById(int id);
+        public Task<ViewDepartment> GetById(int id, bool? status);
         public Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request);
         public Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request);
         //

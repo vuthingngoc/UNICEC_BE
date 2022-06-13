@@ -32,14 +32,19 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return Int32.Parse(claim.Value);
         }
 
-        public async Task<ViewDepartment> GetById(int id)
+        public async Task<ViewDepartment> GetById(string token, int id)
         {
-            ViewDepartment department = await _departmentRepo.GetById(id);
+            int roleId = DecodeToken(token, "RoleId");
+            bool? status = null;
+            if (!roleId.Equals(4)) status = true;
+            ViewDepartment department = await _departmentRepo.GetById(id, status);
             return (department != null) ? department : throw new NullReferenceException("Not found this department");
         }
 
-        public async Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request)
+        public async Task<PagingResult<ViewDepartment>> GetByConditions(string token, DepartmentRequestModel request) // not finish
         {
+            int roleId = DecodeToken(token, "RoleId");
+            if (!roleId.Equals(4)) request.Status = true;
             PagingResult<ViewDepartment> departments = await _departmentRepo.GetByConditions(request);
             if (departments == null) throw new NullReferenceException("Not found any departments");
             return (departments != null) ? departments : throw new NullReferenceException();
@@ -58,13 +63,13 @@ namespace UniCEC.Business.Services.DepartmentSvc
             int roleId = DecodeToken(token, "RoleId");
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
 
-            Department element = new Department()
+            Department department = new Department()
             {
                 Name = name,
                 Status = true // default inserted status is true 
             };
-            int id = await _departmentRepo.Insert(element);
-            return (id > 0) ? await _departmentRepo.GetById(id) : null;
+            int id = await _departmentRepo.Insert(department);
+            return (id > 0) ? await _departmentRepo.GetById(id, department.Status) : null;
         }
 
         public async Task Update(string token, DepartmentUpdateModel model)

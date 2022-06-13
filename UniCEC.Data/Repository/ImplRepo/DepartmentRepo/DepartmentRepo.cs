@@ -22,7 +22,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             var query = from d in context.Departments
                         select d;
 
-            if(!string.IsNullOrEmpty(request.Name)) query = query.Where(department => department.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(department => department.Name.Contains(request.Name));
 
             if (request.Status.HasValue) query = query.Where(department => department.Status.Equals(request.Status.Value));
 
@@ -76,16 +76,20 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             return result;
         }
 
-        public async Task<ViewDepartment> GetById(int id)
+        public async Task<ViewDepartment> GetById(int id, bool? status)
         {
-            return await (from d in context.Departments
-                          where d.Id.Equals(id)
-                          select new ViewDepartment()
-                          {
-                              Id = d.Id,
-                              Name = d.Name,
-                              Status = d.Status,
-                          }).FirstOrDefaultAsync();
+            var query = from d in context.Departments
+                        where d.Id.Equals(id)
+                        select d;
+
+            if (status.HasValue) query = query.Where(department => department.Status.Equals(status.Value));
+
+            return await query.Select(d => new ViewDepartment()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Status = d.Status,
+            }).FirstOrDefaultAsync();
         }
     }
 }
