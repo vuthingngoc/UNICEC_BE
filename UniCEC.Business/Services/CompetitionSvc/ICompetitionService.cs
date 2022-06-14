@@ -17,17 +17,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
 {
     public interface ICompetitionService
     {      
-        public Task<ViewDetailCompetition> GetById(int id);
+        
 
-        //-----------------------------------------------------Leader 
+        //-----------------------------------------------------Role Manager
         public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
+        public Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token);
+        public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
+        public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
+
+        //-----------------------------------------------------Role In Competition Manager
         //FE-Mobile use
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         //BE  use to test
         public Task<bool> UpdateBE(LeaderUpdateCompOrEventModel competition, string token);
-        public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
-        public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
-        
+            
         public Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
@@ -36,13 +39,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token);
 
        
-
-       
-        
-
-
         //-----------------------------------------------------Sponsor       
-        public Task<ViewSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
+        public Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
         public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token);
 
 
@@ -54,6 +52,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
        
         //Get All Sponsor Apply in competition 
         public Task<PagingResult<ViewSponsorInCompetition>> GetAllSponsorApplyInCompOrEve(SponsorApplyRequestModel model, string token);
+
+        //Get
+        public Task<ViewDetailCompetition> GetById(int CompetitionId);
+        public Task<ViewDetailSponsorInCompetition> GetDetailSponsorApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
+
 
         //Comment
         //Competition - Manager

@@ -13,7 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
     {
         //check-sponsor-id-create-competition-or-event-duplicate
         public Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId, int userId);
-        public Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId);
+        
         //retrun View Detail
         public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int competitionId);
         //get all
