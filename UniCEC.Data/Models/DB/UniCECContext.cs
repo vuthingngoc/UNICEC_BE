@@ -10,6 +10,7 @@ namespace UniCEC.Data.Models.DB
     public partial class UniCECContext : DbContext
     {
         private readonly IConfiguration _configuration;
+
         public UniCECContext()
         {
         }
@@ -492,6 +493,7 @@ namespace UniCEC.Data.Models.DB
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Majors)
                     .HasForeignKey(d => d.UniversityId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Major__Universit__72C60C4A");
             });
 
