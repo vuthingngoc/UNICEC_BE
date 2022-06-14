@@ -82,7 +82,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             
             if (model.Status.HasValue && model.Status.Value.Equals(true))
             {
-                List<int> majorIds = await _majorRepo.GetByDepartment(model.Id);
+                List<int> majorIds = await _majorRepo.GetIdsByDepartmentId(model.Id, model.Status.Value);
                 if (majorIds != null)
                 {
                     foreach (int majorId in majorIds)
@@ -113,7 +113,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
 
             department.Status = false;
             // delete concerned major
-            List<int> majorIds = await _majorRepo.GetByDepartment(id);
+            List<int> majorIds = await _majorRepo.GetIdsByDepartmentId(id, department.Status);
             if (majorIds != null)
             {
                 foreach (int majorId in majorIds)

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get department by id - Authenticated user")]
         public async Task<IActionResult> GetDepartmentById(int id)
         {
             try
@@ -45,6 +47,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
+        [SwaggerOperation(Summary = "Get departments by conditions - Authenticated user")]
         public async Task<IActionResult> GetDepartmentByConditions([FromQuery] DepartmentRequestModel request)
         {
             try 
@@ -64,6 +67,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("competition/{id}")]
+        [SwaggerOperation(Summary = "Get departments by competition id - Authenticated user")]
         public async Task<IActionResult> GetDepartmentByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
@@ -83,6 +87,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Insert new department - System admin")]
         public async Task<IActionResult> InsertDepartment(string name)
         {
             try 
@@ -111,6 +116,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPut]
         [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Update a department - System admin")]
         public async Task<IActionResult> UpdateDepartment([FromBody] DepartmentUpdateModel department)
         {
             try
@@ -144,6 +150,7 @@ namespace UniCEC.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Delete department by id - System admin")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             try

@@ -7,12 +7,13 @@ namespace UniCEC.Business.Services.MajorSvc
 {
     public interface IMajorService
     {
-        public Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request);
-        public Task<PagingResult<ViewMajor>> GetByUniversity(int universityId, PagingRequest request);
-        public Task<PagingResult<ViewMajor>> GetMajorByCondition(MajorRequestModel request);
-        public Task<ViewMajor> Insert(MajorInsertModel major);
-        public Task Update(ViewMajor major);
-        public Task Delete(int id);
-        public Task<ViewMajor> GetMajorById(int id);
+        //public Task<PagingResult<ViewMajor>> GetAllPaging(PagingRequest request);
+        //public Task<PagingResult<ViewMajor>> GetByUniversity(int universityId, PagingRequest request);
+        public Task<ViewMajor> GetById(string token, int id);
+        public Task<ViewMajor> GetByCode(string token, string majorCode);
+        public Task<PagingResult<ViewMajor>> GetMajorByConditions(string token, MajorRequestModel request);
+        public Task<ViewMajor> Insert(string token, MajorInsertModel major);
+        public Task Update(string token, ViewMajor major);
+        public Task Delete(string token, int id);        
     }
 }
