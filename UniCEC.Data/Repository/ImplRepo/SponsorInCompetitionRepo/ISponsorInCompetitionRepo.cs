@@ -15,6 +15,8 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         public Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId, int userId);
         public Task<SponsorInCompetition> GetNewestApply(int sponsorId, int competitionId, int userId);
 
+        public Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request, int userId, int sponsorId);
+
         //retrun View Detail
         public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int competitionId);
         //get all

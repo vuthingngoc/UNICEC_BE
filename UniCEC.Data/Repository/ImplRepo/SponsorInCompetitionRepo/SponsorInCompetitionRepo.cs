@@ -133,7 +133,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
                         where request.CompetitionId == sic.CompetitionId //&& sic.Status != SponsorInCompetitionStatus.Rejected
                         select sic;
 
-            if (request.Status.HasValue) query = query.Where(s => s.Status == request.Status);
+            if (request.status.HasValue) query = query.Where(s => s.Status == request.status);
 
             int totalCount = query.Count();
 
@@ -170,6 +170,140 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
             return (list_vsic.Count > 0) ? new PagingResult<ViewSponsorInCompetition>(list_vsic, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
+        //
+        public async Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request, int userId, int sponsorId)
+        {
+            //Take List Apply Of User Sort Data by Date
+            IQueryable<SponsorInCompetition> query = null;
 
+            if (request.UnversityId.HasValue)
+            {
+                query = from c in context.Clubs
+                        where c.UniversityId == request.UnversityId.Value
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == c.Id && cic.IsOwner == true 
+                        from compe in context.Competitions
+                        where compe.Id == cic.CompetitionId
+                        from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId
+                              && sic.CompetitionId == compe.Id
+                              && sic.UserId == userId
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+            if (request.UnversityId.HasValue && request.ClubId.HasValue)
+            {
+                query = from c in context.Clubs
+                        where c.UniversityId == request.UnversityId.Value && c.Id == request.ClubId.Value   
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == c.Id && cic.IsOwner == true 
+                        from compe in context.Competitions
+                        where compe.Id == cic.CompetitionId
+                        from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId
+                              && sic.CompetitionId == compe.Id
+                              && sic.UserId == userId
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+            if (request.UnversityId.HasValue && request.status.HasValue)
+            {
+                query = from c in context.Clubs
+                        where c.UniversityId == request.UnversityId.Value
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == c.Id && cic.IsOwner == true
+                        from compe in context.Competitions
+                        where compe.Id == cic.CompetitionId
+                        from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId
+                              && sic.CompetitionId == compe.Id
+                              && sic.UserId == userId
+                              && sic.Status == request.status
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+            if (request.UnversityId.HasValue && request.ClubId.HasValue && request.status.HasValue)
+            {
+                query = from c in context.Clubs
+                        where c.UniversityId == request.UnversityId.Value && c.Id == request.ClubId.Value
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == c.Id && cic.IsOwner == true
+                        from compe in context.Competitions
+                        where compe.Id == cic.CompetitionId
+                        from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId
+                              && sic.CompetitionId == compe.Id
+                              && sic.UserId == userId
+                              && sic.Status == request.status
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+            if (!request.UnversityId.HasValue && !request.ClubId.HasValue && request.status.HasValue)
+            {
+                query = from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId
+                              && sic.UserId == userId
+                              && sic.Status == request.status.Value
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+            if (!request.UnversityId.HasValue && !request.ClubId.HasValue && !request.status.HasValue)
+            {
+                query = from sic in context.SponsorInCompetitions
+                        where sic.SponsorId == sponsorId                              
+                              && sic.UserId == userId                             
+                              && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                        orderby sic.CreateTime descending
+                        select sic;
+            }
+
+
+     
+            int totalCount = await query.CountAsync();
+
+            List<ViewSponsorInCompetition> list_vsic = new List<ViewSponsorInCompetition>();
+
+            List<SponsorInCompetition> sponsorInCompetitions = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+
+            foreach (SponsorInCompetition sponsorInCompetition in sponsorInCompetitions)
+            {
+                //user 
+                User user = await (from us in context.Users
+                                   where us.Id == sponsorInCompetition.UserId
+                                   select us).FirstOrDefaultAsync();
+                //sponsor
+                Sponsor sponsor = await (from s in context.Sponsors
+                                         where s.Id == sponsorInCompetition.SponsorId
+                                         select s).FirstOrDefaultAsync();
+
+                ViewSponsorInCompetition vsic = new ViewSponsorInCompetition()
+                {
+                    Id = sponsorInCompetition.Id,
+                    CompetitionId = sponsorInCompetition.CompetitionId,
+                    SponsorId = sponsorInCompetition.SponsorId,
+                    UserId = sponsorInCompetition.UserId,
+                    Email = user.Email,
+                    Fullname = user.Fullname,
+                    CreateTime = (DateTime)sponsorInCompetition.CreateTime,
+                    SponsorName = sponsor.Name,
+                    SponsorLogo = sponsor.Logo,
+                    Status = sponsorInCompetition.Status
+                };
+                list_vsic.Add(vsic);
+            }
+            return (list_vsic.Count > 0) ? new PagingResult<ViewSponsorInCompetition>(list_vsic, totalCount, request.CurrentPage, request.PageSize) : null;
+
+
+        }
     }
 }
