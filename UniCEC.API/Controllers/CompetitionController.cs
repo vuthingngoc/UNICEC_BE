@@ -134,7 +134,7 @@ namespace UniCEC.API.Controllers
         // GET: api/<CompetitionController>
         [HttpGet("top3")]
         [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status, public")]
-        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? status, [FromQuery(Name = "public")] CompetitionScopeStatus? Scope)
+        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? status, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope)
         {
             try
             {
