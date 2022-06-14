@@ -137,6 +137,45 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope)
         {
             List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Scope);
+           
+
+            foreach (ViewCompetition item in result)
+            {
+
+                //List Competition Entity
+                List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+                List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.CompetitionId);
+
+                if (CompetitionEntities != null)
+                {
+                    foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                    {
+                        //get IMG from Firebase                        
+                        string imgUrl_CompetitionEntity;
+                        try
+                        {
+                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            imgUrl_CompetitionEntity = "";
+                        }
+
+                        ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                        {
+                            Id = competitionEntity.Id,
+                            CompetitionId = competitionEntity.CompetitionId,
+                            Name = competitionEntity.Name,
+                            ImageUrl = imgUrl_CompetitionEntity,
+                        };
+                        //
+                        ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                    }
+                }
+
+                item.CompetitionEntities = ListView_CompetitionEntities;
+            }
             if (result == null) throw new NullReferenceException();
             return result;
         }
@@ -144,13 +183,50 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get EVENT or COMPETITION by conditions
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
         {
-
-
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
+
+            List<ViewCompetition> resultList = result.Items.ToList();
+
+            foreach (ViewCompetition item in resultList)
+            {
+
+                //List Competition Entity
+                List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+                List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.CompetitionId);
+
+                if (CompetitionEntities != null)
+                {
+                    foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                    {
+                        //get IMG from Firebase                        
+                        string imgUrl_CompetitionEntity;
+                        try
+                        {
+                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            imgUrl_CompetitionEntity = "";
+                        }
+
+                        ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                        {
+                            Id = competitionEntity.Id,
+                            CompetitionId = competitionEntity.CompetitionId,
+                            Name = competitionEntity.Name,
+                            ImageUrl = imgUrl_CompetitionEntity,
+                        };
+                        //
+                        ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                    }
+                }
+
+                item.CompetitionEntities = ListView_CompetitionEntities;
+            }
+
             if (result == null) throw new NullReferenceException();
             return result;
-
-
 
         }
 
@@ -1641,10 +1717,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int UserId = DecodeToken(token, "Id");
                 int SponsorId = DecodeToken(token, "SponsorId");
 
-                if(request.ClubId.HasValue && !request.UnversityId.HasValue) throw new ArgumentException("University Null");
+                if (request.ClubId.HasValue && !request.UnversityId.HasValue) throw new ArgumentException("University Null");
 
-                PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetSponsorViewAllApplyInCompOrEve(request, UserId, SponsorId);  
-                if(result == null) throw new NullReferenceException();
+                PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetSponsorViewAllApplyInCompOrEve(request, UserId, SponsorId);
+                if (result == null) throw new NullReferenceException();
                 return result;
             }
             catch (Exception)
@@ -1666,7 +1742,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (sic == null) throw new NullReferenceException();
 
             //Check Apply is belong to this user
-            if(sic.UserId != UserId) throw new ArgumentException("This Apply is not belong to you!");
+            if (sic.UserId != UserId) throw new ArgumentException("This Apply is not belong to you!");
 
             return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
 
@@ -2127,6 +2203,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return true;
         }
 
-       
+
     }
 }

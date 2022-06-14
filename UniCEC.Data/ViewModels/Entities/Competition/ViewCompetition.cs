@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -16,6 +17,10 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public string CompetitionTypeName { get; set; }
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }
+
+        [JsonPropertyName("start_time")]
+        public DateTime StartTime { get; set; }
+
         [JsonPropertyName("is_sponsor")]
         public bool IsSponsor { get; set; }
         public CompetitionScopeStatus Scope { get; set; }      
@@ -27,5 +32,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
 
+        //------------- ADD Field Competition Entity -> Object Array  
+        [JsonPropertyName("competition_entities")]
+        public List<ViewCompetitionEntity> CompetitionEntities { get; set; }
     }
 }
