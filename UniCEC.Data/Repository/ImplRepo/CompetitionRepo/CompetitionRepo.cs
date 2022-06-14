@@ -11,11 +11,15 @@ using UniCEC.Data.Enum;
 using System;
 using UniCEC.Data.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionManager;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
+
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 {
     public class CompetitionRepo : Repository<Competition>, ICompetitionRepo
     {
+
+       
         public CompetitionRepo(UniCECContext context) : base(context)
         {
 
@@ -59,10 +63,12 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             foreach (Competition compe in list_Competition)
             {
+
+               
+
                 //lấy department ID
                 List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
-
-                //              
+                
                 var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
                 List<CompetitionInDepartment> list_CompetitionInDepartment = query_List_CompetitionInDepartment.ToList();
 
@@ -86,7 +92,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = club.Id,
                             Name = club.Name,
                             Image = club.Image,
-                            Fanpage = club.ClubFanpage
+                            Fanpage = club.ClubFanpage,
+                            IsOwner = competitionInClub.IsOwner
                         };
 
                         List_vcip.Add(vcip);
@@ -119,9 +126,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     Scope = compe.Scope,
                     View = compe.View,
                     CreateTime = compe.CreateTime,
+                    StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = list_View_DeparmentInComp,
-                    ClubInCompetition = List_vcip
+                    ClubInCompetition = List_vcip,
+                   
                 };
                 Competitions.Add(vc);
             }//end each competition
@@ -172,7 +181,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<Competition> list_Competition = await query.Take(3).ToListAsync();
 
             foreach (Competition compe in list_Competition)
-            {
+            {                
+
                 //lấy department ID
                 List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
 
@@ -241,9 +251,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     Scope = compe.Scope,
                     View = compe.View,
                     CreateTime = compe.CreateTime,
+                    StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = list_View_DeparmentInComp,
-                    ClubInCompetition = List_vcip
+                    ClubInCompetition = List_vcip,
+                    
                 };
                 competitions.Add(vc);
             }//end each competition
