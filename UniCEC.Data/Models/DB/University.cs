@@ -11,6 +11,7 @@ namespace UniCEC.Data.Models.DB
         {
             Clubs = new HashSet<Club>();
             DepartmentInUniversities = new HashSet<DepartmentInUniversity>();
+            Majors = new HashSet<Major>();
             Users = new HashSet<User>();
         }
 
@@ -29,6 +30,7 @@ namespace UniCEC.Data.Models.DB
         public virtual City City { get; set; }
         public virtual ICollection<Club> Clubs { get; set; }
         public virtual ICollection<DepartmentInUniversity> DepartmentInUniversities { get; set; }
+        public virtual ICollection<Major> Majors { get; set; }
         public virtual ICollection<User> Users { get; set; }
     }
 }
