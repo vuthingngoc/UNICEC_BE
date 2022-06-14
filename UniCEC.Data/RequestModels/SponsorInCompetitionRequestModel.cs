@@ -9,15 +9,17 @@ using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
 {
-    public class SponsorApplyRequestModel : PagingRequest
+    public class SponsorInCompetitionRequestModel : PagingRequest
     {
-        //Competition Id
-        [FromQuery(Name = "competitionId")]
-        public int CompetitionId { get; set; }
-        public SponsorInCompetitionStatus? status { get; set; }
+        //University Id
+        [FromQuery(Name = "universityId")]
+        public int? UnversityId { get; set; }
+
         //Club Id
         [FromQuery(Name = "clubId")]
-        public int ClubId { get; set; }
-
+        public int? ClubId { get; set; }
+       
+        //Status
+        public SponsorInCompetitionStatus? status { get; set; }
     }
 }
