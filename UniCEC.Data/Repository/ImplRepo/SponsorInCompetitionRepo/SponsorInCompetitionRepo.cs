@@ -10,6 +10,7 @@ using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.Enum;
 using System;
+using UniCEC.Data.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 {
@@ -20,13 +21,36 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
 
         }
 
+        //Check SponsorDeny
+        public async Task<SponsorInCompetition> GetNewestApply(int sponsorId, int competitionId, int userId)
+        {
+            SponsorInCompetition query = await (from sic in context.SponsorInCompetitions
+                                                where sic.SponsorId == sponsorId
+                                                      && sic.CompetitionId == competitionId
+                                                      && sic.UserId == userId
+                                                      && sic.CreateTime < new LocalTime().GetLocalTime().DateTime
+                                                orderby sic.CreateTime descending
+                                                select sic).FirstOrDefaultAsync();
+            if (query != null)
+            {
 
+                return query;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        //Check to addSponsor , Leader delete, 
         public async Task<SponsorInCompetition> CheckSponsorInCompetition(int sponsorId, int competitionId, int userId)
         {
             SponsorInCompetition query = null;
 
-            // Advoid another User belong to this Sponsor is apply again    (not UserId)  = 0
-            if (userId == 0)
+
+            // Advoid this User belong to this Sponsor is apply again       (has UserId) != 0
+            if (userId != 0)
             {
                 query = await (from sic in context.SponsorInCompetitions
                                where sic.SponsorId == sponsorId
@@ -34,8 +58,9 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
                                      && sic.UserId == userId && sic.Status != SponsorInCompetitionStatus.Rejected
                                select sic).FirstOrDefaultAsync();
             }
-            // Advoid this User belong to this Sponsor is apply again       (has UserId) != 0
-            if (userId != 0)
+
+            // Advoid another User belong to this Sponsor is apply again    (not UserId)  = 0
+            if (userId == 0)
             {
                 query = await (from sic in context.SponsorInCompetitions
                                where sic.SponsorId == sponsorId
@@ -105,10 +130,10 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         public async Task<PagingResult<ViewSponsorInCompetition>> GetListSponsor_In_Competition(SponsorApplyRequestModel request)
         {
             var query = from sic in context.SponsorInCompetitions
-                        where request.CompetitionId == sic.CompetitionId && sic.Status != SponsorInCompetitionStatus.Rejected
+                        where request.CompetitionId == sic.CompetitionId //&& sic.Status != SponsorInCompetitionStatus.Rejected
                         select sic;
 
-            if(request.Status.HasValue) query = query.Where(s => s.Status == request.Status); 
+            if (request.Status.HasValue) query = query.Where(s => s.Status == request.Status);
 
             int totalCount = query.Count();
 
@@ -144,5 +169,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
             }
             return (list_vsic.Count > 0) ? new PagingResult<ViewSponsorInCompetition>(list_vsic, totalCount, request.CurrentPage, request.PageSize) : null;
         }
+
+
     }
 }

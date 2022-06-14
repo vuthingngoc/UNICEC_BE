@@ -42,7 +42,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //-----------------------------------------------------Sponsor       
         public Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
         public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token);
-
+        public Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(string token);
+        
 
         //-----------------------------------------------------Get       
         //Get EVENT or COMPETITION by conditions
@@ -51,11 +52,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
        
         //Get All Sponsor Apply in competition 
-        public Task<PagingResult<ViewSponsorInCompetition>> GetAllSponsorApplyInCompOrEve(SponsorApplyRequestModel model, string token);
-
+        public Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel model, string token);
+        public Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
         //Get
         public Task<ViewDetailCompetition> GetById(int CompetitionId);
-        public Task<ViewDetailSponsorInCompetition> GetDetailSponsorApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
+        
 
 
         //Comment

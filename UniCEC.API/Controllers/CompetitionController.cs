@@ -57,9 +57,9 @@ namespace UniCEC.API.Controllers
 
         // GET api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
-        [HttpGet("all-sponsor-apply")]
+        [HttpGet("view-all-apply")]
         [SwaggerOperation(Summary = "Get ALL sponsor apllies in ONE competition or event")]
-        public async Task<IActionResult> GetAllSponsorApplyInCompOrEve([FromQuery] SponsorApplyRequestModel request)
+        public async Task<IActionResult> GetViewAllApplyInCompOrEve([FromQuery] SponsorApplyRequestModel request)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetAllSponsorApplyInCompOrEve(request, token);
+                PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetViewAllApplyInCompOrEve(request, token);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -95,9 +95,9 @@ namespace UniCEC.API.Controllers
 
         // GET api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
-        [HttpGet("detail-sponsor-apply")]
+        [HttpGet("view-detail-apply")]
         [SwaggerOperation(Summary = "Get Detail sponsor aplly in ONE competition or event")]
-        public async Task<IActionResult> GetDetailSponsorApplyInCompOrEve([FromQuery(Name = "sponsor_in_competition_id")] int SponsorInCompetitionId, [FromQuery(Name = "club_id")] int ClubId)
+        public async Task<IActionResult> GetViewDetailApplyInCompOrEve([FromQuery(Name = "sponsorInCompetitionId")] int SponsorInCompetitionId, [FromQuery(Name = "clubId")] int ClubId)
         {
             try
             {
@@ -105,7 +105,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewDetailSponsorInCompetition result = await _competitionService.GetDetailSponsorApplyInCompOrEve(SponsorInCompetitionId, ClubId, token);
+                ViewDetailSponsorInCompetition result = await _competitionService.GetViewDetailApplyInCompOrEve(SponsorInCompetitionId, ClubId, token);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -266,7 +266,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
 
 
         // PUT api/<CompetitionController>/5
@@ -639,6 +638,44 @@ namespace UniCEC.API.Controllers
 
 
         //---------------------------------------------------------------------------Sponsor in Competition
+
+        // GET api/<CompetitionController>/5
+        [Authorize(Roles = "Sponsor")]
+        [HttpGet("sponsor-view-apply")]
+        [SwaggerOperation(Summary = "Sponsor view all applies")]
+        public async Task<IActionResult> GetSponsorViewAllApplyInCompOrEve()
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetSponsorViewAllApplyInCompOrEve(token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
         //POST api/<SponsorInCompetitionController>
         [Authorize(Roles = "Sponsor")]
         [HttpPost("sponsor-apply")]

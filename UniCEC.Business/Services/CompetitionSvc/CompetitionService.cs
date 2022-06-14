@@ -155,7 +155,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get All Sponsor Apply In Competition
-        public async Task<PagingResult<ViewSponsorInCompetition>> GetAllSponsorApplyInCompOrEve(SponsorApplyRequestModel request, string token)
+        public async Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel request, string token)
         {
             try
             {
@@ -181,7 +181,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get Detail Sponsor Apply In Competition
-        public async Task<ViewDetailSponsorInCompetition> GetDetailSponsorApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token)
+        public async Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //Check is existed
                 if (sic == null) throw new NullReferenceException();
     
-                bool Check = await CheckCompetitionManager(token, sponsorInCompetitionId, clubId);
+                bool Check = await CheckCompetitionManager(token, sic.CompetitionId, clubId);
                 if (Check)
                 {
                     return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
@@ -580,7 +580,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             }
                             if (check)
                             {
-                                await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sic.Id);
+                                //delete
+                                //await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sic.Id);
+                                // Change Status to Rejected
+                                sic.Status = SponsorInCompetitionStatus.Rejected;
+                                await _sponsorInCompetitionRepo.Update();
                                 //
                                 List<ViewSponsorInComp> list = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(sic.CompetitionId);
                                 if (list == null)
@@ -1264,7 +1268,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //Check is existed
                 if (sic == null) throw new ArgumentException("Not found this apply of Sponsor");
 
-                //Check has status cannot feeback again
+                //Check Apply is belong to this competition
+                Competition compe = await _competitionRepo.Get(sic.CompetitionId);
+                ViewCompetitionInClub cic = await _competitionInClubRepo.GetCompetitionInClub(model.ClubId,compe.Id);
+                if (cic == null) throw new ArgumentException("This apply of Sponsor is not belong to this Competition");
+
+                //Check has status cannot feeback again -(optional)
                 if (sic.Status != SponsorInCompetitionStatus.Waiting) throw new ArgumentException("Already feedback this apply");
 
                 bool Check = await CheckCompetitionManager(token, sic.CompetitionId, model.ClubId);
@@ -1276,8 +1285,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     sic.Status = model.Status;
                     //Status Approved
                     if (sic.Status == SponsorInCompetitionStatus.Approved)
-                    {
-                        Competition compe = await _competitionRepo.Get(sic.CompetitionId);
+                    {                  
                         compe.IsSponsor = true;
                         await _competitionRepo.Update();
                     }
@@ -1508,6 +1516,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 int SponsorId = DecodeToken(token, "SponsorId");
 
+                DateTime DefaultReviewDate = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
                 if (model.CompetitionId == 0 || string.IsNullOrEmpty(model.Comment)) throw new ArgumentNullException("Competition Id Null || Comment Null");
 
                 //------------- CHECK Competition is have in system or not
@@ -1533,6 +1543,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 sponsorInCompetition.CreateTime = new LocalTime().GetLocalTime().DateTime;
                                 sponsorInCompetition.Comment = model.Comment;
                                 sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+                                //
+                                sponsorInCompetition.ReviewDate = DefaultReviewDate;
+                                sponsorInCompetition.Feedback = "Not has content";
 
                                 int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
                                 if (result > 0)
@@ -1584,7 +1597,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (competition != null)
                 {
                     //------------- CHECK this apply is exsited
-                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
+                    // The newest apply base on CreateTime
+                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.GetNewestApply(SponsorId, model.CompetitionId, UserId);
                     if (sponsorInCompetition != null)
                     {
                         //------------- CHECK this apply Status is Waiting 
@@ -1595,7 +1609,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         }
                         else
                         {
-                            throw new ArgumentException("Deny Failed, Please Contact with Club Manager Of Competition !!!");
+                            throw new ArgumentException("Deny Failed, Your Apply is reviewed by Club Manager, Please Contact with Club Manager Of Competition !!!");
                         }
                     }
                     else
@@ -1606,12 +1620,25 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 else
                 {
                     throw new ArgumentException("Competition or Event not found ");
-                }
+                }     
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+
+        public async Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve( string token)
+        {
+            int UserId = DecodeToken(token, "Id");
+            int SponsorId = DecodeToken(token, "SponsorId");
+
+            return null;
+            
+
+            //
+
         }
 
         //transfer view
@@ -1755,6 +1782,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
 
             User user_Sponsor = await _userRepo.Get(userId);
+
             Sponsor sponsor = await _sponsorRepo.Get(sponsorInCompetition.SponsorId);
 
             return new ViewDetailSponsorInCompetition()
@@ -2067,6 +2095,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return true;
         }
+
+       
 
 
 
