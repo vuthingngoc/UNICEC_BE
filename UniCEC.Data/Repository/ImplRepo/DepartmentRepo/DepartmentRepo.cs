@@ -58,6 +58,29 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             return (departments.Count > 0) ? new PagingResult<ViewDepartment>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
+        public async Task<ViewDepartment> GetById(int id, bool? status)
+        {
+            var query = from d in context.Departments
+                        where d.Id.Equals(id)
+                        select d;
+
+            if (status.HasValue) query = query.Where(department => department.Status.Equals(status.Value));
+
+            return await query.Select(d => new ViewDepartment()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Status = d.Status,
+            }).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CheckDuplicatedName(string name)
+        {
+            return await (from d in context.Departments
+                               where d.Name.ToLower().Equals(name.ToLower())
+                               select d.Id).FirstOrDefaultAsync();
+        }
+
         //
         public async Task<bool> checkDepartment(List<int> listDepartmentId)
         {
@@ -74,22 +97,6 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                 }
             }
             return result;
-        }
-
-        public async Task<ViewDepartment> GetById(int id, bool? status)
-        {
-            var query = from d in context.Departments
-                        where d.Id.Equals(id)
-                        select d;
-
-            if (status.HasValue) query = query.Where(department => department.Status.Equals(status.Value));
-
-            return await query.Select(d => new ViewDepartment()
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Status = d.Status,
-            }).FirstOrDefaultAsync();
         }
     }
 }

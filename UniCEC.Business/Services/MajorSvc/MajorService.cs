@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
@@ -43,7 +44,6 @@ namespace UniCEC.Business.Services.MajorSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             bool? status = null;
             int? universityId = null;
-            
 
             if (!roleId.Equals(1) && !roleId.Equals(4)) status = true;
             if (!roleId.Equals(4) && !roleId.Equals(2)) universityId = _decodeToken.Decode(token, "UniversityId"); // system admin and sponsor            
@@ -115,52 +115,80 @@ namespace UniCEC.Business.Services.MajorSvc
             return majors;
         }
 
-        public async Task<ViewMajor> Insert(string token, MajorInsertModel major)
+        private void checkAuthorizedUser(string token, int uniId)
         {
-            if (major.DepartmentId == 0 || string.IsNullOrEmpty(major.MajorCode) ||
-                string.IsNullOrEmpty(major.Name) || string.IsNullOrEmpty(major.Description))
-                throw new ArgumentNullException("DepartmentId null || MajorCode null || Name null || Description null");
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            if (!roleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            int majorId = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
-            if (majorId > 0) throw new ArgumentException("Duplicated MajorCode");
-            Department department = await _departmentRepo.Get(major.DepartmentId);
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            if (!uniId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+        }
+
+        public async Task<ViewMajor> Insert(string token, MajorInsertModel model)
+        {
+            if (model.DepartmentId.Equals(0) || model.UniversityId.Equals(0) || string.IsNullOrEmpty(model.MajorCode) ||
+                string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
+                throw new ArgumentNullException("DepartmentId null || UniversityId null || MajorCode null || Name null || Description null");
+
+            checkAuthorizedUser(token, model.UniversityId);
+            //int roleId = _decodeToken.Decode(token, "RoleId");
+            //if (!roleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            //int universityId = _decodeToken.Decode(token, "UniversityId");
+            //if (!major.UniversityId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            model.Name = Regex.Replace(model.Name.Trim(), @"\s{2,}", " ");
+            int duplicatedId = await _majorRepo.CheckDuplicatedName(model.UniversityId, model.Name);
+            if (duplicatedId > 0) throw new ArgumentException("Duplicated major name");
+
+            int majorCode = await _majorRepo.CheckExistedMajorCode(model.UniversityId, model.MajorCode);
+            if (majorCode > 0) throw new ArgumentException("Duplicated MajorCode");
+            Department department = await _departmentRepo.Get(model.DepartmentId);
             if (department == null) throw new ArgumentException("Can not find this department");
 
             // default status when insert is true
             bool status = true;
-            Major element = new Major()
+            Major major = new Major()
             {
-                DepartmentId = major.DepartmentId,
-                Description = major.Description,
-                MajorCode = major.MajorCode,
-                Name = major.Name,
+                UniversityId = model.UniversityId,
+                DepartmentId = model.DepartmentId,
+                Description = model.Description,
+                MajorCode = model.MajorCode,
+                Name = model.Name,
                 Status = status
             };
-            int id = await _majorRepo.Insert(element);
-            if (id > 0)
-            {
-                element.Id = id;
-                return TransformViewMajor(element);
-            }
-            return null;
+            int id = await _majorRepo.Insert(major);
+            ViewMajor viewMajor = await _majorRepo.GetById(id, status, model.UniversityId);
+            return viewMajor;
         }
 
-        public async Task Update(string token, ViewMajor major)
+        public async Task Update(string token, ViewMajor model)
         {
-            Major element = await _majorRepo.Get(major.Id);
-            if (element == null) throw new NullReferenceException("Not found this element");
+            checkAuthorizedUser(token, model.UniversityId);
+            //int roleId = _decodeToken.Decode(token, "RoleId");
+            //if (!roleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            int majorId = await _majorRepo.CheckExistedMajorCode(major.DepartmentId, major.MajorCode);
-            if (majorId > 0 && majorId != major.Id) throw new ArgumentException("Duplicated MajorCode");
+            //int universityId = _decodeToken.Decode(token, "UniversityId");
+            //if (!major.UniversityId.Equals(universityId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            Department department = await _departmentRepo.Get(major.DepartmentId);
+            Major major = await _majorRepo.Get(model.Id);
+            if (major == null) throw new NullReferenceException("Not found this element");
+
+            int majorCode = await _majorRepo.CheckExistedMajorCode(model.UniversityId, model.MajorCode);
+            if (majorCode > 0 && majorCode != model.Id) throw new ArgumentException("Duplicated MajorCode");
+
+            Department department = await _departmentRepo.Get(model.DepartmentId);
             if (department == null) throw new ArgumentException("Can not find this department");
 
-            if (major.DepartmentId != 0) element.DepartmentId = major.DepartmentId;
-            if (!string.IsNullOrEmpty(major.Description)) element.Description = major.Description;
-            if (!string.IsNullOrEmpty(major.MajorCode)) element.MajorCode = major.MajorCode;
-            if (!string.IsNullOrEmpty(major.Name)) element.Name = major.Name;
-            element.Status = major.Status;
+            if (model.DepartmentId != 0) major.DepartmentId = model.DepartmentId;
+            
+            if (!string.IsNullOrEmpty(model.Description)) major.Description = model.Description;
+            
+            if (!string.IsNullOrEmpty(model.MajorCode)) major.MajorCode = model.MajorCode;
+            
+            if (!string.IsNullOrEmpty(model.Name)) major.Name = model.Name;
+            
+            if(model.Status.Equals(true)) major.Status = model.Status;
 
             await _majorRepo.Update();
         }
@@ -169,6 +197,10 @@ namespace UniCEC.Business.Services.MajorSvc
         {
             Major major = await _majorRepo.Get(id);
             if (major == null) throw new NullReferenceException($"Not found this id: {id}");
+
+            checkAuthorizedUser(token, major.UniversityId);
+
+            if (major.Status.Equals(false)) return;
             major.Status = false;
             await _majorRepo.Update();
         }

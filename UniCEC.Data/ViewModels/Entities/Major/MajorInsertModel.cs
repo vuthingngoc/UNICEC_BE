@@ -4,6 +4,8 @@ namespace UniCEC.Data.ViewModels.Entities.Major
 {
     public class MajorInsertModel
     {
+        [JsonPropertyName("university_id")]
+        public int UniversityId { get; set; }
         [JsonPropertyName("department_id")]
         public int DepartmentId { get; set; }
         [JsonPropertyName("major_code")]

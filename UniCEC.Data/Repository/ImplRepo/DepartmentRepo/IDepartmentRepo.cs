@@ -13,6 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public Task<ViewDepartment> GetById(int id, bool? status);
         public Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request);
         public Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request);
+        public Task<int> CheckDuplicatedName(string name);
         //
         public Task<bool> checkDepartment(List<int> listDepartmentId);
     }

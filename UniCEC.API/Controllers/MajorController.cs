@@ -133,9 +133,9 @@ namespace UniCEC.API.Controllers
                 ViewMajor viewMajor = await _majorService.Insert(token, major);
                 return Ok(viewMajor);
             }
-            catch (ArgumentNullException ex)
+            catch(UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch(ArgumentException ex)
             {
@@ -161,13 +161,13 @@ namespace UniCEC.API.Controllers
                 await _majorService.Update(token, major);
                 return Ok();                
             }
-            catch(NullReferenceException ex)
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
-            }
-            catch(ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (ArgumentException ex)
             {
@@ -192,6 +192,10 @@ namespace UniCEC.API.Controllers
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _majorService.Delete(token, id);                
                 return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {
