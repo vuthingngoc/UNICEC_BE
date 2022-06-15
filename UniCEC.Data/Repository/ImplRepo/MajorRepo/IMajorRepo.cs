@@ -15,6 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
         public Task<PagingResult<ViewMajor>> GetByConditions(MajorRequestModel request);
         public Task<PagingResult<Major>> GetByUniversity(int universityId, PagingRequest request);
         public Task<List<int>> GetIdsByDepartmentId(int departmentId, bool? status);
-        public Task<int> CheckExistedMajorCode(int departmentId, string code);
+        public Task<int> CheckExistedMajorCode(int universityId, string code);
+        public Task<int> CheckDuplicatedName(int universityId, string name);
     }
 }

@@ -9,6 +9,7 @@ using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.RequestModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
@@ -58,10 +59,14 @@ namespace UniCEC.Business.Services.DepartmentSvc
 
         public async Task<ViewDepartment> Insert(string token, string name)
         {
+            name = Regex.Replace(name.Trim(), @"\s{2,}", " ");
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("Name Null");
 
             int roleId = DecodeToken(token, "RoleId");
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
+
+            int duplicatedId = await _departmentRepo.CheckDuplicatedName(name);
+            if (duplicatedId > 0) throw new ArgumentException("Duplicated department");
 
             Department department = new Department()
             {
@@ -96,7 +101,13 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 department.Status = model.Status.Value;
             }
 
-            if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                model.Name = Regex.Replace(model.Name.Trim(), @"\s{2,}", " ");
+                int duplicatedId = await _departmentRepo.CheckDuplicatedName(model.Name);
+                if (duplicatedId > 0 && !duplicatedId.Equals(model.Id)) throw new ArgumentException("Duplicated department");
+                department.Name = model.Name;
+            }
 
             await _departmentRepo.Update();
         }

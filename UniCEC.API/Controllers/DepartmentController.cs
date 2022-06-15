@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -88,7 +89,7 @@ namespace UniCEC.API.Controllers
         [HttpPost]
         [Authorize(Roles = "System Admin")]
         [SwaggerOperation(Summary = "Insert new department - System admin")]
-        public async Task<IActionResult> InsertDepartment(string name)
+        public async Task<IActionResult> InsertDepartment([BindRequired] string name)
         {
             try 
             {
@@ -108,7 +109,7 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            catch(ArgumentNullException ex)
+            catch(ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -137,7 +138,7 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
