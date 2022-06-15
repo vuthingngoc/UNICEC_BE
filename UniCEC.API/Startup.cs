@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Text;
+using UniCEC.Business.Services.ActivitiesEntitySvc;
 using UniCEC.Business.Services.CitySvc;
 using UniCEC.Business.Services.ClubRoleSvc;
 using UniCEC.Business.Services.ClubSvc;
@@ -40,6 +41,7 @@ using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
@@ -102,6 +104,7 @@ namespace UniCEC.API
             // Add DbContext
             services.AddDbContext<UniCECContext>();
             // Service
+            services.AddScoped<IActivitiesEntityService, ActivitiesEntityService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();
             services.AddScoped<IClubRoleService, ClubRoleService>();
@@ -132,6 +135,7 @@ namespace UniCEC.API
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddTransient<IActivitiesEntityRepo, ActivitiesEntityRepo>();
             services.AddTransient<ICityRepo, CityRepo>();
             services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<IClubRepo, ClubRepo>();
