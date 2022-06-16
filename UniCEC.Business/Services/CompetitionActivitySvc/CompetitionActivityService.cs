@@ -155,9 +155,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
                 
-                bool check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
+                int check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
                                                                          // khi check đến competitionManager thì sẽ thấy được là User đó kh thuộc trong Competitio
-                if (check)
+                if (check > 0)
                 {
                     return await TransformViewDetailCompetitionActivity(competitionActivity);
                 }
@@ -279,9 +279,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                bool check = await CheckConditions(token, c.Id, model.ClubId);
+                int check = await CheckConditions(token, c.Id, model.ClubId);
 
-                if (check)
+                if (check > 0)
                 {
                     //------------ Check date update
                     bool checkDateUpdate = false;
@@ -348,8 +348,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                bool check = await CheckConditions(token, c.Id, model.ClubId);
-                if (check)
+                int check = await CheckConditions(token, c.Id, model.ClubId);
+                if (check > 0)
                 {
                     competitionActivity.Status = CompetitionActivityStatus.Canceling;
                     await _competitionActivityRepo.Update();
