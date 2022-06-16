@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ViewProcessCompetitionActivity : ViewCompetitionActivity
+    public class ViewProcessCompetitionActivity : ViewDetailCompetitionActivity
     {
         //Extra infomation 
         [JsonPropertyName("num_of_member_join")]

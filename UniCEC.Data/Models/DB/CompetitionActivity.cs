@@ -16,6 +16,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int CompetitionId { get; set; }
+        public int MemberId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public double SeedsPoint { get; set; }
@@ -24,6 +25,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime Ending { get; set; }
         public int NumOfMember { get; set; }
         public PriorityStatus Priority { get; set; }
+        public CompetitionActivityProcessStatus Process { get; set; }
         public CompetitionActivityStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }

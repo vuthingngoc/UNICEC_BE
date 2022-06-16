@@ -33,7 +33,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         }
 
         //Get Top 4 Club Activities depend on create time
-        public async Task<List<ViewCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
+        public async Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
         {
 
             //LocalTime
@@ -48,7 +48,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
                         orderby ca.CreateTime descending
                         select ca;
 
-            List<ViewCompetitionActivity> clubActivities = await query.Take(4).Select(ca => new ViewCompetitionActivity()
+            List<ViewDetailCompetitionActivity> clubActivities = await query.Take(4).Select(ca => new ViewDetailCompetitionActivity()
             {
                 Id = ca.Id,
                 //ClubId = ca.ClubId,
@@ -71,7 +71,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
 
         ////Get List ClubActivity By Conditions
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
 
             //lấy tất cả các task của 1 trường      

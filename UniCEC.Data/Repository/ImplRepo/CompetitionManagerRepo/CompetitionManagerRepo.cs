@@ -53,6 +53,12 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
                                                         where cr.Id == competitionManager.CompetitionRoleId
                                                         select cr).FirstOrDefaultAsync();
 
+                //Lấy FullName
+                User user = await (from m in context.Members
+                                   where m.Id == competitionManager.MemberId
+                                   from us in context.Users
+                                   where us.Id == m.UserId
+                                   select us).FirstOrDefaultAsync(); 
 
                 ViewCompetitionManager vcm = new ViewCompetitionManager()
                 {
@@ -61,7 +67,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
                     CompetitionRoleId = competitionManager.CompetitionRoleId,
                     CompetitionRoleName = competitionRole.RoleName,
                     MemberId = competitionManager.MemberId,
-                    FullName = competitionManager.Fullname,
+                    FullName = user.Fullname,
                     Status = competitionManager.Status,
                 };
 

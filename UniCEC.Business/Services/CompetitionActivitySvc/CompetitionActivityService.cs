@@ -45,7 +45,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           ITermRepo termRepo,
                                           IMemberRepo memberRepo,
                                           ICompetitionManagerRepo competitionManagerRepo,
-                                          IActivitiesEntityRepo activitiesEntityRepo,   
+                                          IActivitiesEntityRepo activitiesEntityRepo,
                                           IFileService fileService)
         {
             _competitionActivityRepo = clubActivityRepo;
@@ -55,7 +55,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _termRepo = termRepo;
             _memberRepo = memberRepo;
             _competitionManagerRepo = competitionManagerRepo;
-            _activitiesEntityRepo = activitiesEntityRepo;   
+            _activitiesEntityRepo = activitiesEntityRepo;
             _fileService = fileService;
         }
 
@@ -63,10 +63,10 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Get-List-Club-Activities-By-Conditions
         //lấy tất cả các task của 1 trường - 1 câu lạc bộ - seed point - Number of member
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
             //
-            PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListClubActivitiesByConditions(conditions);
+            PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityRepo.GetListClubActivitiesByConditions(conditions);
             //
             return result;
         }
@@ -89,9 +89,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 if (club.UniversityId == UniId)
                 {
                     //top 4 activity by ClubId
-                    List<ViewCompetitionActivity> ListViewClubActivity = await _competitionActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
+                    List<ViewDetailCompetitionActivity> ListViewClubActivity = await _competitionActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
 
-                    foreach (ViewCompetitionActivity viewClubActivity in ListViewClubActivity)
+                    foreach (ViewDetailCompetitionActivity viewClubActivity in ListViewClubActivity)
                     {
                         //Get Process
                         //get total num of member join
@@ -141,25 +141,43 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
         //Get-ClubActivity-By-Id
-        public async Task<ViewCompetitionActivity> GetByClubActivityId(int id)
+        public async Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token)
         {
-            CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
-            //
-            if (competitionActivity != null)
+            try
             {
-                return await TransformViewCompetitionActivity(competitionActivity);
+
+                if (clubId == 0) throw new ArgumentException("Club Id Null");
+
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
+                //
+                if (competitionActivity == null) throw new NullReferenceException();
+
+                Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
+
+                
+                bool check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
+                                                                         // khi check đến competitionManager thì sẽ thấy được là User đó kh thuộc trong Competitio
+                if (check)
+                {
+                    return await TransformViewDetailCompetitionActivity(competitionActivity);
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }          
             }
-            else
+            catch (Exception)
             {
-                throw new NullReferenceException();
+                throw;
             }
+
         }
 
         //Insert
-        public async Task<ViewCompetitionActivity> Insert(CompetitionActivityInsertModel model, string token)
+        public async Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel model, string token)
         {
             try
-            {            
+            {
                 if (string.IsNullOrEmpty(model.Name)
                     || model.ClubId == 0
                     || model.SeedsPoint < 0
@@ -170,58 +188,65 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 bool check = await CheckConditions(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-
-                    //Add Activities Entity
-                    bool insertActivitiesEntity;
-                    if (!string.IsNullOrEmpty(model.ActivitiesEntity.Base64StringEntity))
+                    bool checkDate = CheckDate(model.Ending);
+                    if (checkDate)
                     {
-                        insertActivitiesEntity = true;
-                    }
-                    else
-                    {
-                        insertActivitiesEntity = false;
-                    }
-
-                    //
-                    CompetitionActivity competitionActivity = new CompetitionActivity();
-                    competitionActivity.CompetitionId = model.CompetitionId;    
-                    //When Member Take Activity will +1
-                    competitionActivity.NumOfMember = 0;
-                    competitionActivity.Description = model.Description;
-                    competitionActivity.Name = model.Name;
-                    competitionActivity.SeedsPoint = model.SeedsPoint;
-                    //LocalTime
-                    competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                    competitionActivity.Ending = model.Ending;
-                    //Check Status
-                    competitionActivity.Status = CompetitionActivityStatus.Happenning;
-                    //Check Code
-                    competitionActivity.SeedsCode = await checkExistCode();
-
-                    int result = await _competitionActivityRepo.Insert(competitionActivity);
-                    if (result > 0)
-                    {
-                        //------------ Insert Activities Entity
-                        if (insertActivitiesEntity)
+                        //Add Activities Entity
+                        bool insertActivitiesEntity;
+                        if (!string.IsNullOrEmpty(model.ActivitiesEntity.Base64StringEntity))
                         {
-                            string Url = await _fileService.UploadFile(model.ActivitiesEntity.Base64StringEntity);
-                            ActivitiesEntity activitesEntity = new ActivitiesEntity()
-                            {
-                                CompetitionActivityId = result,
-                                Name = model.ActivitiesEntity.NameEntity,
-                                ImageUrl = Url
-                            };
-                            await _activitiesEntityRepo.Insert(activitesEntity);
+                            insertActivitiesEntity = true;
+                        }
+                        else
+                        {
+                            insertActivitiesEntity = false;
                         }
 
+                        //
+                        CompetitionActivity competitionActivity = new CompetitionActivity();
+                        competitionActivity.CompetitionId = model.CompetitionId;
+                        //When Member Take Activity will +1
+                        competitionActivity.NumOfMember = 0;
+                        competitionActivity.Description = model.Description;
+                        competitionActivity.Name = model.Name;
+                        competitionActivity.SeedsPoint = model.SeedsPoint;
+                        //LocalTime
+                        competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                        competitionActivity.Ending = model.Ending;
+                        //Check Status
+                        competitionActivity.Status = CompetitionActivityStatus.Happenning;
+                        //Check Code
+                        competitionActivity.SeedsCode = await checkExistCode();
 
-                        CompetitionActivity ca = await _competitionActivityRepo.Get(result);
-                        ViewCompetitionActivity viewClubActivity = await TransformViewCompetitionActivity(ca);
-                        return viewClubActivity;
+                        int result = await _competitionActivityRepo.Insert(competitionActivity);
+                        if (result > 0)
+                        {
+                            //------------ Insert Activities Entity
+                            if (insertActivitiesEntity)
+                            {
+                                string Url = await _fileService.UploadFile(model.ActivitiesEntity.Base64StringEntity);
+                                ActivitiesEntity activitesEntity = new ActivitiesEntity()
+                                {
+                                    CompetitionActivityId = result,
+                                    Name = model.ActivitiesEntity.NameEntity,
+                                    ImageUrl = Url
+                                };
+                                await _activitiesEntityRepo.Insert(activitesEntity);
+                            }
+
+
+                            CompetitionActivity ca = await _competitionActivityRepo.Get(result);
+                            ViewDetailCompetitionActivity viewClubActivity = await TransformViewDetailCompetitionActivity(ca);
+                            return viewClubActivity;
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                     else
                     {
-                        return null;
+                        throw new ArgumentException("Date not suitable");
                     }
                 }
                 else
@@ -243,79 +268,62 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             try
             {
 
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                int UserId = Int32.Parse(UserIdClaim.Value);
+                if (model.ClubId == 0) throw new ArgumentException("Club Id Null");
 
+                //get club Activity
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.Id);
+                if (competitionActivity == null) throw new ArgumentException("Club Activity not found to update");
 
-                bool roleLeader = false;
-                bool checkDateUpdate = false;
+                Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                GetMemberInClubModel conditions = new GetMemberInClubModel()
+                bool check = await CheckConditions(token, c.Id, model.ClubId);
+
+                if (check)
                 {
-                    UserId = UserId,
-                    ClubId = model.ClubId,
-                    TermId = model.TermId
-                };
-                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();// await _clubHistoryRepo.GetMemberInCLub(conditions);
-                //------------ Check Mem in that club
-                if (infoClubMem != null)
-                {
-                    //------------ Check Role Member Is Leader 
-                    if (infoClubMem.ClubRoleName.Equals("Leader"))
+                    //------------ Check date update
+                    bool checkDateUpdate = false;
+                    bool Ending = false;
+                    //Ending Update = Ending 
+                    if (DateTime.Compare(model.Ending.Value, competitionActivity.Ending) != 0) // data mới
                     {
-                        roleLeader = true;
+                        Ending = true;
                     }
-                    if (roleLeader)
+
+                    if (Ending)
                     {
-                        //get club Activity
-                        CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.Id);
-                        if (competitionActivity != null)
-                        {
-                            //------------ Check date update
-                            //th1
-                            if (model.Beginning.HasValue && !model.Ending.HasValue)
-                            {
-                                checkDateUpdate = CheckDate((DateTime)model.Beginning, competitionActivity.Ending);
-                            }
-                            //th2
-                            if (model.Beginning.HasValue && model.Ending.HasValue)
-                            {
-                                checkDateUpdate = CheckDate((DateTime)model.Beginning, (DateTime)model.Ending);
-                            }
-                            if (checkDateUpdate)
-                            {
-                                //update name-des-seedpoint-beginning-ending
-                                competitionActivity.Name = (model.Name.Length > 0) ? model.Name : competitionActivity.Name;
-                                competitionActivity.Description = (model.Description.Length > 0) ? model.Description : competitionActivity.Description;
-                                competitionActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : competitionActivity.SeedsPoint;
-                                competitionActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : competitionActivity.Ending);
+                        checkDateUpdate = CheckDate(model.Ending.Value);
+                    }
+                    else
+                    {
+                        checkDateUpdate = true;
+                    }
+                    if (checkDateUpdate)
+                    {
 
-                                //Update DEADLINE day of member takes activity
-                                await _memberTakesActivityRepo.UpdateDeadlineDate(competitionActivity.Id, competitionActivity.Ending);
-                                await _competitionActivityRepo.Update();
-                                return true;
+                        competitionActivity.Name = (model.Name.Length > 0) ? model.Name : competitionActivity.Name;
+                        competitionActivity.Description = (model.Description.Length > 0) ? model.Description : competitionActivity.Description;
+                        competitionActivity.SeedsPoint = (model.SeedsPoint != 0) ? model.SeedsPoint : competitionActivity.SeedsPoint;
+                        competitionActivity.Ending = (DateTime)((model.Ending.HasValue) ? model.Ending : competitionActivity.Ending);
+                        competitionActivity.Priority = (PriorityStatus)((model.Priority.HasValue) ? model.Priority : competitionActivity.Priority);
 
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Date not suitable");
-                            }
-                        }
-                        else
+                        if (Ending)
                         {
-                            throw new ArgumentException("Club Activity not found to update");
+                            //Update DEADLINE day of member takes activity
+                            //await _memberTakesActivityRepo.UpdateDeadlineDate(competitionActivity.Id, competitionActivity.Ending);
                         }
+
+                        await _competitionActivityRepo.Update();
+                        return true;
 
                     }
                     else
                     {
-                        throw new UnauthorizedAccessException("You do not a role Leader to update this Club Activity");
+                        throw new ArgumentException("Date not suitable");
                     }
                 }
                 else
                 {
-                    throw new UnauthorizedAccessException("You aren't member in Club");
+                    return false;
                 }
 
             }
@@ -325,9 +333,42 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
+        //Delete-Club-Activity-By-Id
+        public async Task<bool> Delete(CompetitionActivityDeleteModel model, string token)
+        {
+            try
+            {
+
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.CompetitionActivityId);
+                //
+                if (competitionActivity == null) throw new ArgumentException("Club Activity not found to update");
+
+                Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
+
+                bool check = await CheckConditions(token, c.Id, model.ClubId);
+                if (check)
+                {
+                    competitionActivity.Status = CompetitionActivityStatus.Canceling;
+                    await _competitionActivityRepo.Update();
+
+                    //Update MemberTakeActivityStatus là Canceling
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         //transform View Model
-        public async Task<ViewCompetitionActivity> TransformViewCompetitionActivity(CompetitionActivity competitionActivity)
+        public async Task<ViewDetailCompetitionActivity> TransformViewDetailCompetitionActivity(CompetitionActivity competitionActivity)
         {
 
             //List Activities Entity
@@ -352,17 +393,17 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                     ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
                     {
-                       Id = ActivitiesEntity.Id,
-                       CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                       ImageUrl = imgUrl_ActivitiesEntity,
-                       Name = ActivitiesEntity.Name,                            
+                        Id = ActivitiesEntity.Id,
+                        CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                        ImageUrl = imgUrl_ActivitiesEntity,
+                        Name = ActivitiesEntity.Name,
                     };
                     //
                     ListView_ActivitiesEntity.Add(viewActivitiesEntity);
                 }
             }
 
-            return new ViewCompetitionActivity()
+            return new ViewDetailCompetitionActivity()
             {
                 Ending = competitionActivity.Ending,
                 CreateTime = competitionActivity.CreateTime,
@@ -375,69 +416,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 Status = competitionActivity.Status,
                 CompetitionId = competitionActivity.CompetitionId,
                 Priority = competitionActivity.Priority,
-                ActivitiesEntities = ListView_ActivitiesEntity           
+                ActivitiesEntities = ListView_ActivitiesEntity
             };
         }
 
-        //Delete-Club-Activity-By-Id
-        public async Task<bool> Delete(CompetitionActivityDeleteModel model, string token)
-        {
-            try
-            {
-                var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var UserIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("Id"));
-                int UserId = Int32.Parse(UserIdClaim.Value);
 
 
-                bool roleLeader = false;
-
-                GetMemberInClubModel conditions = new GetMemberInClubModel()
-                {
-                    UserId = UserId,
-                    ClubId = model.ClubId,
-                    TermId = model.TermId
-                };
-
-                ViewBasicInfoMember infoClubMem = new ViewBasicInfoMember();//await _clubHistoryRepo.GetMemberInCLub(conditions);
-                //------------ Check Mem in that club
-                if (infoClubMem != null)
-                {
-                    //------------ Check Role Member Is Leader 
-                    if (infoClubMem.ClubRoleName.Equals("Leader"))
-                    {
-                        roleLeader = true;
-                    }
-
-                    if (roleLeader)
-                    {
-                        CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.ClubActivityId);
-                        if (competitionActivity != null)
-                        {
-                            //
-                            //clubActivity.Status = ClubActivityStatus.Canceling;
-                            await _competitionActivityRepo.Update();
-                            return true;
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Club Activity not found to update");
-                        }
-                    }//end check role Leader
-                    else
-                    {
-                        throw new UnauthorizedAccessException("You do not a role Leader to delete this Club Activity");
-                    }
-                }//end member
-                else
-                {
-                    throw new UnauthorizedAccessException("You aren't member in Club");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
         //generate Seed code length 8
         private string generateSeedCode()
@@ -472,14 +456,14 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Check date 
         // COC < Ending
-        private bool CheckDate(DateTime CreateTimeOfCompetition, DateTime Ending)
+        private bool CheckDate(DateTime Ending)
         {
 
             bool result = false;
+            DateTime lt = new LocalTime().GetLocalTime().DateTime;
+            int rs1 = DateTime.Compare(Ending, lt);
 
-            int rs1 = DateTime.Compare(CreateTimeOfCompetition, Ending);
-
-            if (rs1 < 0)
+            if (rs1 > 0)
             {
                 result = true;
             }
@@ -517,8 +501,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             //------------- CHECK is in CompetitionManger table                
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
-                            {                              
-                                    return true;                            
+                            {
+                                return true;
                             }
                             else
                             {

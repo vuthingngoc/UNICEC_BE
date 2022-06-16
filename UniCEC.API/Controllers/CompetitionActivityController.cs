@@ -41,7 +41,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 List<ViewProcessCompetitionActivity> result = await _competitionActivityService.GetTop4_Process(ClubId, token);
-                    return Ok(result);
+                return Ok(result);
             }
             catch (NullReferenceException)
             {
@@ -50,7 +50,7 @@ namespace UniCEC.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
-            }        
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -64,15 +64,15 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListClubActivitiesByConditions(conditions);
+                PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityService.GetListClubActivitiesByConditions(conditions);
 
-                    return Ok(result);
-                                        
+                return Ok(result);
+
             }
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
-            }         
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -81,15 +81,24 @@ namespace UniCEC.API.Controllers
         }
 
         // GET api/<ClubActivityController>/5
+        [Authorize(Roles = "Student")]
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get Competition Activity by Id")]
-        public async Task<IActionResult> GetClubActivityById(int id)
+        public async Task<IActionResult> GetCompetitionActivityById(int id, [FromQuery(Name = "clubId")] int clubId)
         {
             try
             {
-                ViewCompetitionActivity result = await _competitionActivityService.GetByClubActivityId(id);                  
-                    return Ok(result);
-                
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewDetailCompetitionActivity result = await _competitionActivityService.GetCompetitionActivityById(id, clubId, token);
+                return Ok(result);
+
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NullReferenceException)
             {
@@ -113,7 +122,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                ViewCompetitionActivity result = await _competitionActivityService.Insert(model, token);
+                ViewDetailCompetitionActivity result = await _competitionActivityService.Insert(model, token);
                 if (result != null)
                 {
 
