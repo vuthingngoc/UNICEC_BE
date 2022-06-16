@@ -185,8 +185,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     || model.Ending == DateTime.Parse("1/1/0001 12:00:00 AM"))
                     throw new ArgumentNullException("Name Null || ClubId Null || SeedsPoint Null || Description Null || Beginning Null || Ending Null");
 
-                bool check = await CheckConditions(token, model.CompetitionId, model.ClubId);
-                if (check)
+                int check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+                if (check > 0)
                 {
                     bool checkDate = CheckDate(model.Ending);
                     if (checkDate)
@@ -217,6 +217,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         competitionActivity.Status = CompetitionActivityStatus.Happenning;
                         //Check Code
                         competitionActivity.SeedsCode = await checkExistCode();
+                        competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;
+                        competitionActivity.MemberId = check;
+                        
 
                         int result = await _competitionActivityRepo.Insert(competitionActivity);
                         if (result > 0)
@@ -472,7 +475,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
 
-        private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
+        private async Task<int> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
             int UserId = DecodeToken(Token, "Id");
@@ -502,7 +505,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
                             {
-                                return true;
+                                return isAllow.MemberId;
                             }
                             else
                             {
