@@ -114,7 +114,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                         CompetitionInClubId = cic.Id,// id này là member thuộc club of club leader add 
                                         CompetitionRoleId = 1, //auto role lowest in competition manager
                                         MemberId = mem.Id,
-                                        Fullname = mem.User.Fullname,
+                                       
                                         Status = true,
                                     };
 
@@ -382,6 +382,8 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
             //lấy competition CompetitionRole
             CompetitionRole cr = await _competitionRoleRepo.Get(competitionManager.CompetitionRoleId);
 
+
+
             return new ViewCompetitionManager()
             {
                 Id = competitionManager.Id,
@@ -389,7 +391,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                 CompetitionRoleName = cr.RoleName, 
                 CompetitionInClubId = competitionManager.CompetitionInClubId,
                 MemberId = competitionManager.MemberId,
-                FullName = competitionManager.Fullname,
+                //FullName = competitionManager.Fullname,
                 Status = competitionManager.Status
             };
         }

@@ -6,7 +6,7 @@ using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ViewCompetitionActivity
+    public class ViewDetailCompetitionActivity
     {
         public int Id { get; set; }
         [JsonPropertyName("competition_id")]
