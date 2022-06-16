@@ -57,14 +57,18 @@ namespace UniCEC.API.Controllers
             }
 
         }
-
+        [Authorize(Roles = "Student")]
         [HttpGet]
         [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
         public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
         {
             try
             {
-                PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityService.GetListClubActivitiesByConditions(conditions);
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityService.GetListActivitiesByConditions(conditions, token);
 
                 return Ok(result);
 

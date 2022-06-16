@@ -63,12 +63,69 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Get-List-Club-Activities-By-Conditions
         //lấy tất cả các task của 1 trường - 1 câu lạc bộ - seed point - Number of member
-        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
         {
-            //
-            PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityRepo.GetListClubActivitiesByConditions(conditions);
-            //
-            return result;
+            try
+            {
+                if (conditions.ClubId == 0 || conditions.CompetitionId == 0) throw new ArgumentException("Club Id Null || Competition Id Null");
+
+                int check = await CheckConditions(token, conditions.CompetitionId, conditions.ClubId);
+
+                if (check > 0)
+                {
+
+                    //
+                    PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                    List<ViewDetailCompetitionActivity> list_vdca = result.Items.ToList();
+                  
+                    foreach (ViewDetailCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                    {
+
+                        //List Activities Entity
+                        List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+
+                        List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+
+                        if (ActivitiesEntities != null)
+                        {
+                            foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                            {
+                                //get IMG from Firebase                        
+                                string imgUrl_ActivitiesEntity;
+                                try
+                                {
+                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                }
+                                catch (Exception ex)
+                                {
+                                    imgUrl_ActivitiesEntity = "";
+                                }
+
+                                ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                                {
+                                    Id = ActivitiesEntity.Id,
+                                    CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                                    ImageUrl = imgUrl_ActivitiesEntity,
+                                    Name = ActivitiesEntity.Name,
+                                };
+                                //
+                                ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                            }
+                        }
+                        viewDetailCompetitionActivity.ActivitiesEntities = ListView_ActivitiesEntity;
+                    }
+
+                    return result;
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         //Get Process + Top 4
@@ -154,9 +211,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                
+
                 int check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
-                                                                         // khi check đến competitionManager thì sẽ thấy được là User đó kh thuộc trong Competitio
+                                                                        // khi check đến competitionManager thì sẽ thấy được là User đó kh thuộc trong Competitio
                 if (check > 0)
                 {
                     return await TransformViewDetailCompetitionActivity(competitionActivity);
@@ -164,7 +221,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 else
                 {
                     throw new NullReferenceException();
-                }          
+                }
             }
             catch (Exception)
             {
@@ -219,7 +276,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         competitionActivity.SeedsCode = await checkExistCode();
                         competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;
                         competitionActivity.MemberId = check;
-                        
+
 
                         int result = await _competitionActivityRepo.Insert(competitionActivity);
                         if (result > 0)
@@ -406,6 +463,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 }
             }
 
+            //List Member Takes Activity
+
+
             return new ViewDetailCompetitionActivity()
             {
                 Ending = competitionActivity.Ending,
@@ -419,6 +479,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 Status = competitionActivity.Status,
                 CompetitionId = competitionActivity.CompetitionId,
                 Priority = competitionActivity.Priority,
+                MemberId = competitionActivity.MemberId,
+                ProcessStatus = competitionActivity.Process,
                 ActivitiesEntities = ListView_ActivitiesEntity
             };
         }

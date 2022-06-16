@@ -42,9 +42,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             var query = from u in context.Universities
                         where u.Id == universityId
                         from c in context.Clubs
-                        where c.UniversityId == u.Id 
+                        where c.UniversityId == u.Id
                         from ca in context.CompetitionActivities
-                        //where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
+                            //where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
                         orderby ca.CreateTime descending
                         select ca;
 
@@ -66,49 +66,52 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             return (clubActivities.Count > 0) ? clubActivities : null;
         }
 
-        
+
 
 
 
         ////Get List ClubActivity By Conditions
-        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListClubActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
 
-            //lấy tất cả các task của 1 trường      
-            //var query = from u in context.Universities
-            //            where u.Id == conditions.UniversityId
-            //            from c in context.Clubs
-            //            where c.UniversityId == u.Id
-            //            //join ca in context.CompetitionActivities on c.Id equals ca.ClubId
-            //            select ca;
+            var query = from c in context.Competitions
+                        where c.Id == conditions.CompetitionId
+                        from ca in context.CompetitionActivities
+                        where ca.CompetitionId == c.Id
+                        select ca;
 
-            ////Club-Id
-            //if (conditions.ClubId.HasValue) query = query.Where(ca => ca.ClubId.Equals(conditions.ClubId));
-            ////Seeds-Point
-            //if (conditions.SeedsPoint.HasValue) query = query.Where(ca => ca.SeedsPoint == conditions.SeedsPoint);
-            ////Number-of-member
-            //if (conditions.NumberOfMember.HasValue) query = query.Where(ca => ca.NumOfMember == conditions.NumberOfMember);
-            ////Status
-            ////if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
 
-            //int totalCount = query.Count();
-            //List<ViewCompetitionActivity> clubActivities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
-            //                                        .Select(ca => new ViewCompetitionActivity
-            //                                        {
-            //                                            Id = ca.Id,
-            //                                            ClubId = ca.ClubId,                                                        
-            //                                            CreateTime = ca.CreateTime,
-            //                                            Description = ca.Description,
-            //                                            Ending = ca.Ending,
-            //                                            Name = ca.Name,
-            //                                            SeedsCode = ca.SeedsCode,
-            //                                            SeedsPoint = ca.SeedsPoint,
-            //                                            //Status = ca.Status,
-            //                                            NumOfMember = ca.NumOfMember,
-            //                                        }).ToListAsync();
+            //ProcessStatus
+            if (conditions.ProcessStatus.HasValue) query = query.Where(ca => ca.Process == conditions.ProcessStatus);
 
-            //return (clubActivities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(clubActivities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
-            return null;
+            //PriorityStatus
+            if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
+
+            //Status
+            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
+
+            
+            int totalCount = query.Count();
+
+            List<ViewDetailCompetitionActivity> Activities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
+                                                    .Select(ca => new ViewDetailCompetitionActivity
+                                                    {
+                                                        Id = ca.Id,                                                    
+                                                        CreateTime = ca.CreateTime,
+                                                        Description = ca.Description,
+                                                        Ending = ca.Ending,
+                                                        Name = ca.Name,
+                                                        NumOfMember = ca.NumOfMember,
+                                                        SeedsCode = ca.SeedsCode,
+                                                        SeedsPoint = ca.SeedsPoint,
+                                                        Status = ca.Status,
+                                                        Priority = ca.Priority,
+                                                        CompetitionId = ca.CompetitionId,                                                      
+                                                        
+                                                    }).ToListAsync();
+
+            return (Activities.Count > 0) ? new PagingResult<ViewDetailCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
+
         }
 
         // Nhat

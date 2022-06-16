@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,17 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
     {
         public ActivitiesEntityRepo(UniCECContext context) : base(context)
         {
+        }
+
+        public async Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId)
+        {
+            List<ActivitiesEntity> activitiesEntities = await (from ca in context.CompetitionActivities
+                                                               where ca.Id == competitionActivityId
+                                                               from ae in context.ActivitiesEntities
+                                                               where ae.CompetitionActivityId == ca.Id
+                                                               select ae).ToListAsync();
+
+            return (activitiesEntities.Count > 0) ? activitiesEntities : null;
         }
     }
 }
