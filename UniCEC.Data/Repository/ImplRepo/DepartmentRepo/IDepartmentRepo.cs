@@ -16,5 +16,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public Task<int> CheckDuplicatedName(string name);
         //
         public Task<bool> checkDepartment(List<int> listDepartmentId);
+
+        public Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId); 
     }
 }

@@ -77,11 +77,11 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<int> CheckDuplicatedName(string name)
         {
             return await (from d in context.Departments
-                               where d.Name.ToLower().Equals(name.ToLower())
-                               select d.Id).FirstOrDefaultAsync();
+                          where d.Name.ToLower().Equals(name.ToLower())
+                          select d.Id).FirstOrDefaultAsync();
         }
 
-        //
+        // TA
         public async Task<bool> checkDepartment(List<int> listDepartmentId)
         {
             bool result = true;
@@ -89,6 +89,25 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             {
                 var query = await (from dep in context.Departments
                                    where dep.Id == DepId
+                                   select dep).FirstOrDefaultAsync();
+
+                if (query == null)
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
+
+        public async Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId)
+        {
+            bool result = true;
+            foreach (int DepId in listDepartmentId)
+            {
+                var query = await (from maj in context.Majors
+                                   where maj.UniversityId == universityId
+                                   from dep in context.Departments
+                                   where dep.Id == maj.Id
                                    select dep).FirstOrDefaultAsync();
 
                 if (query == null)

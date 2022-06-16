@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 
 namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
 {
@@ -16,6 +19,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         //Get all records have all in CompetitionManger with MemberId
         public Task<CompetitionManager> GetMemberInCompetitionManager(int competitionId, int memberId, int clubId);
         public bool CheckValidManagerByUser(int competitionId, int userId);
-       
+        //Get All Manager in competition manager
+        public Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel request);
     }
 }

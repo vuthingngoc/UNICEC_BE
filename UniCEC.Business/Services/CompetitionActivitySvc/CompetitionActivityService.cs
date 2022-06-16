@@ -517,8 +517,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             //------------- CHECK is in CompetitionManger table                
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
-                            {
-                                return true;
+                            {                              
+                                    return true;                            
                             }
                             else
                             {

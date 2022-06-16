@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -34,7 +33,6 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
-using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
 using UniCEC.Data.ViewModels.Entities.Member;
@@ -50,7 +48,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionInClubRepo _competitionInClubRepo;
         private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
         private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
-        private IDepartmentInUniversityRepo _departmentInUniversityRepo;
         private IClubRepo _clubRepo;
         private IParticipantRepo _participantRepo;
         private ICompetitionTypeRepo _competitionTypeRepo;
@@ -60,7 +57,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IInfluencerRepo _influencerRepo;
         private IInfluencerInCompetitionRepo _influencerInCompetitionRepo;
         private ITermRepo _termRepo;
-        private ICompetitionRoleRepo _competitionRoleRepo;
         private IDepartmentRepo _departmentRepo;
         private ITeamRepo _teamRepo;
         private IUserRepo _userRepo;
@@ -73,7 +69,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionInClubRepo competitionInClubRepo,
                                   ISponsorInCompetitionRepo sponsorInCompetitionRepo,
                                   ICompetitionInDepartmentRepo competitionInDepartmentRepo,
-                                  IDepartmentInUniversityRepo departmentInUniversityRepo,
                                   IClubRepo clubRepo,
                                   IParticipantRepo participantRepo,
                                   ICompetitionTypeRepo competitionTypeRepo,
@@ -83,7 +78,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IInfluencerInCompetitionRepo influencerInCompetitionRepo,
                                   ITermRepo termRepo,
                                   IConfiguration configuration,
-                                  ICompetitionRoleRepo competitionRoleRepo,
                                   IDepartmentRepo departmentRepo,
                                   ITeamRepo teamRepo,
                                   IUserRepo userRepo,
@@ -95,7 +89,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
             _competitionInDepartmentRepo = competitionInDepartmentRepo;
-            _departmentInUniversityRepo = departmentInUniversityRepo;
             _clubRepo = clubRepo;
             _participantRepo = participantRepo;
             _competitionTypeRepo = competitionTypeRepo;
@@ -106,7 +99,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _termRepo = termRepo;
             _influencerRepo = influencerRepo;
             _configuration = configuration;
-            _competitionRoleRepo = competitionRoleRepo;
             _departmentRepo = departmentRepo;
             _userRepo = userRepo;
             _teamRepo = teamRepo;
@@ -137,7 +129,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope)
         {
             List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Scope);
-           
+
 
             foreach (ViewCompetition item in result)
             {
@@ -370,7 +362,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                     //TH2: University-Club
                                     else
                                     {
-                                        bool check = await _departmentInUniversityRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
+                                        bool check = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
                                         if (check)
                                         {
                                             insertDepartment = true;
@@ -793,7 +785,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             //add extra parameter
                             int UniversityId = DecodeToken(token, "UniversityId");
                             //------------- CHECK Department belong to University
-                            bool departmentBelongToUni = await _departmentInUniversityRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
+                            bool departmentBelongToUni = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
 
                             if (departmentBelongToUni)
                             {
@@ -1449,7 +1441,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                             MemberId = ClubLeaderCollaborate.Id,
                                             CompetitionInClubId = result,
                                             CompetitionRoleId = 1,
-                                            Fullname = ClubLeaderCollaborate.User.Fullname
+                                            Fullname = ClubLeaderCollaborate.User.Fullname,
+                                            Status = true,
                                         };
                                         await _competitionManagerRepo.Insert(competitionManager);
 
@@ -2085,6 +2078,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
                             {
+
                                 //------------- CHECK Role Is Manger
                                 if (isAllow.CompetitionRoleId == 1)
                                 {
@@ -2094,6 +2088,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                 {
                                     throw new UnauthorizedAccessException("Only role Manager can do this action");
                                 }
+
                             }
                             else
                             {
@@ -2151,7 +2146,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
                             {
+
                                 return true;
+
                             }
                             else
                             {
