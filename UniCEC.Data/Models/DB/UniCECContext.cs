@@ -9,18 +9,16 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class UniCECContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-
+        private IConfiguration _configuration;
         public UniCECContext()
         {
         }
 
         public UniCECContext(DbContextOptions<UniCECContext> options, IConfiguration configuration)
-           : base(options)
+            : base(options)
         {
             _configuration = configuration;
         }
-
 
         public virtual DbSet<ActivitiesEntity> ActivitiesEntities { get; set; }
         public virtual DbSet<City> Cities { get; set; }
@@ -36,7 +34,6 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<CompetitionRound> CompetitionRounds { get; set; }
         public virtual DbSet<CompetitionType> CompetitionTypes { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
-        public virtual DbSet<DepartmentInUniversity> DepartmentInUniversities { get; set; }
         public virtual DbSet<Influencer> Influencers { get; set; }
         public virtual DbSet<InfluencerInCompetition> InfluencerInCompetitions { get; set; }
         public virtual DbSet<Major> Majors { get; set; }
@@ -396,29 +393,6 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
-            });
-
-            modelBuilder.Entity<DepartmentInUniversity>(entity =>
-            {
-                entity.ToTable("DepartmentInUniversity");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
-
-                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
-
-                entity.HasOne(d => d.Department)
-                    .WithMany(p => p.DepartmentInUniversities)
-                    .HasForeignKey(d => d.DepartmentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Departmen__Depar__6E01572D");
-
-                entity.HasOne(d => d.University)
-                    .WithMany(p => p.DepartmentInUniversities)
-                    .HasForeignKey(d => d.UniversityId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Departmen__Unive__6EF57B66");
             });
 
             modelBuilder.Entity<Influencer>(entity =>

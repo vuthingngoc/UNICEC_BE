@@ -223,6 +223,13 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<int> GetIdByUser(int userId, int clubId)
+        {
+            return await (from m in context.Members
+                          where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
+                          select m.Id).FirstOrDefaultAsync();
+        }
+
         public async Task<int> CheckDuplicated(int clubId, int clubRoleId, int userId, int termId)
         {
             Member member = await context.Members.FirstOrDefaultAsync(m => m.ClubId.Equals(clubId)
@@ -350,19 +357,19 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             await Insert(newRecord);
         }
 
-        public async Task DeleteMember(int memberId)
-        {
-            Member record = await (from m in context.Members
-                                   where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
-                                   select m).FirstOrDefaultAsync();
+        //public async Task DeleteMember(int memberId)
+        //{
+        //    Member record = await (from m in context.Members
+        //                           where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
+        //                           select m).FirstOrDefaultAsync();
 
-            if (record != null)
-            {
-                record.EndTime = DateTime.Now;
-                record.Status = MemberStatus.Inactive;
-                await Update();
-            }
-        }
+        //    if (record != null)
+        //    {
+        //        record.EndTime = DateTime.Now;
+        //        record.Status = MemberStatus.Inactive;
+        //        await Update();
+        //    }
+        //}
 
         public async Task UpdateEndTerm(int clubId)
         {

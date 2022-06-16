@@ -17,17 +17,17 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo
         public async Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId)
         {
             bool result = true;
-            foreach (int DepId in listDepartmentId)
-            {
-                var query = await (from dep_uni in context.DepartmentInUniversities
-                                   where dep_uni.DepartmentId == DepId && dep_uni.UniversityId == universityId
-                                   select dep_uni).FirstOrDefaultAsync();
+            //foreach (int DepId in listDepartmentId)
+            //{
+            //    var query = await (from dep_uni in context.DepartmentInUniversities
+            //                       where dep_uni.DepartmentId == DepId && dep_uni.UniversityId == universityId
+            //                       select dep_uni).FirstOrDefaultAsync();
 
-                if (query == null)
-                {
-                    result = false;
-                }
-            }
+            //    if (query == null)
+            //    {
+            //        result = false;
+            //    }
+            //}
             return result;
         }
     }

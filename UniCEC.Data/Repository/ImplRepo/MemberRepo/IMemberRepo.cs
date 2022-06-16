@@ -20,9 +20,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public Task<int> GetTotalMembersByClub(int clubId);
         public Task<bool> CheckExistedMemberInClub(int userId, int clubId);   
         public Task<int> GetRoleMemberInClub(int userId, int clubId);
+        public Task<int> GetIdByUser(int userId, int clubId);
         public int CheckValidNewLeader(int userId, int universityId);
         public Task UpdateMemberRole(int memberId, int clubRoleId);
-        public Task DeleteMember(int memberId);
+        //public Task DeleteMember(int memberId);
         public Task UpdateEndTerm(int clubId);
         //TA
         public Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model);      
