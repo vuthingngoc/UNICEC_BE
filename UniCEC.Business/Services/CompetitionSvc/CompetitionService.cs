@@ -1399,10 +1399,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (model.ClubIdCollaborate != model.ClubId)
                         {
                             //---------------CHECK Club-Id-Collaborate----------
-                            //check club Id Collaborate has in system
+                            //CHECK club Id Collaborate has in system
                             Club clubCollaborate = await _clubRepo.Get(model.ClubIdCollaborate);
                             if (clubCollaborate != null)
                             {
+
+                                //CHECK club Id Collaborate has in Competition
+                                ViewCompetitionInClub vcic = await _competitionInClubRepo.GetCompetitionInClub(clubCollaborate.Id, model.CompetitionId);
+                                if(vcic != null) throw new ArgumentException("Club has join in Competition");
+
                                 //
                                 bool checkClubIn_Out = false;
                                 //Scope != inter => Check ClubCollaborate University
