@@ -120,7 +120,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPut("member-role")]
         [SwaggerOperation(Summary = "Update member role in Competition Manager")]
-        public async Task<IActionResult> UpdateMemberInCompetitionManagerRole([FromBody] CompetitionManagerUpdateModel model)
+        public async Task<IActionResult> UpdateMemberRoleInCompetitionManager([FromBody] CompetitionManagerUpdateRoleModel model)
         {
             try
             {
@@ -128,7 +128,52 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _competitionManagerService.UpdateMemberInCompetitionManager(model, token);
+                check = await _competitionManagerService.UpdateMemberRoleInCompetitionManager(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // PUT api/<CompetitionManagerController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("member-status")]
+        [SwaggerOperation(Summary = "Update member status in Competition Manager")]
+        public async Task<IActionResult> UpdateMemberStatusInCompetitionManager([FromBody] CompetitionManagerUpdateStatusModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionManagerService.UpdateMemberStatusInCompetitionManager(model, token);
                 if (check)
                 {
                     return Ok();

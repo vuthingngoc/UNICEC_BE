@@ -266,41 +266,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
 
-        public async Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel request)
-        {
-            //
-            List<ViewCompetitionManager> list_viewCompetitionManagers = new List<ViewCompetitionManager>();
-
-            //CompetitionManager
-            var query = from cic in context.CompetitionInClubs
-                        where cic.CompetitionId == request.CompetitionId
-                        from cm in context.CompetitionManagers
-                        where cm.CompetitionInClubId == cic.Id
-                        select cm;
-
-            int totalCount = await query.CountAsync();
-
-            List<CompetitionManager> list_compeManager = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
-
-            foreach (CompetitionManager competitionManager in list_compeManager)
-            {
-                ViewCompetitionManager vcm = new ViewCompetitionManager()
-                {
-                    Id = competitionManager.Id,
-                    CompetitionInClubId = competitionManager.CompetitionInClubId,
-                    CompetitionRoleId = competitionManager.CompetitionRoleId,
-                    MemberId = competitionManager.MemberId,
-                    FullName = competitionManager.Fullname,
-                };
-
-                list_viewCompetitionManagers.Add(vcm);
-            }
-
-            return (list_viewCompetitionManagers.Count > 0) ? new PagingResult<ViewCompetitionManager>(list_viewCompetitionManagers, totalCount, request.CurrentPage, request.PageSize) : null;
-
-        }
-
-
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
         {

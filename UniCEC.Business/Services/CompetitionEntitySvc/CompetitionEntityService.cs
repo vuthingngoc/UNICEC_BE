@@ -152,7 +152,9 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
                             if (isAllow != null)
                             {
-                                return true;
+                               
+                                    return true;
+                                
                             }
                             else
                             {

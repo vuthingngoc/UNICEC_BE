@@ -24,33 +24,22 @@ namespace UniCEC.Business.Services.ParticipantSvc
     public class ParticipantService : IParticipantService
     {
         private IParticipantRepo _participantRepo;
-        private ICompetitionRepo _competitionRepo;
-        private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
-
-        private IDepartmentInUniversityRepo _departmentInUniversityRepo;
+        private ICompetitionRepo _competitionRepo;      
         private IClubRepo _clubRepo;
         private JwtSecurityTokenHandler _tokenHandler;
         private IMemberRepo _memberRepo;
-        private ITermRepo _termRepo;
-        //
         private IUserRepo _userRepo;
 
         public ParticipantService(IParticipantRepo participantRepo,
-                                  ICompetitionRepo competitionRepo,
-                                  ICompetitionInDepartmentRepo competitionInDepartmentRepo,
-                                  IDepartmentInUniversityRepo departmentInUniversityRepo,
+                                  ICompetitionRepo competitionRepo,                                                             
                                   IClubRepo clubRepo,
-                                  IMemberRepo memberRepo,
-                                  ITermRepo termRepo,
+                                  IMemberRepo memberRepo,                                
                                   IUserRepo userRepo)
         {
             _participantRepo = participantRepo;
-            _competitionRepo = competitionRepo;
-            _competitionInDepartmentRepo = competitionInDepartmentRepo;
-            _departmentInUniversityRepo = departmentInUniversityRepo;
+            _competitionRepo = competitionRepo;     
             _clubRepo = clubRepo;
-            _memberRepo = memberRepo;
-            _termRepo = termRepo;
+            _memberRepo = memberRepo;         
             _userRepo = userRepo;
         }
 
