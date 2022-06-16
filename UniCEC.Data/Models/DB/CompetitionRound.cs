@@ -20,6 +20,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime EndTime { get; set; }
         public int NumberOfTeam { get; set; }
         public int SeedsPoint { get; set; }
+        public bool Status { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual ICollection<TeamInRound> TeamInRounds { get; set; }

@@ -12,6 +12,7 @@ namespace UniCEC.Data.Models.DB
         public int CompetitionRoleId { get; set; }
         public int MemberId { get; set; }
         public string Fullname { get; set; }
+        public bool Status { get; set; }
 
         public virtual CompetitionInClub CompetitionInClub { get; set; }
         public virtual CompetitionRole CompetitionRole { get; set; }

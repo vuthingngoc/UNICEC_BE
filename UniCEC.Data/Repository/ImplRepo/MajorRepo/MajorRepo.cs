@@ -37,9 +37,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                     .Select(m => new ViewMajor()
                                     {
+                                        Id = m.Id,
+                                        UniversityId = m.UniversityId,
                                         DepartmentId = m.DepartmentId,
                                         Description = m.Description,
-                                        Id = m.Id,
                                         MajorCode = m.MajorCode,
                                         Name = m.Name,
                                         Status = m.Status
@@ -50,22 +51,23 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
         public async Task<PagingResult<Major>> GetByUniversity(int universityId, PagingRequest request)
         {
-            var query = from diu in context.DepartmentInUniversities
-                        join d in context.Departments on diu.DepartmentId equals d.Id
-                        join m in context.Majors on d.Id equals m.DepartmentId
-                        where diu.UniversityId == universityId
-                        select new { m };
+            var query = from m in context.Majors
+                        where m.UniversityId.Equals(universityId)
+                        select m;
+
             int totalCount = query.Count();
 
-            List<Major> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x => new Major()
-            {
-                Id = x.m.Id,
-                DepartmentId = x.m.DepartmentId,
-                Description = x.m.Description,
-                MajorCode = x.m.MajorCode,
-                Name = x.m.Name,
-                Status = x.m.Status
-            }).ToListAsync();
+            List<Major> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                .Select(m => new Major()
+                {
+                    Id = m.Id,
+                    UniversityId = m.UniversityId,
+                    DepartmentId = m.DepartmentId,
+                    Description = m.Description,
+                    MajorCode = m.MajorCode,
+                    Name = m.Name,
+                    Status = m.Status
+                }).ToListAsync();
 
             return (majors.Count > 0) ? new PagingResult<Major>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
         }
