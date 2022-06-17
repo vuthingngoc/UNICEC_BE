@@ -76,8 +76,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                     //
                     PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                    
+                    //
+                    if(result == null) throw new NullReferenceException("Not Has Data !!!");
+
                     List<ViewDetailCompetitionActivity> list_vdca = result.Items.ToList();
-                  
+
                     foreach (ViewDetailCompetitionActivity viewDetailCompetitionActivity in list_vdca)
                     {
 
@@ -119,7 +123,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 }
                 else
                 {
-                    throw new NullReferenceException();
+                    throw new NullReferenceException("Not Has Data !!!");
                 }
             }
             catch (Exception)
