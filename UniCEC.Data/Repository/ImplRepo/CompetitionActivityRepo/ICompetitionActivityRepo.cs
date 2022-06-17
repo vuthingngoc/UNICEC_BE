@@ -11,12 +11,12 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 {
     public interface ICompetitionActivityRepo : IRepository<CompetitionActivity>
     {
-        //
+        
         public Task<bool> CheckExistCode(string code);
         //
-        public Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions);
-        //
-        public Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
+        public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions);
+    
+        //public Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId);
 
         // Nhat
         public Task<int> GetTotalActivityByClub(int clubId);

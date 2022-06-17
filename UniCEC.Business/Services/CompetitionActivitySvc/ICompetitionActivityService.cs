@@ -15,9 +15,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         public Task<bool> Update(CompetitionActivityUpdateModel clubActivity, string token);
         public Task<bool> Delete(CompetitionActivityDeleteModel model, string token);
         //Get List ClubActivity By Conditions
-        public Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token);
+        public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token);
 
-        public Task<List<ViewProcessCompetitionActivity>> GetTop4_Process(int clubId, string token);
+        //public Task<List<ViewProcessCompetitionActivity>> GetTop4_Process(int clubId, string token);
 
     }
 }

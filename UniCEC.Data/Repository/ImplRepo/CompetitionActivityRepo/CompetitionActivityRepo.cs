@@ -32,46 +32,46 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             return check;
         }
 
-        //Get Top 4 Club Activities depend on create time
-        public async Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
-        {
+        ////Get Top 4 Club Activities depend on create time
+        //public async Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
+        //{
 
-            //LocalTime
-            DateTimeOffset localTime = new LocalTime().GetLocalTime();
-            //
-            var query = from u in context.Universities
-                        where u.Id == universityId
-                        from c in context.Clubs
-                        where c.UniversityId == u.Id
-                        from ca in context.CompetitionActivities
-                            //where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
-                        orderby ca.CreateTime descending
-                        select ca;
+        //    //LocalTime
+        //    DateTimeOffset localTime = new LocalTime().GetLocalTime();
+        //    //
+        //    var query = from u in context.Universities
+        //                where u.Id == universityId
+        //                from c in context.Clubs
+        //                where c.UniversityId == u.Id
+        //                from ca in context.CompetitionActivities
+        //                    //where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
+        //                orderby ca.CreateTime descending
+        //                select ca;
 
-            List<ViewDetailCompetitionActivity> clubActivities = await query.Take(4).Select(ca => new ViewDetailCompetitionActivity()
-            {
-                Id = ca.Id,
-                //ClubId = ca.ClubId,
-                CreateTime = ca.CreateTime,
-                Description = ca.Description,
-                Ending = ca.Ending,
-                Name = ca.Name,
-                SeedsCode = ca.SeedsCode,
-                SeedsPoint = ca.SeedsPoint,
-                //Status = ca.Status,
-                NumOfMember = ca.NumOfMember,
+        //    List<ViewDetailCompetitionActivity> clubActivities = await query.Take(4).Select(ca => new ViewDetailCompetitionActivity()
+        //    {
+        //        Id = ca.Id,
+        //        //ClubId = ca.ClubId,
+        //        CreateTime = ca.CreateTime,
+        //        Description = ca.Description,
+        //        Ending = ca.Ending,
+        //        Name = ca.Name,
+        //        SeedsCode = ca.SeedsCode,
+        //        SeedsPoint = ca.SeedsPoint,
+        //        //Status = ca.Status,
+        //        NumOfMember = ca.NumOfMember,
 
-            }).ToListAsync();
+        //    }).ToListAsync();
 
-            return (clubActivities.Count > 0) ? clubActivities : null;
-        }
+        //    return (clubActivities.Count > 0) ? clubActivities : null;
+        //}
 
 
 
 
 
         ////Get List ClubActivity By Conditions
-        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
 
             var query = from c in context.Competitions
@@ -90,27 +90,23 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             //Status
             if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
 
-            
+
             int totalCount = query.Count();
 
-            List<ViewDetailCompetitionActivity> Activities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
-                                                    .Select(ca => new ViewDetailCompetitionActivity
+            List<ViewCompetitionActivity> Activities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
+                                                    .Select(ca => new ViewCompetitionActivity
                                                     {
-                                                        Id = ca.Id,                                                    
-                                                        CreateTime = ca.CreateTime,
-                                                        Description = ca.Description,
-                                                        Ending = ca.Ending,
+                                                        Id = ca.Id,
+                                                        CompetitionId = ca.CompetitionId,
                                                         Name = ca.Name,
-                                                        NumOfMember = ca.NumOfMember,
-                                                        SeedsCode = ca.SeedsCode,
-                                                        SeedsPoint = ca.SeedsPoint,
-                                                        Status = ca.Status,
+                                                        CreateTime = ca.CreateTime,
+                                                        Ending = ca.Ending,
+                                                        ProcessStatus = ca.Process,
                                                         Priority = ca.Priority,
-                                                        CompetitionId = ca.CompetitionId,                                                      
-                                                        
+                                                        Status = ca.Status,
                                                     }).ToListAsync();
 
-            return (Activities.Count > 0) ? new PagingResult<ViewDetailCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
+            return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
 
         }
 

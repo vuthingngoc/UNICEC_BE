@@ -13,12 +13,18 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     public class ViewDetailCompetition
     {
         [JsonPropertyName("competition_id")]
-        public int CompetitionId { get; set; }
-        public string Name { get; set; }
+        public int CompetitionId { get; set; }       
         [JsonPropertyName("competition_type_id")]
         public int CompetitionTypeId { get; set; }
         [JsonPropertyName("competition_type_name")]
         public string CompetitionTypeName { get; set; }
+        public double Fee { get; set; }
+        [JsonPropertyName("seeds_code")]
+        public string SeedsCode { get; set; }
+        [JsonPropertyName("seeds_point")]
+        public double SeedsPoint { get; set; }
+        [JsonPropertyName("seeds_deposited")]
+        public double SeedsDeposited { get; set; }
         [JsonPropertyName("number_of_participations")]
         public int NumberOfParticipation { get; set; }
         [JsonPropertyName("number_of_team")]
@@ -38,21 +44,17 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         [JsonPropertyName("end_time")]
         public DateTime EndTime { get; set; }
-        public string Content { get; set; }
-        public double Fee { get; set; }
-        [JsonPropertyName("seeds_code")]
-        public string SeedsCode { get; set; }
-        [JsonPropertyName("seeds_point")]
-        public double SeedsPoint { get; set; }
-        [JsonPropertyName("seeds_deposited")]
-        public double SeedsDeposited { get; set; }
-        [JsonPropertyName("is_sponsor")]
-        public bool IsSponsor { get; set; }
-        public CompetitionScopeStatus Scope { get; set; }
-        public CompetitionStatus Status { get; set; }
+        public string Name { get; set; }
+
         [JsonPropertyName("address_name")]
         public string AddressName { get; set; }
         public string Address { get; set; }
+        public string Content { get; set; }
+     
+        [JsonPropertyName("is_sponsor")]
+        public bool IsSponsor { get; set; }
+        public CompetitionScopeStatus Scope { get; set; }
+        public CompetitionStatus Status { get; set; }   
         public int View { get; set; }
 
         //------------- ADD Field Sponsor Collaborate -> Object Array
