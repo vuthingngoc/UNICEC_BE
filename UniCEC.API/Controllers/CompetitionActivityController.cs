@@ -28,35 +28,35 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [Authorize(Roles = "Student")]
-        [HttpGet("top4-process")]
-        [SwaggerOperation(Summary = "Get top 4 competition activities by now and process")]
-        //Lưu ý University Id dựa vào JWT
-        public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "clubId")] int ClubId)
-        {
-            try
-            {
-                var header = Request.Headers;
-                if (!header.ContainsKey("Authorization")) return Unauthorized();
-                string token = header["Authorization"].ToString().Split(" ")[1];
+        //[Authorize(Roles = "Student")]
+        //[HttpGet("top4-process")]
+        //[SwaggerOperation(Summary = "Get top 4 competition activities by now and process")]
+        ////Lưu ý University Id dựa vào JWT
+        //public async Task<IActionResult> GetTop4_Process([FromQuery(Name = "clubId")] int ClubId)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewProcessCompetitionActivity> result = await _competitionActivityService.GetTop4_Process(ClubId, token);
-                return Ok(result);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
+        //        List<ViewProcessCompetitionActivity> result = await _competitionActivityService.GetTop4_Process(ClubId, token);
+        //        return Ok(result);
+        //    }
+        //    catch (NullReferenceException)
+        //    {
+        //        return Ok(new List<object>());
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
-        }
         [Authorize(Roles = "Student")]
         [HttpGet]
         [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
@@ -68,7 +68,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityService.GetListActivitiesByConditions(conditions, token);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListActivitiesByConditions(conditions, token);
 
                 return Ok(result);
 

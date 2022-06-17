@@ -16,8 +16,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         //Check Condititon in Competition Service
         //public Task<CompetitionManager> GetManagerInCompetitionManager(int CompetitionId, int ClubId, int MemberId);
 
-        //Get all records have all in CompetitionManger with MemberId
+        //Get all records have all in CompetitionManger with MemberId TO CHECK
         public Task<CompetitionManager> GetMemberInCompetitionManager(int competitionId, int memberId, int clubId);
+
+        
+
         public bool CheckValidManagerByUser(int competitionId, int userId);
         //Get All Manager in competition manager
         public Task<PagingResult<ViewCompetitionManager>> GetAllManagerCompOrEve(CompetitionManagerRequestModel request);

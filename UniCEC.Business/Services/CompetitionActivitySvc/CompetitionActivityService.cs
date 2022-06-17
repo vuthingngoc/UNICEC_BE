@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private ICompetitionRepo _competitionRepo;
         private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
+        private ICompetitionManagerRepo _competitionManagerRepo;     
         private IFileService _fileService;
         private JwtSecurityTokenHandler _tokenHandler;
 
@@ -61,9 +61,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
 
 
-        //Get-List-Club-Activities-By-Conditions
-        //lấy tất cả các task của 1 trường - 1 câu lạc bộ - seed point - Number of member
-        public async Task<PagingResult<ViewDetailCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
+        
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
         {
             try
             {
@@ -75,14 +74,14 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 {
 
                     //
-                    PagingResult<ViewDetailCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                    PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
                     
                     //
                     if(result == null) throw new NullReferenceException("Not Has Data !!!");
 
-                    List<ViewDetailCompetitionActivity> list_vdca = result.Items.ToList();
+                    List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
-                    foreach (ViewDetailCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                    foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
                     {
 
                         //List Activities Entity
@@ -132,74 +131,10 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
-        //Get Process + Top 4
-        public async Task<List<ViewProcessCompetitionActivity>> GetTop4_Process(int clubId, string token)
-        {
-            //
-            var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var UniIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
-            int UniId = Int32.Parse(UniIdClaim.Value);
+       
 
-            List<ViewProcessCompetitionActivity> viewProcessClubActivities = new List<ViewProcessCompetitionActivity>();
 
-            //check clubId in the system
-            Club club = await _clubRepo.Get(clubId);
-            if (club != null)
-            {
-                //check club belong to university id
-                if (club.UniversityId == UniId)
-                {
-                    //top 4 activity by ClubId
-                    List<ViewDetailCompetitionActivity> ListViewClubActivity = await _competitionActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
 
-                    foreach (ViewDetailCompetitionActivity viewClubActivity in ListViewClubActivity)
-                    {
-                        //Get Process
-                        //get total num of member join
-                        int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(viewClubActivity.Id);
-                        //get number of member doing task
-                        int NumMemberDoingTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Doing);
-                        //get number of member submit on time task
-                        int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Finished);
-                        //get number of member submit on late task
-                        int NumMemberDoneLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.FinishedLate);
-                        //get number of member late task
-                        int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.LateTime);
-                        //get number of member out task
-                        //int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Approved);
-
-                        ViewProcessCompetitionActivity vpca = new ViewProcessCompetitionActivity()
-                        {
-                            Ending = viewClubActivity.Ending,
-                            CreateTime = viewClubActivity.CreateTime,
-                            Description = viewClubActivity.Description,
-                            Id = viewClubActivity.Id,
-                            Name = viewClubActivity.Name,
-                            NumOfMember = viewClubActivity.NumOfMember,
-                            SeedsCode = viewClubActivity.SeedsCode,
-                            SeedsPoint = viewClubActivity.SeedsPoint,
-                            Status = viewClubActivity.Status,
-                            NumOfMemberJoin = NumberOfMemberJoin,
-                            NumMemberDoingTask = NumMemberDoingTask,
-                            NumMemberDoneTask = NumMemberDoneTask,
-                            NumMemberDoneLateTask = NumMemberDoneLateTask,
-                            NumMemberLateTask = NumMemberLateTask,
-                            //NumMemberOutTask = NumMemberOutTask
-                        };
-                        viewProcessClubActivities.Add(vpca);
-                    }
-                    return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : throw new NullReferenceException();
-                }//end check club in Uni
-                else
-                {
-                    throw new ArgumentException("Club not in University");
-                }
-            }//end check club
-            else
-            {
-                throw new ArgumentException("Club not found ");
-            }
-        }
 
         //Get-ClubActivity-By-Id
         public async Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token)
@@ -265,20 +200,17 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                         //
                         CompetitionActivity competitionActivity = new CompetitionActivity();
-                        competitionActivity.CompetitionId = model.CompetitionId;
-                        //When Member Take Activity will +1
-                        competitionActivity.NumOfMember = 0;
+                        competitionActivity.CompetitionId = model.CompetitionId;                       
+                        competitionActivity.NumOfMember = 0;                                                    //When Member Take Activity will +1
                         competitionActivity.Description = model.Description;
                         competitionActivity.Name = model.Name;
-                        competitionActivity.SeedsPoint = model.SeedsPoint;
-                        //LocalTime
-                        competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                        competitionActivity.Ending = model.Ending;
-                        //Check Status
-                        competitionActivity.Status = CompetitionActivityStatus.Happenning;
-                        //Check Code
-                        competitionActivity.SeedsCode = await checkExistCode();
-                        competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;
+                        competitionActivity.SeedsPoint = model.SeedsPoint;                       
+                        competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;               //LocalTime
+                        competitionActivity.Ending = model.Ending;                                                    
+                        competitionActivity.SeedsCode = await checkExistCode();                                 //Check Code
+                        competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;             //Will update when Member Submit task
+                        competitionActivity.Status = CompetitionActivityStatus.Happenning;                      //Check Status
+                        competitionActivity.Priority = model.Priority;                                                                                       
                         competitionActivity.MemberId = check;
 
 
@@ -467,24 +399,30 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 }
             }
 
+            //Who Create This Task
+            ViewDetailMember member = await _memberRepo.GetDetailById(competitionActivity.MemberId);
+
+
             //List Member Takes Activity
 
 
             return new ViewDetailCompetitionActivity()
             {
-                Ending = competitionActivity.Ending,
-                CreateTime = competitionActivity.CreateTime,
-                Description = competitionActivity.Description,
                 Id = competitionActivity.Id,
-                Name = competitionActivity.Name,
-                NumOfMember = competitionActivity.NumOfMember,
-                SeedsCode = competitionActivity.SeedsCode,
-                SeedsPoint = competitionActivity.SeedsPoint,
-                Status = competitionActivity.Status,
                 CompetitionId = competitionActivity.CompetitionId,
-                Priority = competitionActivity.Priority,
-                MemberId = competitionActivity.MemberId,
+                Name = competitionActivity.Name,
+                Description = competitionActivity.Description,      
+                SeedsCode = competitionActivity.SeedsCode,
+                SeedsPoint = competitionActivity.SeedsPoint,                
+                NumOfMember = competitionActivity.NumOfMember,
+                Ending = competitionActivity.Ending,
+                CreateTime = competitionActivity.CreateTime,         
+                Priority = competitionActivity.Priority,           
                 ProcessStatus = competitionActivity.Process,
+                Status = competitionActivity.Status,
+                CreatorId = competitionActivity.MemberId,
+                CreatorName = member.Name,
+                CreatorEmail = member.Email,
                 ActivitiesEntities = ListView_ActivitiesEntity
             };
         }
@@ -608,3 +546,71 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
     }
 }
+////Get Process + Top 4
+//public async Task<List<ViewProcessCompetitionActivity>> GetTop4_Process(int clubId, string token)
+//{
+//    //
+//    var jsonToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+//    var UniIdClaim = jsonToken.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UniversityId"));
+//    int UniId = Int32.Parse(UniIdClaim.Value);
+
+//    List<ViewProcessCompetitionActivity> viewProcessClubActivities = new List<ViewProcessCompetitionActivity>();
+
+//    //check clubId in the system
+//    Club club = await _clubRepo.Get(clubId);
+//    if (club != null)
+//    {
+//        //check club belong to university id
+//        if (club.UniversityId == UniId)
+//        {
+//            //top 4 activity by ClubId
+//            List<ViewDetailCompetitionActivity> ListViewClubActivity = await _competitionActivityRepo.GetClubActivitiesByCreateTime(UniId, clubId);
+
+//            foreach (ViewDetailCompetitionActivity viewClubActivity in ListViewClubActivity)
+//            {
+//                //Get Process
+//                //get total num of member join
+//                int NumberOfMemberJoin = await _memberTakesActivityRepo.GetNumOfMemInTask(viewClubActivity.Id);
+//                //get number of member doing task
+//                int NumMemberDoingTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Doing);
+//                //get number of member submit on time task
+//                int NumMemberDoneTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Finished);
+//                //get number of member submit on late task
+//                int NumMemberDoneLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.FinishedLate);
+//                //get number of member late task
+//                int NumMemberLateTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.LateTime);
+//                //get number of member out task
+//                //int NumMemberOutTask = await _memberTakesActivityRepo.GetNumOfMemInTask_Status(viewClubActivity.Id, MemberTakesActivityStatus.Approved);
+
+//                ViewProcessCompetitionActivity vpca = new ViewProcessCompetitionActivity()
+//                {
+//                    Ending = viewClubActivity.Ending,
+//                    CreateTime = viewClubActivity.CreateTime,
+//                    Description = viewClubActivity.Description,
+//                    Id = viewClubActivity.Id,
+//                    Name = viewClubActivity.Name,
+//                    NumOfMember = viewClubActivity.NumOfMember,
+//                    SeedsCode = viewClubActivity.SeedsCode,
+//                    SeedsPoint = viewClubActivity.SeedsPoint,
+//                    Status = viewClubActivity.Status,
+//                    NumOfMemberJoin = NumberOfMemberJoin,
+//                    NumMemberDoingTask = NumMemberDoingTask,
+//                    NumMemberDoneTask = NumMemberDoneTask,
+//                    NumMemberDoneLateTask = NumMemberDoneLateTask,
+//                    NumMemberLateTask = NumMemberLateTask,
+//                    //NumMemberOutTask = NumMemberOutTask
+//                };
+//                viewProcessClubActivities.Add(vpca);
+//            }
+//            return (viewProcessClubActivities.Count > 0) ? viewProcessClubActivities : throw new NullReferenceException();
+//        }//end check club in Uni
+//        else
+//        {
+//            throw new ArgumentException("Club not in University");
+//        }
+//    }//end check club
+//    else
+//    {
+//        throw new ArgumentException("Club not found ");
+//    }
+//}

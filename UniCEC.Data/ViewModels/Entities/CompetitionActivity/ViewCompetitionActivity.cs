@@ -13,14 +13,19 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
     {
         public int Id { get; set; }
         [JsonPropertyName("competition_id")]
-        public int CompetitionId { get; set; }
-        public PriorityStatus Priority { get; set; }
-        public string Name { get; set; }
-          
+        public int CompetitionId { get; set; } 
+           
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }
         public DateTime Ending { get; set; }
-        [JsonPropertyName("club_activity_status")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("process_activity_status")]
+        public CompetitionActivityProcessStatus ProcessStatus { get; set; }
+
+        public PriorityStatus Priority { get; set; }
+
+        [JsonPropertyName("competition_activity_status")]
         public CompetitionActivityStatus Status { get; set; }
        
         //------------- ADD Field Activities Entities -> Object Array  

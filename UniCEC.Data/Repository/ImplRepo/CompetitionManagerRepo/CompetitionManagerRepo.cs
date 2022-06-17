@@ -78,6 +78,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
 
         }
 
+        //Get To CHECK
         public async Task<CompetitionManager> GetMemberInCompetitionManager(int CompetitionId, int MemberId, int ClubId)
         {
             var query = from cic in context.CompetitionInClubs
@@ -93,5 +94,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             }
             return null;
         }
+
+       
     }
 }
