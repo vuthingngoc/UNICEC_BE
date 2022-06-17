@@ -60,7 +60,6 @@ namespace UniCEC.Data.Models.DB
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer(_configuration.GetConnectionString("UniCEC"));
                 optionsBuilder.UseLazyLoadingProxies();
-
             }
         }
 
@@ -518,6 +517,8 @@ namespace UniCEC.Data.Models.DB
                 entity.ToTable("MemberTakesActivity");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.BookerId).HasColumnName("BookerID");
 
                 entity.Property(e => e.CompetitionActivityId).HasColumnName("CompetitionActivityID");
 
