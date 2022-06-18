@@ -24,7 +24,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
                         join m in context.Members on cm.MemberId equals m.Id
                         join c in context.Clubs on m.ClubId equals c.Id
                         join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
-                        where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId)
+                        where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && cm.Status.Equals(true)
                         select new {cm, m, c, cic};
             
             return query.Any();

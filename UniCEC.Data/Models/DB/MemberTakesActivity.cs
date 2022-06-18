@@ -10,6 +10,7 @@ namespace UniCEC.Data.Models.DB
     {
         public int Id { get; set; }
         public int MemberId { get; set; }
+        public int BookerId { get; set; }
         public int CompetitionActivityId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
