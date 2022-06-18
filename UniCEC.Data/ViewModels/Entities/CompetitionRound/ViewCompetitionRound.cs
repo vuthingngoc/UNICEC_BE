@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionRound
 {
@@ -22,5 +18,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionRound
         public int NumberOfTeam { get; set; }
         [JsonPropertyName("seeds_point")]
         public int SeedsPoint { get; set; }
+        public bool Status { get; set; }
     }
 }

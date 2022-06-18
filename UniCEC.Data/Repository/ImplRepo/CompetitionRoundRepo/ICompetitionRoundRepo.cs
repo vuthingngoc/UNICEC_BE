@@ -9,7 +9,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 {
     public interface ICompetitionRoundRepo : IRepository<CompetitionRound>
     {
-        public Task<ViewCompetitionRound> GetById(int id);
-        public Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel model);
+        public Task<ViewCompetitionRound> GetById(int id, bool? status);
+        public Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request);
     }
 }

@@ -14,5 +14,7 @@ namespace UniCEC.Data.RequestModels
         public DateTime? StartTime { get; set; }
         [FromQuery(Name = "endTime")]
         public DateTime? EndTime { get; set; }
+        [FromQuery(Name = "status")]
+        public bool? Status { get; set; }
     }
 }
