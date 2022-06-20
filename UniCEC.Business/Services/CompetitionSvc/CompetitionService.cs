@@ -121,7 +121,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             else
             {
-                return null;
+                throw new NullReferenceException();
             }
         }
 
@@ -540,7 +540,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         //auto role 1 Manager
                                         CompetitionRoleId = 1,
                                         MemberId = infoClubMem.Id,
-                                        
+                                        Status = true,                                     
                                     };
 
                                     int cmId = await _competitionManagerRepo.Insert(cm);
@@ -1445,8 +1445,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         {
                                             MemberId = ClubLeaderCollaborate.Id,
                                             CompetitionInClubId = result,
-                                            CompetitionRoleId = 1,
-                                            
+                                            CompetitionRoleId = 1,                                           
                                             Status = true,
                                         };
                                         await _competitionManagerRepo.Insert(competitionManager);
