@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -27,7 +27,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
             if (!string.IsNullOrEmpty(request.Title)) query = query.Where(cr => cr.Title.ToLower().Contains(request.Title.ToLower()));
 
-            if (request.StartTime.HasValue) query = query.Where(cr => cr.StartTime.Year.Equals(request.StartTime.Value.Year) && cr.StartTime.Month.Equals(request.StartTime.Value.Month) 
+            if (request.StartTime.HasValue) query = query.Where(cr => cr.StartTime.Year.Equals(request.StartTime.Value.Year) && cr.StartTime.Month.Equals(request.StartTime.Value.Month)
                 && cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
             if (request.StartTime.HasValue && request.StartTime.Value.Hour > 0) query = query.Where(cr => cr.StartTime.Hour.Equals(request.StartTime.Value.Hour));
@@ -35,7 +35,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             if (request.EndTime.HasValue) query = query.Where(cr => cr.EndTime.Year.Equals(request.EndTime.Value.Year) && cr.EndTime.Month.Equals(request.EndTime.Value.Month)
                 && cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
-            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) query = query.Where(cr => cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));            
+            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) query = query.Where(cr => cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
 
             if (request.Status.HasValue) query = query.Where(cr => cr.Status.Equals(request.Status.Value));
 
@@ -78,6 +78,46 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                 SeedsPoint = cr.SeedsPoint,
                 Status = cr.Status
             }).FirstOrDefaultAsync();
+        }
+
+        private async Task<int> CheckDuplicatedTitle(int competitionId, string title)
+        {
+            return await (from cr in context.CompetitionRounds
+                        where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel) 
+                                && cr.Title.ToLower().Equals(title.ToLower())
+                        select cr.Id).FirstOrDefaultAsync();
+        }
+
+        private async Task<int> CheckDuplicatedTime(int competitionId, DateTime time)
+        {
+            return await (from cr in context.CompetitionRounds
+                        where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
+                                && cr.StartTime.CompareTo(time) < 0 && cr.EndTime.CompareTo(time) > 0
+                        select cr.Id).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime)
+        {
+            int roundId = 0;
+            if (!string.IsNullOrEmpty(title))
+            {
+                roundId = await CheckDuplicatedTitle(competitionId, title);
+                if (roundId != 0) return roundId;
+            }
+
+            if (startTime.HasValue) 
+            {
+                roundId = await CheckDuplicatedTime(competitionId, startTime.Value);
+                if (roundId != 0) return roundId;
+            }
+
+            if (endTime.HasValue) 
+            {
+                roundId = await CheckDuplicatedTime(competitionId, endTime.Value);
+                if (roundId != 0) return roundId;
+            } 
+
+            return roundId;
         }
     }
 }
