@@ -7,15 +7,23 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 {
     public interface IMemberTakesActivityService
     {
-        public Task<PagingResult<ViewMemberTakesActivity>> GetAllPaging(PagingRequest request);
-        public Task<ViewMemberTakesActivity> GetByMemberTakesActivityId(int id);
-        public Task<ViewMemberTakesActivity> Insert(MemberTakesActivityInsertModel memberTakesActivity, string token);
-
-        //------------------------------------------------sau này sẽ có comment kèm theo
-        public Task<bool> Update(SubmitMemberTakesActivity model, string token);
+        
+              
         public Task<bool> ApprovedOrRejectedTask(ConfirmMemberTakesActivity model, string token);
 
-        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
 
+
+        //----- Refactor code
+        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksByConditions(MemberTakesActivityRequestModel request, string token);
+
+        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksMemberByConditions(MemberTakesActivityRequestModel request, string token);
+
+        public Task<ViewDetailMemberTakesActivity> GetByMemberTakesActivityId(int memberTakesActivityId, int clubId, string token);
+
+        public Task<ViewDetailMemberTakesActivity> Insert(MemberTakesActivityInsertModel memberTakesActivity, string token);
+
+        public Task<bool> RemoveMemberTakeActivity(RemoveMemberTakeActivityModel model, string token);
+
+        public Task<bool> SubmitTask(SubmitMemberTakesActivity model, string token);
     }
 }
