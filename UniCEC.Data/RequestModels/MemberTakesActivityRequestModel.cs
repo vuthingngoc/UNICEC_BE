@@ -11,15 +11,16 @@ namespace UniCEC.Data.RequestModels
 {
     public class MemberTakesActivityRequestModel : PagingRequest
     {
-        //Lấy list tasks của Id member đó
-        [FromQuery(Name = "memberId")]
-        public int MemberId { get; set; }
-        //lấy các task của Id member đó theo clubId mà nó tham gia
-        [FromQuery(Name = "clubId")]
-        public int? ClubId { get; set; }
-        //search by Status của task thuộc về member đó 
+      
+        [FromQuery(Name = "competitionActivityId")]
+        public int CompetitionActivityId { get; set; }
+        
         [FromQuery(Name = "status")]
         public MemberTakesActivityStatus? Status { get; set; }
+
+        //Check
+        [FromQuery(Name = "clubId")]
+        public int ClubId { get; set; }
 
     }
 }

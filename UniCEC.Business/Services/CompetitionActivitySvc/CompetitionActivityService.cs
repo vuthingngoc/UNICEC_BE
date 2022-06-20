@@ -266,9 +266,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 if (model.ClubId == 0) throw new ArgumentException("Club Id Null");
 
-                //get club Activity
+                //get competition Activity
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.Id);
-                if (competitionActivity == null) throw new ArgumentException("Club Activity not found to update");
+                if (competitionActivity == null) throw new ArgumentException("Competition Activity not found in system");
+
+                //Canceling
+                if (competitionActivity.Status == CompetitionActivityStatus.Canceling) throw new ArgumentException("Competition Activity not found to update");
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
@@ -305,7 +308,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         if (Ending)
                         {
                             //Update DEADLINE day of member takes activity
-                            //await _memberTakesActivityRepo.UpdateDeadlineDate(competitionActivity.Id, competitionActivity.Ending);
+                            await _memberTakesActivityRepo.UpdateDeadlineDate(competitionActivity.Id, competitionActivity.Ending);
                         }
 
                         await _competitionActivityRepo.Update();

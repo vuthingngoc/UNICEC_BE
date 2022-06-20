@@ -11,13 +11,25 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 {
     public interface IMemberTakesActivityRepo : IRepository<MemberTakesActivity>
     {
-        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTaskesByConditions(MemberTakesActivityRequestModel request);
+
+        //--------------------------Refactor
+        //Manager
+        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksByConditions(MemberTakesActivityRequestModel request);
+
+        //Member
+        public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksMemberByConditions(MemberTakesActivityRequestModel request, int userId);
+
         //check mem take task
-        public Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId);
-        public Task<bool> CheckTaskBelongToStudent(int MemberTakesActivityId, int UserId, int UniversityId);    
-        public Task<int> GetNumOfMemInTask(int competitionActivityId);
-        //Get number of member in task with status
-        public Task<int> GetNumOfMemInTask_Status(int competitionActivityId, MemberTakesActivityStatus Status);
+        public Task<MemberTakesActivity> CheckMemberTakesTask(int competitionActivityId, int memberId);
+
+        //remove member take task 
+        public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId);
+
+        //
+        public Task<bool> CheckTaskBelongToStudent(int memberTakesActivityId, int userId, int clubId);
+
+        //
+        public Task<int> GetNumberOfMemberIsSubmitted(int competitionActivityId);
 
         //Update DeadLine Date 
         public Task UpdateDeadlineDate(int competitionActivityId, DateTime deadline);
