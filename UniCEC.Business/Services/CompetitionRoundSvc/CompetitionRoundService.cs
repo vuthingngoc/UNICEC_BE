@@ -5,6 +5,7 @@ using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.RequestModels;
@@ -17,13 +18,15 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
     {
         private ICompetitionRoundRepo _competitionRoundRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
+        private ICompetitionRepo _competitionRepo;
 
         private DecodeToken _decodeToken;
 
-        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo, ICompetitionManagerRepo competitionManager)
+        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo, ICompetitionManagerRepo competitionManager, ICompetitionRepo competitionRepo)
         {
             _competitionRoundRepo = competitionRoundRepo;
             _competitionManagerRepo = competitionManager;
+            _competitionRepo = competitionRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -59,18 +62,22 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             int competitionId = models[0].CompetitionId;
             CheckValidAuthorizedAsync(token, competitionId);
 
+            Competition competition = await _competitionRepo.Get(competitionId);
+            if (competition == null) throw new ArgumentException("Not found this competition");
+
             List<ViewCompetitionRound> viewCompetitionRounds = new List<ViewCompetitionRound>();
             DateTime timePreviousRound = new LocalTime().GetLocalTime().DateTime;
             List<string> titleRounds = new List<string>();
+
 
             foreach (var model in models)
             {
                 // check in list
                 if (model.CompetitionId.Equals(0) || string.IsNullOrEmpty(model.Title)
-                    || string.IsNullOrEmpty(model.Description) || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
-                    || model.NumberOfTeam.Equals(0) || model.SeedsPoint.Equals(0))
+                    || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
+                    || string.IsNullOrEmpty(model.Description) || model.SeedsPoint.Equals(0))
                     throw new ArgumentNullException("CompetitionId Null || Title Null || Description Null || StartTime Null " +
-                        "|| EndTime Null || NumberOfTeam Null || SeedsPoint Null");
+                        "|| EndTime Null || SeedsPoint Null");
 
                 if (!model.CompetitionId.Equals(competitionId))
                     throw new ArgumentException("You do not have permission to insert rounds for more than 1 competitions in the same time");
@@ -86,10 +93,12 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
                 titleRounds.Add(model.Title);
 
-                if (model.NumberOfTeam < 0 || model.SeedsPoint < 0) throw new ArgumentException("NumberOfTeam && SeedsPoint must be greater than 0");
+                if (model.SeedsPoint < 0) throw new ArgumentException("SeedsPoint must be greater than 0");
 
-                if (model.StartTime < timePreviousRound || model.EndTime <= model.StartTime)
-                    throw new ArgumentException("CurrentTime <= StartTime < EndTime and time in each round is in order");
+                if (model.StartTime < timePreviousRound || model.EndTime <= model.StartTime 
+                    || model.StartTime < competition.StartTime || model.StartTime > competition.EndTime
+                    || model.EndTime > competition.EndTime)
+                    throw new ArgumentException("StartTime < EndTime and time in each round is in order follow by competition");
 
                 timePreviousRound = model.EndTime;
 
@@ -107,7 +116,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     Description = model.Description,
                     StartTime = model.StartTime,
                     EndTime = model.EndTime,
-                    NumberOfTeam = model.NumberOfTeam,
+                    NumberOfTeam = 0, // default number when insert round
                     SeedsPoint = model.SeedsPoint,
                     Status = CompetitionRoundStatus.Active // default status insert
                 };
@@ -120,7 +129,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     Description = model.Description,
                     StartTime = model.StartTime,
                     EndTime = model.EndTime,
-                    NumberOfTeam = model.NumberOfTeam,
+                    NumberOfTeam = competitionRound.NumberOfTeam,
                     SeedsPoint = model.SeedsPoint,
                     Status = competitionRound.Status
                 };

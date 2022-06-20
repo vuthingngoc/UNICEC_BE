@@ -13,8 +13,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionRound
         public DateTime StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime EndTime { get; set; }
-        [JsonPropertyName("number_of_team")]
-        public int NumberOfTeam { get; set; }
         [JsonPropertyName("seeds_point")]
         public int SeedsPoint { get; set; }
     }
