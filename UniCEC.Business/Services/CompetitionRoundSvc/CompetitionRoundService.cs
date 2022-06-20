@@ -64,6 +64,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             Competition competition = await _competitionRepo.Get(competitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
+            if (competition.Status.Equals(4) || competition.Status.Equals(5)) throw new ArgumentException("Can not access the cancel or ending competition");
 
             List<ViewCompetitionRound> viewCompetitionRounds = new List<ViewCompetitionRound>();
             DateTime timePreviousRound = new LocalTime().GetLocalTime().DateTime;
@@ -146,8 +147,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             CheckValidAuthorizedAsync(token, competitionRound.CompetitionId);
 
+            Competition competition = await _competitionRepo.Get(competitionRound.CompetitionId);
+            if (competition == null) throw new ArgumentException("Not found this competition");
+            if (competition.Status.Equals(4) || competition.Status.Equals(5)) throw new ArgumentException("Can not access the cancel or ending competition");
             
-
             if (!string.IsNullOrEmpty(model.Title))
             {
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, model.Title, null, null);
@@ -159,6 +162,14 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (model.StartTime.HasValue) 
             {
+                if (model.StartTime.Value < competition.StartTime || model.StartTime.Value > competition.EndTime)
+                    throw new ArgumentException("Invalid startTime");
+
+                if (model.EndTime.HasValue && model.StartTime.Value >= model.EndTime.Value)
+                    throw new ArgumentException("Invalid time");
+                else if(!model.EndTime.HasValue && model.StartTime.Value >= competitionRound.EndTime)
+                    throw new ArgumentException("Invalid startTime");
+
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, null, model.StartTime.Value, null);
                 if (roundId > 0 && !roundId.Equals(model.Id)) throw new ArgumentException("Duplicated time of another competition round");
                 competitionRound.StartTime = model.StartTime.Value;
@@ -166,16 +177,21 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (model.EndTime.HasValue) 
             {
+                if(model.EndTime.Value > competition.EndTime) throw new ArgumentException("Invalid endTime");
+
+                if(!model.StartTime.HasValue && model.EndTime.Value <= competitionRound.StartTime)
+                    throw new ArgumentException("Invalid endTime");
+
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, null, null, model.EndTime.Value);
                 if (roundId > 0 && !roundId.Equals(model.Id)) throw new ArgumentException("Duplicated time of another competition round");
                 competitionRound.EndTime = model.EndTime.Value;
             }
 
-            if (model.NumberOfTeam.HasValue) 
+            if (model.NumberOfTeam.HasValue)
             {
                 if (model.NumberOfTeam.Value <= 0) throw new ArgumentException("Number of team must greater than 0");
                 competitionRound.NumberOfTeam = model.NumberOfTeam.Value;
-            } 
+            }
 
             if (model.SeedsPoint.HasValue)
             {
