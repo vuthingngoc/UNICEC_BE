@@ -119,5 +119,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
             return roundId;
         }
+
+        public async Task UpdateNumberOfTeam(int roundId, int numberOfTeam)
+        {
+            CompetitionRound round = await Get(roundId);
+            if(round != null && numberOfTeam > 0)
+            {
+                round.NumberOfTeam = numberOfTeam;
+                await Update();
+            }            
+        }
     }
 }
