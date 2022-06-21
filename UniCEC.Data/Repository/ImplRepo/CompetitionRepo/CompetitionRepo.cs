@@ -154,7 +154,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        where comp.StartTime >= localTime.DateTime
+                        where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Canceling
                         orderby comp.StartTime
                         select comp;
             }

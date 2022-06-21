@@ -68,7 +68,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             {
                 if (clubId == 0) throw new ArgumentException("Club Id Null");
                 List<ViewProcessCompetitionActivity> result = await _competitionActivityRepo.GetTop3CompetitionActivity(clubId);
-                if(result == null) throw new NullReferenceException("Not Has Data !!!");
+                if (result == null) throw new NullReferenceException();
                 return result;
             }
             catch (Exception)
@@ -81,63 +81,86 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         {
             try
             {
-                if (conditions.ClubId == 0 || conditions.CompetitionId == 0) throw new ArgumentException("Club Id Null || Competition Id Null");
+                if (conditions.ClubId == 0) throw new ArgumentException("Club Id Null");
 
-                int check = await CheckConditions(token, conditions.CompetitionId, conditions.ClubId);
-
-                if (check > 0)
+                //có Competition Id
+                if (conditions.CompetitionId.HasValue)
                 {
+                    int check = await CheckConditions(token, conditions.CompetitionId.Value, conditions.ClubId);
 
-                    //
-                    PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
-
-                    //
-                    if (result == null) throw new NullReferenceException("Not Has Data !!!");
-
-                    List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
-
-                    foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                    if (check > 0)
                     {
 
-                        //List Activities Entity
-                        List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+                        //
+                        PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
 
-                        List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+                        //
+                        if (result == null) throw new NullReferenceException();
 
-                        if (ActivitiesEntities != null)
+                        List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+
+                        foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
                         {
-                            foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
-                            {
-                                //get IMG from Firebase                        
-                                string imgUrl_ActivitiesEntity;
-                                try
-                                {
-                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-                                }
-                                catch (Exception ex)
-                                {
-                                    imgUrl_ActivitiesEntity = "";
-                                }
 
-                                ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                            //List Activities Entity
+                            List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+
+                            List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+
+                            if (ActivitiesEntities != null)
+                            {
+                                foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
                                 {
-                                    Id = ActivitiesEntity.Id,
-                                    CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                                    ImageUrl = imgUrl_ActivitiesEntity,
-                                    Name = ActivitiesEntity.Name,
-                                };
-                                //
-                                ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                                    //get IMG from Firebase                        
+                                    string imgUrl_ActivitiesEntity;
+                                    try
+                                    {
+                                        imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        imgUrl_ActivitiesEntity = "";
+                                    }
+
+                                    ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                                    {
+                                        Id = ActivitiesEntity.Id,
+                                        CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                                        ImageUrl = imgUrl_ActivitiesEntity,
+                                        Name = ActivitiesEntity.Name,
+                                    };
+                                    //
+                                    ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                                }
                             }
+                            viewDetailCompetitionActivity.ActivitiesEntities = ListView_ActivitiesEntity;
                         }
-                        viewDetailCompetitionActivity.ActivitiesEntities = ListView_ActivitiesEntity;
+
+                        return result;
+
+
+                    }
+                    else
+                    {
+                        throw new NullReferenceException();
                     }
 
-                    return result;
                 }
+                //kh có Competition Id
                 else
                 {
-                    throw new NullReferenceException("Not Has Data !!!");
+                    //thì thằng này phải là club leader 
+                    Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
+                    if (clubLeader.UserId == DecodeToken(token, "Id"))
+                    {
+                        PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListProcessActivitiesByConditions(conditions);
+                        if (result == null) throw new NullReferenceException();
+                        return result;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("You don't have permission to do this action");
+                    }
                 }
             }
             catch (Exception)
