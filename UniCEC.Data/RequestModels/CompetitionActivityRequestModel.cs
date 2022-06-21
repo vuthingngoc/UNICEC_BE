@@ -9,8 +9,8 @@ namespace UniCEC.Data.RequestModels
     {
 
         //Competition Id
-        [FromQuery(Name = "competitionId"), BindRequired]
-        public int CompetitionId { get; set; }
+        [FromQuery(Name = "competitionId")]
+        public int? CompetitionId { get; set; }
 
         [FromQuery(Name = "processStatus")]
         public  CompetitionActivityProcessStatus? ProcessStatus { get; set; }
