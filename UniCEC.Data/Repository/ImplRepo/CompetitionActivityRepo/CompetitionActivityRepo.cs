@@ -23,8 +23,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         public async Task<bool> CheckExistCode(string code)
         {
             bool check = false;
-            CompetitionActivity clubActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
-            if (clubActivity != null)
+            CompetitionActivity competitionActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
+            if (competitionActivity != null)
             {
                 check = true;
                 return check;
@@ -32,41 +32,94 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             return check;
         }
 
-        ////Get Top 4 Club Activities depend on create time
-        //public async Task<List<ViewDetailCompetitionActivity>> GetClubActivitiesByCreateTime(int universityId, int clubId)
-        //{
+        //use with method top 3 Competition
+        public async Task<List<ViewProcessCompetitionActivity>> GetTop3CompetitionActivity(int clubId)
+        {
+            //
+            List<ViewProcessCompetitionActivity> listVPCA = new List<ViewProcessCompetitionActivity>();
 
-        //    //LocalTime
-        //    DateTimeOffset localTime = new LocalTime().GetLocalTime();
-        //    //
-        //    var query = from u in context.Universities
-        //                where u.Id == universityId
-        //                from c in context.Clubs
-        //                where c.UniversityId == u.Id
-        //                from ca in context.CompetitionActivities
-        //                    //where ca.ClubId == clubId && ca.CreateTime <= localTime.DateTime && ca.Status == Enum.ClubActivityStatus.Happenning
-        //                orderby ca.CreateTime descending
-        //                select ca;
+            //LocalTime
+            DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-        //    List<ViewDetailCompetitionActivity> clubActivities = await query.Take(4).Select(ca => new ViewDetailCompetitionActivity()
-        //    {
-        //        Id = ca.Id,
-        //        //ClubId = ca.ClubId,
-        //        CreateTime = ca.CreateTime,
-        //        Description = ca.Description,
-        //        Ending = ca.Ending,
-        //        Name = ca.Name,
-        //        SeedsCode = ca.SeedsCode,
-        //        SeedsPoint = ca.SeedsPoint,
-        //        //Status = ca.Status,
-        //        NumOfMember = ca.NumOfMember,
+            List<Competition> listCompe = await (from cic in context.CompetitionInClubs
+                                                 where cic.ClubId == clubId
+                                                 join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                                                 where comp.StartTime >= localTime
+                                                 orderby comp.StartTime
+                                                 select comp).ToListAsync();
+            //top 3 compe
+            listCompe = listCompe.Take(3).ToList();
 
-        //    }).ToListAsync();
+            //cứ mỗi list compe sẽ có top 3 task
+            foreach (Competition comp in listCompe)
+            {
+                var query = from ca in context.CompetitionActivities
+                            where ca.CompetitionId == comp.Id && ca.Ending >= localTime
+                            orderby ca.Ending
+                            select ca;
 
-        //    return (clubActivities.Count > 0) ? clubActivities : null;
-        //}
+                List<CompetitionActivity> list_CompetitionActivity = await query.Take(3).ToListAsync();
+
+                //mỗi task sẽ có người tham gia
+                foreach (CompetitionActivity activity in list_CompetitionActivity)
+                {
+                    int numberOfMemberJoin = activity.NumOfMember;
+                    //doing
+                    var doing = from mta in context.MemberTakesActivities
+                                where mta.CompetitionActivityId == activity.Id
+                                   && mta.Status == Enum.MemberTakesActivityStatus.Doing
+                                select mta;
+
+                    int numberOfMemberDoing = await doing.CountAsync();
+
+                    //finish 
+                    var finish = from mta in context.MemberTakesActivities
+                                 where mta.CompetitionActivityId == activity.Id
+                                    && mta.Status == Enum.MemberTakesActivityStatus.Finished
+                                 select mta;
+
+                    int numberOfMemberFinish = await finish.CountAsync();
+
+                    //finishLate
+                    var finishLate = from mta in context.MemberTakesActivities
+                                     where mta.CompetitionActivityId == activity.Id
+                                        && mta.Status == Enum.MemberTakesActivityStatus.FinishedLate
+                                     select mta;
+
+                    int numberOfMemberFinishLate = await finishLate.CountAsync();
+
+                    //late
+                    var late = from mta in context.MemberTakesActivities
+                               where mta.CompetitionActivityId == activity.Id
+                                  && mta.Status == Enum.MemberTakesActivityStatus.LateTime
+                               select mta;
+
+                    int numberOfMemberLate = await late.CountAsync();
+
+                    ViewProcessCompetitionActivity vcpa = new ViewProcessCompetitionActivity()
+                    {
+                        Id = activity.Id,
+                        CompetitionId = comp.Id,
+                        CreateTime = activity.CreateTime,
+                        Ending = activity.Ending,
+                        Name = activity.Name,
+                        ProcessStatus = activity.Process,
+                        Priority = activity.Priority,
+                        NumOfMemberJoin = numberOfMemberJoin,
+                        NumMemberDoingTask = numberOfMemberDoing,
+                        NumMemberDoneTask = numberOfMemberFinish,
+                        NumMemberDoneLateTask = numberOfMemberFinishLate,
+                        NumMemberLateTask = numberOfMemberLate,        
+                    };
+
+                    listVPCA.Add(vcpa);
+                }//end task
 
 
+            }//end competition
+
+            return (listVPCA.Count > 0) ? listVPCA : null;  
+        }
 
 
 
