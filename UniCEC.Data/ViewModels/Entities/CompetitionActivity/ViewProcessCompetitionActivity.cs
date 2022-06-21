@@ -4,12 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
-    public class ViewProcessCompetitionActivity : ViewDetailCompetitionActivity
+    public class ViewProcessCompetitionActivity 
     {
-        //Extra infomation 
+        
+        public int Id { get; set; }
+
+        [JsonPropertyName("competition_id")]
+        public int CompetitionId { get; set; }
+
+        [JsonPropertyName("create_time")]
+        public DateTime CreateTime { get; set; }
+        public DateTime Ending { get; set; }
+        public string Name { get; set; }
+        public PriorityStatus Priority { get; set; }
+
+        [JsonPropertyName("process_status")]
+        public CompetitionActivityProcessStatus ProcessStatus { get; set; }
+
+        //Extra infomation to view process
         [JsonPropertyName("num_of_member_join")]
         public int NumOfMemberJoin { get; set; }
 
@@ -24,8 +40,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 
         [JsonPropertyName("num_member_late_task")]
         public int NumMemberLateTask { get; set; }
-
-        [JsonPropertyName("num_member_out_task")]
-        public int NumMemberOutTask { get; set; }
+      
     }
 }
