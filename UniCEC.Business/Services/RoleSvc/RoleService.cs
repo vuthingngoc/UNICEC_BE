@@ -24,12 +24,12 @@ namespace UniCEC.Business.Services.RoleSvc
             return roles;
         }
 
-        public async Task Delete(int id)
-        {
-            Role role = await _roleRepo.Get(id);
-            if(role == null) throw new NullReferenceException();
-            await _roleRepo.Delete(role);
-        }
+        //public async Task Delete(int id)
+        //{
+        //    Role role = await _roleRepo.Get(id);
+        //    if(role == null) throw new NullReferenceException();
+        //    await _roleRepo.Delete(role);
+        //}
 
 
         public async Task<ViewRole> GetByRoleId(int id)

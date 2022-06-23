@@ -6,34 +6,34 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.RoleSvc;
-using UniCEC.Data.ViewModels.Entities.Role;
+using UniCEC.Business.Services.CompetitionRoleSvc;
+using UniCEC.Data.ViewModels.Entities.CompetitionRole;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/roles")]
+    [Route("api/competition-role")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize(Roles = "System Admin")]
-    public class RoleController : ControllerBase
+    public class CompetitionRoleController : ControllerBase
     {
-        IRoleService _roleService;
-
-        public RoleController(IRoleService roleService)
+        private ICompetitionRoleService _competitionRoleService;
+        public CompetitionRoleController(ICompetitionRoleService competitionRoleService)
         {
-            _roleService = roleService;
+            _competitionRoleService = competitionRoleService;
         }
 
+        //// GET: api/<CompetitionRoleController>
         //Get List Roles
         [HttpGet()]
-        [SwaggerOperation(Summary = "Get all roles - System admin")]
+        [SwaggerOperation(Summary = "Get all competition roles - System admin")]
         public async Task<IActionResult> GetAllRoles()
         {
             try
             {
-                List<ViewRole> result = await _roleService.GetAll();
+                List<ViewCompetitionRole> result = await _competitionRoleService.GetAll();
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -46,14 +46,14 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // GET api/<RoleController>/5
+        // GET api/<CompetitionRoleController>/5
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get role by Id")]
-        public async Task<IActionResult> GetRoleById(int id)
+        [SwaggerOperation(Summary = "Get Competition Role by Id")]
+        public async Task<IActionResult> GetCompetitionRoleById(int id)
         {
             try
             {
-                ViewRole result = await _roleService.GetByRoleId(id);
+                ViewCompetitionRole result = await _competitionRoleService.GetByCompetitionRoleId(id);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -66,18 +66,22 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //InsertRoleModel
+        // POST api/<CompetitionRoleController>
         [HttpPost]
-        [SwaggerOperation(Summary = "Insert role")]
-        public async Task<IActionResult> InsertRoleId(string roleName)
+        [SwaggerOperation(Summary = "Insert competition role")]
+        public async Task<IActionResult> InsertCompetitionRole([FromBody] CompetitionRoleInsertModel model)
         {
             try
             {
-                ViewRole result = await _roleService.Insert(roleName);
+                ViewCompetitionRole result = await _competitionRoleService.Insert(model);
                 return Ok(result);
-                
+
             }
             catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -91,16 +95,16 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // PUT api/<RoleController>/5
+        // PUT api/<CompetitionRoleController>/5
         [HttpPut]
-        [SwaggerOperation(Summary = "Update role")]
-        public async Task<IActionResult> UpdateRole([FromBody] ViewRole model)
+        [SwaggerOperation(Summary = "Update competition role")]
+        public async Task<IActionResult> UpdateCompetitionRole([FromBody] ViewCompetitionRole model)
         {
             try
             {
-                await _roleService.Update(model);
+                await _competitionRoleService.Update(model);
                 return Ok();
-                
+
             }
             catch (NullReferenceException ex)
             {
@@ -120,28 +124,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //[HttpDelete]
-        //[SwaggerOperation(Summary = "Delete role - System admin")]
-        //public async Task<IActionResult> DeleteRole(int id)
-        //{
-        //    try
-        //    {
-        //        await _roleService.Delete(id);
-        //        return Ok();
-
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+        
     }
 }

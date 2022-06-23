@@ -10,6 +10,6 @@ namespace UniCEC.Business.Services.RoleSvc
         public Task<ViewRole> GetByRoleId(int id);
         public Task<ViewRole> Insert(string roleName);
         public Task Update(ViewRole role);
-        public Task Delete(int id);
+        //public Task Delete(int id);
     }
 }
