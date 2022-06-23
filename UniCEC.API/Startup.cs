@@ -19,6 +19,7 @@ using UniCEC.Business.Services.ClubSvc;
 using UniCEC.Business.Services.CompetitionActivitySvc;
 using UniCEC.Business.Services.CompetitionEntitySvc;
 using UniCEC.Business.Services.CompetitionManagerSvc;
+using UniCEC.Business.Services.CompetitionRoleSvc;
 using UniCEC.Business.Services.CompetitionRoundSvc;
 using UniCEC.Business.Services.CompetitionSvc;
 using UniCEC.Business.Services.CompetitionTypeSvc;
@@ -115,6 +116,7 @@ namespace UniCEC.API
             services.AddScoped<IClubService, ClubService>();
             services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();
             services.AddScoped<ICompetitionManagerService, CompetitionManagerService>();
+            services.AddScoped<ICompetitionRoleService, CompetitionRoleService>();  
             services.AddScoped<ICompetitionEntityService, CompetitionEntityService>();            
             services.AddScoped<ICompetitionService, CompetitionService>();
             services.AddScoped<ICompetitionTypeService, CompetitionTypeService>();
