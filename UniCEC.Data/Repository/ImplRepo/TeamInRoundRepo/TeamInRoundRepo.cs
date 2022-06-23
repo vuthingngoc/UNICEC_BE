@@ -33,7 +33,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                               TeamId = tir.TeamId,
                               RoundId = tir.RoundId,
                               Rank = tir.Rank,
-                              Result = tir.Result,
+                              Scores = tir.Scores,
                               Status = tir.Status
                           }).FirstOrDefaultAsync();
         }

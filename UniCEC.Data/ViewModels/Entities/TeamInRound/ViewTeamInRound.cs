@@ -14,8 +14,8 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInRound
         public string TeamName { get; set; }
         [JsonPropertyName("round_id")]
         public int RoundId { get; set; }
-        [JsonPropertyName("result")]
-        public string Result { get; set; }
+        [JsonPropertyName("scores")]
+        public int Scores { get; set; }
         [JsonPropertyName("status")]
         public bool Status { get; set; }
         [JsonPropertyName("rank")]
