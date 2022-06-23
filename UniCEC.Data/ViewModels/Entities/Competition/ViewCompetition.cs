@@ -23,7 +23,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         [JsonPropertyName("is_sponsor")]
         public bool IsSponsor { get; set; }
-        public CompetitionScopeStatus Scope { get; set; }      
+        public CompetitionScopeStatus Scope { get; set; }
+        public CompetitionStatus Status { get; set; }
         public int View { get; set; }
 
         //-------------ADD Field           
