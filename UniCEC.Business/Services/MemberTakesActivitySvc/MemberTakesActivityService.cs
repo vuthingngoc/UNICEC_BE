@@ -199,8 +199,8 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 //Check Competition Activity
                 if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
 
-                //Canceling
-                if (competitionActivity.Status == CompetitionActivityStatus.Canceling) throw new ArgumentException("Competition Activity is canceling");
+                //Canceling // Ending
+                if (competitionActivity.Status == CompetitionActivityStatus.Canceling || competitionActivity.Status == CompetitionActivityStatus.Ending) throw new ArgumentException("Competition Activity is canceling or ending");
 
                 //BookerId
                 int bookerId = await CheckConditions(token, competitionActivity.CompetitionId, model.ClubId);
@@ -236,6 +236,8 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
                     if (result == 0) throw new ArgumentException("Insert Failed !");
 
+                    //do mới add thêm nên tiến trình chưa hoàn thành 
+                    competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;
                     //+ 1 number Of Member
                     competitionActivity.NumOfMember = competitionActivity.NumOfMember + 1;
                     await _competitionActivityRepo.Update();
@@ -269,6 +271,12 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
                 if (check > 0)
                 {
+                    //Update Status của Competition Activity
+                    int numberOfMemberHasSubmit = await _memberTakesActivityRepo.GetNumberOfMemberIsSubmitted(ca.Id);
+                    if (numberOfMemberHasSubmit == ca.NumOfMember)
+                    {
+                        ca.Process = CompetitionActivityProcessStatus.Complete;                   
+                    }
                     // -1 Number Of Participant
                     ca.NumOfMember = ca.NumOfMember - 1;
                     await _competitionActivityRepo.Update();
@@ -293,8 +301,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             try
             {
                 if (model.ClubId == 0 || model.MemberTakesActivityId == 0) throw new ArgumentNullException("ClubId Null || Member Takes Activity Id Null");
-
-
 
                 //CHECK Task belong to this user
                 if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(model.MemberTakesActivityId, DecodeToken(token, "Id"), model.ClubId))
