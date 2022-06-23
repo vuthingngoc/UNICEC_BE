@@ -14,7 +14,7 @@ namespace UniCEC.API.Controllers
 {
     [Route("api/v1/sponsors")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "System Admin")]
     public class SponsorController : ControllerBase
     {
 
