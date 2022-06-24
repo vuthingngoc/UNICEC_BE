@@ -14,15 +14,16 @@ namespace UniCEC.Business.Services.TeamSvc
         public Task<ViewDetailTeam> GetDetailTeamInCompetition(int teamId, int competitionId, string token);
 
         //-------------------------------------INSERT
-        public Task<ViewTeam> InsertTeam(TeamInsertModel model, string Token);
-        public Task<ViewParticipantInTeam> InsertMemberInTeam(ParticipantInTeamInsertModel model, string Token);
+        public Task<ViewTeam> InsertTeam(TeamInsertModel model, string token);
+        public Task<ViewParticipantInTeam> InsertMemberInTeam(ParticipantInTeamInsertModel model, string token);
         //-------------------------------------UPDATE
-        public Task<bool> UpdateTeamRole(ParticipantInTeamUpdateModel model, string Token);
+        public Task<bool> UpdateTeamRole(ParticipantInTeamUpdateModel model, string token);
         public Task<bool> UpdateTeam(TeamUpdateModel model, string Token);
+        public Task<bool> CompetitionManagerLockTeam(LockTeamModel model, string token);
 
         //-------------------------------------DELETE
-        public Task<bool> DeleteByLeader(int TeamId, string Token);
+        public Task<bool> DeleteByLeader(int teamId, string token);
 
-        public Task<bool> OutTeam(int TeamId, string Token);
+        public Task<bool> OutTeam(int teamId, string token);
     }
 }

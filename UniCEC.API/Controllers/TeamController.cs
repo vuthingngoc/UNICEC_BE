@@ -227,6 +227,98 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
+        // PUT api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut()]
+        [SwaggerOperation(Summary = "Update team by Leader - Student")]
+        public async Task<IActionResult> UpdateTeam([FromBody] TeamUpdateModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _teamService.UpdateTeam(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // PUT api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("manager-lock-team")]
+        [SwaggerOperation(Summary = "Competition Manager lock team")]
+        public async Task<IActionResult> CompetitionManagerLockTeam(LockTeamModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _teamService.CompetitionManagerLockTeam(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+
         [Authorize(Roles = "Student")]
         [HttpDelete("team/{id}")]
         [SwaggerOperation(Summary = "Delete team by leader")]
