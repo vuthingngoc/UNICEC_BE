@@ -12,8 +12,8 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionManager
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
 
-        [JsonPropertyName("member_id")]
-        public int MemberId { get; set; }
+        [JsonPropertyName("user_id_in_competition_manager")]
+        public int UserIdInCompetitionManager { get; set; }
 
         public bool Status { get; set; }
 

@@ -21,12 +21,12 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         public bool CheckValidManagerByUser(int competitionId, int userId)
         {
             var query = from cm in context.CompetitionManagers
-                        join m in context.Members on cm.MemberId equals m.Id
+                        join m in context.Members on cm.UserId equals m.UserId
                         join c in context.Clubs on m.ClubId equals c.Id
                         join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
                         where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && cm.Status.Equals(true)
-                        select new {cm, m, c, cic};
-            
+                        select new { cm, m, c, cic };
+
             return query.Any();
         }
 
@@ -39,7 +39,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.CompetitionId == request.CompetitionId
                         from cm in context.CompetitionManagers
-                        where cm.CompetitionInClubId == cic.Id 
+                        where cm.CompetitionInClubId == cic.Id
                         select cm;
 
             int totalCount = await query.CountAsync();
@@ -50,15 +50,13 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             {
                 //Lấy RoleName
                 CompetitionRole competitionRole = await (from cr in context.CompetitionRoles
-                                                        where cr.Id == competitionManager.CompetitionRoleId
-                                                        select cr).FirstOrDefaultAsync();
+                                                         where cr.Id == competitionManager.CompetitionRoleId
+                                                         select cr).FirstOrDefaultAsync();
 
                 //Lấy FullName
-                User user = await (from m in context.Members
-                                   where m.Id == competitionManager.MemberId
-                                   from us in context.Users
-                                   where us.Id == m.UserId
-                                   select us).FirstOrDefaultAsync(); 
+                User user = await (from us in context.Users
+                                   where us.Id == competitionManager.UserId
+                                   select us).FirstOrDefaultAsync();
 
                 ViewCompetitionManager vcm = new ViewCompetitionManager()
                 {
@@ -66,7 +64,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
                     CompetitionInClubId = competitionManager.CompetitionInClubId,
                     CompetitionRoleId = competitionManager.CompetitionRoleId,
                     CompetitionRoleName = competitionRole.RoleName,
-                    MemberId = competitionManager.MemberId,
+                    UserId = competitionManager.UserId,
                     FullName = user.Fullname,
                     Status = competitionManager.Status,
                 };
@@ -79,12 +77,12 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
         }
 
         //Get To CHECK
-        public async Task<CompetitionManager> GetMemberInCompetitionManager(int CompetitionId, int MemberId, int ClubId)
+        public async Task<CompetitionManager> GetMemberInCompetitionManager(int competitionId, int userId, int clubId)
         {
             var query = from cic in context.CompetitionInClubs
-                        where cic.CompetitionId == CompetitionId && cic.ClubId == ClubId
+                        where cic.CompetitionId == competitionId && cic.ClubId == clubId
                         from cm in context.CompetitionManagers
-                        where cm.CompetitionInClubId == cic.Id && cm.MemberId == MemberId && cm.Status == true
+                        where cm.CompetitionInClubId == cic.Id && cm.UserId == userId && cm.Status == true
                         select cm;
 
             CompetitionManager competitionManager = await query.FirstOrDefaultAsync();
@@ -95,6 +93,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo
             return null;
         }
 
-       
+
     }
 }
