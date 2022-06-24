@@ -206,8 +206,6 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Ending).HasColumnType("datetime");
 
-                entity.Property(e => e.MemberId).HasColumnName("MemberID");
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -215,6 +213,8 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.SeedsCode)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.UserId).HasColumnName("UserID");
 
                 entity.HasOne(d => d.Competition)
                     .WithMany(p => p.CompetitionActivities)
@@ -304,7 +304,7 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.CompetitionRoleId).HasColumnName("CompetitionRoleID");
 
-                entity.Property(e => e.MemberId).HasColumnName("MemberID");
+                entity.Property(e => e.UserId).HasColumnName("UserID");
 
                 entity.HasOne(d => d.CompetitionInClub)
                     .WithMany(p => p.CompetitionManagers)
@@ -317,12 +317,6 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.CompetitionRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__693CA210");
-
-                entity.HasOne(d => d.Member)
-                    .WithMany(p => p.CompetitionManagers)
-                    .HasForeignKey(d => d.MemberId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Competiti__Membe__6A30C649");
             });
 
             modelBuilder.Entity<CompetitionRole>(entity =>
@@ -360,7 +354,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.CompetitionRounds)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Competiti__Compe__6B24EA82");
+                    .HasConstraintName("FK__Competiti__Compe__6A30C649");
             });
 
             modelBuilder.Entity<CompetitionType>(entity =>
@@ -416,13 +410,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.InfluencerInCompetitions)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Influence__Compe__6C190EBB");
+                    .HasConstraintName("FK__Influence__Compe__6B24EA82");
 
                 entity.HasOne(d => d.Influencer)
                     .WithMany(p => p.InfluencerInCompetitions)
                     .HasForeignKey(d => d.InfluencerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Influence__Influ__6D0D32F4");
+                    .HasConstraintName("FK__Influence__Influ__6C190EBB");
             });
 
             modelBuilder.Entity<Major>(entity =>
@@ -452,13 +446,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Majors)
                     .HasForeignKey(d => d.DepartmentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Major__Departmen__6E01572D");
+                    .HasConstraintName("FK__Major__Departmen__6D0D32F4");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Majors)
                     .HasForeignKey(d => d.UniversityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Major__Universit__6EF57B66");
+                    .HasConstraintName("FK__Major__Universit__6E01572D");
             });
 
             modelBuilder.Entity<Member>(entity =>
@@ -483,13 +477,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Members)
                     .HasForeignKey(d => d.ClubId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Member__ClubID__6FE99F9F");
+                    .HasConstraintName("FK__Member__ClubID__6EF57B66");
 
                 entity.HasOne(d => d.ClubRole)
                     .WithMany(p => p.Members)
                     .HasForeignKey(d => d.ClubRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Member__ClubRole__70DDC3D8");
+                    .HasConstraintName("FK__Member__ClubRole__6FE99F9F");
 
                 entity.HasOne(d => d.Term)
                     .WithMany(p => p.Members)
@@ -501,7 +495,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Members)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Member__UserID__71D1E811");
+                    .HasConstraintName("FK__Member__UserID__70DDC3D8");
             });
 
             modelBuilder.Entity<MemberTakesActivity>(entity =>
@@ -509,8 +503,6 @@ namespace UniCEC.Data.Models.DB
                 entity.ToTable("MemberTakesActivity");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.BookerId).HasColumnName("BookerID");
 
                 entity.Property(e => e.CompetitionActivityId).HasColumnName("CompetitionActivityID");
 
@@ -522,17 +514,19 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
 
+                entity.Property(e => e.UserId).HasColumnName("UserID");
+
                 entity.HasOne(d => d.CompetitionActivity)
                     .WithMany(p => p.MemberTakesActivities)
                     .HasForeignKey(d => d.CompetitionActivityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MemberTak__Compe__73BA3083");
+                    .HasConstraintName("FK__MemberTak__Compe__72C60C4A");
 
                 entity.HasOne(d => d.Member)
                     .WithMany(p => p.MemberTakesActivities)
                     .HasForeignKey(d => d.MemberId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MemberTak__Membe__74AE54BC");
+                    .HasConstraintName("FK__MemberTak__Membe__73BA3083");
             });
 
             modelBuilder.Entity<Participant>(entity =>
@@ -553,18 +547,18 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Participa__Compe__75A278F5");
+                    .HasConstraintName("FK__Participa__Compe__74AE54BC");
 
                 entity.HasOne(d => d.Member)
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.MemberId)
-                    .HasConstraintName("FK__Participa__Membe__76969D2E");
+                    .HasConstraintName("FK__Participa__Membe__75A278F5");
 
                 entity.HasOne(d => d.Student)
                     .WithMany(p => p.Participants)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Participa__Stude__778AC167");
+                    .HasConstraintName("FK__Participa__Stude__76969D2E");
             });
 
             modelBuilder.Entity<ParticipantInTeam>(entity =>
@@ -583,19 +577,19 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.ParticipantInTeams)
                     .HasForeignKey(d => d.ParticipantId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Participa__Parti__787EE5A0");
+                    .HasConstraintName("FK__Participa__Parti__778AC167");
 
                 entity.HasOne(d => d.Team)
                     .WithMany(p => p.ParticipantInTeams)
                     .HasForeignKey(d => d.TeamId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Participa__TeamI__797309D9");
+                    .HasConstraintName("FK__Participa__TeamI__787EE5A0");
 
                 entity.HasOne(d => d.TeamRole)
                     .WithMany(p => p.ParticipantInTeams)
                     .HasForeignKey(d => d.TeamRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Participa__TeamR__7A672E12");
+                    .HasConstraintName("FK__Participa__TeamR__797309D9");
             });
 
             modelBuilder.Entity<RegisterForm>(entity =>
@@ -617,7 +611,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.RegisterForms)
                     .HasForeignKey(d => d.ClubId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__RegisterF__ClubI__7B5B524B");
+                    .HasConstraintName("FK__RegisterF__ClubI__7A672E12");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -645,7 +639,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.SeedsWallets)
                     .HasForeignKey(d => d.StudentId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__SeedsWall__Stude__7C4F7684");
+                    .HasConstraintName("FK__SeedsWall__Stude__7B5B524B");
             });
 
             modelBuilder.Entity<Sponsor>(entity =>
@@ -706,13 +700,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.SponsorInCompetitions)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__SponsorIn__Compe__7D439ABD");
+                    .HasConstraintName("FK__SponsorIn__Compe__7C4F7684");
 
                 entity.HasOne(d => d.Sponsor)
                     .WithMany(p => p.SponsorInCompetitions)
                     .HasForeignKey(d => d.SponsorId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__SponsorIn__Spons__7E37BEF6");
+                    .HasConstraintName("FK__SponsorIn__Spons__7D439ABD");
             });
 
             modelBuilder.Entity<Team>(entity =>
@@ -739,7 +733,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Teams)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Team__Competitio__7F2BE32F");
+                    .HasConstraintName("FK__Team__Competitio__7E37BEF6");
             });
 
             modelBuilder.Entity<TeamInRound>(entity =>
@@ -756,13 +750,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.TeamInRounds)
                     .HasForeignKey(d => d.RoundId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TeamInRou__Round__00200768");
+                    .HasConstraintName("FK__TeamInRou__Round__7F2BE32F");
 
                 entity.HasOne(d => d.Team)
                     .WithMany(p => p.TeamInRounds)
                     .HasForeignKey(d => d.TeamId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TeamInRou__TeamI__01142BA1");
+                    .HasConstraintName("FK__TeamInRou__TeamI__00200768");
             });
 
             modelBuilder.Entity<TeamRole>(entity =>
@@ -835,7 +829,7 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.Universities)
                     .HasForeignKey(d => d.CityId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Universit__CityI__02084FDA");
+                    .HasConstraintName("FK__Universit__CityI__01142BA1");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -888,23 +882,23 @@ namespace UniCEC.Data.Models.DB
                 entity.HasOne(d => d.Major)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.MajorId)
-                    .HasConstraintName("FK__User__MajorID__02FC7413");
+                    .HasConstraintName("FK__User__MajorID__02084FDA");
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__User__RoleID__03F0984C");
+                    .HasConstraintName("FK__User__RoleID__02FC7413");
 
                 entity.HasOne(d => d.Sponsor)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.SponsorId)
-                    .HasConstraintName("FK__User__SponsorID__04E4BC85");
+                    .HasConstraintName("FK__User__SponsorID__03F0984C");
 
                 entity.HasOne(d => d.University)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UniversityId)
-                    .HasConstraintName("FK__User__University__05D8E0BE");
+                    .HasConstraintName("FK__User__University__04E4BC85");
             });
 
             OnModelCreatingPartial(modelBuilder);

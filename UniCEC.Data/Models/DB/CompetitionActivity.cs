@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -16,7 +15,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int CompetitionId { get; set; }
-        public int MemberId { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public double SeedsPoint { get; set; }
@@ -24,9 +23,9 @@ namespace UniCEC.Data.Models.DB
         public DateTime CreateTime { get; set; }
         public DateTime Ending { get; set; }
         public int NumOfMember { get; set; }
-        public PriorityStatus Priority { get; set; }
-        public CompetitionActivityProcessStatus Process { get; set; }
-        public CompetitionActivityStatus Status { get; set; }
+        public int Priority { get; set; }
+        public int Process { get; set; }
+        public int Status { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual ICollection<ActivitiesEntity> ActivitiesEntities { get; set; }
