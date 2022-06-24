@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
@@ -24,22 +25,25 @@ namespace UniCEC.Business.Services.TeamSvc
         private ICompetitionRepo _competitionRepo;
         private ITeamRoleRepo _teamRoleRepo;
         private IParticipantInTeamRepo _participantInTeamRepo;
+        private IClubRepo _clubRepo;
         private JwtSecurityTokenHandler _tokenHandler;
-        
+
 
 
         public TeamService(ITeamRepo teamRepo,
                            IParticipantRepo participantRepo,
                            ICompetitionRepo competitionRepo,
-                           ITeamRoleRepo teamRoleRepo,                          
+                           ITeamRoleRepo teamRoleRepo,
+                           IClubRepo clubRepo,
                            IParticipantInTeamRepo participantInTeamRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
             _competitionRepo = competitionRepo;
             _teamRoleRepo = teamRoleRepo;
+            _clubRepo = clubRepo;
             _participantInTeamRepo = participantInTeamRepo;
-           
+
         }
 
         public TeamService()
@@ -309,7 +313,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                         Team t = await _teamRepo.Get(team.Id);
 
                                         t.NumberOfStudentInTeam = t.NumberOfStudentInTeam++;
-                                      
+
                                         await _teamRepo.Update();
 
                                         return TransformViewParticipantInTeam(pit, competition.Id);
@@ -490,6 +494,30 @@ namespace UniCEC.Business.Services.TeamSvc
                 throw;
             }
         }
+
+        public async Task<bool> CompetitionManagerLockTeam(LockTeamModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null || Club Id Null");
+
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition == null) throw new ArgumentException("Competition not found");
+
+                Club club = await _clubRepo.Get(model.ClubId);
+                if (club == null) throw new ArgumentException("Club not found");
+
+                //CompetitionManager competitionManager = await 
+                return false;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         // Delete nguyên team
         public async Task<bool> DeleteByLeader(int TeamId, string token)
         {
@@ -553,12 +581,12 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (team != null)
                 {
                     //2. if team is locked can't out
-                    if(team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't out team because team is locked");
+                    if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't out team because team is locked");
 
                     //3.check user in same Team in Competition
                     ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
                     if (Participant_In_Team != null)
-                    {                     
+                    {
                         //Delete Participant In Team
                         await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
                         //------------------Update number of member in Team
@@ -665,7 +693,6 @@ namespace UniCEC.Business.Services.TeamSvc
             }
             return check;
         }
-
 
 
     }
