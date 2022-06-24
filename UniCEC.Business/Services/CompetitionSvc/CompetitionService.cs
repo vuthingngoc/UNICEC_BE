@@ -324,7 +324,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (infoClubMem != null)
                     {
                         //------------ Check Role Member Is Leader Of Club
-                        if (infoClubMem.ClubRoleName.Equals("Leader"))
+                        if (infoClubMem.Id == 1  || infoClubMem.Id == 2)
                         {
                             roleLeader = true;
                         }
