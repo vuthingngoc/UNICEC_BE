@@ -11,6 +11,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
     {
         public Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request);
         public Task<ViewTerm> GetCurrentTermByClub(int clubId);
+        public Task<int> GetCurrentTermIdByClub(int clubId);
         public Task<ViewTerm> GetById(int clubId, int id);
         public Task<bool> CloseOldTermByClub(int clubId);
         

@@ -98,7 +98,7 @@ namespace UniCEC.Business.Services.ClubSvc
             return clubs;
         }
 
-        public async Task<ViewClub> GetById(string token, int id)
+        public async Task<ViewClub> GetById(string token, int id) // status ???
         {
             int roleId = DecodeToken(token, "RoleId");
 
@@ -114,7 +114,7 @@ namespace UniCEC.Business.Services.ClubSvc
             return await AddMoreInfoClub(club);
         }
 
-        public async Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request)
+        public async Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request) // check again
         {
             int roleId = DecodeToken(token, "RoleId");
 
@@ -135,7 +135,7 @@ namespace UniCEC.Business.Services.ClubSvc
             return await AddMoreInfoClub(clubs);
         }
 
-        public async Task<PagingResult<ViewClub>> GetByConditions(string token, ClubRequestModel request)
+        public async Task<PagingResult<ViewClub>> GetByConditions(string token, ClubRequestModel request) // not check status for admin and anothers yet
         {
             int roleId = DecodeToken(token, "RoleId");
 

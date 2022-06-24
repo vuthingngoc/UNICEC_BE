@@ -30,7 +30,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             _decodeToken = new DecodeToken();
         }
 
-        private void CheckValidAuthorizedAsync(string token, int competitionId)
+        private void CheckValidAuthorized(string token, int competitionId)
         {
             int userId = _decodeToken.Decode(token, "Id");
             bool isValidUser = _competitionManagerRepo.CheckValidManagerByUser(competitionId, userId);
@@ -60,7 +60,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
         {
             if (models.Count == 0) throw new ArgumentException();
             int competitionId = models[0].CompetitionId;
-            CheckValidAuthorizedAsync(token, competitionId);
+            CheckValidAuthorized(token, competitionId);
 
             Competition competition = await _competitionRepo.Get(competitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
@@ -145,7 +145,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             CompetitionRound competitionRound = await _competitionRoundRepo.Get(model.Id);
             if (competitionRound == null) throw new NullReferenceException("Not found this competition round");
 
-            CheckValidAuthorizedAsync(token, competitionRound.CompetitionId);
+            CheckValidAuthorized(token, competitionRound.CompetitionId);
 
             Competition competition = await _competitionRepo.Get(competitionRound.CompetitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
@@ -204,7 +204,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
         public async Task Delete(string token, int id)
         {
-            CheckValidAuthorizedAsync(token, id);
+            CheckValidAuthorized(token, id);
 
             CompetitionRound competitionRound = await _competitionRoundRepo.Get(id);
             if (competitionRound == null || (competitionRound != null && !competitionRound.CompetitionId.Equals(id)))

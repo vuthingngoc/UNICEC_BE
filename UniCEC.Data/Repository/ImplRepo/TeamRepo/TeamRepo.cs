@@ -196,5 +196,10 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 return true; // vẫn là true nếu không có team để update thì thôi
             }
         }
+
+        public async Task<bool> CheckExistedTeam(int teamId)
+        {
+            return await context.Teams.FirstOrDefaultAsync(team => team.Id.Equals(teamId)) != null;
+        }
     }
 }

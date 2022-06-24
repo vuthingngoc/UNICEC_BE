@@ -51,6 +51,14 @@ namespace UniCEC.Data.Repository.ImplRepo.TermRepo
                           }).FirstOrDefaultAsync();
         }
 
+        public async Task<int> GetCurrentTermIdByClub(int clubId)
+        {
+            return await (from m in context.Members
+                          join t in context.Terms on m.TermId equals t.Id
+                          where m.ClubId.Equals(clubId) && t.Status.Equals(true) // current term
+                          select t.Id).FirstOrDefaultAsync();
+        }
+
         public async Task<PagingResult<ViewTerm>> GetByConditions(int clubId, TermRequestModel request)
         {
             var query = (from m in context.Members

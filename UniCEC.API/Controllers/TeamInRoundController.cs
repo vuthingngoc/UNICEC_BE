@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,7 +15,7 @@ using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/teams-in-round")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
@@ -27,29 +28,29 @@ namespace UniCEC.API.Controllers
             _teamInRoundService = teamInRoundService;
         }
 
-        [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get team in round by id - Authenticated user")]
-        public async Task<IActionResult> GetRoundById(int id)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewTeamInRound teamInRound = await _teamInRoundService.GetById(token, id);
-                return Ok(teamInRound);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new object());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exeption");
-            }
-        }
+        //[HttpGet("{id}")]
+        //[SwaggerOperation(Summary = "Get team in round by id - Authenticated user")]
+        //public async Task<IActionResult> GetRoundById(int id)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        ViewTeamInRound teamInRound = await _teamInRoundService.GetById(token, id);
+        //        return Ok(teamInRound);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (NullReferenceException)
+        //    {
+        //        return Ok(new object());
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal Server Exeption");
+        //    }
+        //}
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search team in round by conditions - Authenticated user")]
@@ -61,13 +62,45 @@ namespace UniCEC.API.Controllers
                 PagingResult< ViewTeamInRound> teamInRounds = await _teamInRoundService.GetByConditions(token, request);
                 return Ok(teamInRounds);
             }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
-                return Ok(new object());
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
+        [HttpGet("top-teams/{number}")]
+        [SwaggerOperation(Summary = "Get top teams in round - Authenticated user - can not use right now !!!")]
+        public async Task<IActionResult> GetTopTeamsInCompetition(int number, [FromQuery, BindRequired] int competitionId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewTeamInRound> teamsInRound = await _teamInRoundService.GetTopTeamsInCompetition(token, competitionId, number);
+                return Ok(teamsInRound);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {
@@ -121,10 +154,6 @@ namespace UniCEC.API.Controllers
             {
                 return Ok(ex.Message);
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
@@ -148,6 +177,10 @@ namespace UniCEC.API.Controllers
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _teamInRoundService.Delete(token, id);
                 return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (NullReferenceException ex)
             {

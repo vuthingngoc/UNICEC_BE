@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
@@ -18,25 +19,19 @@ namespace UniCEC.Business.Services.TermSvc
         private IMemberRepo _memberRepo;
 
         private IMemberService _memberService;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
         public TermService(ITermRepo termRepo, IMemberRepo memberRepo, IMemberService memberService)
         {
             _termRepo = termRepo;
             _memberRepo = memberRepo;
             _memberService = memberService;
-        }
-
-        public int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
+            _decodeToken = new DecodeToken();
         }
 
         public async Task<ViewTerm> GetCurrentTermByClub(string token, int clubId)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
 
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -48,7 +43,7 @@ namespace UniCEC.Business.Services.TermSvc
 
         public async Task<PagingResult<ViewTerm>> GetByConditions(string token, int clubId, TermRequestModel request)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
 
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -67,7 +62,7 @@ namespace UniCEC.Business.Services.TermSvc
 
         public async Task<ViewTerm> GetById(string token, int clubId, int id)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
 
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -80,7 +75,7 @@ namespace UniCEC.Business.Services.TermSvc
         public async Task<ViewTerm> Insert(string token, TermInsertModel model) 
         {
             // if user is not leader or vice president
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
             
@@ -114,7 +109,7 @@ namespace UniCEC.Business.Services.TermSvc
 
         public async Task Update(string token, TermUpdateModel model, int clubId)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
 
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");

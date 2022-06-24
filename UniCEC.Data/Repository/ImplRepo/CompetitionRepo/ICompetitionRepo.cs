@@ -6,7 +6,6 @@ using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
-using UniCEC.Data.ViewModels.Entities.CompetitionManager;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 {
@@ -23,5 +22,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
         public Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId);
+        public Task<bool> CheckExistedCompetition(int competitionId);
     }
 }

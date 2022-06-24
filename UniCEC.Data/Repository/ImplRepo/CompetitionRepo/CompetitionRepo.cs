@@ -286,5 +286,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                where cic.CompetitionId.Equals(competitionId) && c.UniversityId.Equals(universityId)
                                select c.UniversityId).FirstOrDefaultAsync() > 0;
         }
+
+        public async Task<bool> CheckExistedCompetition(int competitionId)
+        {
+            return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
+        }
     }
 }
