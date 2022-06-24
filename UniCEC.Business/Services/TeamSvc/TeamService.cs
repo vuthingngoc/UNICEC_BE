@@ -194,7 +194,7 @@ namespace UniCEC.Business.Services.TeamSvc
                                     Name = model.Name,
                                     Description = model.Description,
                                     //number of student in team
-                                    NumberOfStudentInTeam = 0,// auto vừa tạo là 0
+                                    NumberOfStudentInTeam = 1,// auto vừa tạo là 1
                                     //generate code
                                     InvitedCode = await CheckExistCode(),
                                     //status available
@@ -218,8 +218,6 @@ namespace UniCEC.Business.Services.TeamSvc
                                     int result = await _participantInTeamRepo.Insert(pit);
                                     if (result > 0)
                                     {
-                                        getTeam.NumberOfStudentInTeam++;
-                                        await _teamRepo.Update();
                                         return TransformViewTeam(getTeam);
                                     }
                                     else
@@ -307,13 +305,11 @@ namespace UniCEC.Business.Services.TeamSvc
 
                                         await _participantInTeamRepo.Insert(pit);
 
-                                        //------------------Update status Team
+                                        //------------------Update Number of member in Team
                                         Team t = await _teamRepo.Get(team.Id);
-                                        //check lại 1 phát nữa nếu như true là available                                  
-                                        if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, (int)competition.MaxNumber))
-                                        {
-                                            t.Status = TeamStatus.Available;
-                                        }
+
+                                        t.NumberOfStudentInTeam = t.NumberOfStudentInTeam++;
+                                      
                                         await _teamRepo.Update();
 
                                         return TransformViewParticipantInTeam(pit, competition.Id);
@@ -494,7 +490,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 throw;
             }
         }
-
+        // Delete nguyên team
         public async Task<bool> DeleteByLeader(int TeamId, string token)
         {
             try
@@ -556,16 +552,18 @@ namespace UniCEC.Business.Services.TeamSvc
                 Team team = await _teamRepo.Get(TeamId);
                 if (team != null)
                 {
-                    //2.check user in same Team in Competition
+                    //2. if team is locked can't out
+                    if(team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't out team because team is locked");
+
+                    //3.check user in same Team in Competition
                     ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
                     if (Participant_In_Team != null)
                     {                     
                         //Delete Participant In Team
                         await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                        //---- auto Team Available
-                        //------------------Update status Team
+                        //------------------Update number of member in Team
                         Team t = await _teamRepo.Get(team.Id);
-                        t.Status = TeamStatus.Available;
+                        t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
                         await _teamRepo.Update();
                         return true;
                     }
