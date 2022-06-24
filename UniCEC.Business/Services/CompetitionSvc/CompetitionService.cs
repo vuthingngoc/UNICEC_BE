@@ -227,13 +227,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                if (request.ClubId == 0 || request.CompetitionId == 0) throw new ArgumentNullException("|| Competition Id Null" + " ClubId Null");
+                if (request.ClubId == 0 || request.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null || ClubId Null");
 
                 bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
                 if (Check)
                 {
                     //
-                    PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(request);
+                    PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetListSponsorInCompetition(request);
                     if (result == null) throw new NullReferenceException();
                     return result;
                 }//end if check
@@ -253,7 +253,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("|| ClubId Null" + "|| Sponsor In Competition Id Null");
+                if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("ClubId Null ||Sponsor In Competition Id Null");
 
                 SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
 
@@ -539,7 +539,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         CompetitionInClubId = compInClub_Id,
                                         //auto role 1 Manager
                                         CompetitionRoleId = 1,
-                                        MemberId = infoClubMem.Id,
+                                        UserId = infoClubMem.UserId,
                                         Status = true,                                     
                                     };
 
@@ -754,8 +754,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (model.CompetitionId == 0
                   || model.ClubId == 0
                   || model.ListDepartmentId.Count < 0)
-                    throw new ArgumentNullException("|| Competition Id Null  || Department Null" +
-                                                     " ClubId Null");
+                    throw new ArgumentNullException("Competition Id Null  || Department Null || ClubId Null");
 
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
                 if (Check)
@@ -879,8 +878,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 if (model.CompetitionId == 0
                    || model.ClubId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null  " +
-                                                     " ClubId Null");
+                    throw new ArgumentNullException("Competition Id Null  || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
@@ -1197,8 +1195,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             {
                 if (model.CompetitionId == 0
                    || model.ClubId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null  " +
-                                                     " ClubId Null");
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
                 bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
@@ -1440,10 +1437,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                         CompetitionInClub cic = await _competitionInClubRepo.Get(result);
 
                                         //Add Club Manager Of Club Collaborate in Competition Manager
-                                        Member ClubLeaderCollaborate = await _memberRepo.GetLeaderByClub(model.ClubIdCollaborate);
+                                        Member clubLeaderCollaborate = await _memberRepo.GetLeaderByClub(model.ClubIdCollaborate);
                                         CompetitionManager competitionManager = new CompetitionManager()
                                         {
-                                            MemberId = ClubLeaderCollaborate.Id,
+                                            UserId = clubLeaderCollaborate.UserId,
                                             CompetitionInClubId = result,
                                             CompetitionRoleId = 1,                                           
                                             Status = true,
@@ -1731,7 +1728,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             int UserId = DecodeToken(token, "Id");
             int SponsorId = DecodeToken(token, "SponsorId");
 
-            if (sponsorInCompetitionId == 0) throw new ArgumentNullException("|| Sponsor In Competition Id Null");
+            if (sponsorInCompetitionId == 0) throw new ArgumentNullException("Sponsor In Competition Id Null");
 
             SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
 
@@ -2079,7 +2076,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK User is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
                             {
 
@@ -2147,7 +2144,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
                             {
 
@@ -2182,19 +2179,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         private bool CheckMaxMin(int max, int min, int NumberOfParticipant)
         {
-            if (max < 0)
+            if (max < 0 || min < 0 || max < min)
             {
-                throw new ArgumentException("Max number can't lower than 0!!!");
-            }
-
-            if (min < 0)
-            {
-                throw new ArgumentException("Min number can't lower than 0 !!!");
-            }
-
-            if (max < min)
-            {
-                throw new ArgumentException("Max number can't lower than Min number !!!");
+                throw new ArgumentException("0 < min < max ");
             }
 
             if (NumberOfParticipant <= 0)

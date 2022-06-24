@@ -113,8 +113,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                     {
                                         CompetitionInClubId = cic.Id,// id này là member thuộc club of club leader add 
                                         CompetitionRoleId = 1, //auto role lowest in competition manager
-                                        MemberId = mem.Id,
-                                       
+                                        UserId = mem.UserId,                                       
                                         Status = true,
                                     };
 
@@ -246,20 +245,23 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
             try
             {
                 int UserId = DecodeToken(token, "Id");
+
                 if (model.CompetitionId == 0
                         || model.ClubId == 0
-                        || model.MemberId == 0)
-                    throw new ArgumentNullException("Competition Id Null || ClubId Null ||Member Id Null");
+                        || model.UserIdInCompetitionManager == 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null ||User Id Null");
 
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-                    //------------- CHECK Id Member
-                    Member mem = await _memberRepo.Get(model.MemberId);
+                    //------------- CHECK UserId
+                    int result = await _memberRepo.GetIdByUser(model.UserIdInCompetitionManager, model.ClubId);
+                    Member mem = await _memberRepo.Get(result);
+
                     if (mem != null)
                     {
-                        //------------- CHECK Id Member In Competition Manager of this Competition Id
-                        CompetitionManager cm = await _competitionManagerRepo.GetMemberInCompetitionManager(model.CompetitionId, model.MemberId, model.ClubId);
+                        //------------- CHECK this In Competition Manager of this Competition Id
+                        CompetitionManager cm = await _competitionManagerRepo.GetMemberInCompetitionManager(model.CompetitionId, mem.UserId, model.ClubId);
                         if (cm != null)
                         {
                             ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(model.ClubId);
@@ -273,7 +275,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                     TermId = CurrentTermOfCLub.Id
                                 };
                                 ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-                                if (infoClubMem.Id != model.MemberId)
+                                if (infoClubMem.Id != mem.Id)
                                 {                                                                         
                                         cm.Status = model.Status;
                                         await _competitionManagerRepo.Update();
@@ -336,7 +338,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK User is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
                             {
 
@@ -344,7 +346,6 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                 if (isAllow.CompetitionRoleId == 1)
                                 {
                                     return true;
-
                                 }
                                 else
                                 {
@@ -381,16 +382,13 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
         {
             //lấy competition CompetitionRole
             CompetitionRole cr = await _competitionRoleRepo.Get(competitionManager.CompetitionRoleId);
-
-
-
             return new ViewCompetitionManager()
             {
                 Id = competitionManager.Id,
                 CompetitionRoleId = competitionManager.CompetitionRoleId,
                 CompetitionRoleName = cr.RoleName, 
                 CompetitionInClubId = competitionManager.CompetitionInClubId,
-                MemberId = competitionManager.MemberId,
+                UserId = competitionManager.UserId,
                 //FullName = competitionManager.Fullname,
                 Status = competitionManager.Status
             };

@@ -20,7 +20,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksMemberByConditions(MemberTakesActivityRequestModel request, int userId);
 
         //check mem take task
-        public Task<MemberTakesActivity> CheckMemberTakesTask(int competitionActivityId, int memberId);
+        public Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId);
 
         //remove member take task 
         public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId);

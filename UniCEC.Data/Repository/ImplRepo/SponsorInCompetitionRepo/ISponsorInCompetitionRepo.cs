@@ -20,7 +20,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         //retrun View Detail
         public Task<List<ViewSponsorInComp>> GetListSponsor_In_Competition(int competitionId);
         //get all
-        public Task<PagingResult<ViewSponsorInCompetition>> GetListSponsor_In_Competition(SponsorApplyRequestModel request);
+        public Task<PagingResult<ViewSponsorInCompetition>> GetListSponsorInCompetition(SponsorApplyRequestModel request);
         public Task DeleteSponsorInCompetition(int sponsorInCompetitionId);
     }
 }

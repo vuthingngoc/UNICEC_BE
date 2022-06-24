@@ -127,7 +127,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo
         }
 
         //get sponsor apply with status(optional) - ViewSponsorInCompetition
-        public async Task<PagingResult<ViewSponsorInCompetition>> GetListSponsor_In_Competition(SponsorApplyRequestModel request)
+        public async Task<PagingResult<ViewSponsorInCompetition>> GetListSponsorInCompetition(SponsorApplyRequestModel request)
         {
             var query = from sic in context.SponsorInCompetitions
                         where request.CompetitionId == sic.CompetitionId //&& sic.Status != SponsorInCompetitionStatus.Rejected
