@@ -16,7 +16,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int CompetitionId { get; set; }
-        public int MemberId { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public double SeedsPoint { get; set; }

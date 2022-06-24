@@ -15,6 +15,7 @@ using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.TermRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
@@ -36,6 +37,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private IMemberRepo _memberRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IFileService _fileService;
+        private IUserRepo _userRepo;
         private JwtSecurityTokenHandler _tokenHandler;
 
         public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo,
@@ -46,6 +48,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           IMemberRepo memberRepo,
                                           ICompetitionManagerRepo competitionManagerRepo,
                                           IActivitiesEntityRepo activitiesEntityRepo,
+                                          IUserRepo userRepo,
                                           IFileService fileService)
         {
             _competitionActivityRepo = clubActivityRepo;
@@ -56,6 +59,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _memberRepo = memberRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _activitiesEntityRepo = activitiesEntityRepo;
+            _userRepo = userRepo;   
             _fileService = fileService;
         }
 
@@ -86,9 +90,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //có Competition Id
                 if (conditions.CompetitionId.HasValue)
                 {
-                    int check = await CheckConditions(token, conditions.CompetitionId.Value, conditions.ClubId);
+                    bool check = await CheckConditions(token, conditions.CompetitionId.Value, conditions.ClubId);
 
-                    if (check > 0)
+                    if (check)
                     {
 
                         //
@@ -185,9 +189,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
 
-                int check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
+                bool check = await CheckConditions(token, c.Id, clubId); // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
                                                                         // khi check đến competitionManager thì sẽ thấy được là User đó kh thuộc trong Competitio
-                if (check > 0)
+                if (check)
                 {
                     return await TransformViewDetailCompetitionActivity(competitionActivity);
                 }
@@ -215,8 +219,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     || model.Ending == DateTime.Parse("1/1/0001 12:00:00 AM"))
                     throw new ArgumentNullException("Name Null || ClubId Null || SeedsPoint Null || Description Null || Beginning Null || Ending Null");
 
-                int check = await CheckConditions(token, model.CompetitionId, model.ClubId);
-                if (check > 0)
+                bool check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+                if (check)
                 {
                     bool checkDate = CheckDate(model.Ending);
                     if (checkDate)
@@ -245,7 +249,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;             //Will update when Member Submit task
                         competitionActivity.Status = CompetitionActivityStatus.Happenning;                      //Check Status
                         competitionActivity.Priority = model.Priority;
-                        competitionActivity.MemberId = check;
+                        competitionActivity.UserId = DecodeToken(token,"Id");
 
 
                         int result = await _competitionActivityRepo.Insert(competitionActivity);
@@ -309,9 +313,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                int check = await CheckConditions(token, c.Id, model.ClubId);
+                bool check = await CheckConditions(token, c.Id, model.ClubId);
 
-                if (check > 0)
+                if (check)
                 {
                     //------------ Check date update
                     bool checkDateUpdate = false;
@@ -378,8 +382,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 Competition c = await _competitionRepo.Get(competitionActivity.CompetitionId);
 
-                int check = await CheckConditions(token, c.Id, model.ClubId);
-                if (check > 0)
+                bool check = await CheckConditions(token, c.Id, model.ClubId);
+                if (check)
                 {
                     competitionActivity.Status = CompetitionActivityStatus.Canceling;
                     await _competitionActivityRepo.Update();
@@ -437,7 +441,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
 
             //Who Create This Task
-            ViewDetailMember member = await _memberRepo.GetDetailById(competitionActivity.MemberId);
+            User creator = await _userRepo.Get(competitionActivity.UserId);
 
 
             //List Member Takes Activity
@@ -457,9 +461,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 Priority = competitionActivity.Priority,
                 ProcessStatus = competitionActivity.Process,
                 Status = competitionActivity.Status,
-                CreatorId = competitionActivity.MemberId,
-                CreatorName = member.Name,
-                CreatorEmail = member.Email,
+                CreatorId = creator.Id,
+                CreatorName = creator.Fullname,
+                CreatorEmail = creator.Email,
                 ActivitiesEntities = ListView_ActivitiesEntity
             };
         }
@@ -515,8 +519,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             return result;
         }
 
-
-        private async Task<int> CheckConditions(string Token, int CompetitionId, int ClubId)
+        //return UserId who Create this task
+        private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
             int UserId = DecodeToken(Token, "Id");
@@ -543,10 +547,10 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
                             {
-                                return isAllow.MemberId;
+                                return true;
                             }
                             else
                             {

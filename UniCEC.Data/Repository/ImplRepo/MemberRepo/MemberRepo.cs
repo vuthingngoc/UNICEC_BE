@@ -290,6 +290,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleName = x.m.ClubRole.Name,
                 ClubRoleId = x.m.ClubRoleId,
                 Id = x.m.Id,
+                UserId = x.us.Id,
                 TermId = x.m.TermId
             }).FirstOrDefaultAsync();
         }

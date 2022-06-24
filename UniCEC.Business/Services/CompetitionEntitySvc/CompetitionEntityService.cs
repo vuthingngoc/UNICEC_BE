@@ -128,7 +128,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             int UserId = DecodeToken(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
-            Competition competition = await _competitionRepo.Get(CompetitionId);
+            Competition competition = await _competitionRepo.Get(CompetitionId);           
             if (competition != null)
             {
                 //------------- CHECK Club in system
@@ -149,12 +149,10 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
-                            {
-                               
-                                    return true;
-                                
+                            {                          
+                                    return true;                      
                             }
                             else
                             {

@@ -122,9 +122,9 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
 
 
-                int competitionManagerId = await CheckConditions(token, competitionActivity.CompetitionId, request.ClubId);
+                bool check = await CheckConditions(token, competitionActivity.CompetitionId, request.ClubId);
 
-                if (competitionManagerId > 0)
+                if (check)
                 {
                     PagingResult<ViewMemberTakesActivity> result = await _memberTakesActivityRepo.GetAllTasksByConditions(request);
                     if (result != null)
@@ -193,7 +193,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     throw new ArgumentNullException("MemberId Null || CompetitionActivityId Null || ClubId Null");
 
                 //
-                DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+                //DateTime DefaultEndTime = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.CompetitionActivityId);
                 //Check Competition Activity
@@ -202,10 +202,10 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 //Canceling // Ending
                 if (competitionActivity.Status == CompetitionActivityStatus.Canceling || competitionActivity.Status == CompetitionActivityStatus.Ending) throw new ArgumentException("Competition Activity is canceling or ending");
 
-                //BookerId
-                int bookerId = await CheckConditions(token, competitionActivity.CompetitionId, model.ClubId);
+                //BookerId == userId
+                bool check = await CheckConditions(token, competitionActivity.CompetitionId, model.ClubId);
 
-                if (bookerId > 0)
+                if (check)
                 {
                     //Check Member Id có status true
                     Member member = await _memberRepo.Get(model.MemberId);
@@ -215,11 +215,13 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     if (member.ClubId != model.ClubId) throw new ArgumentException("Member are not belong to this club");
 
                     //Check booker can not assign task for yourself 
-                    if (bookerId == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself");
+                    int memId = await _memberRepo.GetIdByUser(DecodeToken(token,"Id"),model.ClubId);
+                    ViewMember vdm = await _memberRepo.GetById(memId);
+                    if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself"); 
 
                     //Check add the same task for this member 
-                    MemberTakesActivity mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, model.MemberId);
-                    if (mtaCheck != null) throw new ArgumentException("This member is already take this task");
+                    bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, model.MemberId);
+                    if (mtaCheck) throw new ArgumentException("This member is already take this task");
 
                     //Check add in task when task id Status Endtime
                     if (competitionActivity.Status == CompetitionActivityStatus.Ending) throw new ArgumentException("This task is End can not add member take task");
@@ -227,9 +229,9 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     MemberTakesActivity mtaInsert = new MemberTakesActivity();
                     mtaInsert.CompetitionActivityId = model.CompetitionActivityId;
                     mtaInsert.MemberId = model.MemberId;
-                    mtaInsert.BookerId = bookerId;
+                    mtaInsert.UserId = DecodeToken(token, "Id");
                     mtaInsert.StartTime = new LocalTime().GetLocalTime().DateTime;
-                    mtaInsert.EndTime = DefaultEndTime;
+                    //mtaInsert.EndTime = DefaultEndTime; //-> Null
                     mtaInsert.Deadline = competitionActivity.Ending;
                     mtaInsert.Status = MemberTakesActivityStatus.Doing;
                     int result = await _memberTakesActivityRepo.Insert(mtaInsert);
@@ -267,9 +269,9 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 //Canceling
                 if (ca.Status == CompetitionActivityStatus.Canceling) throw new ArgumentException("Competition Activity is canceling");
 
-                int check = await CheckConditions(token, ca.CompetitionId, model.ClubId);
+                bool check = await CheckConditions(token, ca.CompetitionId, model.ClubId);
 
-                if (check > 0)
+                if (check)
                 {
                     //Update Status của Competition Activity
                     int numberOfMemberHasSubmit = await _memberTakesActivityRepo.GetNumberOfMemberIsSubmitted(ca.Id);
@@ -312,7 +314,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         CompetitionActivity ca = await _competitionActivityRepo.Get(mta.CompetitionActivityId);
                         //Canceling
                         if (ca.Status == CompetitionActivityStatus.Canceling) throw new ArgumentException("Competition Activity is canceling");
-
                         //Check Date
                         //LocalTime
                         DateTimeOffset localTime = new LocalTime().GetLocalTime();
@@ -371,10 +372,10 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
 
 
-                int competitionManagerId = await CheckConditions(token, ca.CompetitionId, model.ClubId);
+                bool check = await CheckConditions(token, ca.CompetitionId, model.ClubId);
 
                 //Check role CompetitionManager --> chắc chắn nó sẽ là task của competition
-                if (competitionManagerId > 0)
+                if (check)
                 {
                     //Approved
                     if (((int)model.Status) == 4)
@@ -414,9 +415,8 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         private async Task<ViewDetailMemberTakesActivity> TransferViewDetailMTA(MemberTakesActivity mta)
         {
-            // Booker
-            Member m1 = await _memberRepo.Get(mta.BookerId);
-            User booker = await _userRepo.Get(m1.UserId);
+            // Booker           
+            User booker = await _userRepo.Get(mta.UserId);
 
             // Member
             Member m2 = await _memberRepo.Get(mta.MemberId);
@@ -432,7 +432,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 EndTime = mta.EndTime,
                 Deadline = mta.Deadline,
                 Status = mta.Status,
-                BookerId = mta.BookerId,
+                BookerId = mta.UserId,
                 BookerName = booker.Fullname
             };
         }
@@ -446,7 +446,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         }
 
         //Check Conditition will be return BookerId
-        private async Task<int> CheckConditions(string Token, int CompetitionId, int ClubId)
+        private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
             int UserId = DecodeToken(Token, "Id");
@@ -473,10 +473,10 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                         if (infoClubMem != null)
                         {
                             //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.Id, ClubId);
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
                             if (isAllow != null)
                             {
-                                return isAllow.MemberId;
+                                return true ;
                             }
                             else
                             {

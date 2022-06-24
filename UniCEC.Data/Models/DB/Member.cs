@@ -10,7 +10,6 @@ namespace UniCEC.Data.Models.DB
     {
         public Member()
         {
-            CompetitionManagers = new HashSet<CompetitionManager>();
             MemberTakesActivities = new HashSet<MemberTakesActivity>();
             Participants = new HashSet<Participant>();
         }
@@ -28,7 +27,6 @@ namespace UniCEC.Data.Models.DB
         public virtual ClubRole ClubRole { get; set; }
         public virtual Term Term { get; set; }
         public virtual User User { get; set; }
-        public virtual ICollection<CompetitionManager> CompetitionManagers { get; set; }
         public virtual ICollection<MemberTakesActivity> MemberTakesActivities { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
     }

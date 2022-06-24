@@ -85,13 +85,13 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         }
 
-        public async Task<MemberTakesActivity> CheckMemberTakesTask(int competitionActivityId, int memberId)
+        public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
         {
             var query = await (from mta in context.MemberTakesActivities
                                where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
                                select mta).FirstOrDefaultAsync();
 
-            return (query != null) ? query : null;
+            return (query != null) ? true : false;
         }
 
         //Check task belong to student 
