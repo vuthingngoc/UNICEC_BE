@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -15,6 +16,7 @@ using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
+using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.MemberSvc
 {
@@ -27,7 +29,7 @@ namespace UniCEC.Business.Services.MemberSvc
         private IClubRoleRepo _clubRoleRepo;
 
         private IFileService _fileService;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
         public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, IFileService fileService
                                 , IUserRepo userRepo, ITermRepo termRepo, IClubRoleRepo clubRoleRepo)
@@ -38,29 +40,30 @@ namespace UniCEC.Business.Services.MemberSvc
             _userRepo = userRepo;
             _termRepo = termRepo;
             _clubRoleRepo = clubRoleRepo;
+            _decodeToken = new DecodeToken();
         }
 
-        private int DecodeToken(string token, string nameClaim)
+        public async Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, int? termId, MemberStatus? status, PagingRequest request)
         {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
-
-        public async Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, PagingRequest request)
-        {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            PagingResult<ViewMember> members = await _memberRepo.GetMembersByClub(clubId, null, null, request);
+            MemberStatus memberStatus = MemberStatus.Active;
+            int clubRoldId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
+            if ((clubRoldId.Equals(1) || clubRoldId.Equals(2)) && status.HasValue) memberStatus = status.Value;
+
+            int clubTermId = await _termRepo.GetCurrentTermIdByClub(clubId);
+            if (termId.HasValue) clubTermId = termId.Value;
+
+            PagingResult<ViewMember> members = await _memberRepo.GetMembersByClub(clubId, clubTermId, memberStatus, request);
             if (members == null) throw new NullReferenceException("Not found any member in this club");
             return members;
         }
 
         public async Task<ViewDetailMember> GetByMemberId(string token, int memberId)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             int clubId = await _memberRepo.GetClubIdByMember(memberId);
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -84,7 +87,7 @@ namespace UniCEC.Business.Services.MemberSvc
 
         public async Task<int> GetQuantityNewMembersByClub(string token, int clubId)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
@@ -101,7 +104,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 throw new ArgumentException("ClubId Null || UserId Null || ClubRoleId Null || TermId Null || StartTime Null");
 
             // check role
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
@@ -146,7 +149,7 @@ namespace UniCEC.Business.Services.MemberSvc
             if (!isValid) throw new ArgumentException("Not found this club role");
 
             // if user is not leader or vice president
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
@@ -180,7 +183,7 @@ namespace UniCEC.Business.Services.MemberSvc
             if (member == null) throw new NullReferenceException("Not found this member");
 
             // if user is not leader or vice president
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 

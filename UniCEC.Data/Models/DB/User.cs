@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -27,7 +28,7 @@ namespace UniCEC.Data.Models.DB
         public string Dob { get; set; }
         public string Description { get; set; }
         public string Avatar { get; set; }
-        public int Status { get; set; }
+        public UserStatus Status { get; set; }
         public bool IsOnline { get; set; }
 
         public virtual Major Major { get; set; }

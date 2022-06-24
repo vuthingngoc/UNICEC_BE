@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -15,7 +16,7 @@ namespace UniCEC.Data.Models.DB
         public string Comment { get; set; }
         public DateTime? ReviewDate { get; set; }
         public string Feedback { get; set; }
-        public int Status { get; set; }
+        public SponsorInCompetitionStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual Sponsor Sponsor { get; set; }

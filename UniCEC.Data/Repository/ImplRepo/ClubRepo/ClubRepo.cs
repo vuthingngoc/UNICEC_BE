@@ -170,16 +170,18 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
         public async Task<List<int>> GetByCompetition(int competitionId)
         {
-            return await (from cic in context.CompetitionInClubs
-                         where cic.CompetitionId.Equals(competitionId)
-                         select cic.ClubId).ToListAsync();
+            List<int> clubIds = await (from cic in context.CompetitionInClubs
+                                       where cic.CompetitionId.Equals(competitionId)
+                                       select cic.ClubId).ToListAsync();
+
+            return (clubIds.Count > 0) ? clubIds : null;
         }
 
         public async Task<int> GetUniversityByClub(int clubId)
         {
-            return await(from c in context.Clubs
-                         where c.Id.Equals(clubId)
-                         select c.UniversityId).FirstOrDefaultAsync();
+            return await (from c in context.Clubs
+                          where c.Id.Equals(clubId)
+                          select c.UniversityId).FirstOrDefaultAsync();
         }
     }
 }

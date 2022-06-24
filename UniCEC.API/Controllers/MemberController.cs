@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 
@@ -30,12 +31,12 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("club/{id}")]
         [SwaggerOperation(Summary = "Get all members in a club - club member")]
-        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] int? termId, [FromQuery] MemberStatus? status, [FromQuery] PagingRequest request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, request);
+                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, termId, status, request);
                 return Ok(members);
             }
             catch(UnauthorizedAccessException ex)

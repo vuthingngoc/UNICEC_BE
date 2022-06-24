@@ -13,9 +13,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
-using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.InfluencerInCompetitionRepo;
@@ -197,7 +195,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         {
                             imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             imgUrl_CompetitionEntity = "";
                         }
@@ -253,7 +251,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         {
             try
             {
-                if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("ClubId Null ||Sponsor In Competition Id Null");
+                if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("ClubId Null || Sponsor In Competition Id Null");
 
                 SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
 
@@ -1899,9 +1897,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 SponsorName = sponsor.Name,
                 SponsorLogo = sponsor.Logo,
                 //info detail
-                CreateTime = (DateTime)sponsorInCompetition.CreateTime,
+                CreateTime = sponsorInCompetition.CreateTime.Value,
                 Comment = sponsorInCompetition.Comment,
-                ReviewDate = (DateTime)sponsorInCompetition.ReviewDate,
+                ReviewDate = (sponsorInCompetition.ReviewDate.HasValue) ? sponsorInCompetition.ReviewDate.Value : null,
                 Feedback = sponsorInCompetition.Feedback,
                 Status = sponsorInCompetition.Status
             };

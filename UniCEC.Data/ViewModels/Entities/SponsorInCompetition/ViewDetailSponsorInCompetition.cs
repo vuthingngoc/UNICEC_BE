@@ -12,7 +12,7 @@ namespace UniCEC.Data.ViewModels.Entities.SponsorInCompetition
         public string Comment { get; set; }
 
         [JsonPropertyName("review_date")]
-        public DateTime ReviewDate { get; set; }
+        public DateTime? ReviewDate { get; set; }
         public string Feedback { get; set; }
       
         

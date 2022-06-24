@@ -21,9 +21,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request)
         {
             var query = from cr in context.CompetitionRounds
-                        select cr;
-
-            if (request.CompetitionId.HasValue) query = query.Where(cr => cr.CompetitionId.Equals(request.CompetitionId));
+                        where cr.CompetitionId.Equals(request.CompetitionId)
+                        select cr;            
 
             if (!string.IsNullOrEmpty(request.Title)) query = query.Where(cr => cr.Title.ToLower().Contains(request.Title.ToLower()));
 
@@ -128,6 +127,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                 round.NumberOfTeam = numberOfTeam;
                 await Update();
             }            
+        }
+
+        public async Task<int> GetCompetitionIdByRound(int competitionRoundId)
+        {
+            return await (from cr in context.CompetitionRounds
+                          where cr.Id.Equals(competitionRoundId)
+                          select cr.CompetitionId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> CheckExistedRound(int roundId)
+        {
+            return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId)) != null;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -19,7 +20,7 @@ namespace UniCEC.Data.Models.DB
         public int UserId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public int Status { get; set; }
+        public MemberStatus Status { get; set; }
         public int TermId { get; set; }
 
         public virtual Club Club { get; set; }

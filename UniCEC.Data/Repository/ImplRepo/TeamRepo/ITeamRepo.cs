@@ -22,5 +22,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         public Task DeleteTeam(int TeamId);
 
         public Task<bool> UpdateStatusAvailableForAllTeam(int CompetitionId);
+
+        //
+        public Task<bool> CheckExistedTeam(int teamId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -40,9 +41,9 @@ namespace UniCEC.Data.Models.DB
         public double SeedsPoint { get; set; }
         public double SeedsDeposited { get; set; }
         public int View { get; set; }
-        public int Scope { get; set; }
+        public CompetitionScopeStatus Scope { get; set; }
         public bool IsSponsor { get; set; }
-        public int Status { get; set; }
+        public CompetitionStatus Status { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
         public virtual ICollection<CompetitionActivity> CompetitionActivities { get; set; }
