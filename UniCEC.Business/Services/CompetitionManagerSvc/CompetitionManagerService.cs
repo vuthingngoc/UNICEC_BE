@@ -54,7 +54,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
             {
                 if (request.CompetitionId == 0
                   || request.ClubId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null" + " ClubId Null");
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null");
 
                 bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
                 if (Check)
@@ -113,7 +113,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                     {
                                         CompetitionInClubId = cic.Id,// id này là member thuộc club of club leader add 
                                         CompetitionRoleId = 1, //auto role lowest in competition manager
-                                        UserId = mem.UserId,                                       
+                                        UserId = mem.UserId,
                                         Status = true,
                                     };
 
@@ -168,24 +168,25 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                 int UserId = DecodeToken(token, "Id");
                 if (model.CompetitionId == 0
                         || model.ClubId == 0
-                        || model.MemberId == 0)
-                    throw new ArgumentNullException("Competition Id Null || ClubId Null ||Member Id Null");
+                        || model.UserIdInCompetitionManager == 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null ||User Id Null");
 
                 bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
                 if (check)
                 {
-                    //------------- CHECK Id Member
-                    Member mem = await _memberRepo.Get(model.MemberId);
+                    //------------- CHECK User Id Member
+                    int result = await _memberRepo.GetIdByUser(model.UserIdInCompetitionManager, model.ClubId);
+                    Member mem = await _memberRepo.Get(result);
                     if (mem != null)
                     {
-                        //------------- CHECK Id Member In Competition Manager of this Competition Id
-                        CompetitionManager cm = await _competitionManagerRepo.GetMemberInCompetitionManager(model.CompetitionId, model.MemberId, model.ClubId);
+                        //------------- CHECK User Id In Competition Manager of this Competition Id
+                        CompetitionManager cm = await _competitionManagerRepo.GetMemberInCompetitionManager(model.CompetitionId, mem.UserId, model.ClubId);
                         if (cm != null)
                         {
                             ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(model.ClubId);
                             if (CurrentTermOfCLub != null)
                             {
-                                //------------- CHECK Id Member the same as manager                   
+                                //------------- CHECK UserId == UserId(the same as manager)                   
                                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                                 {
                                     UserId = UserId,
@@ -193,14 +194,14 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                     TermId = CurrentTermOfCLub.Id
                                 };
                                 ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-                                if (infoClubMem.Id != model.MemberId)
+                                if (infoClubMem.Id != mem.Id)
                                 {
                                     //------------- CHECK Competition Role
                                     CompetitionRole competitionRole = await _competitionRoleRepo.Get(model.RoleCompetitionId);
                                     if (competitionRole != null)
                                     {
                                         //Manager update role for this member
-                                        cm.CompetitionRoleId = model.RoleCompetitionId;// auto role Manager
+                                        cm.CompetitionRoleId = model.RoleCompetitionId;
                                         await _competitionManagerRepo.Update();
                                         return true;
                                     }
@@ -211,22 +212,23 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                 }
                                 else
                                 {
-                                    throw new ArgumentException("Member id is the same you");
+                                    throw new ArgumentException("You can't update role by yourself");
                                 }
                             }
                             else
                             {
-                                throw new ArgumentException("Member is not in Competition Manager of this Competition or Event");
+
+                                throw new ArgumentException("Term of ClubId is End");
                             }
                         }
                         else
                         {
-                            throw new ArgumentException("Term of ClubId is End");
+                            throw new ArgumentException("Member update not found");
                         }
                     }
                     else
                     {
-                        throw new ArgumentException("Member not found");
+                        throw new ArgumentException("You is not in Competition Manager of this Competition or Event");
                     }
                 }
                 else
@@ -267,7 +269,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                             ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(model.ClubId);
                             if (CurrentTermOfCLub != null)
                             {
-                                //------------- CHECK Id Member the same as manager                   
+                                //------------- CHECK User Id the same as manager                   
                                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                                 {
                                     UserId = UserId,
@@ -276,29 +278,29 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
                                 };
                                 ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
                                 if (infoClubMem.Id != mem.Id)
-                                {                                                                         
-                                        cm.Status = model.Status;
-                                        await _competitionManagerRepo.Update();
-                                        return true;           
+                                {
+                                    cm.Status = model.Status;
+                                    await _competitionManagerRepo.Update();
+                                    return true;
                                 }
                                 else
                                 {
-                                    throw new ArgumentException("Member id is the same you");
+                                    throw new ArgumentException("You can't update role by yourself");
                                 }
                             }
                             else
                             {
-                                throw new ArgumentException("Member is not in Competition Manager of this Competition or Event");
+                                throw new ArgumentException("Term of ClubId is End");
                             }
                         }
                         else
                         {
-                            throw new ArgumentException("Term of ClubId is End");
+                            throw new ArgumentException("Member update not found");
                         }
                     }
                     else
-                    {
-                        throw new ArgumentException("Member not found");
+                    {                  
+                        throw new ArgumentException("You is not in Competition Manager of this Competition or Event");
                     }
                 }
                 else
@@ -386,7 +388,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
             {
                 Id = competitionManager.Id,
                 CompetitionRoleId = competitionManager.CompetitionRoleId,
-                CompetitionRoleName = cr.RoleName, 
+                CompetitionRoleName = cr.RoleName,
                 CompetitionInClubId = competitionManager.CompetitionInClubId,
                 UserId = competitionManager.UserId,
                 //FullName = competitionManager.Fullname,
@@ -401,7 +403,7 @@ namespace UniCEC.Business.Services.CompetitionManagerSvc
             return Int32.Parse(claim.Value);
         }
 
-        
+
     }
 }
 

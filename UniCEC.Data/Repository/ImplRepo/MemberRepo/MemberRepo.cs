@@ -227,7 +227,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public async Task<int> GetIdByUser(int userId, int clubId)
         {
             return await (from m in context.Members
-                          where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
+                          where m.UserId.Equals(userId) && m.ClubId.Equals(clubId) && m.Status == MemberStatus.Active
                           select m.Id).FirstOrDefaultAsync();
         }
 
