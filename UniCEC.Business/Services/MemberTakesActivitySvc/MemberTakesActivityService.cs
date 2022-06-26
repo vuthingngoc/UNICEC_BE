@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -36,7 +35,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IUserRepo _userRepo;
         private IFileService _fileService;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
 
 
@@ -59,6 +58,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             _userRepo = userRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _fileService = fileService;
+            _decodeToken = new DecodeToken();
         }
 
         //Get-All-Taskes-Member-By-Conditions 
@@ -83,7 +83,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
                 GetMemberInClubModel conditions = new GetMemberInClubModel()
                 {
-                    UserId = DecodeToken(token, "Id"),
+                    UserId = _decodeToken.Decode(token, "Id"),
                     ClubId = club.Id,
                     TermId = CurrentTermOfCLub.Id
                 };
@@ -92,7 +92,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
                 //
 
-                PagingResult<ViewMemberTakesActivity> result = await _memberTakesActivityRepo.GetAllTasksMemberByConditions(request, DecodeToken(token, "Id"));
+                PagingResult<ViewMemberTakesActivity> result = await _memberTakesActivityRepo.GetAllTasksMemberByConditions(request, _decodeToken.Decode(token, "Id"));
                 if (result != null)
                 {
                     return result;
@@ -158,7 +158,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     throw new ArgumentNullException("Member take activity Null || ClubId Null");
 
                 //CHECK Task belong to this user
-                if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(memberTakeActivityId, DecodeToken(token, "Id"), clubId))
+                if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(memberTakeActivityId, _decodeToken.Decode(token, "Id"), clubId))
                 {
                     MemberTakesActivity mta = await _memberTakesActivityRepo.Get(memberTakeActivityId);
                     //
@@ -215,7 +215,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     if (member.ClubId != model.ClubId) throw new ArgumentException("Member are not belong to this club");
 
                     //Check booker can not assign task for yourself 
-                    int memId = await _memberRepo.GetIdByUser(DecodeToken(token,"Id"),model.ClubId);
+                    int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token,"Id"),model.ClubId);
                     ViewMember vdm = await _memberRepo.GetById(memId);
                     if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself"); 
 
@@ -229,7 +229,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                     MemberTakesActivity mtaInsert = new MemberTakesActivity();
                     mtaInsert.CompetitionActivityId = model.CompetitionActivityId;
                     mtaInsert.MemberId = model.MemberId;
-                    mtaInsert.UserId = DecodeToken(token, "Id");
+                    mtaInsert.UserId = _decodeToken.Decode(token, "Id");
                     mtaInsert.StartTime = new LocalTime().GetLocalTime().DateTime;
                     //mtaInsert.EndTime = DefaultEndTime; //-> Null
                     mtaInsert.Deadline = competitionActivity.Ending;
@@ -305,7 +305,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                 if (model.ClubId == 0 || model.MemberTakesActivityId == 0) throw new ArgumentNullException("ClubId Null || Member Takes Activity Id Null");
 
                 //CHECK Task belong to this user
-                if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(model.MemberTakesActivityId, DecodeToken(token, "Id"), model.ClubId))
+                if (await _memberTakesActivityRepo.CheckTaskBelongToStudent(model.MemberTakesActivityId, _decodeToken.Decode(token, "Id"), model.ClubId))
                 {
                     MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
                     if (mta != null)
@@ -438,18 +438,18 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         }
 
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
 
         //Check Conditition will be return BookerId
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);

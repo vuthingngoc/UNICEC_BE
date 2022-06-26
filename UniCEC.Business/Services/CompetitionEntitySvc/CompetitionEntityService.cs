@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
@@ -29,7 +28,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         private ITermRepo _termRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IMemberRepo _memberRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
 
         public CompetitionEntityService(ICompetitionEntityRepo competitionEntityRepo,
@@ -37,7 +36,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                                         IFileService fileService,
                                         IClubRepo clubRepo,
                                         ITermRepo termRepo,
-                                        ICompetitionManagerRepo competitionManagerRepo,
+                                        ICompetitionManagerRepo competitionManagerRepo,                                       
                                         IMemberRepo memberRepo) 
         {
             _competitionEntityRepo = competitionEntityRepo;
@@ -46,7 +45,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             _clubRepo = clubRepo;
             _termRepo = termRepo;
             _competitionManagerRepo = competitionManagerRepo;
-            _memberRepo = memberRepo;   
+            _memberRepo = memberRepo;
+            _decodeToken = new DecodeToken() ;
         }
 
 
@@ -125,7 +125,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);           
@@ -180,12 +180,12 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             }
         }
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
 
     }
 }

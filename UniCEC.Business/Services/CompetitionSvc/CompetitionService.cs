@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -59,7 +60,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ITeamRepo _teamRepo;
         private IUserRepo _userRepo;
         private ISponsorRepo _sponsorRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+        //private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
@@ -101,6 +103,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _userRepo = userRepo;
             _teamRepo = teamRepo;
             _sponsorRepo = sponsorRepo;
+            _decodeToken = new DecodeToken();
         }
 
 
@@ -220,72 +223,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         }
 
-        //Get All Sponsor Apply In Competition
-        public async Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel request, string token)
-        {
-            try
-            {
-                if (request.ClubId == 0 || request.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null || ClubId Null");
-
-                bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
-                if (Check)
-                {
-                    //
-                    PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetListSponsorInCompetition(request);
-                    if (result == null) throw new NullReferenceException();
-                    return result;
-                }//end if check
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //Get Detail Sponsor Apply In Competition
-        public async Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token)
-        {
-            try
-            {
-                if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("ClubId Null || Sponsor In Competition Id Null");
-
-                SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
-
-                //Check is existed
-                if (sic == null) throw new NullReferenceException();
-
-                //Check Apply is belong to this competition
-                Competition compe = await _competitionRepo.Get(sic.CompetitionId);
-                ViewCompetitionInClub cic = await _competitionInClubRepo.GetCompetitionInClub(clubId, compe.Id);
-                if (cic == null) throw new ArgumentException("This apply of Sponsor is not belong to this Competition");
-
-                bool Check = await CheckCompetitionManager(token, sic.CompetitionId, clubId);
-                if (Check)
-                {
-                    return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
+        
         //----ROLE LEADER OF CLUB
         public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
-                int UniversityId = DecodeToken(token, "UniversityId");
+                int UserId = _decodeToken.Decode(token, "Id");
+                int UniversityId = _decodeToken.Decode(token, "UniversityId");
 
                 bool roleLeader = false;
 
@@ -780,7 +725,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         else
                         {
                             //add extra parameter
-                            int UniversityId = DecodeToken(token, "UniversityId");
+                            int UniversityId = _decodeToken.Decode(token, "UniversityId");
                             //------------- CHECK Department belong to University
                             bool departmentBelongToUni = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
 
@@ -1321,56 +1266,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token)
-        {
-            try
-            {
-                if (model.SponsorInCompetitionId == 0
-                   || model.Status == 0
-                   || model.ClubId == 0
-                   || string.IsNullOrEmpty(model.Feedback))
-                    throw new ArgumentNullException("Sponsor In Competition Id Null || Club Id Null || Status not equal 0|| Feedback Null");
-
-                SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(model.SponsorInCompetitionId);
-
-                //Check is existed
-                if (sic == null) throw new ArgumentException("Not found this apply of Sponsor");
-
-                //Check Apply is belong to this competition
-                Competition compe = await _competitionRepo.Get(sic.CompetitionId);
-                ViewCompetitionInClub cic = await _competitionInClubRepo.GetCompetitionInClub(model.ClubId, compe.Id);
-                if (cic == null) throw new ArgumentException("This apply of Sponsor is not belong to this Competition");
-
-                //Check has status cannot feeback again -(optional)
-                if (sic.Status != SponsorInCompetitionStatus.Waiting) throw new ArgumentException("Already feedback this apply");
-
-                bool Check = await CheckCompetitionManager(token, sic.CompetitionId, model.ClubId);
-                if (Check)
-                {
-                    if (model.Feedback.Length > 4000) throw new ArgumentException("Content of feedback can not length > 4000 words");
-                    sic.ReviewDate = new LocalTime().GetLocalTime().DateTime;
-                    sic.Feedback = model.Feedback;
-                    sic.Status = model.Status;
-                    //Status Approved
-                    if (sic.Status == SponsorInCompetitionStatus.Approved)
-                    {
-                        compe.IsSponsor = true;
-                        await _competitionRepo.Update();
-                    }
-                    await _sponsorInCompetitionRepo.Update();
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
+        
+        //
         public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
         {
             try
@@ -1388,7 +1285,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
                     {
                         //add 2 parameter to check
-                        int UniversityId = DecodeToken(token, "UniversityId");
+                        int UniversityId = _decodeToken.Decode(token, "UniversityId");
                         Competition competition = await _competitionRepo.Get(model.CompetitionId);
                         //------------ CHECK 2 club are the same 
                         if (model.ClubIdCollaborate != model.ClubId)
@@ -1581,166 +1478,306 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //----ROLE SPONSOR
-        public async Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel model, string token)
-        {
-            try
-            {
-                int UserId = DecodeToken(token, "Id");
+        //public async Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel model, string token)
+        //{
+        //    try
+        //    {
+        //        int UserId = DecodeToken(token, "Id");
 
-                int SponsorId = DecodeToken(token, "SponsorId");
+        //        int SponsorId = DecodeToken(token, "SponsorId");
 
-                DateTime DefaultReviewDate = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        //        DateTime DefaultReviewDate = DateTime.ParseExact("1900-01-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
-                if (model.CompetitionId == 0 || string.IsNullOrEmpty(model.Comment)) throw new ArgumentNullException("Competition Id Null || Comment Null");
+        //        if (model.CompetitionId == 0 || string.IsNullOrEmpty(model.Comment)) throw new ArgumentNullException("Competition Id Null || Comment Null");
 
-                //------------- CHECK Competition is have in system or not
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
-                if (competition != null)
-                {
-                    //------------- CHECK Status Competition                    
-                    if (competition.Status != CompetitionStatus.Happening && competition.Status != CompetitionStatus.Ending && competition.Status != CompetitionStatus.Canceling)
-                    {
-                        //------------------------------------CHECK Specific User(Sponsor) is apply                 
-                        SponsorInCompetition checkSpecificSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
-                        if (checkSpecificSponsorInCompetition == null)
-                        {
-                            //------------------------------------CHECK Sponsor is aplly
-                            SponsorInCompetition checkSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, 0);
-                            if (checkSponsorInCompetition == null)
-                            {
-                                SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
-                                sponsorInCompetition.SponsorId = SponsorId;
-                                sponsorInCompetition.CompetitionId = model.CompetitionId;
-                                //add UserId Of Sponsor
-                                sponsorInCompetition.UserId = UserId;
-                                sponsorInCompetition.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                                sponsorInCompetition.Comment = model.Comment;
-                                sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
-                                //
-                                sponsorInCompetition.ReviewDate = DefaultReviewDate;
-                                sponsorInCompetition.Feedback = "Not has content";
+        //        //------------- CHECK Competition is have in system or not
+        //        Competition competition = await _competitionRepo.Get(model.CompetitionId);
+        //        if (competition != null)
+        //        {
+        //            //------------- CHECK Status Competition                    
+        //            if (competition.Status != CompetitionStatus.Happening && competition.Status != CompetitionStatus.Ending && competition.Status != CompetitionStatus.Canceling)
+        //            {
+        //                //------------------------------------CHECK Specific User(Sponsor) is apply                 
+        //                SponsorInCompetition checkSpecificSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, UserId);
+        //                if (checkSpecificSponsorInCompetition == null)
+        //                {
+        //                    //------------------------------------CHECK Sponsor is aplly
+        //                    SponsorInCompetition checkSponsorInCompetition = await _sponsorInCompetitionRepo.CheckSponsorInCompetition(SponsorId, model.CompetitionId, 0);
+        //                    if (checkSponsorInCompetition == null)
+        //                    {
+        //                        SponsorInCompetition sponsorInCompetition = new SponsorInCompetition();
+        //                        sponsorInCompetition.SponsorId = SponsorId;
+        //                        sponsorInCompetition.CompetitionId = model.CompetitionId;
+        //                        //add UserId Of Sponsor
+        //                        sponsorInCompetition.UserId = UserId;
+        //                        sponsorInCompetition.CreateTime = new LocalTime().GetLocalTime().DateTime;
+        //                        sponsorInCompetition.Comment = model.Comment;
+        //                        sponsorInCompetition.Status = SponsorInCompetitionStatus.Waiting;
+        //                        //
+        //                        sponsorInCompetition.ReviewDate = DefaultReviewDate;
+        //                        sponsorInCompetition.Feedback = "Not has content";
 
-                                int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
-                                if (result > 0)
-                                {
-                                    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
-                                    return await TransferViewDetailSponsorInCompetition(sic, UserId);
-                                }
-                                else
-                                {
-                                    throw new ArgumentException("Sponsor has already submit");
-                                }
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Add Sponsor failed");
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException("You has already submit");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Competition or Event not found ");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //                        int result = await _sponsorInCompetitionRepo.Insert(sponsorInCompetition);
+        //                        if (result > 0)
+        //                        {
+        //                            SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(result);
+        //                            return await TransferViewDetailSponsorInCompetition(sic, UserId);
+        //                        }
+        //                        else
+        //                        {
+        //                            throw new ArgumentException("Sponsor has already submit");
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        throw new ArgumentException("Add Sponsor failed");
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    throw new ArgumentException("You has already submit");
+        //                }
+        //            }
+        //            else
+        //            {
+        //                throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new ArgumentException("Competition or Event not found ");
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-        public async Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token)
-        {
-            try
-            {
-                int UserId = DecodeToken(token, "Id");
-                int SponsorId = DecodeToken(token, "SponsorId");
+        //public async Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token)
+        //{
+        //    try
+        //    {
+        //        int UserId = DecodeToken(token, "Id");
+        //        int SponsorId = DecodeToken(token, "SponsorId");
 
-                if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
-                //------------- CHECK Competition is have in system or not
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
-                if (competition != null)
-                {
-                    //------------- CHECK this apply is exsited
-                    // The newest apply base on CreateTime
-                    SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.GetNewestApply(SponsorId, model.CompetitionId, UserId);
-                    if (sponsorInCompetition != null)
-                    {
-                        //------------- CHECK this apply Status is Waiting 
-                        if (sponsorInCompetition.Status == SponsorInCompetitionStatus.Waiting)
-                        {
-                            await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sponsorInCompetition.Id);
-                            return true;
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Deny Failed, Your Apply is reviewed by Club Manager, Please Contact with Club Manager Of Competition !!!");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("This Apply is not found ");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Competition or Event not found ");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        if (model.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null");
+        //        //------------- CHECK Competition is have in system or not
+        //        Competition competition = await _competitionRepo.Get(model.CompetitionId);
+        //        if (competition != null)
+        //        {
+        //            //------------- CHECK this apply is exsited
+        //            // The newest apply base on CreateTime
+        //            SponsorInCompetition sponsorInCompetition = await _sponsorInCompetitionRepo.GetNewestApply(SponsorId, model.CompetitionId, UserId);
+        //            if (sponsorInCompetition != null)
+        //            {
+        //                //------------- CHECK this apply Status is Waiting 
+        //                if (sponsorInCompetition.Status == SponsorInCompetitionStatus.Waiting)
+        //                {
+        //                    await _sponsorInCompetitionRepo.DeleteSponsorInCompetition(sponsorInCompetition.Id);
+        //                    return true;
+        //                }
+        //                else
+        //                {
+        //                    throw new ArgumentException("Deny Failed, Your Apply is reviewed by Club Manager, Please Contact with Club Manager Of Competition !!!");
+        //                }
+        //            }
+        //            else
+        //            {
+        //                throw new ArgumentException("This Apply is not found ");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new ArgumentException("Competition or Event not found ");
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
+        //public async Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request, string token)
+        //{
+        //    try
+        //    {
+        //        int UserId = DecodeToken(token, "Id");
+        //        int SponsorId = DecodeToken(token, "SponsorId");
 
-        public async Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request, string token)
-        {
-            try
-            {
-                int UserId = DecodeToken(token, "Id");
-                int SponsorId = DecodeToken(token, "SponsorId");
+        //        if (request.ClubId.HasValue && !request.UnversityId.HasValue) throw new ArgumentException("University Null");
 
-                if (request.ClubId.HasValue && !request.UnversityId.HasValue) throw new ArgumentException("University Null");
+        //        PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetSponsorViewAllApplyInCompOrEve(request, UserId, SponsorId);
+        //        if (result == null) throw new NullReferenceException();
+        //        return result;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-                PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetSponsorViewAllApplyInCompOrEve(request, UserId, SponsorId);
-                if (result == null) throw new NullReferenceException();
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //public async Task<ViewDetailSponsorInCompetition> GetSponsorViewDetailApplyInCompOrEve(int sponsorInCompetitionId, string token)
+        //{
+        //    int UserId = DecodeToken(token, "Id");
+        //    int SponsorId = DecodeToken(token, "SponsorId");
 
-        public async Task<ViewDetailSponsorInCompetition> GetSponsorViewDetailApplyInCompOrEve(int sponsorInCompetitionId, string token)
-        {
-            int UserId = DecodeToken(token, "Id");
-            int SponsorId = DecodeToken(token, "SponsorId");
+        //    if (sponsorInCompetitionId == 0) throw new ArgumentNullException("Sponsor In Competition Id Null");
 
-            if (sponsorInCompetitionId == 0) throw new ArgumentNullException("Sponsor In Competition Id Null");
+        //    SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
 
-            SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
+        //    //Check is existed
+        //    if (sic == null) throw new NullReferenceException();
 
-            //Check is existed
-            if (sic == null) throw new NullReferenceException();
+        //    //Check Apply is belong to this user
+        //    if (sic.UserId != UserId) throw new ArgumentException("This Apply is not belong to you!");
 
-            //Check Apply is belong to this user
-            if (sic.UserId != UserId) throw new ArgumentException("This Apply is not belong to you!");
+        //    return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
 
-            return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
+        //}
 
-        }
+        ////Get All Sponsor Apply In Competition
+        //public async Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel request, string token)
+        //{
+        //    try
+        //    {
+        //        if (request.ClubId == 0 || request.CompetitionId == 0) throw new ArgumentNullException("Competition Id Null || ClubId Null");
+
+        //        bool Check = await CheckCompetitionManager(token, request.CompetitionId, request.ClubId);
+        //        if (Check)
+        //        {
+        //            //
+        //            PagingResult<ViewSponsorInCompetition> result = await _sponsorInCompetitionRepo.GetListSponsorInCompetition(request);
+        //            if (result == null) throw new NullReferenceException();
+        //            return result;
+        //        }//end if check
+        //        else
+        //        {
+        //            return null;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        ////Get Detail Sponsor Apply In Competition
+        //public async Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token)
+        //{
+        //    try
+        //    {
+        //        if (clubId == 0 || sponsorInCompetitionId == 0) throw new ArgumentNullException("ClubId Null || Sponsor In Competition Id Null");
+
+        //        SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(sponsorInCompetitionId);
+
+        //        //Check is existed
+        //        if (sic == null) throw new NullReferenceException();
+
+        //        //Check Apply is belong to this competition
+        //        Competition compe = await _competitionRepo.Get(sic.CompetitionId);
+        //        ViewCompetitionInClub cic = await _competitionInClubRepo.GetCompetitionInClub(clubId, compe.Id);
+        //        if (cic == null) throw new ArgumentException("This apply of Sponsor is not belong to this Competition");
+
+        //        bool Check = await CheckCompetitionManager(token, sic.CompetitionId, clubId);
+        //        if (Check)
+        //        {
+        //            return await TransferViewDetailSponsorInCompetition(sic, sic.UserId);
+        //        }
+        //        else
+        //        {
+        //            throw new NullReferenceException();
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //public async Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token)
+        //{
+        //    try
+        //    {
+        //        if (model.SponsorInCompetitionId == 0
+        //           || model.Status == 0
+        //           || model.ClubId == 0
+        //           || string.IsNullOrEmpty(model.Feedback))
+        //            throw new ArgumentNullException("Sponsor In Competition Id Null || Club Id Null || Status not equal 0|| Feedback Null");
+
+        //        SponsorInCompetition sic = await _sponsorInCompetitionRepo.Get(model.SponsorInCompetitionId);
+
+        //        //Check is existed
+        //        if (sic == null) throw new ArgumentException("Not found this apply of Sponsor");
+
+        //        //Check Apply is belong to this competition
+        //        Competition compe = await _competitionRepo.Get(sic.CompetitionId);
+        //        ViewCompetitionInClub cic = await _competitionInClubRepo.GetCompetitionInClub(model.ClubId, compe.Id);
+        //        if (cic == null) throw new ArgumentException("This apply of Sponsor is not belong to this Competition");
+
+        //        //Check has status cannot feeback again -(optional)
+        //        if (sic.Status != SponsorInCompetitionStatus.Waiting) throw new ArgumentException("Already feedback this apply");
+
+        //        bool Check = await CheckCompetitionManager(token, sic.CompetitionId, model.ClubId);
+        //        if (Check)
+        //        {
+        //            if (model.Feedback.Length > 4000) throw new ArgumentException("Content of feedback can not length > 4000 words");
+        //            sic.ReviewDate = new LocalTime().GetLocalTime().DateTime;
+        //            sic.Feedback = model.Feedback;
+        //            sic.Status = model.Status;
+        //            //Status Approved
+        //            if (sic.Status == SponsorInCompetitionStatus.Approved)
+        //            {
+        //                compe.IsSponsor = true;
+        //                await _competitionRepo.Update();
+        //            }
+        //            await _sponsorInCompetitionRepo.Update();
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //private async Task<ViewDetailSponsorInCompetition> TransferViewDetailSponsorInCompetition(SponsorInCompetition sponsorInCompetition, int userId)
+        //{
+
+        //    User user_Sponsor = await _userRepo.Get(userId);
+
+        //    Sponsor sponsor = await _sponsorRepo.Get(sponsorInCompetition.SponsorId);
+
+        //    return new ViewDetailSponsorInCompetition()
+        //    {
+        //        Id = sponsorInCompetition.Id,
+        //        SponsorId = sponsorInCompetition.SponsorId,
+        //        CompetitionId = sponsorInCompetition.CompetitionId,
+        //        //info User
+        //        UserId = userId,
+        //        Email = user_Sponsor.Email,
+        //        Fullname = user_Sponsor.Fullname,
+        //        //info Sponsor
+        //        SponsorName = sponsor.Name,
+        //        SponsorLogo = sponsor.Logo,
+        //        //info detail
+        //        CreateTime = sponsorInCompetition.CreateTime.Value,
+        //        Comment = sponsorInCompetition.Comment,
+        //        ReviewDate = (sponsorInCompetition.ReviewDate.HasValue) ? sponsorInCompetition.ReviewDate.Value : null,
+        //        Feedback = sponsorInCompetition.Feedback,
+        //        Status = sponsorInCompetition.Status
+        //    };
+        //}
+
 
         //transfer view
+
+
+
         private ViewCompetitionInClub TransferViewCompetitionInClub(CompetitionInClub competitionInClub)
         {
             return new ViewCompetitionInClub()
@@ -1877,35 +1914,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
-        private async Task<ViewDetailSponsorInCompetition> TransferViewDetailSponsorInCompetition(SponsorInCompetition sponsorInCompetition, int userId)
-        {
-
-            User user_Sponsor = await _userRepo.Get(userId);
-
-            Sponsor sponsor = await _sponsorRepo.Get(sponsorInCompetition.SponsorId);
-
-            return new ViewDetailSponsorInCompetition()
-            {
-                Id = sponsorInCompetition.Id,
-                SponsorId = sponsorInCompetition.SponsorId,
-                CompetitionId = sponsorInCompetition.CompetitionId,
-                //info User
-                UserId = userId,
-                Email = user_Sponsor.Email,
-                Fullname = user_Sponsor.Fullname,
-                //info Sponsor
-                SponsorName = sponsor.Name,
-                SponsorLogo = sponsor.Logo,
-                //info detail
-                CreateTime = sponsorInCompetition.CreateTime.Value,
-                Comment = sponsorInCompetition.Comment,
-                ReviewDate = (sponsorInCompetition.ReviewDate.HasValue) ? sponsorInCompetition.ReviewDate.Value : null,
-                Feedback = sponsorInCompetition.Feedback,
-                Status = sponsorInCompetition.Status
-            };
-        }
-
-
         private string GenerateSeedCode()
         {
             string codePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -2041,16 +2049,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
 
         private async Task<bool> CheckCompetitionManager(string Token, int CompetitionId, int ClubId)
         {
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);
@@ -2118,7 +2126,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);

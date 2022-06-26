@@ -21,7 +21,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //-----------------------------------------------------Role Manager
         public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
-        public Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token);
+       
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
         public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
 
@@ -38,12 +38,22 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token);
         public Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token);
 
-       
+
         //-----------------------------------------------------Sponsor       
-        public Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
-        public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token);
-        public Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request,string token);
-        public Task<ViewDetailSponsorInCompetition> GetSponsorViewDetailApplyInCompOrEve(int sponsorInCompetitionId, string token);
+        //public Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
+
+        //public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token);
+
+        //public Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request,string token);
+
+        //public Task<ViewDetailSponsorInCompetition> GetSponsorViewDetailApplyInCompOrEve(int sponsorInCompetitionId, string token);
+
+        //Get All Sponsor Apply in competition 
+        //public Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel model, string token);
+
+        //public Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
+
+        //public Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token);
 
 
         //-----------------------------------------------------Get       
@@ -51,10 +61,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
         //Get top 3 EVENT or COMPETITION by Status
         public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
-       
-        //Get All Sponsor Apply in competition 
-        public Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel model, string token);
-        public Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
+             
         //Get
         public Task<ViewDetailCompetition> GetById(int CompetitionId);
         

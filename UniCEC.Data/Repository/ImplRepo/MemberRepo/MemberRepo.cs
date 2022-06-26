@@ -285,7 +285,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         join us in context.Users on m.UserId equals us.Id
-                        where m.ClubId == model.ClubId && m.TermId == model.TermId && m.UserId == model.UserId && m.Status == MemberStatus.Active
+                        where m.ClubId == model.ClubId && m.UserId == model.UserId && m.Status == MemberStatus.Active //&& m.TermId == model.TermId
                         select new { us, m };
 
 
@@ -296,7 +296,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = x.m.ClubRoleId,
                 Id = x.m.Id,
                 UserId = x.us.Id,
-                TermId = x.m.TermId
+                //TermId = x.m.TermId
             }).FirstOrDefaultAsync();
         }
         public async Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo)
