@@ -1,140 +1,167 @@
 ﻿using System;
-using System.Threading.Tasks;
-using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Department;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.RequestModels;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text.RegularExpressions;
+using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Department;
+using UniCEC.Data.ViewModels.Entities.Major;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
     public class DepartmentService : IDepartmentService
     {
-        private IDepartmentRepo _departmentRepo;
         private IMajorRepo _majorRepo;
+        private IDepartmentRepo _departmentRepo;
 
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
-        public DepartmentService(IDepartmentRepo departmentRepo, IMajorRepo majorRepo)
+        public DepartmentService(IMajorRepo majorRepo, IDepartmentRepo departmentRepo)
         {
-            _departmentRepo = departmentRepo;
             _majorRepo = majorRepo;
+            _departmentRepo = departmentRepo;
+            _decodeToken = new DecodeToken();
         }
 
-        private int DecodeToken(string token, string nameClaim)
+        private ViewDepartment TransformViewDepartment(Department department)
         {
-            if(_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
+            return new ViewDepartment()
+            {
+                Id = department.Id,
+                MajorId = department.MajorId,
+                Description = department.Description,
+                DepartmentCode = department.MajorCode,
+                Name = department.Name,
+                Status = department.Status,
+                UniversityId = department.UniversityId                
+            };
         }
 
         public async Task<ViewDepartment> GetById(string token, int id)
         {
-            int roleId = DecodeToken(token, "RoleId");
+            int roleId = _decodeToken.Decode(token, "RoleId");
             bool? status = null;
-            if (!roleId.Equals(4)) status = true;
-            ViewDepartment department = await _departmentRepo.GetById(id, status);
-            return (department != null) ? department : throw new NullReferenceException("Not found this department");
+            int? universityId = null;
+
+            if (!roleId.Equals(1) && !roleId.Equals(4)) status = true;
+            if (!roleId.Equals(4) && !roleId.Equals(2)) universityId = _decodeToken.Decode(token, "UniversityId"); // system admin and sponsor            
+
+            ViewDepartment department = await _departmentRepo.GetById(id, status, universityId);
+            if (department == null) throw new NullReferenceException();
+            return department;
         }
 
-        public async Task<PagingResult<ViewDepartment>> GetByConditions(string token, DepartmentRequestModel request) // not finish
+        public async Task<ViewDepartment> GetByCode(string token, string majorCode)
         {
-            int roleId = DecodeToken(token, "RoleId");
-            if (!roleId.Equals(4)) request.Status = true;
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            bool? status = null;
+            int? universityId = null;
+
+            if (!roleId.Equals(1) && !roleId.Equals(4)) status = true;
+            if (!roleId.Equals(2) && !roleId.Equals(4)) universityId = _decodeToken.Decode(token, "UniversityId");
+
+            ViewDepartment department = await _departmentRepo.GetByCode(majorCode, status, universityId);
+            if (department == null) throw new NullReferenceException();
+            return department;
+        }
+
+        public async Task<PagingResult<ViewDepartment>> GetByConditions(string token, DepartmentRequestModel request)
+        {
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            
+            if (!roleId.Equals(1) && !roleId.Equals(4)) request.Status = true;            
+            if(!roleId.Equals(4) && !roleId.Equals(2))
+            {
+                int universityId = _decodeToken.Decode(token, "UniversityId");
+                if (!universityId.Equals(request.UniversityId)) throw new NullReferenceException();
+            }
+
             PagingResult<ViewDepartment> departments = await _departmentRepo.GetByConditions(request);
-            if (departments == null) throw new NullReferenceException("Not found any departments");
-            return (departments != null) ? departments : throw new NullReferenceException();
+            if(departments == null) throw new NullReferenceException();
+            return departments;
         }
 
-        public async Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request)
+        private void checkAuthorizedUser(string token, int uniId)
         {
-            PagingResult<ViewDepartment> departments = await _departmentRepo.GetByCompetition(competitionId, request);
-            return (departments != null) ? departments : throw new NullReferenceException();
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+
+            if (!roleId.Equals(1) || !uniId.Equals(universityId)) 
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
-        public async Task<ViewDepartment> Insert(string token, string name)
+        public async Task<ViewDepartment> Insert(string token, DepartmentInsertModel model)
         {
-            name = Regex.Replace(name.Trim(), @"\s{2,}", " ");
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("Name Null");
+            if (model.MajorId.Equals(0) || model.UniversityId.Equals(0) || string.IsNullOrEmpty(model.DepartmentCode) ||
+                string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
+                throw new ArgumentNullException("DepartmentId null || UniversityId null || MajorCode null || Name null || Description null");
 
-            int roleId = DecodeToken(token, "RoleId");
-            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
+            checkAuthorizedUser(token, model.UniversityId);
 
-            int duplicatedId = await _departmentRepo.CheckDuplicatedName(name);
-            if (duplicatedId > 0) throw new ArgumentException("Duplicated department");
+            model.Name = Regex.Replace(model.Name.Trim(), @"\s{2,}", " ");
+            int duplicatedId = await _departmentRepo.CheckDuplicatedName(model.UniversityId, model.Name);
+            if (duplicatedId > 0) throw new ArgumentException("Duplicated department name");
 
+            int departmentCode = await _departmentRepo.CheckExistedDepartmentCode(model.UniversityId, model.DepartmentCode);
+            if (departmentCode > 0) throw new ArgumentException("Duplicated MajorCode");
+            Major major = await _majorRepo.Get(model.MajorId);
+            if (major == null) throw new ArgumentException("Can not find this major");
+
+            // default status when insert is true
+            bool status = true;
             Department department = new Department()
             {
-                Name = name,
-                Status = true // default inserted status is true 
+                UniversityId = model.UniversityId,
+                MajorId = model.MajorId,
+                Description = model.Description,
+                MajorCode = model.DepartmentCode,
+                Name = model.Name,
+                Status = status                
             };
             int id = await _departmentRepo.Insert(department);
-            return (id > 0) ? await _departmentRepo.GetById(id, department.Status) : null;
+            department.Id = id;
+            return TransformViewDepartment(department);
         }
 
-        public async Task Update(string token, DepartmentUpdateModel model)
+        public async Task Update(string token, ViewDepartment model)
         {
-            int roleId = DecodeToken(token, "RoleId");
-            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
+            checkAuthorizedUser(token, model.UniversityId);
 
             Department department = await _departmentRepo.Get(model.Id);
-            if (department == null) throw new NullReferenceException("Not found this element");
+            if (department == null) throw new NullReferenceException("Not found this department");
+
+            int departmentCode = await _departmentRepo.CheckExistedDepartmentCode(model.UniversityId, model.DepartmentCode);
+            if (departmentCode > 0 && departmentCode != model.Id) throw new ArgumentException("Duplicated MajorCode");
+
+            Major major = await _majorRepo.Get(model.MajorId);
+            if (major == null) throw new ArgumentException("Can not find this major");
+
+            if (model.MajorId != 0) department.MajorId = model.MajorId;
             
-            if (model.Status.HasValue && model.Status.Value.Equals(true))
-            {
-                List<int> majorIds = await _majorRepo.GetIdsByDepartmentId(model.Id, model.Status.Value);
-                if (majorIds != null)
-                {
-                    foreach (int majorId in majorIds)
-                    {
-                        Major major = await _majorRepo.Get(majorId);
-                        major.Status = model.Status.Value;
-                    }
-                    await _majorRepo.Update();
-                }
+            if (!string.IsNullOrEmpty(model.Description)) department.Description = model.Description;
+            
+            if (!string.IsNullOrEmpty(model.DepartmentCode)) department.MajorCode = model.DepartmentCode;
+            
+            if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
+            
+            if(model.Status.Equals(true)) department.Status = model.Status;
 
-                department.Status = model.Status.Value;
-            }
-
-            if (!string.IsNullOrEmpty(model.Name))
-            {
-                model.Name = Regex.Replace(model.Name.Trim(), @"\s{2,}", " ");
-                int duplicatedId = await _departmentRepo.CheckDuplicatedName(model.Name);
-                if (duplicatedId > 0 && !duplicatedId.Equals(model.Id)) throw new ArgumentException("Duplicated department");
-                department.Name = model.Name;
-            }
-
-            await _departmentRepo.Update();
+            await _majorRepo.Update();
         }
 
         public async Task Delete(string token, int id)
         {
-            int roleId = DecodeToken(token, "RoleId");
-            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource"); // system admin
-            
             Department department = await _departmentRepo.Get(id);
-            if (department == null) throw new NullReferenceException("Not found this element");
+            if (department == null) throw new NullReferenceException("Not found this department");
 
-            if (department.Status.Equals(false)) return; // already deleted 
+            checkAuthorizedUser(token, department.UniversityId);
 
+            if (department.Status.Equals(false)) return;
             department.Status = false;
-            // delete concerned major
-            List<int> majorIds = await _majorRepo.GetIdsByDepartmentId(id, department.Status);
-            if (majorIds != null)
-            {
-                foreach (int majorId in majorIds)
-                {
-                    Major major = await _majorRepo.Get(majorId);
-                    major.Status = false;
-                }
-                await _majorRepo.Update();
-            }
-
             await _departmentRepo.Update();
         }
     }

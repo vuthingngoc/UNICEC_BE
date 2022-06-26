@@ -20,7 +20,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
         public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request)
         {
-            var query = from cr in context.CompetitionRounds
+            var query = from cr in context.CompetitionRounds                        
                         where cr.CompetitionId.Equals(request.CompetitionId)
                         select cr;            
 
@@ -37,6 +37,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) query = query.Where(cr => cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
 
             if (request.Status.HasValue) query = query.Where(cr => cr.Status.Equals(request.Status.Value));
+
+            query = query.OrderBy(cr => cr.StartTime);
 
             int totalCount = query.Count();
 

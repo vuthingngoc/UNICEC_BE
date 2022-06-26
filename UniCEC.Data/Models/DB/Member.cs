@@ -21,11 +21,9 @@ namespace UniCEC.Data.Models.DB
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public MemberStatus Status { get; set; }
-        public int TermId { get; set; }
 
         public virtual Club Club { get; set; }
         public virtual ClubRole ClubRole { get; set; }
-        public virtual Term Term { get; set; }
         public virtual User User { get; set; }
         public virtual ICollection<MemberTakesActivity> MemberTakesActivities { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }

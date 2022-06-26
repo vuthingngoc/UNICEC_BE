@@ -48,10 +48,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                 //nó cứ đưa list Department Id vào nếu thỏa đúng thì nó sẽ trả ra user đó 
                 var query = from stu in context.Users
                             where stu.Id == stuInfo.Id
+                            from dep in context.Departments
+                            where dep.Id == stuInfo.MajorId
                             from mj in context.Majors
-                            where mj.Id == stuInfo.MajorId
-                            from dp in context.Departments
-                            where dp.Id == mj.DepartmentId && dp.Id == Com_In_Dep_Id
+                            where mj.Id == dep.Id && mj.Id == Com_In_Dep_Id
                             select stu;
                 //
                 User student = await query.FirstOrDefaultAsync();

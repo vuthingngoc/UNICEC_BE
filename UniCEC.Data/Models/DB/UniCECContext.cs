@@ -28,7 +28,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<CompetitionActivity> CompetitionActivities { get; set; }
         public virtual DbSet<CompetitionEntity> CompetitionEntities { get; set; }
         public virtual DbSet<CompetitionInClub> CompetitionInClubs { get; set; }
-        public virtual DbSet<CompetitionInDepartment> CompetitionInDepartments { get; set; }
+        public virtual DbSet<CompetitionInMajor> CompetitionInMajors { get; set; }
         public virtual DbSet<CompetitionManager> CompetitionManagers { get; set; }
         public virtual DbSet<CompetitionRole> CompetitionRoles { get; set; }
         public virtual DbSet<CompetitionRound> CompetitionRounds { get; set; }
@@ -49,7 +49,6 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Team> Teams { get; set; }
         public virtual DbSet<TeamInRound> TeamInRounds { get; set; }
         public virtual DbSet<TeamRole> TeamRoles { get; set; }
-        public virtual DbSet<Term> Terms { get; set; }
         public virtual DbSet<University> Universities { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
@@ -275,25 +274,25 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__Competiti__Compe__656C112C");
             });
 
-            modelBuilder.Entity<CompetitionInDepartment>(entity =>
+            modelBuilder.Entity<CompetitionInMajor>(entity =>
             {
-                entity.ToTable("CompetitionInDepartment");
+                entity.ToTable("CompetitionInMajor");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
-                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+                entity.Property(e => e.MajorId).HasColumnName("MajorID");
 
                 entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.CompetitionInDepartments)
+                    .WithMany(p => p.CompetitionInMajors)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__66603565");
 
-                entity.HasOne(d => d.Department)
-                    .WithMany(p => p.CompetitionInDepartments)
-                    .HasForeignKey(d => d.DepartmentId)
+                entity.HasOne(d => d.Major)
+                    .WithMany(p => p.CompetitionInMajors)
+                    .HasForeignKey(d => d.MajorId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Depar__6754599E");
             });
@@ -378,9 +377,34 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.MajorCode)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.MajorId).HasColumnName("MajorID");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
+
+                entity.HasOne(d => d.Major)
+                    .WithMany(p => p.Departments)
+                    .HasForeignKey(d => d.MajorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Major__Departmen__6D0D32F4");
+
+                entity.HasOne(d => d.University)
+                    .WithMany(p => p.Departments)
+                    .HasForeignKey(d => d.UniversityId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Major__Universit__6E01572D");
             });
 
             modelBuilder.Entity<Influencer>(entity =>
@@ -429,34 +453,9 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.MajorCode)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.UniversityId).HasColumnName("UniversityID");
-
-                entity.HasOne(d => d.Department)
-                    .WithMany(p => p.Majors)
-                    .HasForeignKey(d => d.DepartmentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Major__Departmen__6D0D32F4");
-
-                entity.HasOne(d => d.University)
-                    .WithMany(p => p.Majors)
-                    .HasForeignKey(d => d.UniversityId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Major__Universit__6E01572D");
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<Member>(entity =>
@@ -473,8 +472,6 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
 
-                entity.Property(e => e.TermId).HasColumnName("TermID");
-
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
                 entity.HasOne(d => d.Club)
@@ -488,12 +485,6 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.ClubRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Member__ClubRole__6FE99F9F");
-
-                entity.HasOne(d => d.Term)
-                    .WithMany(p => p.Members)
-                    .HasForeignKey(d => d.TermId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_TermID");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Members)
@@ -772,21 +763,6 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Term>(entity =>
-            {
-                entity.ToTable("Term");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
-
-                entity.Property(e => e.EndTime).HasColumnType("datetime");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<University>(entity =>

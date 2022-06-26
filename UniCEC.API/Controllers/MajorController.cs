@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Department;
 using UniCEC.Data.ViewModels.Entities.Major;
 
 namespace UniCEC.API.Controllers
@@ -17,54 +19,17 @@ namespace UniCEC.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
-
     public class MajorController : ControllerBase
     {
-        private IMajorService _majorService;
+        IMajorService _majorService;
 
         public MajorController(IMajorService majorService)
         {
             _majorService = majorService;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllMajor([FromQuery] PagingRequest request)
-        //{
-        //    try
-        //    {
-        //        PagingResult<ViewMajor> majors = await _majorService.GetAllPaging(request);
-        //        return Ok(majors);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
-
-        //[HttpGet("university/{id}")]
-        //public async Task<IActionResult> GetMajorByUniversity(int id, [FromQuery] PagingRequest request)
-        //{
-        //    try
-        //    {
-        //        PagingResult<ViewMajor> majors = await _majorService.GetByUniversity(id, request);
-        //        return Ok(majors);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //    catch(NullReferenceException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //}
-
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get major by id - authenticated user")]
+        [SwaggerOperation(Summary = "Get major by id - Authenticated user")]
         public async Task<IActionResult> GetMajorById(int id)
         {
             try
@@ -73,27 +38,7 @@ namespace UniCEC.API.Controllers
                 ViewMajor major = await _majorService.GetById(token, id);
                 return Ok(major);
             }
-            catch (NullReferenceException)
-            {
-                return Ok(new object());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
-        [HttpGet("code/{id}")]
-        [SwaggerOperation(Summary = "Get major by code - authenticated user")]
-        public async Task<IActionResult> GetMajorByCode([FromRoute(Name = "id")] string code)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewMajor major = await _majorService.GetByCode(token, code);
-                return Ok(major);
-            }
-            catch (NullReferenceException)
+            catch(NullReferenceException)
             {
                 return Ok(new object());
             }
@@ -104,43 +49,88 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Get majors by conditions - authenticated user")]
-        public async Task<IActionResult> GetMajorByConditions([FromQuery] MajorRequestModel request)
+        [SwaggerOperation(Summary = "Get majors by conditions - Authenticated user")]
+        public async Task<IActionResult> GetMajorsByConditions([FromQuery] MajorRequestModel request)
+        {
+            try 
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewMajor> majors = await _majorService.GetByConditions(token, request);
+                return Ok(majors);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch(NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+        }
+
+        [HttpGet("competition/{id}")]
+        [SwaggerOperation(Summary = "Get majors by competition id - Authenticated user")]
+        public async Task<IActionResult> GetMajorsByCompetition(int id, [FromQuery] PagingRequest request)
         {
             try
             {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewMajor> majors = await _majorService.GetMajorByConditions(token, request);
+                PagingResult<ViewMajor> majors = await _majorService.GetByCompetition(id, request);
                 return Ok(majors);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
             }
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Insert new major - System admin")]
+        public async Task<IActionResult> InsertMajor([BindRequired] string name)
+        {
+            try 
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewMajor major = await _majorService.Insert(token, name);
+                return Ok(major);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-        }
-
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert new major - University admin")]
-        public async Task<IActionResult> InsertMajor([FromBody] MajorInsertModel major)
-        {
-            try
+            catch (DbUpdateException)
             {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewMajor viewMajor = await _majorService.Insert(token, major);
-                return Ok(viewMajor);
-            }
-            catch(UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
+                return StatusCode(500, "Internal Server Exception");
             }
             catch(ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Update a major - System admin")]
+        public async Task<IActionResult> UpdateMajor([FromBody] MajorUpdateModel model)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _majorService.Update(token, model);
+                return Ok(); 
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
@@ -148,58 +138,28 @@ namespace UniCEC.API.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
-        [HttpPut]
-        [SwaggerOperation(Summary = "Update a major - University admin")]
-        public async Task<IActionResult> UpdateMajor([FromBody] ViewMajor major)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _majorService.Update(token, major);
-                return Ok();                
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (SqlException)
+            catch(NullReferenceException ex)
             {
-                return StatusCode(500, "Internal Server Exception");
+                return BadRequest(ex.Message);
             }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
+
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete major by id - University admin")]
-        public async Task<IActionResult> DeleteMajor(int id)
+        [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Delete major by id - System admin")]
+        public async Task<IActionResult> DeleteDepartment(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _majorService.Delete(token, id);                
+                await _majorService.Delete(token, id);
                 return NoContent();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
             }
             catch (SqlException)
             {
@@ -208,7 +168,11 @@ namespace UniCEC.API.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal Server Exception");
-            }            
-        }
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }       
     }
 }

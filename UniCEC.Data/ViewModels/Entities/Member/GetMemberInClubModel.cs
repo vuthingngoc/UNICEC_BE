@@ -14,10 +14,5 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         {
             get; set;
         }
-        [FromQuery(Name = "term-id")]
-        public int TermId
-        {
-            get; set;
-        }
     }
 }

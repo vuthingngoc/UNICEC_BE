@@ -11,10 +11,8 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
-using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
-using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
-using UniCEC.Data.ViewModels.Entities.CompetitionManager;
+using UniCEC.Data.ViewModels.Entities.CompetitionInMajor;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
@@ -456,7 +454,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPost("department")]
         [SwaggerOperation(Summary = "Add department for competition")]
-        public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInDepartmentInsertModel model)
+        public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInMajorInsertModel model)
         {
             try
             {
@@ -464,7 +462,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewCompetitionInDepartment> result = await _competitionService.AddCompetitionInDepartment(model, token);
+                List<ViewCompetitionInMajor> result = await _competitionService.AddCompetitionInDepartment(model, token);
 
                 if (result != null)
                 {
