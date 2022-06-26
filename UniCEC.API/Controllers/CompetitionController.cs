@@ -405,48 +405,48 @@ namespace UniCEC.API.Controllers
 
 
         // DELETE api/<CompetitionController>/5
-        [Authorize(Roles = "Student")]
-        [HttpDelete("remove-sponsor")]
-        [SwaggerOperation(Summary = "Club manager delete sponsor in competition or event")]
-        public async Task<IActionResult> LeaderDeleteSponsorInCompetition([FromBody] SponsorInCompetitionDeleteModel model)
-        {
-            try
-            {
-                var header = Request.Headers;
-                if (!header.ContainsKey("Authorization")) return Unauthorized();
-                string token = header["Authorization"].ToString().Split(" ")[1];
-                Boolean check = false;
-                check = await _competitionService.LeaderDeleteSponsorInCompetition(model, token);
-                if (check)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //[Authorize(Roles = "Student")]
+        //[HttpDelete("remove-sponsor")]
+        //[SwaggerOperation(Summary = "Club manager delete sponsor in competition or event")]
+        //public async Task<IActionResult> LeaderDeleteSponsorInCompetition([FromBody] SponsorInCompetitionDeleteModel model)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        //        Boolean check = false;
+        //        check = await _competitionService.LeaderDeleteSponsorInCompetition(model, token);
+        //        if (check)
+        //        {
+        //            return Ok();
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
 
 
