@@ -23,7 +23,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
        
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
-        public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
+        //public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
 
         //-----------------------------------------------------Role In Competition Manager
         //FE-Mobile use
