@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
@@ -30,7 +27,8 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
         private ITermRepo _termRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IMemberRepo _memberRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
+
 
         public ActivitiesEntityService(IActivitiesEntityRepo activitiesEntityRepo,
                                        ICompetitionActivityRepo competitionActivityRepo,
@@ -49,6 +47,7 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
             _termRepo = termRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _memberRepo = memberRepo;
+            _decodeToken = new DecodeToken();
         }
 
         public async Task<ViewActivitiesEntity> AddActivitiesEntity(ActivitiesEntityInsertModel model, string token)
@@ -122,7 +121,7 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);
@@ -177,11 +176,11 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
             }
         }
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
     }
 }

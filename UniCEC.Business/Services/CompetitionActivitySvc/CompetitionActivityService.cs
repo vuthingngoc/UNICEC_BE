@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -38,7 +38,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IFileService _fileService;
         private IUserRepo _userRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+
+        private DecodeToken _decodeToken;
 
         public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo,
                                           IMemberTakesActivityRepo memberTakesActivityRepo,
@@ -61,6 +62,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _activitiesEntityRepo = activitiesEntityRepo;
             _userRepo = userRepo;   
             _fileService = fileService;
+            _decodeToken= new DecodeToken();
         }
 
 
@@ -155,7 +157,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 {
                     //thì thằng này phải là club leader 
                     Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
-                    if (clubLeader.UserId == DecodeToken(token, "Id"))
+                    if (clubLeader.UserId == _decodeToken.Decode(token, "Id"))
                     {
                         PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListProcessActivitiesByConditions(conditions);
                         if (result == null) throw new NullReferenceException();
@@ -249,7 +251,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;             //Will update when Member Submit task
                         competitionActivity.Status = CompetitionActivityStatus.Happenning;                      //Check Status
                         competitionActivity.Priority = model.Priority;
-                        competitionActivity.UserId = DecodeToken(token,"Id");
+                        competitionActivity.UserId = _decodeToken.Decode(token,"Id");
 
 
                         int result = await _competitionActivityRepo.Insert(competitionActivity);
@@ -523,7 +525,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
             //
-            int UserId = DecodeToken(Token, "Id");
+            int UserId = _decodeToken.Decode(Token, "Id");
 
             //------------- CHECK Competition is have in system or not
             Competition competition = await _competitionRepo.Get(CompetitionId);
@@ -578,12 +580,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
 
     }
 }

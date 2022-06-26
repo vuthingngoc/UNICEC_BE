@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -26,7 +25,7 @@ namespace UniCEC.Business.Services.TeamSvc
         private ITeamRoleRepo _teamRoleRepo;
         private IParticipantInTeamRepo _participantInTeamRepo;
         private IClubRepo _clubRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
 
 
@@ -43,6 +42,7 @@ namespace UniCEC.Business.Services.TeamSvc
             _teamRoleRepo = teamRoleRepo;
             _clubRepo = clubRepo;
             _participantInTeamRepo = participantInTeamRepo;
+            _decodeToken = new DecodeToken();   
 
         }
 
@@ -60,7 +60,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (request.CompetitionId == 0)
                     throw new ArgumentNullException("|| Competition Id Null");
 
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
                 Competition competition = await _competitionRepo.Get(request.CompetitionId);
                 //----- Check Competition id
                 if (competition != null)
@@ -95,7 +95,7 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 if (teamId == 0 || competitionId == 0) throw new ArgumentNullException("|| Competition Id Null  || Team Null");
 
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
                 Competition competition = await _competitionRepo.Get(competitionId);
                 //----- Check Competition id
                 if (competition != null)
@@ -173,7 +173,7 @@ namespace UniCEC.Business.Services.TeamSvc
             //2.Member       
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
 
                 if (model.CompetitionId == 0
                  || string.IsNullOrEmpty(model.Name)
@@ -268,7 +268,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
 
                 if (string.IsNullOrEmpty(model.InvitedCode)) throw new ArgumentNullException("Invited Code Null");
 
@@ -360,7 +360,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
 
                 if (model.TeamId == 0) throw new ArgumentNullException("Team Id Null");
                 //check team
@@ -438,7 +438,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
                 if (model.ParticipantInTeamId != 0) throw new ArgumentNullException("Participant In Team Id Null");
                 //----- Check participant
                 ParticipantInTeam Member_pit = await _participantInTeamRepo.Get(model.ParticipantInTeamId);
@@ -523,7 +523,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
 
                 if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
                 //1.check team
@@ -572,7 +572,7 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                int UserId = DecodeToken(token, "Id");
+                int UserId = _decodeToken.Decode(token, "Id");
 
                 if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
 
@@ -667,12 +667,12 @@ namespace UniCEC.Business.Services.TeamSvc
             return seedCode;
         }
 
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
 
         private bool CheckDate(DateTime StartTimeRegister, DateTime StartTime)
         {

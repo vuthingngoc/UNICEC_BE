@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
-using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.DepartmentInUniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Competition;
-using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.Participant;
 
 namespace UniCEC.Business.Services.ParticipantSvc
@@ -26,9 +21,9 @@ namespace UniCEC.Business.Services.ParticipantSvc
         private IParticipantRepo _participantRepo;
         private ICompetitionRepo _competitionRepo;      
         private IClubRepo _clubRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
         private IMemberRepo _memberRepo;
         private IUserRepo _userRepo;
+        private DecodeToken _decodeToken;
 
         public ParticipantService(IParticipantRepo participantRepo,
                                   ICompetitionRepo competitionRepo,                                                             
@@ -41,6 +36,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             _clubRepo = clubRepo;
             _memberRepo = memberRepo;         
             _userRepo = userRepo;
+            _decodeToken = new DecodeToken();
         }
 
         public Task<bool> Delete(int id)
@@ -68,8 +64,8 @@ namespace UniCEC.Business.Services.ParticipantSvc
             try
             {
 
-                int UserId = DecodeToken(token, "Id");
-                int UniversityId = DecodeToken(token, "UniversityId");
+                int UserId = _decodeToken.Decode(token, "Id");
+                int UniversityId = _decodeToken.Decode(token, "UniversityId");
 
                 //get Student Info
                 User studentInfo = await _userRepo.Get(UserId);
@@ -252,12 +248,12 @@ namespace UniCEC.Business.Services.ParticipantSvc
         }
 
         //Decode Token
-        private int DecodeToken(string token, string nameClaim)
-        {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
-        }
+        //private int DecodeToken(string token, string nameClaim)
+        //{
+        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
+        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+        //    return Int32.Parse(claim.Value);
+        //}
     }
 }
 
