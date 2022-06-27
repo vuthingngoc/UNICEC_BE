@@ -9,6 +9,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
 {
     public interface IActivitiesEntityService
     {
-        public Task<ViewActivitiesEntity> AddActivitiesEntity(ActivitiesEntityInsertModel model, string token);
+        //public Task<ViewActivitiesEntity> AddActivitiesEntity(ActivitiesEntityInsertModel model, string token);
     }
 }

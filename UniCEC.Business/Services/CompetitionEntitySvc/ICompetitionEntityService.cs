@@ -8,6 +8,6 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 {
     public interface ICompetitionEntityService
     {
-        public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token);
+        //public Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token);
     }
 }
