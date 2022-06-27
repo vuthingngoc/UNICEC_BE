@@ -28,7 +28,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //BE  use to test
         public Task<bool> UpdateBE(LeaderUpdateCompOrEventModel competition, string token);
             
-        public Task<List<ViewCompetitionInMajor>> AddCompetitionInDepartment(CompetitionInMajorInsertModel model, string token);
+        //public Task<List<ViewCompetitionInMajor>> AddCompetitionInDepartment(CompetitionInMajorInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
         //Influencer

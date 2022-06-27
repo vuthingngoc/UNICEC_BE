@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UniCEC.Business.Services.FileSvc;
+﻿using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
-using UniCEC.Data.Common;
-using UniCEC.Data.Enum;
-using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
@@ -15,11 +8,6 @@ using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
-using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
-using UniCEC.Data.ViewModels.Entities.Member;
 
 namespace UniCEC.Business.Services.CompetitionActivitySvc
 {
@@ -31,6 +19,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private IMemberTakesActivityRepo _memberTakesActivityRepo;
         private IClubRepo _clubRepo;
         private ICompetitionRepo _competitionRepo;
+       //private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IFileService _fileService;
@@ -42,6 +31,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           IMemberTakesActivityRepo memberTakesActivityRepo,
                                           IClubRepo clubRepo,
                                           ICompetitionRepo competitionRepo,
+                                          //ITermRepo termRepo,
                                           IMemberRepo memberRepo,
                                           ICompetitionManagerRepo competitionManagerRepo,
                                           IActivitiesEntityRepo activitiesEntityRepo,
@@ -52,12 +42,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _memberTakesActivityRepo = memberTakesActivityRepo;
             _clubRepo = clubRepo;
             _competitionRepo = competitionRepo;
+            //_termRepo = termRepo;
             _memberRepo = memberRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _activitiesEntityRepo = activitiesEntityRepo;
             _userRepo = userRepo;
             _fileService = fileService;
-            _decodeToken= new DecodeToken();
+            _decodeToken = new DecodeToken();
         }
 
 
@@ -233,20 +224,20 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //                    insertActivitiesEntity = false;
         //                }
 
-                        //
-                        CompetitionActivity competitionActivity = new CompetitionActivity();
-                        competitionActivity.CompetitionId = model.CompetitionId;
-                        competitionActivity.NumOfMember = 0;                                                    //When Member Take Activity will +1
-                        competitionActivity.Description = model.Description;
-                        competitionActivity.Name = model.Name;
-                        competitionActivity.SeedsPoint = model.SeedsPoint;
-                        competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;               //LocalTime
-                        competitionActivity.Ending = model.Ending;
-                        competitionActivity.SeedsCode = await checkExistCode();                                 //Check Code
-                        competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;             //Will update when Member Submit task
-                        competitionActivity.Status = CompetitionActivityStatus.Happenning;                      //Check Status
-                        competitionActivity.Priority = model.Priority;
-                        competitionActivity.UserId = _decodeToken.Decode(token,"Id");
+        //                //
+        //                CompetitionActivity competitionActivity = new CompetitionActivity();
+        //                competitionActivity.CompetitionId = model.CompetitionId;
+        //                competitionActivity.NumOfMember = 0;                                                    //When Member Take Activity will +1
+        //                competitionActivity.Description = model.Description;
+        //                competitionActivity.Name = model.Name;
+        //                competitionActivity.SeedsPoint = model.SeedsPoint;
+        //                competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;               //LocalTime
+        //                competitionActivity.Ending = model.Ending;
+        //                competitionActivity.SeedsCode = await checkExistCode();                                 //Check Code
+        //                competitionActivity.Process = CompetitionActivityProcessStatus.NotComplete;             //Will update when Member Submit task
+        //                competitionActivity.Status = CompetitionActivityStatus.Happenning;                      //Check Status
+        //                competitionActivity.Priority = model.Priority;
+        //                competitionActivity.UserId = _decodeToken.Decode(token,"Id");
 
 
         //                int result = await _competitionActivityRepo.Insert(competitionActivity);
@@ -522,65 +513,60 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //    //
         //    int UserId = _decodeToken.Decode(Token, "Id");
 
-            //------------- CHECK Competition is have in system or not
-            Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition != null)
-            {
-                //------------- CHECK Club in system
-                Club club = await _clubRepo.Get(ClubId);
-                if (club != null)
-                {
-                    ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
-                    if (CurrentTermOfCLub != null)
-                    {
-                        GetMemberInClubModel conditions = new GetMemberInClubModel()
-                        {
-                            UserId = UserId,
-                            ClubId = ClubId,
-                            TermId = CurrentTermOfCLub.Id
-                        };
-                        ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-                        //------------- CHECK Mem in that club
-                        if (infoClubMem != null)
-                        {
-                            //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
-                            if (isAllow != null)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You do not in Competition Manager");
-                            }
-                        }
-                        else
-                        {
-                            throw new UnauthorizedAccessException("You are not member in Club");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Term of ClubId is End");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Club is not found");
-                }
-            }
-            else
-            {
-                throw new ArgumentException("Competition or Event not found ");
-            }
-        }
-
-        //private int DecodeToken(string token, string nameClaim)
-        //{
-        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-        //    return Int32.Parse(claim.Value);
+        //    //------------- CHECK Competition is have in system or not
+        //    Competition competition = await _competitionRepo.Get(CompetitionId);
+        //    if (competition != null)
+        //    {
+        //        //------------- CHECK Club in system
+        //        Club club = await _clubRepo.Get(ClubId);
+        //        if (club != null)
+        //        {
+        //            ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
+        //            if (CurrentTermOfCLub != null)
+        //            {
+        //                GetMemberInClubModel conditions = new GetMemberInClubModel()
+        //                {
+        //                    UserId = UserId,
+        //                    ClubId = ClubId,
+        //                    TermId = CurrentTermOfCLub.Id
+        //                };
+        //                ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
+        //                //------------- CHECK Mem in that club
+        //                if (infoClubMem != null)
+        //                {
+        //                    //------------- CHECK is in CompetitionManger table                
+        //                    CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
+        //                    if (isAllow != null)
+        //                    {
+        //                        return true;
+        //                    }
+        //                    else
+        //                    {
+        //                        throw new UnauthorizedAccessException("You do not in Competition Manager");
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    throw new UnauthorizedAccessException("You are not member in Club");
+        //                }
+        //            }
+        //            else
+        //            {
+        //                throw new ArgumentException("Term of ClubId is End");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new ArgumentException("Club is not found");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw new ArgumentException("Competition or Event not found ");
+        //    }
         //}
+
+        
 
     }
 }

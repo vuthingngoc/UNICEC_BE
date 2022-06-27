@@ -667,12 +667,7 @@ namespace UniCEC.Business.Services.TeamSvc
             return seedCode;
         }
 
-        //private int DecodeToken(string token, string nameClaim)
-        //{
-        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-        //    return Int32.Parse(claim.Value);
-        //}
+        
 
         private bool CheckDate(DateTime StartTimeRegister, DateTime StartTime)
         {
