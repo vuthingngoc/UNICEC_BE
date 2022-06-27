@@ -303,42 +303,42 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //}
 
                 //List Influencer ID
-                bool insertInfluencer;
-                if (model.ListInfluencer.Count > 0)
-                {
-                    bool check = true;
+                //bool insertInfluencer;
+                //if (model.ListInfluencer.Count > 0)
+                //{
+                //    bool check = true;
 
-                    foreach (var influencer in model.ListInfluencer)
-                    {
-                        if (string.IsNullOrEmpty(influencer.Name) || string.IsNullOrEmpty(influencer.ImageUrl))
-                        {
-                            check = false;
-                        }
-                    }
-                    if (check)
-                    {
-                        insertInfluencer = true;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Name or Base64 can not null");
-                    }
-                }
-                else
-                {
-                    insertInfluencer = false;
-                }
+                //    foreach (var influencer in model.ListInfluencer)
+                //    {
+                //        if (string.IsNullOrEmpty(influencer.Name) || string.IsNullOrEmpty(influencer.ImageUrl))
+                //        {
+                //            check = false;
+                //        }
+                //    }
+                //    if (check)
+                //    {
+                //        insertInfluencer = true;
+                //    }
+                //    else
+                //    {
+                //        throw new ArgumentException("Name or Base64 can not null");
+                //    }
+                //}
+                //else
+                //{
+                //    insertInfluencer = false;
+                //}
 
                 //Add Competition Entity
-                bool insertCompetitionEntity;
-                if (!string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
-                {
-                    insertCompetitionEntity = true;
-                }
-                else
-                {
-                    insertCompetitionEntity = false;
-                }
+                //bool insertCompetitionEntity;
+                //if (!string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
+                //{
+                //    insertCompetitionEntity = true;
+                //}
+                //else
+                //{
+                //    insertCompetitionEntity = false;
+                //}
 
                 //------------ Insert Competition
                 //ở trong trường hợp này phân biệt EVENT - COMPETITION
@@ -412,42 +412,42 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //}
 
                 //------------ Insert Competition Entity
-                if (insertCompetitionEntity)
-                {
-                    string Url = await _fileService.UploadFile(model.CompetitionEntity.Base64StringEntity);
-                    CompetitionEntity competitionEntity = new CompetitionEntity()
-                    {
-                        CompetitionId = comp.Id,
-                        Name = model.CompetitionEntity.NameEntity,
-                        ImageUrl = Url
-                    };
-                    await _competitionEntityRepo.Insert(competitionEntity);
-                }
+                //if (insertCompetitionEntity)
+                //{
+                //    string Url = await _fileService.UploadFile(model.CompetitionEntity.Base64StringEntity);
+                //    CompetitionEntity competitionEntity = new CompetitionEntity()
+                //    {
+                //        CompetitionId = comp.Id,
+                //        Name = model.CompetitionEntity.NameEntity,
+                //        ImageUrl = Url
+                //    };
+                //    await _competitionEntityRepo.Insert(competitionEntity);
+                //}
 
-                //------------ Insert Influencer-In-Competition
-                if (insertInfluencer)
-                {
-                    foreach (InfluencerInsertModel influ in model.ListInfluencer)
-                    {
-                        Influencer influencer = new Influencer()
-                        {
-                            Name = influ.Name,
-                            ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
-                        };
+                ////------------ Insert Influencer-In-Competition
+                //if (insertInfluencer)
+                //{
+                //    foreach (InfluencerInsertModel influ in model.ListInfluencer)
+                //    {
+                //        Influencer influencer = new Influencer()
+                //        {
+                //            Name = influ.Name,
+                //            ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
+                //        };
 
-                        int result = await _influencerRepo.Insert(influencer);
-                        if (result > 0)
-                        {
-                            //add in Influencer in competition
-                            InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
-                            {
-                                CompetitionId = comp.Id,
-                                InfluencerId = result
-                            };
-                            await _influencerInCompetitionRepo.Insert(influ_in_comp);
-                        }
-                    }
-                }
+                //        int result = await _influencerRepo.Insert(influencer);
+                //        if (result > 0)
+                //        {
+                //            //add in Influencer in competition
+                //            InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
+                //            {
+                //                CompetitionId = comp.Id,
+                //                InfluencerId = result
+                //            };
+                //            await _influencerInCompetitionRepo.Insert(influ_in_comp);
+                //        }
+                //    }
+                //}
                 //------------ Insert Competition-In-Club
                 CompetitionInClub competitionInClub = new CompetitionInClub();
                 competitionInClub.ClubId = model.ClubId;
