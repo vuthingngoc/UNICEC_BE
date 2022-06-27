@@ -150,7 +150,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         {
                             imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             imgUrl_CompetitionEntity = "";
                         }
@@ -1951,129 +1951,50 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         private async Task<bool> CheckCompetitionManager(string Token, int CompetitionId, int ClubId)
         {
-            int UserId = _decodeToken.Decode(Token, "Id");
-
-            //------------- CHECK Competition is have in system or not
+            //------------- CHECK Competition in system
             Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition != null)
-            {
-                //------------- CHECK Club in system
-                Club club = await _clubRepo.Get(ClubId);
-                if (club != null)
-                {
-                    ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
-                    if (CurrentTermOfCLub != null)
-                    {
-                        GetMemberInClubModel conditions = new GetMemberInClubModel()
-                        {
-                            UserId = UserId,
-                            ClubId = ClubId,
-                            TermId = CurrentTermOfCLub.Id
-                        };
-                        ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-                        //------------- CHECK Mem in that club
-                        if (infoClubMem != null)
-                        {
-                            //------------- CHECK User is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
-                            if (isAllow != null)
-                            {
+            if (competition == null) throw new ArgumentException("Competition or Event not found ");
 
-                                //------------- CHECK Role Is Manger
-                                if (isAllow.CompetitionRoleId == 1)
-                                {
-                                    return true;
-                                }
-                                else
-                                {
-                                    throw new UnauthorizedAccessException("Only role Manager can do this action");
-                                }
+            //------------- CHECK Club in system
+            Club club = await _clubRepo.Get(ClubId);
+            if (club == null) throw new ArgumentException("Club in not found");
 
-                            }
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You do not in Competition Manager ");
-                            }
-                        }
-                        else
-                        {
-                            throw new UnauthorizedAccessException("You are not member in Club");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Term of ClubId is End");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Club is not found");
-                }
-            }
-            else
-            {
-                throw new ArgumentException("Competition or Event not found ");
-            }
+            //------------- CHECK Is Member in Club
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
+            Member member = await _memberRepo.Get(memberId);
+            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+            //------------- CHECK User is in CompetitionManger table                          
+            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, member.UserId, ClubId);
+            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+
+            //------------- CHECK Role Is Manger
+            if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
+
+            return true;
+
         }
 
         private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
         {
-            //
-            int UserId = _decodeToken.Decode(Token, "Id");
-
-            //------------- CHECK Competition is have in system or not
+            //------------- CHECK Competition in system
             Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition != null)
-            {
-                //------------- CHECK Club in system
-                Club club = await _clubRepo.Get(ClubId);
-                if (club != null)
-                {
-                    ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
-                    if (CurrentTermOfCLub != null)
-                    {
-                        GetMemberInClubModel conditions = new GetMemberInClubModel()
-                        {
-                            UserId = UserId,
-                            ClubId = ClubId,
-                            TermId = CurrentTermOfCLub.Id
-                        };
-                        ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-                        //------------- CHECK Mem in that club
-                        if (infoClubMem != null)
-                        {
-                            //------------- CHECK is in CompetitionManger table                
-                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
-                            if (isAllow != null)
-                            {
+            if (competition == null) throw new ArgumentException("Competition or Event not found ");
 
-                                return true;
+            //------------- CHECK Club in system
+            Club club = await _clubRepo.Get(ClubId);
+            if (club == null) throw new ArgumentException("Club in not found");
 
-                            }
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You do not in Competition Manager");
-                            }
-                        }
-                        else
-                        {
-                            throw new UnauthorizedAccessException("You are not member in Club");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Term of ClubId is End");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Club is not found");
-                }
-            }
-            else
-            {
-                throw new ArgumentException("Competition or Event not found ");
-            }
+            //------------- CHECK Is Member in Club
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
+            Member member = await _memberRepo.Get(memberId);
+            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+            //------------- CHECK User is in CompetitionManger table                
+            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, member.UserId, ClubId);
+            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+
+            return true;
         }
 
         private bool CheckMaxMin(int max, int min, int NumberOfParticipant)
