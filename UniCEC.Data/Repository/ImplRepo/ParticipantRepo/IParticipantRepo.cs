@@ -9,11 +9,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
     {
         public Task<bool> CheckStudentInCom_In_Dep(List<int> listComp_In_Dep_Id, User stuInfo);
 
-        public Task<bool> CheckAddDuplicateUser(User stuInfo, int CompetitionId);
+        public Task<bool> CheckDuplicateUser(User stuInfo, int CompetitionId);
 
         public Task<bool> CheckNumOfParticipant(int CompetitionId, int numOfCompetition);
 
-        public Task<Participant> Participant_In_Competition(int UserId, int CompetitionId);
+        public Task<Participant> ParticipantInCompetition(int UserId, int CompetitionId);
 
         public Task<int> NumOfParticipant(int CompetitionId);
 
