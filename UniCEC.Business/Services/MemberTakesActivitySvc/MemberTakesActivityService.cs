@@ -11,13 +11,11 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.MemberTakesActivitySvc
 {
@@ -30,7 +28,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         private ICompetitionRepo _competitionRepo;
         private IClubRepo _clubRepo;
-        private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IUserRepo _userRepo;
@@ -43,7 +40,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                                           ICompetitionActivityRepo clubActivityRepo,
                                           ICompetitionRepo competitionRepo,
                                           IClubRepo clubRepo,
-                                          ITermRepo termRepo,
                                           IMemberRepo memberRepo,
                                           IUserRepo userRepo,
                                           ICompetitionManagerRepo competitionManagerRepo,
@@ -53,7 +49,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             _competitionActivityRepo = clubActivityRepo;
             _competitionRepo = competitionRepo;
             _clubRepo = clubRepo;
-            _termRepo = termRepo;
             _memberRepo = memberRepo;
             _userRepo = userRepo;
             _competitionManagerRepo = competitionManagerRepo;
@@ -214,10 +209,10 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         //            //Check member is belong to club
         //            if (member.ClubId != model.ClubId) throw new ArgumentException("Member are not belong to this club");
 
-        //            //Check booker can not assign task for yourself 
-        //            int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token,"Id"),model.ClubId);
-        //            ViewMember vdm = await _memberRepo.GetById(memId);
-        //            if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself"); 
+                    //Check booker can not assign task for yourself 
+                    int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token,"Id"),model.ClubId);
+                    ViewMember vdm = await _memberRepo.GetById(memId);
+                    if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself"); 
 
         //            //Check add the same task for this member 
         //            bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, model.MemberId);
@@ -271,17 +266,17 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         //        bool check = await CheckConditions(token, ca.CompetitionId, model.ClubId);
 
-        //        if (check)
-        //        {
-        //            //Update Status của Competition Activity
-        //            int numberOfMemberHasSubmit = await _memberTakesActivityRepo.GetNumberOfMemberIsSubmitted(ca.Id);
-        //            if (numberOfMemberHasSubmit == ca.NumOfMember)
-        //            {
-        //                ca.Process = CompetitionActivityProcessStatus.Complete;                   
-        //            }
-        //            // -1 Number Of Participant
-        //            ca.NumOfMember = ca.NumOfMember - 1;
-        //            await _competitionActivityRepo.Update();
+                if (check)
+                {
+                    //Update Status của Competition Activity
+                    int numberOfMemberHasSubmit = await _memberTakesActivityRepo.GetNumberOfMemberIsSubmitted(ca.Id);
+                    if (numberOfMemberHasSubmit == ca.NumOfMember)
+                    {
+                        ca.Process = CompetitionActivityProcessStatus.Complete;                   
+                    }
+                    // -1 Number Of Participant
+                    ca.NumOfMember = ca.NumOfMember - 1;
+                    await _competitionActivityRepo.Update();
 
         //            return await _memberTakesActivityRepo.RemoveMemberTakeTask(model.MemberTakesActivityId);
 
@@ -503,5 +498,64 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
         //        throw new ArgumentException("Competition or Event not found ");
         //    }
         //}
+
+        //Check Conditition will be return BookerId
+        private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
+        {
+            //
+            int UserId = _decodeToken.Decode(Token, "Id");
+
+            //------------- CHECK Competition is have in system or not
+            Competition competition = await _competitionRepo.Get(CompetitionId);
+            if (competition != null)
+            {
+                //------------- CHECK Club in system
+                Club club = await _clubRepo.Get(ClubId);
+                if (club != null)
+                {
+                    ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
+                    if (CurrentTermOfCLub != null)
+                    {
+                        GetMemberInClubModel conditions = new GetMemberInClubModel()
+                        {
+                            UserId = UserId,
+                            ClubId = ClubId,
+                            TermId = CurrentTermOfCLub.Id
+                        };
+                        ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
+                        //------------- CHECK Mem in that club
+                        if (infoClubMem != null)
+                        {
+                            //------------- CHECK is in CompetitionManger table                
+                            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
+                            if (isAllow != null)
+                            {
+                                return true ;
+                            }
+                            else
+                            {
+                                throw new UnauthorizedAccessException("You do not in Competition Manager");
+                            }
+                        }
+                        else
+                        {
+                            throw new UnauthorizedAccessException("You are not member in Club");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Term of ClubId is End");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Club is not found");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Competition or Event not found ");
+            }
+        }
     }
 }

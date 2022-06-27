@@ -43,7 +43,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //List Department Id Belong To University
         [JsonPropertyName("list_department_id")]
-        public List<int>? ListDepartmentId { get; set; }
+        public List<int>? ListMajorId { get; set; }
         
         //Add competition entity
         public AddCompetitionEntity? CompetitionEntity { get; set; }

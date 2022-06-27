@@ -9,19 +9,12 @@ using System.Linq;
 using System.Collections.Generic;
 using UniCEC.Data.Enum;
 using System;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 {
     public class MemberTakesActivityRepo : Repository<MemberTakesActivity>, IMemberTakesActivityRepo
     {
-
-        private ITermRepo _termRepo;
-        public MemberTakesActivityRepo(UniCECContext context, ITermRepo termRepo) : base(context)
-        {
-            _termRepo = termRepo;
-        }
+        public MemberTakesActivityRepo(UniCECContext context) : base(context) { }
 
 
         //Get-All-Taskes-By-Conditions 

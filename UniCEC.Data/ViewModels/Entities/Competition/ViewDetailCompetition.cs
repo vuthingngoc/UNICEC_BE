@@ -67,7 +67,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //------------- ADD Field Department   -> Object Array
         [JsonPropertyName("departments_in_competition")]
-        public List<ViewDeparmentInComp> DepartmentInCompetition { get; set; }
+        public List<ViewMajorInComp> DepartmentInCompetition { get; set; }
 
         //------------- ADD Field Infuencer   -> Object Array
         [JsonPropertyName("influencers_in_competition")]

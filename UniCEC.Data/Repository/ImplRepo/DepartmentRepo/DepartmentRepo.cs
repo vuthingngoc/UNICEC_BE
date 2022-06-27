@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.RequestModels;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
+using System.Collections.Generic;
+using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Department;
-using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 {
@@ -20,102 +21,125 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request)
         {
             var query = from d in context.Departments
+                        where d.UniversityId.Equals(request.UniversityId)
                         select d;
 
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(department => department.Name.Contains(request.Name));
 
-            if (request.Status.HasValue) query = query.Where(department => department.Status.Equals(request.Status.Value));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(d => d.Name.Contains(request.Name));
+
+            if (request.MajorId.HasValue) query = query.Where(d => d.MajorId.Equals(request.MajorId));
+
+            //if (!string.IsNullOrEmpty(request.MajorCode)) query = query.Where(m => m.MajorCode.Equals(request.MajorCode));
+
+            if (request.Status.HasValue) query = query.Where(m => m.Status.Equals(request.Status.Value));
 
             int totalCount = query.Count();
-            List<ViewDepartment> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                                        .Select(department => new ViewDepartment()
-                                                        {
-                                                            Id = department.Id,
-                                                            Name = department.Name,
-                                                            Status = department.Status
-                                                        }).ToListAsync();
 
-            return (departments.Count > 0) ? new PagingResult<ViewDepartment>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
+            var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                    .Select(m => new ViewDepartment()
+                                    {
+                                        Id = m.Id,
+                                        UniversityId = m.UniversityId,
+                                        MajorId = m.MajorId,
+                                        Description = m.Description,
+                                        DepartmentCode = m.MajorCode,
+                                        Name = m.Name,
+                                        Status = m.Status
+                                    }).ToListAsync();
+
+            return (query.Any()) ? new PagingResult<ViewDepartment>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<PagingResult<ViewDepartment>> GetByCompetition(int competitionId, PagingRequest request)
+        public async Task<PagingResult<Department>> GetByUniversity(int universityId, PagingRequest request)
         {
-            var query = from cid in context.CompetitionInDepartments
-                        join d in context.Departments on cid.DepartmentId equals d.Id
-                        where cid.CompetitionId == competitionId
+            var query = from d in context.Departments
+                        where d.UniversityId.Equals(universityId)
                         select d;
 
             int totalCount = query.Count();
 
-            List<ViewDepartment> departments = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                                            .Select(department => new ViewDepartment()
-                                                            {
-                                                                Id = department.Id,
-                                                                Name = department.Name,
-                                                                Status = department.Status
-                                                            }).ToListAsync();
+            List<Department> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                .Select(m => new Department()
+                {
+                    Id = m.Id,
+                    UniversityId = m.UniversityId,
+                    MajorId = m.MajorId,
+                    Description = m.Description,
+                    MajorCode = m.MajorCode,
+                    Name = m.Name,
+                    Status = m.Status
+                }).ToListAsync();
 
-            return (departments.Count > 0) ? new PagingResult<ViewDepartment>(departments, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (majors.Count > 0) ? new PagingResult<Department>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<ViewDepartment> GetById(int id, bool? status)
+        public async Task<int> CheckExistedDepartmentCode(int universityId, string code)
+        {
+            Department department = await context.Departments.FirstOrDefaultAsync(d => d.UniversityId.Equals(universityId)
+                                                                        && d.MajorCode.Equals(code));
+            return (department != null) ? department.Id : 0;
+        }
+
+        public async Task<List<int>> GetIdsByMajorId(int majorId, bool? status)
+        {
+            var query = from d in context.Departments
+                        where d.MajorId == majorId
+                        select d;
+
+            if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
+
+            List<int> departmentIds = await query.Select(d => d.Id).ToListAsync();
+            return (departmentIds.Count > 0) ? departmentIds : null;
+        }
+
+        public async Task<ViewDepartment> GetById(int id, bool? status, int? universityId)
         {
             var query = from d in context.Departments
                         where d.Id.Equals(id)
                         select d;
 
-            if (status.HasValue) query = query.Where(department => department.Status.Equals(status.Value));
+            if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
+            if (universityId.HasValue) query = query.Where(d => d.UniversityId.Equals(universityId));
 
-            return await query.Select(d => new ViewDepartment()
+            return await query.Select(m => new ViewDepartment()
             {
-                Id = d.Id,
-                Name = d.Name,
-                Status = d.Status,
+                UniversityId = m.UniversityId,
+                MajorId = m.MajorId,
+                Description = m.Description,
+                Id = m.Id,
+                DepartmentCode = m.MajorCode,
+                Name = m.Name,
+                Status = m.Status
             }).FirstOrDefaultAsync();
         }
 
-        public async Task<int> CheckDuplicatedName(string name)
+        public async Task<ViewDepartment> GetByCode(string majorCode, bool? status, int? universityId)
+        {
+            var query = from d in context.Departments
+                        where d.MajorCode.Equals(majorCode)
+                        select d;
+
+            if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
+
+            if (universityId.HasValue) query = query.Where(d => d.UniversityId.Equals(universityId));
+
+            return await query.Select(m => new ViewDepartment()
+            {
+                UniversityId = m.UniversityId,
+                MajorId = m.MajorId,
+                Description = m.Description,
+                Id = m.Id,
+                DepartmentCode = m.MajorCode,
+                Name = m.Name,
+                Status = m.Status
+            }).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CheckDuplicatedName(int universityId, string name)
         {
             return await (from d in context.Departments
-                          where d.Name.ToLower().Equals(name.ToLower())
+                          where d.UniversityId.Equals(universityId) && d.Name.ToLower().Equals(name.ToLower())
                           select d.Id).FirstOrDefaultAsync();
-        }
-
-        // TA
-        public async Task<bool> checkDepartment(List<int> listDepartmentId)
-        {
-            bool result = true;
-            foreach (int DepId in listDepartmentId)
-            {
-                var query = await (from dep in context.Departments
-                                   where dep.Id == DepId
-                                   select dep).FirstOrDefaultAsync();
-
-                if (query == null)
-                {
-                    result = false;
-                }
-            }
-            return result;
-        }
-
-        public async Task<bool> CheckDepartmentBelongToUni(List<int> listDepartmentId, int universityId)
-        {
-            bool result = true;
-            foreach (int DepId in listDepartmentId)
-            {
-                var query = await (from maj in context.Majors
-                                   where maj.UniversityId == universityId
-                                   from dep in context.Departments
-                                   where dep.Id == maj.Id
-                                   select dep).FirstOrDefaultAsync();
-
-                if (query == null)
-                {
-                    result = false;
-                }
-            }
-            return result;
         }
     }
 }

@@ -9,23 +9,20 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.CompetitionEntitySvc
 {
     public class CompetitionEntityService : ICompetitionEntityService
     {
-       
+
         private ICompetitionEntityRepo _competitionEntityRepo;
         //Add 
         private ICompetitionRepo _competitionRepo;
         private IFileService _fileService;
         private IClubRepo _clubRepo;
-        private ITermRepo _termRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IMemberRepo _memberRepo;
         private DecodeToken _decodeToken;
@@ -35,15 +32,13 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                                         ICompetitionRepo competitionRepo,
                                         IFileService fileService,
                                         IClubRepo clubRepo,
-                                        ITermRepo termRepo,
-                                        ICompetitionManagerRepo competitionManagerRepo,                                       
-                                        IMemberRepo memberRepo) 
+                                        ICompetitionManagerRepo competitionManagerRepo,
+                                        IMemberRepo memberRepo)
         {
             _competitionEntityRepo = competitionEntityRepo;
             _competitionRepo = competitionRepo;
             _fileService = fileService;
             _clubRepo = clubRepo;
-            _termRepo = termRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _memberRepo = memberRepo;
             _decodeToken = new DecodeToken() ;
