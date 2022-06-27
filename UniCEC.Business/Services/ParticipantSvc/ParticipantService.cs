@@ -77,156 +77,146 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
 
                 //
-                if (competition != null)
+                if (competition == null) throw new ArgumentException("Competition not found");
+
+                //check add duplicate student 
+                //false -> student can add
+                //true -> student can't add
+                if (await _participantRepo.CheckDuplicateUser(studentInfo, model.CompetitionId)) 
+                    throw new ArgumentException("Student already join in this Competition");
+
+                //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
+                bool round1 = false;
+                //Inter University
+                if (competition.Scope == CompetitionScopeStatus.InterUniversity)
                 {
-                    //check add duplicate student 
-                    //false -> student can add
-                    //true -> student can't add
-                    if (await _participantRepo.CheckAddDuplicateUser(studentInfo, model.CompetitionId) == false)
+                    //ai cũng có thể join
+                    round1 = true;
+                }
+
+                //NoPublic -- dành cho nội bộ trường
+                if (competition.Scope == CompetitionScopeStatus.University)
+                {
+                    //get Club in Competition to check university id
+                    List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
+                    int clubId = listComp_In_Club[0].ClubId;
+                    Club club = await _clubRepo.Get(clubId);
+                    int UniversityIdOfCompetition = club.UniversityId;
+
+                    if (studentInfo.UniversityId == UniversityIdOfCompetition)
                     {
-                        //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
-                        bool round1 = false;
-                        //Inter University
-                        if (competition.Scope == CompetitionScopeStatus.InterUniversity)
-                        {
-                            //ai cũng có thể join
-                            round1 = true;
-                        }
-
-                        //NoPublic -- dành cho nội bộ trường
-                        if (competition.Scope == CompetitionScopeStatus.University)
-                        {
-                            //get Club in Competition to check university id
-                            List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
-                            int clubId = listComp_In_Club[0].ClubId;
-                            Club club = await _clubRepo.Get(clubId);
-                            int UniversityIdOfCompetition = club.UniversityId;
-
-                            if (studentInfo.UniversityId == UniversityIdOfCompetition)
-                            {
-                                round1 = true;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("User isn't a student in this University, Competition can't support");
-                            }
-                        }
-
-                        //Scope = Club -- dành riêng 1 hoặc nhiều Club
-                        if (competition.Scope == CompetitionScopeStatus.Club)
-                        {
-                            //chỉ kiểm tra trong trường                                
-                            //Khác university thì kh join đc 
-                            List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
-
-                            //List<Club> listClub = new List<Club>();
-                            List<int> listClub_Id = new List<int>();
-
-                            foreach (CompetitionInClub cic in listComp_In_Club)
-                            {
-                                //listClub.Add(cic.Club);
-                                listClub_Id.Add(cic.Club.Id);
-                            }
-                            //kiểm tra xem có là thành viên trong CLB                                   
-                            Member stuIsMember = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
-                            if (stuIsMember != null)
-                            {
-                                round1 = true;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("User isn't a Member, Competition can't support");
-                            }
-                            //int uniId_In_Comp = listClub.FirstOrDefault().UniversityId;
-
-                            //kiểm tra có trùng Uni hay không
-                            //if (uniId_In_Comp == UniversityId)
-                            //{
-                            //}//end if uniId_In_Comp
-                            // else
-                            // {
-                            //throw new ArgumentException("User isn't a student in this University, Competition can't support");
-                            //}
-                        }
-
-                        //ROUND 2 - Check xem Competition is RegisterTime
-                        bool round2 = false;
-                        if (round1)
-                        {
-                            if (competition.Status == CompetitionStatus.Registering)
-                            {
-                                round2 = true;
-                            }//end check Registering
-                            else
-                            {
-                                throw new ArgumentException("Time Register is end for this Compeititon");
-                            }
-                        }
-
-                        //ROUND 3 - Check Number Of Participant is full or Not??
-                        bool round3 = false;
-                        if (round1 && round2)
-                        {
-                            //Check Number Of Participant join this competition
-                            if (await _participantRepo.CheckNumOfParticipant(competition.Id, competition.NumberOfParticipation))
-                            {
-                                round3 = true;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Competition is full of Participant");
-                            }
-                        }
-
-                        //ROUND 4 - Create Participant
-                        if (round1 && round2 && round3)
-                        {
-
-                            Participant participant = new Participant();
-                            participant.StudentId = studentInfo.Id;
-                            participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
-                            participant.StudentId = UserId;
-                            participant.CompetitionId = competition.Id;
-
-
-                            //IsMember
-                            List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
-
-                            List<int> listClub_Id = new List<int>();
-
-                            foreach (CompetitionInClub cic in listComp_In_Club)
-                            {
-                                listClub_Id.Add(cic.Club.Id);
-                            }
-
-                            Member member = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
-                            if (member != null)
-                            {
-                                participant.MemberId = member.Id;
-                            }
-
-                            //-------------- INSERT PARTICIPANT
-                            int result = await _participantRepo.Insert(participant);
-                            if (result != 0)
-                            {
-                                Participant p = await _participantRepo.Get(result);
-                                //                              
-                                return TransformViewModel(p, studentInfo);
-                            }
-                        }
-                        return null;
+                        round1 = true;
                     }
-                    //end add duplicate user
                     else
                     {
-                        throw new ArgumentException("Student already join in this Competition");
+                        throw new ArgumentException("User isn't a student in this University, Competition can't support");
                     }
                 }
-                //end if Competition != null
-                else
+
+                //Scope = Club -- dành riêng 1 hoặc nhiều Club
+                if (competition.Scope == CompetitionScopeStatus.Club)
                 {
-                    throw new ArgumentException("Competition not found");
+                    //chỉ kiểm tra trong trường                                
+                    //Khác university thì kh join đc 
+                    List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
+
+                    //List<Club> listClub = new List<Club>();
+                    List<int> listClub_Id = new List<int>();
+
+                    foreach (CompetitionInClub cic in listComp_In_Club)
+                    {
+                        //listClub.Add(cic.Club);
+                        listClub_Id.Add(cic.Club.Id);
+                    }
+                    //kiểm tra xem có là thành viên trong CLB                                   
+                    Member stuIsMember = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
+                    if (stuIsMember != null)
+                    {
+                        round1 = true;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("User isn't a Member, Competition can't support");
+                    }
+                    //int uniId_In_Comp = listClub.FirstOrDefault().UniversityId;
+
+                    //kiểm tra có trùng Uni hay không
+                    //if (uniId_In_Comp == UniversityId)
+                    //{
+                    //}//end if uniId_In_Comp
+                    // else
+                    // {
+                    //throw new ArgumentException("User isn't a student in this University, Competition can't support");
+                    //}
                 }
+
+                //ROUND 2 - Check xem Competition is RegisterTime
+                bool round2 = false;
+                if (round1)
+                {
+                    if (competition.Status == CompetitionStatus.Registering)
+                    {
+                        round2 = true;
+                    }//end check Registering
+                    else
+                    {
+                        throw new ArgumentException("Time Register is end for this Compeititon");
+                    }
+                }
+
+                //ROUND 3 - Check Number Of Participant is full or Not??
+                bool round3 = false;
+                if (round1 && round2)
+                {
+                    //Check Number Of Participant join this competition
+                    if (await _participantRepo.CheckNumOfParticipant(competition.Id, competition.NumberOfParticipation))
+                    {
+                        round3 = true;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Competition is full of Participant");
+                    }
+                }
+
+                //ROUND 4 - Create Participant
+                if (round1 && round2 && round3)
+                {
+
+                    Participant participant = new Participant();
+                    participant.StudentId = studentInfo.Id;
+                    participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
+                    participant.StudentId = UserId;
+                    participant.CompetitionId = competition.Id;
+
+
+                    //IsMember
+                    List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
+
+                    List<int> listClub_Id = new List<int>();
+
+                    foreach (CompetitionInClub cic in listComp_In_Club)
+                    {
+                        listClub_Id.Add(cic.Club.Id);
+                    }
+
+                    Member member = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
+                    if (member != null)
+                    {
+                        participant.MemberId = member.Id;
+                    }
+
+                    //-------------- INSERT PARTICIPANT
+                    int result = await _participantRepo.Insert(participant);
+                    if (result != 0)
+                    {
+                        Participant p = await _participantRepo.Get(result);
+                        //                              
+                        return TransformViewModel(p, studentInfo);
+                    }
+                }
+                return null;
+
             }
             catch (Exception)
             {
@@ -247,7 +237,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             };
         }
 
-        
+
     }
 }
 

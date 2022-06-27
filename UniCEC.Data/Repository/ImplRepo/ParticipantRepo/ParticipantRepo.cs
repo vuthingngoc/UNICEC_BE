@@ -15,7 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 
         }
 
-        public async Task<bool> CheckAddDuplicateUser(User stuInfo, int CompetitionId)
+        public async Task<bool> CheckDuplicateUser(User stuInfo, int CompetitionId)
         {
             // chưa được add
             bool result = false;
@@ -85,7 +85,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
             }
         }
 
-        public async Task<Participant> Participant_In_Competition(int UserId, int CompetitionId)
+        public async Task<Participant> ParticipantInCompetition(int UserId, int CompetitionId)
         {
             var query = from p in context.Participants
                         where p.CompetitionId == CompetitionId && p.StudentId == UserId

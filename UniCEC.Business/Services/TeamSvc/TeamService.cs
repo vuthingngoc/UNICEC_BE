@@ -42,7 +42,7 @@ namespace UniCEC.Business.Services.TeamSvc
             _teamRoleRepo = teamRoleRepo;
             _clubRepo = clubRepo;
             _participantInTeamRepo = participantInTeamRepo;
-            _decodeToken = new DecodeToken();   
+            _decodeToken = new DecodeToken();
 
         }
 
@@ -58,30 +58,21 @@ namespace UniCEC.Business.Services.TeamSvc
             try
             {
                 if (request.CompetitionId == 0)
-                    throw new ArgumentNullException("|| Competition Id Null");
+                    throw new ArgumentNullException("Competition Id Null");
 
                 int UserId = _decodeToken.Decode(token, "Id");
                 Competition competition = await _competitionRepo.Get(request.CompetitionId);
                 //----- Check Competition id
-                if (competition != null)
-                {
-                    //----- Check Participant 
-                    Participant p = await _participantRepo.Participant_In_Competition(UserId, request.CompetitionId);
-                    if (p != null)
-                    {
-                        PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
-                        return result;
-                    }
-                    //end check is Participant
-                    else
-                    {
-                        throw new UnauthorizedAccessException("You aren't participant in Competition");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Competition is not found");
-                }
+                if (competition == null) throw new ArgumentException("Competition is not found");
+
+                //----- Check Participant 
+                Participant p = await _participantRepo.ParticipantInCompetition(UserId, request.CompetitionId);
+                if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+
+                PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
+                return result;
+
+
             }
             catch (Exception)
             {
@@ -93,47 +84,28 @@ namespace UniCEC.Business.Services.TeamSvc
         {
             try
             {
-                if (teamId == 0 || competitionId == 0) throw new ArgumentNullException("|| Competition Id Null  || Team Null");
+                if (teamId == 0 || competitionId == 0) throw new ArgumentNullException("Competition Id Null  || Team Null");
 
                 int UserId = _decodeToken.Decode(token, "Id");
                 Competition competition = await _competitionRepo.Get(competitionId);
+
                 //----- Check Competition id
-                if (competition != null)
-                {
-                    //----- Check Team id
-                    Team team = await _teamRepo.Get(teamId);
-                    if (team != null)
-                    {
-                        //----- Check Team id is belong to this competition
-                        if (competition.Id == team.CompetitionId)
-                        {
-                            //----- Check Participant  
-                            Participant p = await _participantRepo.Participant_In_Competition(UserId, competitionId);
-                            if (p != null)
-                            {
-                                ViewDetailTeam vdt = await _teamRepo.GetDetailTeamInCompetition(teamId, competitionId);
-                                return vdt;
-                            }
-                            //end check is Participant
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You aren't participant in Competition");
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Team is not belong to this competition");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Team is not found");
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Competition is not found");
-                }
+                if (competition == null) throw new ArgumentException("Competition is not found");
+
+                //----- Check Team id
+                Team team = await _teamRepo.Get(teamId);
+                if (team == null) throw new ArgumentException("Team is not found");
+
+                //----- Check Team id is belong to this competition
+                if (competition.Id != team.CompetitionId) throw new ArgumentException("Team is not belong to this competition");
+
+                //----- Check Participant  
+                Participant p = await _participantRepo.ParticipantInCompetition(UserId, competitionId);
+                if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+
+                ViewDetailTeam vdt = await _teamRepo.GetDetailTeamInCompetition(teamId, competitionId);
+                return vdt;
+
             }
             catch (Exception)
             {
@@ -181,81 +153,52 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
                 //Check Competition
-                if (competition != null)
+                if (competition == null) throw new ArgumentException("Competition is not found");
+
+                //Check Competition can create Team StartTimeRegister < local time < StartTime
+                if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Can't create Team at this moment !!!");
+
+                //check competition is Event or not -> if event can't create team
+                if (competition.NumberOfTeam == 0) throw new ArgumentException("Event can't not create team !");
+
+                //Check Participant
+                if (await _participantRepo.ParticipantInCompetition(UserId, model.CompetitionId) == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+
+                //-----------------Add Team
+                Team team = new Team()
                 {
-                    //Check Competition can create Team StartTimeRegister < local time < StartTime
-                    if (CheckDate(competition.StartTimeRegister, competition.StartTime))
-                    {
-                        //check competition is Event or not -> if event can't create team
-                        if (competition.NumberOfTeam != 0)
-                        {
-                            if (await _participantRepo.Participant_In_Competition(UserId, model.CompetitionId) != null) // Check xem có phải là Participant kh 
-                            {
-                                //-----------------Add Team
-                                Team team = new Team()
-                                {
-                                    CompetitionId = model.CompetitionId,
-                                    Name = model.Name,
-                                    Description = model.Description,
-                                    //number of student in team
-                                    NumberOfStudentInTeam = 1,// auto vừa tạo là 1
-                                    //generate code
-                                    InvitedCode = await CheckExistCode(),
-                                    //status available
-                                    Status = TeamStatus.Available
-                                };
-                                int Team_Id = await _teamRepo.Insert(team);
-                                if (Team_Id > 0)
-                                {
-                                    Team getTeam = await _teamRepo.Get(Team_Id);
-                                    //-----------------Add ParticiPant in Team with Role Leader
-                                    ParticipantInTeam pit = new ParticipantInTeam()
-                                    {
-                                        ParticipantId = model.CompetitionId,
-                                        //Team Id
-                                        TeamId = getTeam.Id,
-                                        //auto leader 
-                                        TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
-                                        //auto status 
-                                        Status = ParticipantInTeamStatus.InTeam
-                                    };
-                                    int result = await _participantInTeamRepo.Insert(pit);
-                                    if (result > 0)
-                                    {
-                                        return TransformViewTeam(getTeam);
-                                    }
-                                    else
-                                    {
-                                        throw new ArgumentException("Add Team Leader Failed");
-                                    }
-                                }//end add team
-                                else
-                                {
-                                    throw new ArgumentException("Add Team Failed");
-                                }
-                            }
-                            //end check is Participant
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You aren't participant in Competition");
-                            }
-                        }
-                        //end check Event
-                        else
-                        {
-                            throw new ArgumentException("Event can't not create team !");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Can't create Team at this moment !!!");
-                    }
-                }
-                //end check competition != null
-                else
+                    CompetitionId = model.CompetitionId,
+                    Name = model.Name,
+                    Description = model.Description,
+                    //number of student in team
+                    NumberOfStudentInTeam = 1,// auto vừa tạo là 1
+                                              //generate code
+                    InvitedCode = await CheckExistCode(),
+                    //status available
+                    Status = TeamStatus.Available
+                };
+                int Team_Id = await _teamRepo.Insert(team);
+
+                if (Team_Id <= 0) throw new ArgumentException("Add Team Failed");
+
+                Team getTeam = await _teamRepo.Get(Team_Id);
+                //-----------------Add ParticiPant in Team with Role Leader
+                ParticipantInTeam pit = new ParticipantInTeam()
                 {
-                    throw new ArgumentException("Competition is not found");
-                }
+                    ParticipantId = model.CompetitionId,
+                    //Team Id
+                    TeamId = getTeam.Id,
+                    //auto leader 
+                    TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader"),
+                    //auto status 
+                    Status = ParticipantInTeamStatus.InTeam
+                };
+                int result = await _participantInTeamRepo.Insert(pit);
+
+                if (result <= 0) throw new ArgumentException("Add Team Leader Failed");
+
+                return TransformViewTeam(getTeam);
+
             }
             catch (Exception)
             {
@@ -274,81 +217,50 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //----- Check invited code 
                 Team team = await _teamRepo.GetTeamByInvitedCode(model.InvitedCode);
-                if (team != null)
+                if (team == null) throw new ArgumentException("Not found team with Invited Code");
+
+                //----- Check student is participant in that competiiton
+                Participant participant = await _participantRepo.ParticipantInCompetition(UserId, team.CompetitionId);
+                if (participant == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+
+                //----- Check Team Status Is Locked 
+                if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Team Is Locked you can't join");
+
+                //----- Check join in the same Team in Competition
+                ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
+                if (participantInTeam != null) throw new ArgumentException("You are already in that Team");
+
+                //kh có trong team này nhưng có thể ở team khác
+                //----- Check join another team when Student not out the previous team
+                ParticipantInTeam participantInAnotherTeam = await _participantInTeamRepo.CheckParticipantInAnotherTeam(team.CompetitionId, UserId);
+                if (participantInAnotherTeam != null) throw new ArgumentException("You are already in Team, Please out team previous to join the next Team");
+
+                //----- Check number of member in team 
+                Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, (int)competition.MaxNumber) == false) throw new ArgumentException("Team is full");
+
+                //------ Add Participant in team
+                ParticipantInTeam pit = new ParticipantInTeam()
                 {
-                    //----- Check student is participant in that competiiton
-                    Participant participant = await _participantRepo.Participant_In_Competition(UserId, team.CompetitionId);
-                    if (participant != null)
-                    {
-                        //----- Check Team Status Is Locked 
-                        if (team.Status == TeamStatus.IsLocked)
-                        {
-                            //----- Check join in the same Team in Competition
-                            ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
-                            if (Participant_In_Team == null)
-                            {
-                                //kh có trong team này nhưng có thể ở team khác
-                                //----- Check join another team when Student not out the previous team
-                                ParticipantInTeam Participant_In_Another_Team = await _participantInTeamRepo.CheckParticipantInAnotherTeam(team.CompetitionId, UserId);
-                                if (Participant_In_Another_Team == null)
-                                {
-                                    //----- Check number of member in team 
-                                    Competition competition = await _competitionRepo.Get(team.CompetitionId);
-                                    if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, (int)competition.MaxNumber))
-                                    {
-                                        //------ Add Participant in team
-                                        ParticipantInTeam pit = new ParticipantInTeam()
-                                        {
-                                            ParticipantId = participant.Id,
-                                            TeamId = team.Id,
-                                            //auto member
-                                            TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
-                                            //auto status 
-                                            Status = ParticipantInTeamStatus.InTeam
-                                        };
+                    ParticipantId = participant.Id,
+                    TeamId = team.Id,
+                    //auto member
+                    TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member"),
+                    //auto status 
+                    Status = ParticipantInTeamStatus.InTeam
+                };
 
-                                        await _participantInTeamRepo.Insert(pit);
+                await _participantInTeamRepo.Insert(pit);
 
-                                        //------------------Update Number of member in Team
-                                        Team t = await _teamRepo.Get(team.Id);
+                //------------------Update Number of member in Team
+                Team t = await _teamRepo.Get(team.Id);
 
-                                        t.NumberOfStudentInTeam = t.NumberOfStudentInTeam++;
+                t.NumberOfStudentInTeam = t.NumberOfStudentInTeam++;
 
-                                        await _teamRepo.Update();
+                await _teamRepo.Update();
 
-                                        return TransformViewParticipantInTeam(pit, competition.Id);
-                                    } //end check number of member in team
-                                    else
-                                    {
-                                        throw new ArgumentException("Team is full");
-                                    }
-                                }//end join another team when Student not out the previous team
-                                else
-                                {
-                                    throw new ArgumentException("You are already in Team, Please out team previous to join the next Team");
-                                }
-                            }//end in the same Team in Competition
-                            else
-                            {
-                                throw new ArgumentException("You are already in that Team");
-                            }
-                        }// end check team is locked 
-                        else
-                        {
-                            throw new ArgumentException("Team Is Locked you can't join");
-                        }
-                    }
-                    //end check is participant
-                    else
-                    {
-                        throw new UnauthorizedAccessException("You aren't participant in Competition");
-                    }
-                }
-                //end invited code 
-                else
-                {
-                    throw new ArgumentException("Not found team with Invited Code");
-                }
+                return TransformViewParticipantInTeam(pit, competition.Id);
+
             }
             catch (Exception)
             {
@@ -363,70 +275,55 @@ namespace UniCEC.Business.Services.TeamSvc
                 int UserId = _decodeToken.Decode(token, "Id");
 
                 if (model.TeamId == 0) throw new ArgumentNullException("Team Id Null");
-                //check team
+                //1.check team
                 Team team = await _teamRepo.Get(model.TeamId);
+                if (team == null) throw new ArgumentException("Not found this team");
 
-                if (team != null)
+                //2.role leader of team can update
+                ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(model.TeamId, UserId);
+                if (participantInTeam == null) throw new ArgumentException("You aren't participant in that team");
+
+                //3.check teamRole of user is Leader 
+                if (participantInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader")) throw new UnauthorizedAccessException("You don't have permission to update team role");
+
+                team.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : team.Name;
+                team.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : team.Description;
+
+                if (model.Status.HasValue)
                 {
-                    //role leader of team can update
-                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(model.TeamId, UserId);
-                    if (Participant_In_Team != null)
+                    //IsLocked
+                    if (model.Status.Value == TeamStatus.IsLocked)
                     {
-                        //3.check teamRole of user is Leader 
-                        if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
+                        Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                        int numberOfMemberInTeam = await _participantInTeamRepo.GetNumberOfMemberInTeam(model.TeamId, team.CompetitionId);
+                        if (numberOfMemberInTeam - competition.MinNumber >= 0)
                         {
-                            team.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : team.Name;
-                            team.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : team.Description;
-
-                            if (model.Status.HasValue)
+                            if (numberOfMemberInTeam - competition.MaxNumber <= 0)
                             {
-                                //IsLocked
-                                if (model.Status.Value == TeamStatus.IsLocked)
-                                {
-                                    Competition competition = await _competitionRepo.Get(team.CompetitionId);
-                                    int numberOfMemberInTeam = await _participantInTeamRepo.GetNumberOfMemberInTeam(model.TeamId, team.CompetitionId);
-                                    if (numberOfMemberInTeam - competition.MinNumber >= 0)
-                                    {
-                                        if (numberOfMemberInTeam - competition.MaxNumber <= 0)
-                                        {
-                                            team.Status = model.Status.Value;
-                                        }
-                                        else
-                                        {
-                                            throw new ArgumentException("Number of member in team is > " + competition.MaxNumber);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        throw new ArgumentException("Number of member in team is < " + competition.MinNumber);
-                                    }
-                                }
-                                //Available
-                                else
-                                {
-                                    team.Status = model.Status.Value;
-                                }
+                                team.Status = model.Status.Value;
                             }
-                            await _teamRepo.Update();
-                            return true;
-
-                        }//end check role leader
+                            else
+                            {
+                                throw new ArgumentException("Number of member in team is > " + competition.MaxNumber);
+                            }
+                        }
                         else
                         {
-                            throw new UnauthorizedAccessException("You don't have permission to update team role");
+                            throw new ArgumentException("Number of member in team is < " + competition.MinNumber);
                         }
                     }
-                    //end check participant in Team
+                    //Available
                     else
                     {
-                        throw new ArgumentException("You aren't participant in that team");
+                        team.Status = model.Status.Value;
                     }
                 }
-                //end Check Team
-                else
-                {
-                    throw new ArgumentException("Not found this team");
-                }
+                await _teamRepo.Update();
+                return true;
+
+
+
+
             }
             catch (Exception)
             {
@@ -441,53 +338,33 @@ namespace UniCEC.Business.Services.TeamSvc
                 int UserId = _decodeToken.Decode(token, "Id");
                 if (model.ParticipantInTeamId != 0) throw new ArgumentNullException("Participant In Team Id Null");
                 //----- Check participant
-                ParticipantInTeam Member_pit = await _participantInTeamRepo.Get(model.ParticipantInTeamId);
-                if (Member_pit != null)
-                {
-                    Team team = await _teamRepo.Get(Member_pit.TeamId);
-                    Competition competition = await _competitionRepo.Get(team.CompetitionId);
-                    int competitionId = competition.Id;
-                    //check user gọi hàm này phải là leader của Team này 
-                    //1.check student is participant in that competiiton
-                    Participant participant = await _participantRepo.Participant_In_Competition(UserId, team.CompetitionId);
-                    if (participant != null)
-                    {
-                        //2.check user in same Team in Competition
-                        ParticipantInTeam User_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
-                        if (User_In_Team != null)
-                        {
-                            //3.check teamRole of user is Leader 
-                            if (User_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
-                            {
-                                //---UPDATE PIT ROLE
-                                //USER TO MEMBER
-                                User_In_Team.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member");
-                                //MEMBER TO LEADER
-                                Member_pit.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader");
-                                await _participantInTeamRepo.Update();
-                                return true;
-                            }
-                            //end check role leader
-                            else
-                            {
-                                throw new UnauthorizedAccessException("You don't have permission to update team role");
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException("You aren't participant in that team");
-                        }
-                    }
-                    else
-                    {
-                        throw new UnauthorizedAccessException("You aren't participant in Competition");
-                    }
-                }
-                //end check pariticpant
-                else
-                {
-                    throw new ArgumentException("Not found this participant in team");
-                }
+                ParticipantInTeam member_PIT = await _participantInTeamRepo.Get(model.ParticipantInTeamId);
+                if (member_PIT == null) throw new ArgumentException("Not found this participant in team");
+
+                Team team = await _teamRepo.Get(member_PIT.TeamId);
+                Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                int competitionId = competition.Id;
+
+                //check user gọi hàm này phải là leader của Team này 
+                //1.check student is participant in that competiiton
+                Participant participant = await _participantRepo.ParticipantInCompetition(UserId, team.CompetitionId);
+                if (participant == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+
+                //2.check user in same Team in Competition
+                ParticipantInTeam userInTeam = await _participantInTeamRepo.CheckParticipantInTeam(team.Id, UserId);
+                if (userInTeam == null) throw new ArgumentException("You aren't participant in that team");
+
+                //3.check teamRole of user is Leader 
+                if (userInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader"))
+                    throw new UnauthorizedAccessException("You don't have permission to update team role");
+
+                //---UPDATE PIT ROLE
+                //USER TO MEMBER
+                userInTeam.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Member");
+                //MEMBER TO LEADER
+                member_PIT.TeamRoleId = await _teamRoleRepo.GetRoleIdByName("Leader");
+                await _participantInTeamRepo.Update();
+                return true;
             }
             catch (Exception)
             {
@@ -495,6 +372,7 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
+        //not build yet
         public async Task<bool> CompetitionManagerLockTeam(LockTeamModel model, string token)
         {
             try
@@ -528,38 +406,23 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
-                if (team != null)
-                {
-                    //2.check user in same Team in Competition
-                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
-                    if (Participant_In_Team != null)
-                    {
-                        //3.check teamRole of user is Leader 
-                        if (Participant_In_Team.TeamRoleId == await _teamRoleRepo.GetRoleIdByName("Leader"))
-                        {
-                            //Delete Participant In Team
-                            await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                            //Delete Team
-                            await _teamRepo.DeleteTeam(TeamId);
-                            //
-                            return true;
+                if (team == null) throw new ArgumentException("Not found this team");
 
-                        }//end check role leader
-                        else
-                        {
-                            throw new UnauthorizedAccessException("You don't have permission to update team role");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("You aren't participant in that team");
-                    }
-                }
-                //end check Team
-                else
-                {
-                    throw new ArgumentException("Not found this team");
-                }
+                //2.check user in same Team in Competition
+                ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
+                if (participantInTeam == null) throw new ArgumentException("You aren't participant in that team");
+
+                //3.check teamRole of user is Leader 
+                if (participantInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader"))
+                    throw new UnauthorizedAccessException("You don't have permission to update team role");
+
+                //Delete Participant In Team
+                await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                //Delete Team
+                await _teamRepo.DeleteTeam(TeamId);
+                //
+                return true;
+
             }
             catch (Exception)
             {
@@ -578,33 +441,23 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
-                if (team != null)
-                {
-                    //2. if team is locked can't out
-                    if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't out team because team is locked");
+                if (team == null) throw new ArgumentException("Not found this team");
 
-                    //3.check user in same Team in Competition
-                    ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
-                    if (Participant_In_Team != null)
-                    {
-                        //Delete Participant In Team
-                        await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                        //------------------Update number of member in Team
-                        Team t = await _teamRepo.Get(team.Id);
-                        t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
-                        await _teamRepo.Update();
-                        return true;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("You aren't participant in that team");
-                    }
+                //2. if team is locked can't out
+                if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't out team because team is locked");
 
-                } //end check Team
-                else
-                {
-                    throw new ArgumentException("Not found this team");
-                }
+                //3.check user in same Team in Competition
+                ParticipantInTeam Participant_In_Team = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
+                if (Participant_In_Team == null) throw new ArgumentException("You aren't participant in that team");
+
+                //Delete Participant In Team
+                await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                //------------------Update number of member in Team
+                Team t = await _teamRepo.Get(team.Id);
+                t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
+                await _teamRepo.Update();
+                return true;
+
             }
             catch (Exception)
             {
@@ -667,7 +520,7 @@ namespace UniCEC.Business.Services.TeamSvc
             return seedCode;
         }
 
-        
+
 
         private bool CheckDate(DateTime StartTimeRegister, DateTime StartTime)
         {
