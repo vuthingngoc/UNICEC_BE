@@ -57,20 +57,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
             int totalCount = query.Count();
             //
-            List<ViewCompetition> Competitions = new List<ViewCompetition>();
+            List<ViewCompetition> competitions = new List<ViewCompetition>();
 
-            List<Competition> list_Competition = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+            List<Competition> listCompetition = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
 
-            foreach (Competition compe in list_Competition)
+            foreach (Competition compe in listCompetition)
             {
-
-               
-
                 //lấy department ID
-                List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
+                List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
                 
-                var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
-                List<CompetitionInDepartment> list_CompetitionInDepartment = query_List_CompetitionInDepartment.ToList();
+                var query_List_CompetitionInDepartment = compe.CompetitionInMajors;
+                List<CompetitionInMajor> listCompetitionInMajor = query_List_CompetitionInDepartment.ToList();
 
                 //lấy Club Owner
                 List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
@@ -100,19 +97,19 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     }
                 }
 
-                foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
+                foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
                 {
-                    Department dep = await (from d in context.Departments
-                                            where d.Id == competitionInDepartment.DepartmentId
-                                            select d).FirstOrDefaultAsync();
-                    if (dep != null)
+                    Major major = await (from m in context.Majors
+                                            where m.Id == competitionInMajor.MajorId
+                                            select m).FirstOrDefaultAsync();
+                    if (major != null)
                     {
-                        ViewDeparmentInComp vdic = new ViewDeparmentInComp()
+                        ViewMajorInComp vdic = new ViewMajorInComp()
                         {
-                            Id = dep.Id,
-                            Name = dep.Name,
+                            Id = major.Id,
+                            Name = major.Name,
                         };
-                        list_View_DeparmentInComp.Add(vdic);
+                        listViewMajorInComp.Add(vdic);
                     }
                 }
 
@@ -129,14 +126,14 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = list_View_DeparmentInComp,
+                    DepartmentInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
                    
                 };
-                Competitions.Add(vc);
+                competitions.Add(vc);
             }//end each competition
 
-            return (Competitions.Count != 0) ? new PagingResult<ViewCompetition>(Competitions, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         //Get top 3 EVENT or COMPETITION by Status
@@ -184,18 +181,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             foreach (Competition compe in list_Competition)
             {                
 
-                //lấy department ID
-                List<ViewDeparmentInComp> list_View_DeparmentInComp = new List<ViewDeparmentInComp>();
+                //lấy major ID
+                List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
 
-                var query_List_CompetitionInDepartment = compe.CompetitionInDepartments;
-                List<CompetitionInDepartment> list_CompetitionInDepartment = query_List_CompetitionInDepartment.ToList();
+                var queryListCompetitionInMajor = compe.CompetitionInMajors;
+                List<CompetitionInMajor> listCompetitionInMajor = queryListCompetitionInMajor.ToList();
 
                 //lấy Club Owner
                 List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
                                                           where compe.Id == cic.CompetitionId
                                                           select cic).ToListAsync();
 
-                List<ViewClubInComp> List_vcip = new List<ViewClubInComp>();
+                List<ViewClubInComp> listVcip = new List<ViewClubInComp>();
 
                 if (clubList.Count > 0)
                 {
@@ -213,7 +210,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Fanpage = club.ClubFanpage
                         };
 
-                        List_vcip.Add(vcip);
+                        listVcip.Add(vcip);
                     }
                 }
 
@@ -226,19 +223,19 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                 string competitionTypeName = competitionType.TypeName;
 
-                foreach (CompetitionInDepartment competitionInDepartment in list_CompetitionInDepartment)
+                foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
                 {
-                    Department dep = await (from d in context.Departments
-                                            where d.Id == competitionInDepartment.DepartmentId
-                                            select d).FirstOrDefaultAsync();
-                    if (dep != null)
+                    Major major = await (from m in context.Majors
+                                            where m.Id == competitionInMajor.MajorId
+                                            select m).FirstOrDefaultAsync();
+                    if (major != null)
                     {
-                        ViewDeparmentInComp vdic = new ViewDeparmentInComp()
+                        ViewMajorInComp vdic = new ViewMajorInComp()
                         {
-                            Id = dep.Id,
-                            Name = dep.Name,
+                            Id = major.Id,
+                            Name = major.Name,
                         };
-                        list_View_DeparmentInComp.Add(vdic);
+                        listViewMajorInComp.Add(vdic);
                     }
                 }
 
@@ -255,8 +252,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = list_View_DeparmentInComp,
-                    ClubInCompetition = List_vcip,
+                    DepartmentInCompetition = listViewMajorInComp,
+                    ClubInCompetition = listVcip,
                     
                 };
                 competitions.Add(vc);
@@ -265,15 +262,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return (competitions.Count > 0) ? competitions : null;
         }
 
-
-
-
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
         {
             var query = from c in context.Competitions
                         where c.Id.Equals(id)
-
                         select c.Scope;
 
             return await query.FirstOrDefaultAsync();

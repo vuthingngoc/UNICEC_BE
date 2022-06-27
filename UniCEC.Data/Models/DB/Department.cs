@@ -9,15 +9,19 @@ namespace UniCEC.Data.Models.DB
     {
         public Department()
         {
-            CompetitionInDepartments = new HashSet<CompetitionInDepartment>();
-            Majors = new HashSet<Major>();
+            Users = new HashSet<User>();
         }
 
         public int Id { get; set; }
+        public int MajorId { get; set; }
+        public int UniversityId { get; set; }
         public string Name { get; set; }
+        public string MajorCode { get; set; }
+        public string Description { get; set; }
         public bool Status { get; set; }
 
-        public virtual ICollection<CompetitionInDepartment> CompetitionInDepartments { get; set; }
-        public virtual ICollection<Major> Majors { get; set; }
+        public virtual Major Major { get; set; }
+        public virtual University University { get; set; }
+        public virtual ICollection<User> Users { get; set; }
     }
 }

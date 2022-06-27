@@ -12,11 +12,9 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.MemberSvc
 {
@@ -25,25 +23,38 @@ namespace UniCEC.Business.Services.MemberSvc
         private IMemberRepo _memberRepo;
         private IClubRepo _clubRepo;
         private IUserRepo _userRepo;
-        private ITermRepo _termRepo;
         private IClubRoleRepo _clubRoleRepo;
 
         private IFileService _fileService;
         private DecodeToken _decodeToken;
 
         public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, IFileService fileService
-                                , IUserRepo userRepo, ITermRepo termRepo, IClubRoleRepo clubRoleRepo)
+                                , IUserRepo userRepo, IClubRoleRepo clubRoleRepo)
         {
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
             _fileService = fileService;
             _userRepo = userRepo;
-            _termRepo = termRepo;
             _clubRoleRepo = clubRoleRepo;
             _decodeToken = new DecodeToken();
         }
 
-        public async Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, int? termId, MemberStatus? status, PagingRequest request)
+        private async Task<string> GetUrlImageAsync(string filename)
+        {
+            string urlImage = string.Empty;
+            try
+            {
+                urlImage = await _fileService.GetUrlFromFilenameAsync(filename);                
+            }
+            catch (Exception)
+            {
+                urlImage = "";
+            }
+
+            return urlImage;
+        }
+
+        public async Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, MemberStatus? status, PagingRequest request)
         {
             int userId = _decodeToken.Decode(token, "Id");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
@@ -53,10 +64,11 @@ namespace UniCEC.Business.Services.MemberSvc
             int clubRoldId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
             if ((clubRoldId.Equals(1) || clubRoldId.Equals(2)) && status.HasValue) memberStatus = status.Value;
 
-            int clubTermId = await _termRepo.GetCurrentTermIdByClub(clubId);
-            if (termId.HasValue) clubTermId = termId.Value;
-
-            PagingResult<ViewMember> members = await _memberRepo.GetMembersByClub(clubId, clubTermId, memberStatus, request);
+            PagingResult<ViewMember> members = await _memberRepo.GetMembersByClub(clubId, memberStatus, request);
+            foreach(var member in members.Items)
+            {
+                member.Avatar = await GetUrlImageAsync(member.Avatar);
+            }
             if (members == null) throw new NullReferenceException("Not found any member in this club");
             return members;
         }
@@ -76,11 +88,10 @@ namespace UniCEC.Business.Services.MemberSvc
         public async Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId)
         {
             List<ViewIntroClubMember> members = await _memberRepo.GetLeadersByClub(clubId);
-            //foreach(var member in members)
-            //{
-            //    member.Avatar = (member.Avatar.Contains("firebase")) ? 
-            //        await _fileService.GetUrlFromFilenameAsync(member.Avatar) : member.Avatar;
-            //}
+            foreach (var member in members)
+            {
+                member.Avatar = await GetUrlImageAsync(member.Avatar);
+            }
             if (members == null) throw new NullReferenceException("Not found any Leaders");
             return members;
         }
@@ -97,7 +108,7 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         //Insert-Member
-        public async Task<ViewMember> Insert(string token, MemberInsertModel model)
+        public async Task<ViewMember> Insert(string token, MemberInsertModel model) // change business
         {
             // check valid data 
             if (model.ClubId == 0 || model.UserId == 0 || model.ClubRoleId == 0 || model.StartTime.Equals(DateTime.MinValue))
@@ -117,7 +128,6 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(model.UserId, model.ClubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
 
-            int currentTerm = (await _termRepo.GetCurrentTermByClub(model.ClubId)).Id;
             bool isExistedClubRoleId = await _clubRoleRepo.CheckExistedClubRole(model.ClubRoleId);
             if (!isExistedClubRoleId) throw new ArgumentException("Not found this club role");
 
@@ -128,7 +138,6 @@ namespace UniCEC.Business.Services.MemberSvc
                 ClubRoleId = model.ClubRoleId,
                 Status = MemberStatus.Active, // default status
                 StartTime = DateTime.Now,
-                TermId = currentTerm,
             };
             int memberId = await _memberRepo.Insert(member);
             if (memberId == 0) throw new DbUpdateException();
@@ -136,11 +145,14 @@ namespace UniCEC.Business.Services.MemberSvc
             club.TotalMember += 1;
             await _clubRepo.Update();
 
-            return await _memberRepo.GetById(memberId);
+            ViewMember viewMember = await _memberRepo.GetById(memberId);
+            if(viewMember != null) viewMember.Avatar = await GetUrlImageAsync(viewMember.Avatar);
+
+            return viewMember;
         }
 
         //Update-Member
-        public async Task Update(string token, MemberUpdateModel model)
+        public async Task Update(string token, MemberUpdateModel model) // change business
         {
             Member member = await _memberRepo.Get(model.Id);
             if (member == null) throw new NullReferenceException("Not found this member");
@@ -155,9 +167,6 @@ namespace UniCEC.Business.Services.MemberSvc
 
             if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            int currentTerm = (await _termRepo.GetCurrentTermByClub(member.ClubId)).Id;
-            if (currentTerm != member.TermId || member.Status.Equals(MemberStatus.Inactive)) throw new ArgumentException("Can not update member in the past");
-
             if (member.ClubRoleId.Equals(model.ClubRoleId)) return;
 
             var currentTime = new LocalTime().GetLocalTime().DateTime;            
@@ -170,7 +179,6 @@ namespace UniCEC.Business.Services.MemberSvc
                 ClubId = member.ClubId,
                 ClubRoleId = model.ClubRoleId,
                 StartTime = currentTime,
-                TermId = member.TermId,
                 UserId = member.UserId,
                 Status = MemberStatus.Active
             };
@@ -198,24 +206,6 @@ namespace UniCEC.Business.Services.MemberSvc
             Club club = await _clubRepo.Get(member.ClubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();
-        }
-
-        public async Task InsertForNewTerm(int clubId, int termId)
-        {
-            // check role in term service already 
-            // if use for another => please check role in here
-
-            List<Member> members = await _memberRepo.GetMembersByClub(clubId);
-            if (members != null)
-            {
-                await _memberRepo.UpdateEndTerm(clubId);
-                // insert new records
-                foreach (Member record in members)
-                {
-                    record.TermId = termId;
-                    await _memberRepo.Insert(record);
-                }
-            }
         }
 
         // Tien Anh

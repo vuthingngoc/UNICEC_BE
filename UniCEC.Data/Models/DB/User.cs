@@ -31,7 +31,7 @@ namespace UniCEC.Data.Models.DB
         public UserStatus Status { get; set; }
         public bool IsOnline { get; set; }
 
-        public virtual Major Major { get; set; }
+        public virtual Department Major { get; set; }
         public virtual Role Role { get; set; }
         public virtual Sponsor Sponsor { get; set; }
         public virtual University University { get; set; }

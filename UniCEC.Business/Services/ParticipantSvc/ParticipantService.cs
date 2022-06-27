@@ -19,22 +19,22 @@ namespace UniCEC.Business.Services.ParticipantSvc
     public class ParticipantService : IParticipantService
     {
         private IParticipantRepo _participantRepo;
-        private ICompetitionRepo _competitionRepo;      
+        private ICompetitionRepo _competitionRepo;
         private IClubRepo _clubRepo;
         private IMemberRepo _memberRepo;
         private IUserRepo _userRepo;
         private DecodeToken _decodeToken;
 
         public ParticipantService(IParticipantRepo participantRepo,
-                                  ICompetitionRepo competitionRepo,                                                             
+                                  ICompetitionRepo competitionRepo,
                                   IClubRepo clubRepo,
-                                  IMemberRepo memberRepo,                                
+                                  IMemberRepo memberRepo,
                                   IUserRepo userRepo)
         {
             _participantRepo = participantRepo;
-            _competitionRepo = competitionRepo;     
+            _competitionRepo = competitionRepo;
             _clubRepo = clubRepo;
-            _memberRepo = memberRepo;         
+            _memberRepo = memberRepo;
             _userRepo = userRepo;
             _decodeToken = new DecodeToken();
         }
@@ -187,7 +187,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                             participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
                             participant.StudentId = UserId;
                             participant.CompetitionId = competition.Id;
-                            
+
 
                             //IsMember
                             List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
@@ -247,13 +247,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             };
         }
 
-        //Decode Token
-        //private int DecodeToken(string token, string nameClaim)
-        //{
-        //    if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-        //    var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-        //    return Int32.Parse(claim.Value);
-        //}
+        
     }
 }
 

@@ -9,18 +9,12 @@ using System;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.RequestModels;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 {
     public class MemberRepo : Repository<Member>, IMemberRepo
     {
-        private ITermRepo _termRepo;
-        public MemberRepo(UniCECContext context, ITermRepo termRepo) : base(context)
-        {
-            _termRepo = termRepo;
-        }
+        public MemberRepo(UniCECContext context) : base(context) { }
 
         private async Task<DateTime> GetJoinDate(int userId, int clubId)
         {
@@ -35,15 +29,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return await GetJoinDate(member.UserId, member.ClubId);
         }
 
-        public async Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, int termId, MemberStatus status, PagingRequest request)
+        public async Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, MemberStatus status, PagingRequest request)
         {
             var query = from m in context.Members
-                        join t in context.Terms on m.TermId equals t.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join u in context.Users on m.UserId equals u.Id
-                        where m.ClubId.Equals(clubId) && m.TermId.Equals(termId) && m.Status.Equals(status)
-                        orderby(cr.Id)
-                        select new { cr, m, u, t };
+                        where m.ClubId.Equals(clubId) && m.Status.Equals(status)
+                        orderby (cr.Id)
+                        select new { cr, m, u };
 
             int totalCount = query.Count();
             List<ViewMember> members = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
@@ -55,11 +48,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                         ClubRoleId = selector.cr.Id,
                                                         ClubRoleName = selector.cr.Name,
                                                         IsOnline = selector.u.IsOnline,
-                                                        TermId = selector.t.Id,
-                                                        TermName = selector.t.Name,
                                                         StartTime = selector.m.StartTime,
                                                         EndTime = selector.m.EndTime,
-                                                        Status = selector.m.Status                                                        
+                                                        Status = selector.m.Status
                                                     }).ToListAsync();
 
             return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -68,11 +59,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public async Task<List<Member>> GetMembersByClub(int clubId)
         {
             var query = from m in context.Members
-                        join t in context.Terms on m.TermId equals t.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join u in context.Users on m.UserId equals u.Id
                         where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
-                        select new { cr, m, u, t };
+                        select new { cr, m, u };
 
             return await query.Select(selector => new Member()
             {
@@ -81,7 +71,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 UserId = selector.m.UserId,
-                TermId = selector.t.Id,
                 ClubRoleId = selector.m.Id,
             }).ToListAsync();
         }
@@ -116,9 +105,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
-                        join t in context.Terms on m.TermId equals t.Id
                         where m.Id.Equals(memberId)
-                        select new { m, u, cr, t };
+                        select new { m, u, cr };
 
             DateTime joinDate = await GetJoinDate(memberId);
             ViewMember member = await query.Select(selector => new ViewMember()
@@ -128,8 +116,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 Avatar = selector.u.Avatar,
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
-                TermId = selector.m.TermId,
-                TermName = selector.t.Name,
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 Status = selector.m.Status,
@@ -163,7 +149,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
-                        orderby(cr.Id) // Leader -> Vice President -> Manager -> member
+                        orderby (cr.Id) // Leader -> Vice President -> Manager -> member
                         select new { m, u, cr }; // if the club don't have enough 3 leaders => replace by member            
 
             List<ViewIntroClubMember> members = await query.Take(3).Select(x => new ViewIntroClubMember()
@@ -235,8 +221,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             Member member = await context.Members.FirstOrDefaultAsync(m => m.ClubId.Equals(clubId)
                                                                 && m.ClubRoleId.Equals(clubRoleId)
-                                                                && m.UserId.Equals(userId)
-                                                                && m.TermId.Equals(termId));
+                                                                && m.UserId.Equals(userId));
             return (member != null) ? member.Id : 0;
         }
 
@@ -246,17 +231,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join c in context.Clubs on m.ClubId equals c.Id
-                        join t in context.Terms on m.TermId equals t.Id
                         where m.ClubId.Equals(clubId)
-                        select new { m, u, cr, c, t };
+                        select new { m, u, cr, c };
 
             if (request.ClubRoleId.HasValue) query = query.Where(x => x.m.ClubRoleId.Equals(request.ClubRoleId));
 
             if (request.StartTime.HasValue) query = query.Where(x => x.m.StartTime.Equals(request.StartTime));
 
             if (request.EndTime.HasValue) query = query.Where(x => x.m.EndTime.Equals(request.EndTime));
-
-            if (request.TermId.HasValue) query = query.Where(x => x.m.TermId.Equals(request.TermId));
 
             if (request.Status.HasValue) query = query.Where(x => x.m.Status.Equals(request.Status));
 
@@ -268,8 +250,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                          Name = x.u.Fullname,
                                                          ClubRoleId = x.m.ClubRoleId,
                                                          ClubRoleName = x.cr.Name,
-                                                         TermId = x.m.TermId,
-                                                         TermName = x.t.Name,
                                                          StartTime = x.m.StartTime,
                                                          EndTime = x.m.EndTime,
                                                          Status = x.m.Status,
@@ -285,7 +265,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         join us in context.Users on m.UserId equals us.Id
-                        where m.ClubId == model.ClubId && m.UserId == model.UserId && m.Status == MemberStatus.Active //&& m.TermId == model.TermId
+                        where m.ClubId == model.ClubId && m.UserId == model.UserId && m.Status == MemberStatus.Active
                         select new { us, m };
 
 
@@ -296,7 +276,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = x.m.ClubRoleId,
                 Id = x.m.Id,
                 UserId = x.us.Id,
-                //TermId = x.m.TermId
             }).FirstOrDefaultAsync();
         }
         public async Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo)
@@ -306,13 +285,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             // User -> Member -> Club 
             foreach (int ClubId_In_Competition in List_ClubId_In_Competition)
             {
-                //Get current Term của 1 club
-                ViewTerm term = await _termRepo.GetCurrentTermByClub(ClubId_In_Competition);
-
                 var query = from us in context.Users
                             where us.Id == studentInfo.Id
                             from mem in context.Members
-                            where mem.UserId == us.Id && term.Id == mem.TermId && mem.Status == MemberStatus.Active
+                            where mem.UserId == us.Id && mem.Status == MemberStatus.Active
                             from c in context.Clubs
                             where mem.ClubId == c.Id && c.Id == ClubId_In_Competition
                             select mem;
@@ -329,12 +305,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
         public async Task<Member> GetLeaderByClub(int clubId)
         {
-            //Get current Term của 1 club
-            ViewTerm term = await _termRepo.GetCurrentTermByClub(clubId);
-
             //current club leader 
             return await (from m in context.Members
-                          where m.ClubId == clubId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active && m.TermId == term.Id
+                          where m.ClubId == clubId && m.ClubRoleId == 1 && m.Status == MemberStatus.Active
                           select m).FirstOrDefaultAsync();
         }
 
@@ -356,8 +329,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubId = clubRoleId,
                 ClubRoleId = member.ClubRoleId,
                 StartTime = DateTime.Now,
-                TermId = member.TermId,
-                UserId = member.UserId,                
+                UserId = member.UserId,
                 Status = MemberStatus.Active, // default status new record                
             };
             await Insert(newRecord);

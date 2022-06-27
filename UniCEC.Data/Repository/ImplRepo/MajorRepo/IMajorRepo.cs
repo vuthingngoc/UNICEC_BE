@@ -10,12 +10,12 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 {
     public interface IMajorRepo : IRepository<Major>
     {
-        public Task<ViewMajor> GetById(int id, bool? status, int? universityId);
-        public Task<ViewMajor> GetByCode(string majorCode, bool? status, int? universityId);
+        public Task<ViewMajor> GetById(int id, bool? status);
         public Task<PagingResult<ViewMajor>> GetByConditions(MajorRequestModel request);
-        public Task<PagingResult<Major>> GetByUniversity(int universityId, PagingRequest request);
-        public Task<List<int>> GetIdsByDepartmentId(int departmentId, bool? status);
-        public Task<int> CheckExistedMajorCode(int universityId, string code);
-        public Task<int> CheckDuplicatedName(int universityId, string name);
+        public Task<PagingResult<ViewMajor>> GetByCompetition(int competitionId, PagingRequest request);
+        public Task<int> CheckDuplicatedName(string name);
+        //
+        public Task<bool> checkMajor(List<int> listMajorId);
+        public Task<bool> CheckMajorBelongToUni(List<int> listMajorId, int universityId); 
     }
 }

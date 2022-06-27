@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
@@ -9,10 +11,8 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.ActivitiesEntitySvc
 {
@@ -24,7 +24,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
         private ICompetitionRepo _competitionRepo;
         private IFileService _fileService;
         private IClubRepo _clubRepo;
-        private ITermRepo _termRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IMemberRepo _memberRepo;
         private DecodeToken _decodeToken;
@@ -35,7 +34,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                                        ICompetitionRepo competitionRepo,
                                        IFileService fileService,
                                        IClubRepo clubRepo,
-                                       ITermRepo termRepo,
                                        ICompetitionManagerRepo competitionManagerRepo,
                                        IMemberRepo memberRepo)
         {
@@ -44,7 +42,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
             _competitionRepo = competitionRepo;
             _fileService = fileService;
             _clubRepo = clubRepo;
-            _termRepo = termRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _memberRepo = memberRepo;
             _decodeToken = new DecodeToken();

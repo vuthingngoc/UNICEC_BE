@@ -1,23 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using UniCEC.Business.Services.FileSvc;
+﻿using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
-using UniCEC.Data.Common;
-using UniCEC.Data.Enum;
-using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.MemberTakesActivitySvc
 {
@@ -30,7 +19,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         private ICompetitionRepo _competitionRepo;
         private IClubRepo _clubRepo;
-        private ITermRepo _termRepo;
+        //private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IUserRepo _userRepo;
@@ -43,7 +32,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                                           ICompetitionActivityRepo clubActivityRepo,
                                           ICompetitionRepo competitionRepo,
                                           IClubRepo clubRepo,
-                                          ITermRepo termRepo,
+                                          //ITermRepo termRepo,
                                           IMemberRepo memberRepo,
                                           IUserRepo userRepo,
                                           ICompetitionManagerRepo competitionManagerRepo,
@@ -53,7 +42,7 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
             _competitionActivityRepo = clubActivityRepo;
             _competitionRepo = competitionRepo;
             _clubRepo = clubRepo;
-            _termRepo = termRepo;
+            //_termRepo = termRepo;
             _memberRepo = memberRepo;
             _userRepo = userRepo;
             _competitionManagerRepo = competitionManagerRepo;

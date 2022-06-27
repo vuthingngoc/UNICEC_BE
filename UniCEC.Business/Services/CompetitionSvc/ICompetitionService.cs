@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
-using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
-using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
-using UniCEC.Data.ViewModels.Entities.CompetitionManager;
+using UniCEC.Data.ViewModels.Entities.CompetitionInMajor;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
 using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
@@ -31,7 +28,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //BE  use to test
         public Task<bool> UpdateBE(LeaderUpdateCompOrEventModel competition, string token);
             
-        public Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token);
+        //public Task<List<ViewCompetitionInMajor>> AddCompetitionInDepartment(CompetitionInMajorInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
         //Influencer

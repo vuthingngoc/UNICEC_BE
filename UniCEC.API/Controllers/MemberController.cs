@@ -31,12 +31,12 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("club/{id}")]
         [SwaggerOperation(Summary = "Get all members in a club - club member")]
-        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] int? termId, [FromQuery] MemberStatus? status, [FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] MemberStatus? status, [FromQuery] PagingRequest request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, termId, status, request);
+                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, status, request);
                 return Ok(members);
             }
             catch(UnauthorizedAccessException ex)
@@ -153,38 +153,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
-
-        //[HttpPost("update-new-term")]
-        //[SwaggerOperation(Summary = "Update new term of a club")]
-        //public async Task<IActionResult> UpdateNewTerm([FromBody] MemberInsertModel model)
-        //{
-        //    try
-        //    {
-        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-        //        ViewMember result = await _memberService.Insert(token, model);
-        //        return Ok(result);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
 
         // PUT api/<MemberController>/5
         [HttpPut]

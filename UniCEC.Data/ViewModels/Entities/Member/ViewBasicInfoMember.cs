@@ -13,7 +13,5 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         public int ClubRoleId { get; set; }
         [JsonPropertyName("club_role_name")]
         public string ClubRoleName { get; set; }
-        //[JsonPropertyName("term_id")]
-        //public int TermId { get; set; }
     }
 }

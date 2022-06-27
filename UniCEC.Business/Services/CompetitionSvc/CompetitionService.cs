@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
@@ -12,7 +11,6 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
-using UniCEC.Data.Repository.ImplRepo.CompetitionInDeparmentRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
@@ -24,19 +22,14 @@ using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.SponsorRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
-using UniCEC.Data.Repository.ImplRepo.TermRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
-using UniCEC.Data.ViewModels.Entities.CompetitionInDepartment;
 using UniCEC.Data.ViewModels.Entities.Influencer;
 using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
-using UniCEC.Data.ViewModels.Entities.Member;
-using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
-using UniCEC.Data.ViewModels.Entities.Term;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -46,7 +39,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IMemberRepo _memberRepo;
         private ICompetitionInClubRepo _competitionInClubRepo;
         private ISponsorInCompetitionRepo _sponsorInCompetitionRepo;
-        private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
+        //private ICompetitionInDepartmentRepo _competitionInDepartmentRepo;
         private IClubRepo _clubRepo;
         private IParticipantRepo _participantRepo;
         private ICompetitionTypeRepo _competitionTypeRepo;
@@ -55,7 +48,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionManagerRepo _competitionManagerRepo;
         private IInfluencerRepo _influencerRepo;
         private IInfluencerInCompetitionRepo _influencerInCompetitionRepo;
-        private ITermRepo _termRepo;
+        //private ITermRepo _termRepo;
         private IDepartmentRepo _departmentRepo;
         private ITeamRepo _teamRepo;
         private IUserRepo _userRepo;
@@ -68,7 +61,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IMemberRepo memberRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
                                   ISponsorInCompetitionRepo sponsorInCompetitionRepo,
-                                  ICompetitionInDepartmentRepo competitionInDepartmentRepo,
+                                  //ICompetitionInDepartmentRepo competitionInDepartmentRepo,
                                   IClubRepo clubRepo,
                                   IParticipantRepo participantRepo,
                                   ICompetitionTypeRepo competitionTypeRepo,
@@ -76,7 +69,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionManagerRepo competitionManagerRepo,
                                   IInfluencerRepo influencerRepo,
                                   IInfluencerInCompetitionRepo influencerInCompetitionRepo,
-                                  ITermRepo termRepo,
+                                  //ITermRepo termRepo,
                                   IConfiguration configuration,
                                   IDepartmentRepo departmentRepo,
                                   ITeamRepo teamRepo,
@@ -88,7 +81,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _memberRepo = memberRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _sponsorInCompetitionRepo = sponsorInCompetitionRepo;
-            _competitionInDepartmentRepo = competitionInDepartmentRepo;
+            //_competitionInDepartmentRepo = competitionInDepartmentRepo;
             _clubRepo = clubRepo;
             _participantRepo = participantRepo;
             _competitionTypeRepo = competitionTypeRepo;
@@ -96,7 +89,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionEntityRepo = competitionEntityRepo;
             _competitionManagerRepo = competitionManagerRepo;
             _influencerInCompetitionRepo = influencerInCompetitionRepo;
-            _termRepo = termRepo;
+            //_termRepo = termRepo;
             _influencerRepo = influencerRepo;
             _configuration = configuration;
             _departmentRepo = departmentRepo;
@@ -273,41 +266,41 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //------------ Check FK
 
-                // Department ID
-                bool insertDepartment;
-                if (model.ListDepartmentId.Count > 0)
-                {
-                    //TH1: InterUniversity
-                    if (model.Scope == CompetitionScopeStatus.InterUniversity)
-                    {
-                        bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
-                        if (check)
-                        {
-                            insertDepartment = true;
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Department Id not have in System");
-                        }
-                    }
-                    //TH2: University-Club
-                    else
-                    {
-                        bool check = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
-                        if (check)
-                        {
-                            insertDepartment = true;
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Department Id not have in University");
-                        }
-                    }
-                }
-                else
-                {
-                    insertDepartment = false;
-                }
+                //// Department ID
+                //bool insertDepartment;
+                //if (model.ListDepartmentId.Count > 0)
+                //{
+                //    //TH1: InterUniversity
+                //    if (model.Scope == CompetitionScopeStatus.InterUniversity)
+                //    {
+                //        bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
+                //        if (check)
+                //        {
+                //            insertDepartment = true;
+                //        }
+                //        else
+                //        {
+                //            throw new ArgumentException("Department Id not have in System");
+                //        }
+                //    }
+                //    //TH2: University-Club
+                //    else
+                //    {
+                //        bool check = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
+                //        if (check)
+                //        {
+                //            insertDepartment = true;
+                //        }
+                //        else
+                //        {
+                //            throw new ArgumentException("Department Id not have in University");
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    insertDepartment = false;
+                //}
 
                 //List Influencer ID
                 bool insertInfluencer;
@@ -404,19 +397,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (competition_Id <= 0) throw new ArgumentException("Add Competition Or Event Failed");
                 Competition comp = await _competitionRepo.Get(competition_Id);
 
-                //------------ Insert Competition-In-Department  
-                if (insertDepartment)
-                {
-                    foreach (int dep_id in model.ListDepartmentId)
-                    {
-                        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                        {
-                            DepartmentId = dep_id,
-                            CompetitionId = comp.Id
-                        };
-                        await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                    }
-                }
+                ////------------ Insert Competition-In-Department  
+                //if (insertDepartment)
+                //{
+                //    foreach (int dep_id in model.ListDepartmentId)
+                //    {
+                //        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+                //        {
+                //            DepartmentId = dep_id,
+                //            CompetitionId = comp.Id
+                //        };
+                //        await _competitionInDepartmentRepo.Insert(comp_in_dep);
+                //    }
+                //}
 
                 //------------ Insert Competition Entity
                 if (insertCompetitionEntity)
@@ -515,169 +508,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 else
                 {
                     return false;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token)
-        {
-            try
-            {
-                if (model.CompetitionId == 0
-                     || model.ClubId == 0
-                     || model.InfluencerId == 0)
-                    throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Id Null");
-
-                bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
-                if (check)
-                {
-                    //------------- CHECK Status Competition
-                    Competition c = await _competitionRepo.Get(model.CompetitionId);
-                    if (c.Status == CompetitionStatus.Happening || c.Status == CompetitionStatus.Ending || c.Status == CompetitionStatus.Canceling)
-                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-
-                    //------------- CHECK Influencer in system
-                    Influencer influencer = await _influencerRepo.Get(model.InfluencerId);
-                    if (influencer == null) throw new ArgumentException("Influencer Id not have in System");
-
-                    //------------- CHECK Influencer in competition
-                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(model.InfluencerId, model.CompetitionId);
-                    if (iic == null) throw new ArgumentException("Influencer Id not in Competition");
-                    await _influencerInCompetitionRepo.DeleteInfluencerInCompetition(iic.Id);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
-        {
-            try
-            {
-                if (model.CompetitionId == 0
-                  || model.ClubId == 0
-                  || model.ListDepartmentId.Count < 0)
-                    throw new ArgumentNullException("Competition Id Null  || Department Null || ClubId Null");
-
-                bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
-                if (Check)
-                {
-                    //------------- CHECK Status Competition
-                    Competition c = await _competitionRepo.Get(model.CompetitionId);
-                    if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
-                    {
-                        bool addDepartment = false;
-                        //------------ CHECK Scope
-                        //TH 1
-                        if (c.Scope == CompetitionScopeStatus.InterUniversity)
-                        {
-                            bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
-                            if (check)
-                            {
-                                addDepartment = true;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Department Id not have in System");
-                            }
-                        }
-                        // TH 2
-                        else
-                        {
-                            //add extra parameter
-                            int UniversityId = _decodeToken.Decode(token, "UniversityId");
-                            //------------- CHECK Department belong to University
-                            bool departmentBelongToUni = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
-
-                            if (departmentBelongToUni)
-                            {
-                                addDepartment = true;
-                            }
-                            // end if CheckDepartmentId
-                            else
-                            {
-                                throw new ArgumentException("Department Id not have in University");
-                            }
-                        }
-                        if (addDepartment)
-                        {
-                            //------------- CHECK Add Department is existed
-                            bool DepartmentIsExsited = true;
-                            foreach (int dep_id in model.ListDepartmentId)
-                            {
-                                //
-                                CompetitionInDepartment cid = await _competitionInDepartmentRepo.GetDepartment_In_Competition(dep_id, model.CompetitionId);
-                                if (cid != null)
-                                {
-                                    DepartmentIsExsited = false;
-                                }
-                            }
-                            if (DepartmentIsExsited)
-                            {
-                                List<int> list_dic_Id = new List<int>();
-                                List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
-
-                                foreach (int dep_id in model.ListDepartmentId)
-                                {
-                                    CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                                    {
-                                        DepartmentId = dep_id,
-                                        CompetitionId = model.CompetitionId
-                                    };
-                                    int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                                    list_dic_Id.Add(id);
-                                }
-                                if (list_dic_Id.Count > 0)
-                                {
-                                    foreach (int id in list_dic_Id)
-                                    {
-                                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
-
-                                        ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
-                                        {
-                                            Id = cid.Id,
-                                            CompetitionId = cid.CompetitionId,
-                                            DepartmentId = cid.DepartmentId
-                                        };
-                                        list_result.Add(vcid);
-                                    }
-                                    return list_result;
-                                }//
-                                else
-                                {
-                                    throw new ArgumentException("Add in DB Department Failed");
-                                }
-                            }//
-                            else
-                            {
-                                throw new ArgumentException("Department already in Competition");
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Add Department Failed");
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-                    }
-                }
-                //end if check
-                else
-                {
-                    return null;
                 }
             }
             catch (Exception)
@@ -1124,7 +954,135 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        //
+        
+
+        //----------------------------------------------------------------Add Competition In Department
+
+        //public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
+        //{
+        //    try
+        //    {
+        //        if (model.CompetitionId == 0
+        //          || model.ClubId == 0
+        //          || model.ListDepartmentId.Count < 0)
+        //            throw new ArgumentNullException("Competition Id Null  || Department Null || ClubId Null");
+
+        //        bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+        //        if (Check)
+        //        {
+        //            //------------- CHECK Status Competition
+        //            Competition c = await _competitionRepo.Get(model.CompetitionId);
+        //            if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
+        //            {
+        //                bool addDepartment = false;
+        //                //------------ CHECK Scope
+        //                //TH 1
+        //                if (c.Scope == CompetitionScopeStatus.InterUniversity)
+        //                {
+        //                    bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
+        //                    if (check)
+        //                    {
+        //                        addDepartment = true;
+        //                    }
+        //                    else
+        //                    {
+        //                        throw new ArgumentException("Department Id not have in System");
+        //                    }
+        //                }
+        //                // TH 2
+        //                else
+        //                {
+        //                    //add extra parameter
+        //                    int UniversityId = _decodeToken.Decode(token, "UniversityId");
+        //                    //------------- CHECK Department belong to University
+        //                    bool departmentBelongToUni = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
+
+        //                    if (departmentBelongToUni)
+        //                    {
+        //                        addDepartment = true;
+        //                    }
+        //                    // end if CheckDepartmentId
+        //                    else
+        //                    {
+        //                        throw new ArgumentException("Department Id not have in University");
+        //                    }
+        //                }
+        //                if (addDepartment)
+        //                {
+        //                    //------------- CHECK Add Department is existed
+        //                    bool DepartmentIsExsited = true;
+        //                    foreach (int dep_id in model.ListDepartmentId)
+        //                    {
+        //                        //
+        //                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.GetDepartment_In_Competition(dep_id, model.CompetitionId);
+        //                        if (cid != null)
+        //                        {
+        //                            DepartmentIsExsited = false;
+        //                        }
+        //                    }
+        //                    if (DepartmentIsExsited)
+        //                    {
+        //                        List<int> list_dic_Id = new List<int>();
+        //                        List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
+
+        //                        foreach (int dep_id in model.ListDepartmentId)
+        //                        {
+        //                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
+        //                            {
+        //                                DepartmentId = dep_id,
+        //                                CompetitionId = model.CompetitionId
+        //                            };
+        //                            int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
+        //                            list_dic_Id.Add(id);
+        //                        }
+        //                        if (list_dic_Id.Count > 0)
+        //                        {
+        //                            foreach (int id in list_dic_Id)
+        //                            {
+        //                                CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
+
+        //                                ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
+        //                                {
+        //                                    Id = cid.Id,
+        //                                    CompetitionId = cid.CompetitionId,
+        //                                    DepartmentId = cid.DepartmentId
+        //                                };
+        //                                list_result.Add(vcid);
+        //                            }
+        //                            return list_result;
+        //                        }//
+        //                        else
+        //                        {
+        //                            throw new ArgumentException("Add in DB Department Failed");
+        //                        }
+        //                    }//
+        //                    else
+        //                    {
+        //                        throw new ArgumentException("Department already in Competition");
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    throw new ArgumentException("Add Department Failed");
+        //                }
+        //            }
+        //            else
+        //            {
+        //                throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
+        //            }
+        //        }
+        //        //end if check
+        //        else
+        //        {
+        //            return null;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
         {
             try
@@ -1297,6 +1255,44 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 else
                 {
                     return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0
+                     || model.ClubId == 0
+                     || model.InfluencerId == 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Id Null");
+
+                bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                if (check)
+                {
+                    //------------- CHECK Status Competition
+                    Competition c = await _competitionRepo.Get(model.CompetitionId);
+                    if (c.Status == CompetitionStatus.Happening || c.Status == CompetitionStatus.Ending || c.Status == CompetitionStatus.Canceling)
+                        throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
+
+                    //------------- CHECK Influencer in system
+                    Influencer influencer = await _influencerRepo.Get(model.InfluencerId);
+                    if (influencer == null) throw new ArgumentException("Influencer Id not have in System");
+
+                    //------------- CHECK Influencer in competition
+                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(model.InfluencerId, model.CompetitionId);
+                    if (iic == null) throw new ArgumentException("Influencer Id not in Competition");
+                    await _influencerInCompetitionRepo.DeleteInfluencerInCompetition(iic.Id);
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             catch (Exception)
@@ -1733,7 +1729,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             List<ViewClubInComp> ClubsInCompetition = await _competitionInClubRepo.GetListClub_In_Competition(competition.Id);
 
             //List Department in Competition
-            List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
+            //List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
 
             //List Competition Entity
             List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
@@ -1805,7 +1801,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //
                 SponsorInCompetition = (SponsorsInCompetition != null) ? SponsorsInCompetition : new List<ViewSponsorInComp>(),
                 //
-                DepartmentInCompetition = (DepartmentsInCompetition_Id != null) ? DepartmentsInCompetition_Id : new List<ViewDeparmentInComp>(),
+                //DepartmentInCompetition = (DepartmentsInCompetition_Id != null) ? DepartmentsInCompetition_Id : new List<ViewDeparmentInComp>(),
                 // 
                 CompetitionEntities = (ListView_CompetitionEntities != null) ? ListView_CompetitionEntities : new List<ViewCompetitionEntity>(),
                 //
