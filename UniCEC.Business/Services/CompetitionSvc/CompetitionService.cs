@@ -488,7 +488,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.ClubId == 0)
                     throw new ArgumentNullException(" Competition Id Null || ClubId Null");
 
-                bool Check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
                     //
@@ -525,7 +525,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     throw new ArgumentNullException("Competition Id Null  || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-                bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check)
                 {
                     //------------- CHECK Status Competition
@@ -828,7 +828,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     throw new ArgumentNullException("Competition Id Null || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-                bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check)
                 {
                     //------------- CHECK Status Competition
@@ -954,7 +954,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        
+
 
         //----------------------------------------------------------------Add Competition In Department
 
@@ -1092,7 +1092,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                    || model.ClubId == 0)
                     throw new ArgumentNullException("Club Id Collaborate Null || Competition Id Null || Club Id Null");
 
-                bool Check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
                     //------------- CHECK Status Competition
@@ -1181,7 +1181,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                      || model.ListInfluencer.Count < 0)
                     throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Null");
 
-                bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                bool check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (check)
                 {
                     //------------- CHECK Status Competition
@@ -1272,7 +1272,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                      || model.InfluencerId == 0)
                     throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Id Null");
 
-                bool check = await CheckCompetitionManager(token, model.CompetitionId, model.ClubId);
+                bool check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (check)
                 {
                     //------------- CHECK Status Competition
@@ -1945,33 +1945,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        private async Task<bool> CheckCompetitionManager(string Token, int CompetitionId, int ClubId)
-        {
-            //------------- CHECK Competition in system
-            Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition == null) throw new ArgumentException("Competition or Event not found ");
-
-            //------------- CHECK Club in system
-            Club club = await _clubRepo.Get(ClubId);
-            if (club == null) throw new ArgumentException("Club in not found");
-
-            //------------- CHECK Is Member in Club
-            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
-            Member member = await _memberRepo.Get(memberId);
-            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
-
-            //------------- CHECK User is in CompetitionManger table                          
-            CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, member.UserId, ClubId);
-            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
-
-            //------------- CHECK Role Is Manger
-            if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
-
-            return true;
-
-        }
-
-        private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
+        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isClubLeader)
         {
             //------------- CHECK Competition in system
             Competition competition = await _competitionRepo.Get(CompetitionId);
@@ -1990,7 +1964,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
             CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, member.UserId, ClubId);
             if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
 
-            return true;
+            if (isClubLeader)
+            {
+                //------------- CHECK Role Is highest role
+                if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                return true;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         private bool CheckMaxMin(int max, int min, int NumberOfParticipant)
