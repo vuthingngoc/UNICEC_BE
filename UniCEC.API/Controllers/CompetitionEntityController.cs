@@ -27,51 +27,51 @@ namespace UniCEC.API.Controllers
 
         //---------------------------------------------------------------------------Competition Entity
         //POST api/<CompetitionEntityController>
-        [Authorize(Roles = "Student")]
-        [HttpPost("image")]
-        [SwaggerOperation(Summary = "Add image for competition")]
-        public async Task<IActionResult> AddCompetitionEntity([FromBody] CompetitionEntityInsertModel model)
-        {
-            try
-            {
-                var header = Request.Headers;
-                if (!header.ContainsKey("Authorization")) return Unauthorized();
-                string token = header["Authorization"].ToString().Split(" ")[1];
+        //[Authorize(Roles = "Student")]
+        //[HttpPost("image")]
+        //[SwaggerOperation(Summary = "Add image for competition")]
+        //public async Task<IActionResult> AddCompetitionEntity([FromBody] CompetitionEntityInsertModel model)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
 
 
-                ViewCompetitionEntity result = await _competitionEntityService.AddCompetitionEntity(model, token);
+        //        ViewCompetitionEntity result = await _competitionEntityService.AddCompetitionEntity(model, token);
 
-                if (result != null)
-                {
+        //        if (result != null)
+        //        {
 
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
 
     }

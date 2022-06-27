@@ -23,7 +23,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo
                                                                  select ce).ToListAsync();
 
             return (competitionEntities.Count > 0) ? competitionEntities : null;
-          
+
         }
     }
 }

@@ -15,15 +15,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
         {
         }
 
-        public async Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId)
-        {
-            List<ActivitiesEntity> activitiesEntities = await (from ca in context.CompetitionActivities
-                                                               where ca.Id == competitionActivityId
-                                                               from ae in context.ActivitiesEntities
-                                                               where ae.CompetitionActivityId == ca.Id
-                                                               select ae).ToListAsync();
+        //public async Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId)
+        //{
+        //    List<ActivitiesEntity> activitiesEntities = await (from ca in context.CompetitionActivities
+        //                                                       where ca.Id == competitionActivityId
+        //                                                       from ae in context.ActivitiesEntities
+        //                                                       where ae.CompetitionActivityId == ca.Id
+        //                                                       select ae).ToListAsync();
 
-            return (activitiesEntities.Count > 0) ? activitiesEntities : null;
-        }
+        //    return (activitiesEntities.Count > 0) ? activitiesEntities : null;
+        //}
     }
 }
