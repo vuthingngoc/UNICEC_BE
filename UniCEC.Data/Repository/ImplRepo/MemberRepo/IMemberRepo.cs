@@ -21,10 +21,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public Task<bool> CheckExistedMemberInClub(int userId, int clubId);   
         public Task<int> GetRoleMemberInClub(int userId, int clubId);
         public Task<int> GetIdByUser(int userId, int clubId);
-        public int CheckValidNewLeader(int userId, int universityId);
+        public int CheckValidLeader(int userId, int universityId); // use when insert club
         public Task UpdateMemberRole(int memberId, int clubRoleId);
         //public Task DeleteMember(int memberId);
-        public Task UpdateEndTerm(int clubId);
+        public Task UpdateStatusDeletedClub(int clubId);
         //TA
         public Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model);      
         public Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo);

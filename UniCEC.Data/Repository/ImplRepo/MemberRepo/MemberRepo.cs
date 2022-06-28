@@ -349,7 +349,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         //    }
         //}
 
-        public async Task UpdateEndTerm(int clubId)
+        public async Task UpdateStatusDeletedClub(int clubId)
         {
             (from m in context.Members
              where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
@@ -363,7 +363,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         }
 
         // use when insert club
-        public int CheckValidNewLeader(int userId, int universityId)
+        public int CheckValidLeader(int userId, int universityId)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id

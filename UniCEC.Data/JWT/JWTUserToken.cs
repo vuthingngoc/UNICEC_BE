@@ -39,32 +39,6 @@ namespace UniCEC.Data.JWT
                         )
                 );
             }
-            else if (user.RoleId.Equals(2)) // sponsor
-            {
-                tokenUser = new JwtSecurityToken(
-                issuer: "https://securetoken.google.com/unics-e46a4",
-                audience: "unics-e46a4",
-                claims: new[] {
-                 //Id
-                 new Claim("Id", user.Id.ToString()),
-                 //SponsorId
-                 new Claim("SponsorId", user.SponsorId.ToString()),
-                 //fullname
-                 new Claim("Fullname", user.Fullname),
-                 //Avatar
-                 new Claim ("Avatar", user.Avatar),
-                 //Role Id
-                 new Claim("RoleId", user.RoleId.ToString()),
-                 //Role
-                 new Claim(ClaimTypes.Role, user.RoleName),
-                },
-                expires: DateTime.UtcNow.AddDays(30),
-                signingCredentials: new SigningCredentials(
-                        key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0wPQUnbnoPATU4MJOprB")),
-                        algorithm: SecurityAlgorithms.HmacSha256
-                        )
-                );
-            }
             else if (user.RoleId.Equals(4) || user.RoleId.Equals(3) && user.UniversityId == 0) // System Admin || new student
             {
                 tokenUser = new JwtSecurityToken(

@@ -18,12 +18,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
         }
 
-        public async Task<ViewClub> GetById(int id, bool status)
+        public async Task<ViewClub> GetById(int id, bool? status)
         {
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
-                        where c.Id.Equals(id) && c.Status.Equals(status)
+                        where c.Id.Equals(id)
                         select new { c, u }; 
+
+            if(status.HasValue) query = query.Where(selector => selector.c.Status.Equals(status.Value));
 
             ViewClub club = await query.Select(x => new ViewClub()
             {

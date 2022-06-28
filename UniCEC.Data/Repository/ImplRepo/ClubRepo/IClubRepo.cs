@@ -10,7 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
     public interface IClubRepo : IRepository<Club>
     {
-        public Task<ViewClub> GetById(int id, bool status);
+        public Task<ViewClub> GetById(int id, bool? status);
         public Task<PagingResult<ViewClub>> GetByCompetition(int competitionId, PagingRequest request);
         public Task<List<int>> GetByCompetition(int competitionId);
         public Task<PagingResult<ViewClub>> GetByConditions(ClubRequestModel request);
