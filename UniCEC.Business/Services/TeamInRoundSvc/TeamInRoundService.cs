@@ -68,7 +68,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
         private void CheckValidAuthorized(string token, int competitionId)
         {
             int userId = _decodeToken.Decode(token, "Id");            
-            bool isValid = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isValid = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId, null);
             if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
@@ -79,7 +79,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             await CheckValidAuthorizedViewer(token, competitionId);            
             
             int userId = _decodeToken.Decode(token, "Id");
-            bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId, null);
             if (!isManager) request.Status = true;
 
             PagingResult<ViewTeamInRound> teamInRounds = await _teamInRoundRepo.GetByConditions(request);

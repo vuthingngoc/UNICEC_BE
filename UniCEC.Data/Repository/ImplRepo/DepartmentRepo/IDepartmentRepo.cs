@@ -11,7 +11,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
     public interface IDepartmentRepo : IRepository<Department>
     {
         public Task<ViewDepartment> GetById(int id, bool? status, int? universityId);
-        public Task<ViewDepartment> GetByCode(string majorCode, bool? status, int? universityId);
+        public Task<ViewDepartment> GetByCode(string departmentCode, bool? status, int? universityId);
         public Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request);
         public Task<PagingResult<Department>> GetByUniversity(int universityId, PagingRequest request);
         public Task<List<int>> GetIdsByMajorId(int majorId, bool? status);

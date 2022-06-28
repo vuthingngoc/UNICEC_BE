@@ -28,11 +28,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             int totalCount = query.Count();
             List<ViewMajor> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                                        .Select(department => new ViewMajor()
+                                                        .Select(major => new ViewMajor()
                                                         {
-                                                            Id = department.Id,
-                                                            Name = department.Name,
-                                                            Status = department.Status
+                                                            Id = major.Id,
+                                                            Name = major.Name,
+                                                            Status = major.Status
                                                         }).ToListAsync();
 
             return (majors.Count > 0) ? new PagingResult<ViewMajor>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -66,11 +66,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
 
             if (status.HasValue) query = query.Where(major => major.Status.Equals(status.Value));
 
-            return await query.Select(d => new ViewMajor()
+            return await query.Select(major => new ViewMajor()
             {
-                Id = d.Id,
-                Name = d.Name,
-                Status = d.Status,
+                Id = major.Id,
+                Name = major.Name,
+                Status = major.Status,
             }).FirstOrDefaultAsync();
         }
 

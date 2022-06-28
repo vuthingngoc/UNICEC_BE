@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
@@ -14,24 +13,23 @@ namespace UniCEC.Business.Services.UserSvc
     public class UserService : IUserService
     {
         private IUserRepo _userRepo;
-        private JwtSecurityTokenHandler _tokenHandler;
+        private DecodeToken _decodeToken;
 
         public UserService(IUserRepo userRepo)
         {
             _userRepo = userRepo;
+            _decodeToken = new DecodeToken();
         }
 
         public int DecodeToken(string token, string nameClaim)
         {
-            if (_tokenHandler == null) _tokenHandler = new JwtSecurityTokenHandler();
-            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
-            return Int32.Parse(claim.Value);
+            return _decodeToken.Decode(token, nameClaim);
         }
 
         public async Task<ViewUser> GetById(string token, int id)
         {
-            int userId = DecodeToken(token, "Id");
-            int roleId = DecodeToken(token, "RoleId");
+            int userId = _decodeToken.Decode(token, "Id");
+            int roleId = _decodeToken.Decode(token, "RoleId");
             bool isFullInfo = false;
             
             // if admin or him/her-self call api
@@ -114,8 +112,8 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<bool> Update(UserUpdateModel model, string token)
         {
-            int userId = DecodeToken(token, "Id");
-            int roleId = DecodeToken(token, "RoleId");
+            int userId = _decodeToken.Decode(token, "Id");
+            int roleId = _decodeToken.Decode(token, "RoleId");
 
             if (!userId.Equals(model.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
@@ -132,7 +130,7 @@ namespace UniCEC.Business.Services.UserSvc
             if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
             if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
             if (!string.IsNullOrEmpty(model.Avatar)) user.Avatar = model.Avatar;
-            //if (model.MajorId.HasValue) user.MajorId = model.MajorId;
+            if (model.DepartmentId.HasValue) user.DepartmentId = model.DepartmentId;
 
             // for admin
             if (model.RoleId != 0 && roleId.Equals(1)) user.RoleId = model.RoleId.Value;
@@ -154,9 +152,9 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task<bool> Delete(int id)
         {
             User user = await _userRepo.Get(id);
-            if (user == null) throw new NullReferenceException("Not found");
+            if (user == null) throw new NullReferenceException("Not found this user");
 
-            //user.Status = UserStatus.InActive;
+            user.Status = UserStatus.InActive;
             await _userRepo.Update();
             return true;
         }
@@ -181,14 +179,14 @@ namespace UniCEC.Business.Services.UserSvc
                 {
                     RoleId = userModel.RoleId,
                     Email = email,
-                    //Status = UserStatus.Active,
+                    Status = UserStatus.Active,
                     Avatar = userModel.Avatar,
                     Fullname = userModel.Fullname,
                     PhoneNumber = phoneNumber,
                     //auto
                     Dob = "",
                     Gender = "",
-                    StudentCode = "",
+                    StudentCode = "",                    
                     Description = "",
                     IsOnline = true // default status when log in
                 };
@@ -200,7 +198,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task UpdateInfoToken(int userId, int universityId, string token)
         {
-            int idUser = DecodeToken(token, "Id");
+            int idUser = _decodeToken.Decode(token, "Id");
             if (!userId.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             User user = await _userRepo.Get(userId);
@@ -226,7 +224,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<UserTokenModel> GetUserTokenById(int id, string token)
         {
-            int userId = DecodeToken(token, "Id");
+            int userId = _decodeToken.Decode(token, "Id");
             if (!userId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
             return await _userRepo.GetUserTokenById(id);
         }

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Department;
 using System.Collections.Generic;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
@@ -34,7 +33,7 @@ namespace UniCEC.Business.Services.MajorSvc
             bool? status = null;
             if (!roleId.Equals(4)) status = true;
             ViewMajor major = await _majorRepo.GetById(id, status);
-            return (major != null) ? major : throw new NullReferenceException("Not found this department");
+            return (major != null) ? major : throw new NullReferenceException("Not found this major");
         }
 
         public async Task<PagingResult<ViewMajor>> GetByConditions(string token, MajorRequestModel request) // not finish
@@ -42,7 +41,7 @@ namespace UniCEC.Business.Services.MajorSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             if (!roleId.Equals(4)) request.Status = true;
             PagingResult<ViewMajor> majors = await _majorRepo.GetByConditions(request);
-            if (majors == null) throw new NullReferenceException("Not found any departments");
+            if (majors == null) throw new NullReferenceException("Not found any majors");
             return (majors != null) ? majors : throw new NullReferenceException();
         }
 
@@ -76,7 +75,7 @@ namespace UniCEC.Business.Services.MajorSvc
             CheckValidAuthorized(token);
 
             int duplicatedId = await _majorRepo.CheckDuplicatedName(name);
-            if (duplicatedId > 0) throw new ArgumentException("Duplicated department");
+            if (duplicatedId > 0) throw new ArgumentException("Duplicated major");
 
             Major major = new Major()
             {
@@ -98,7 +97,7 @@ namespace UniCEC.Business.Services.MajorSvc
             CheckValidAuthorized(token);
 
             Major major = await _majorRepo.Get(model.Id);
-            if (major == null) throw new NullReferenceException("Not found this element");
+            if (major == null) throw new NullReferenceException("Not found this major");
             
             if (model.Status.HasValue && model.Status.Value.Equals(true))
             {
@@ -120,7 +119,7 @@ namespace UniCEC.Business.Services.MajorSvc
             {
                 model.Name = Regex.Replace(model.Name.Trim(), @"\s{2,}", " ");
                 int duplicatedId = await _majorRepo.CheckDuplicatedName(model.Name);
-                if (duplicatedId > 0 && !duplicatedId.Equals(model.Id)) throw new ArgumentException("Duplicated department");
+                if (duplicatedId > 0 && !duplicatedId.Equals(model.Id)) throw new ArgumentException("Duplicated major");
                 major.Name = model.Name;
             }
 
