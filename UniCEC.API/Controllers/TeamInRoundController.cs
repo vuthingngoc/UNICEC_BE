@@ -53,7 +53,7 @@ namespace UniCEC.API.Controllers
         //}
 
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Search team in round by conditions - Authenticated user")]
+        [SwaggerOperation(Summary = "Search teams in round by conditions - Authenticated user")]
         public async Task<IActionResult> GetRoundByConditions([FromQuery] TeamInRoundRequestModel request)
         {
             try

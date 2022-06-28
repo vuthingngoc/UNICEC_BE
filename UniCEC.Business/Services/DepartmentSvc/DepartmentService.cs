@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 Id = department.Id,
                 MajorId = department.MajorId,
                 Description = department.Description,
-                //DepartmentCode = department.MajorCode,
+                DepartmentCode = department.DepartmentCode,
                 Name = department.Name,
                 Status = department.Status,
                 UniversityId = department.UniversityId                
@@ -55,7 +55,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return department;
         }
 
-        public async Task<ViewDepartment> GetByCode(string token, string majorCode)
+        public async Task<ViewDepartment> GetByCode(string token, string departmentCode)
         {
             int roleId = _decodeToken.Decode(token, "RoleId");
             bool? status = null;
@@ -64,7 +64,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (!roleId.Equals(1) && !roleId.Equals(4)) status = true;
             if (!roleId.Equals(2) && !roleId.Equals(4)) universityId = _decodeToken.Decode(token, "UniversityId");
 
-            ViewDepartment department = await _departmentRepo.GetByCode(majorCode, status, universityId);
+            ViewDepartment department = await _departmentRepo.GetByCode(departmentCode, status, universityId);
             if (department == null) throw new NullReferenceException();
             return department;
         }
@@ -98,7 +98,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         {
             if (model.MajorId.Equals(0) || model.UniversityId.Equals(0) || string.IsNullOrEmpty(model.DepartmentCode) ||
                 string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
-                throw new ArgumentNullException("DepartmentId null || UniversityId null || MajorCode null || Name null || Description null");
+                throw new ArgumentNullException("DepartmentId null || UniversityId null || DepartmentCode null || Name null || Description null");
 
             checkAuthorizedUser(token, model.UniversityId);
 
@@ -107,7 +107,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (duplicatedId > 0) throw new ArgumentException("Duplicated department name");
 
             int departmentCode = await _departmentRepo.CheckExistedDepartmentCode(model.UniversityId, model.DepartmentCode);
-            if (departmentCode > 0) throw new ArgumentException("Duplicated MajorCode");
+            if (departmentCode > 0) throw new ArgumentException("Duplicated DepartmentCode");
             Major major = await _majorRepo.Get(model.MajorId);
             if (major == null) throw new ArgumentException("Can not find this major");
 
@@ -118,7 +118,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 UniversityId = model.UniversityId,
                 MajorId = model.MajorId,
                 Description = model.Description,
-                //MajorCode = model.DepartmentCode,
+                DepartmentCode = model.DepartmentCode,
                 Name = model.Name,
                 Status = status                
             };
@@ -135,7 +135,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (department == null) throw new NullReferenceException("Not found this department");
 
             int departmentCode = await _departmentRepo.CheckExistedDepartmentCode(model.UniversityId, model.DepartmentCode);
-            if (departmentCode > 0 && departmentCode != model.Id) throw new ArgumentException("Duplicated MajorCode");
+            if (departmentCode > 0 && departmentCode != model.Id) throw new ArgumentException("Duplicated DepartmentCode");
 
             Major major = await _majorRepo.Get(model.MajorId);
             if (major == null) throw new ArgumentException("Can not find this major");
@@ -143,9 +143,9 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (model.MajorId != 0) department.MajorId = model.MajorId;
             
             if (!string.IsNullOrEmpty(model.Description)) department.Description = model.Description;
-            
-            //if (!string.IsNullOrEmpty(model.DepartmentCode)) department.MajorCode = model.DepartmentCode;
-            
+
+            if (!string.IsNullOrEmpty(model.DepartmentCode)) department.DepartmentCode = model.DepartmentCode;
+
             if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
             
             if(model.Status.Equals(true)) department.Status = model.Status;

@@ -5,6 +5,6 @@
         Cancel = 0,
         Active = 1,
         Happening = 2,
-        Done = 3
+        finished = 3
     }
 }

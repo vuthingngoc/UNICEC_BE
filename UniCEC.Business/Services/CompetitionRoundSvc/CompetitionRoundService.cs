@@ -35,7 +35,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
         private void CheckValidAuthorized(string token, int competitionId)
         {
             int userId = _decodeToken.Decode(token, "Id");
-            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId, null);
             if (!isValidUser) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
@@ -52,7 +52,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (competitionRound == null) throw new NullReferenceException();
 
             int userId = _decodeToken.Decode(token, "Id");
-            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId);
+            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId, null);
             if (!isValidUser && competitionRound.Status.Equals(false)) throw new NullReferenceException();
 
             return competitionRound;

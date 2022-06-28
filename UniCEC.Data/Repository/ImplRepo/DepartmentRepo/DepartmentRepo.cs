@@ -29,22 +29,20 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 
             if (request.MajorId.HasValue) query = query.Where(d => d.MajorId.Equals(request.MajorId));
 
-            //if (!string.IsNullOrEmpty(request.MajorCode)) query = query.Where(m => m.MajorCode.Equals(request.MajorCode));
-
             if (request.Status.HasValue) query = query.Where(m => m.Status.Equals(request.Status.Value));
 
             int totalCount = query.Count();
 
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                    .Select(m => new ViewDepartment()
+                                    .Select(d => new ViewDepartment()
                                     {
-                                        Id = m.Id,
-                                        UniversityId = m.UniversityId,
-                                        MajorId = m.MajorId,
-                                        Description = m.Description,
-                                        //DepartmentCode = m.MajorCode,
-                                        Name = m.Name,
-                                        Status = m.Status
+                                        Id = d.Id,
+                                        UniversityId = d.UniversityId,
+                                        MajorId = d.MajorId,
+                                        Description = d.Description,
+                                        DepartmentCode = d.DepartmentCode,
+                                        Name = d.Name,
+                                        Status = d.Status
                                     }).ToListAsync();
 
             return (query.Any()) ? new PagingResult<ViewDepartment>(items, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -59,15 +57,15 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             int totalCount = query.Count();
 
             List<Department> majors = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                .Select(m => new Department()
+                .Select(d => new Department()
                 {
-                    Id = m.Id,
-                    UniversityId = m.UniversityId,
-                    MajorId = m.MajorId,
-                    Description = m.Description,
-                    //MajorCode = m.MajorCode,
-                    Name = m.Name,
-                    Status = m.Status
+                    Id = d.Id,
+                    UniversityId = d.UniversityId,
+                    MajorId = d.MajorId,
+                    Description = d.Description,
+                    DepartmentCode = d.DepartmentCode,                    
+                    Name = d.Name,
+                    Status = d.Status
                 }).ToListAsync();
 
             return (majors.Count > 0) ? new PagingResult<Department>(majors, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -75,8 +73,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 
         public async Task<int> CheckExistedDepartmentCode(int universityId, string code)
         {
-            Department department = await context.Departments.FirstOrDefaultAsync(d => d.UniversityId.Equals(universityId));
-                                                                        //&& d.MajorCode.Equals(code));
+            Department department = await context.Departments.FirstOrDefaultAsync(d => d.UniversityId.Equals(universityId) && d.DepartmentCode.Equals(code));
             return (department != null) ? department.Id : 0;
         }
 
@@ -101,22 +98,22 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
             if (universityId.HasValue) query = query.Where(d => d.UniversityId.Equals(universityId));
 
-            return await query.Select(m => new ViewDepartment()
+            return await query.Select(d => new ViewDepartment()
             {
-                UniversityId = m.UniversityId,
-                MajorId = m.MajorId,
-                Description = m.Description,
-                Id = m.Id,
-                //DepartmentCode = m.MajorCode,
-                Name = m.Name,
-                Status = m.Status
+                UniversityId = d.UniversityId,
+                MajorId = d.MajorId,
+                Description = d.Description,
+                Id = d.Id,
+                DepartmentCode = d.DepartmentCode,
+                Name = d.Name,
+                Status = d.Status
             }).FirstOrDefaultAsync();
         }
 
-        public async Task<ViewDepartment> GetByCode(string majorCode, bool? status, int? universityId)
+        public async Task<ViewDepartment> GetByCode(string departmentCode, bool? status, int? universityId)
         {
             var query = from d in context.Departments
-                        //where d.MajorCode.Equals(majorCode)
+                        where d.DepartmentCode.Equals(departmentCode)
                         select d;
 
             if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
@@ -129,7 +126,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                 MajorId = m.MajorId,
                 Description = m.Description,
                 Id = m.Id,
-                //DepartmentCode = m.MajorCode,
+                DepartmentCode = m.DepartmentCode,
                 Name = m.Name,
                 Status = m.Status
             }).FirstOrDefaultAsync();

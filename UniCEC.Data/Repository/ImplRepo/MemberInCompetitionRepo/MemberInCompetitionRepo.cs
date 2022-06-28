@@ -19,17 +19,18 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo
         }
 
 
-        public bool CheckValidManagerByUser(int competitionId, int userId)
+        public bool CheckValidManagerByUser(int competitionId, int userId, int? competitionRoleId)
         {
-            //var query = from cm in context.CompetitionManagers
-            //            join m in context.Members on cm.UserId equals m.UserId
-            //            join c in context.Clubs on m.ClubId equals c.Id
-            //            join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
-            //            where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && cm.Status.Equals(true)
-            //            select new { cm, m, c, cic };
+            var query = from mic in context.MemberInCompetitions
+                        join m in context.Members on mic.MemberId equals m.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
+                        join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
+                        where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && mic.Status.Equals(true) 
+                        select new { mic, m, c, cic };
 
-            //return query.Any();
-            return false;
+            if (competitionRoleId.HasValue) query = query.Where(selector => selector.mic.CompetitionRoleId.Equals(competitionRoleId));
+
+            return query.Any();
         }
 
         public async Task<PagingResult<ViewMemberInCompetition>> GetAllManagerCompOrEve(MemberInCompetitionRequestModel request)
