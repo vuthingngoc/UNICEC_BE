@@ -18,6 +18,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
         public Task<PagingResult<ViewClub>> GetByUniversity(int universityId, PagingRequest request);
         public Task<int> CheckExistedClubName(int universityId, string name);
         public Task<int> GetUniversityByClub(int clubId);
-       
+        public Task<bool> CheckExistedClubInUniversity(int universityId, int clubId);
+
     }
 }

@@ -84,8 +84,13 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                List<ViewIntroClubMember> members = await _memberService.GetLeadersByClub(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewIntroClubMember> members = await _memberService.GetLeadersByClub(token, id);
                 return Ok(members);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException e)
             {
@@ -157,7 +162,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<MemberController>/5
         [HttpPut]
         [SwaggerOperation(Summary = "Update member - leader or vice president")]
-        public async Task<IActionResult> UpdateMember([FromBody] MemberUpdateModel model)
+        public async Task<IActionResult> UpdateMember([FromBody, BindRequired] MemberUpdateModel model)
         {
             try
             {
@@ -196,7 +201,7 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 await _memberService.Delete(token, id);
-                return Ok();
+                return NoContent();
             }
             catch (UnauthorizedAccessException ex)
             {
