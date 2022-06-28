@@ -23,7 +23,7 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
         public DateTime? EndTime { get; set; }
         
         public DateTime Deadline { get; set; }
-        public MemberTakesActivityStatus Status { get; set; }
+      
 
         [JsonPropertyName("booker_id")]
         public int BookerId { get; set; }

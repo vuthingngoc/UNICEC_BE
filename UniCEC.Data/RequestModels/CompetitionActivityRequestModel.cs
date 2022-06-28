@@ -12,8 +12,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "competitionId")]
         public int? CompetitionId { get; set; }
 
-        [FromQuery(Name = "processStatus")]
-        public  CompetitionActivityProcessStatus? ProcessStatus { get; set; }
+        
 
         [FromQuery(Name = "priorityStatus")]
         public PriorityStatus? PriorityStatus { get; set; }

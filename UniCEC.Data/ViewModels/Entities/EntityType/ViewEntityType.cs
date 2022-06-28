@@ -1,4 +1,10 @@
-﻿namespace UniCEC.Data.ViewModels.Entities.EntityType
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UniCEC.Data.ViewModels.Entities.EntityType
 {
     public class ViewEntityType
     {
