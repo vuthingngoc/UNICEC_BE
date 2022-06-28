@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -13,7 +9,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo
 {
     public interface IMemberInCompetitionRepo : IRepository<MemberInCompetition>
     {
-        public bool CheckValidManagerByUser(int competitionId, int userId);
+        public bool CheckValidManagerByUser(int competitionId, int userId, int? competitionRoleId);
 
         public Task<PagingResult<ViewMemberInCompetition>> GetAllManagerCompOrEve(MemberInCompetitionRequestModel request);
 

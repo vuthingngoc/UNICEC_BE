@@ -9,7 +9,7 @@ namespace UniCEC.Data.ViewModels.Entities.User
         [JsonPropertyName("role_id")]
         public int? RoleId { get; set; }
         [JsonPropertyName("major_id")]
-        public int? MajorId { get; set; }
+        public int? DepartmentId { get; set; }
         [JsonPropertyName("user_code")]
         public string StudentCode { get; set; }
         public string Fullname { get; set; }

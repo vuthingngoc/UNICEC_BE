@@ -30,7 +30,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleId = user.RoleId,
                 SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
                 UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
-                //MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
+                MajorId = (user.DepartmentId.HasValue) ? user.DepartmentId.Value : 0,
                 Fullname = user.Fullname,
                 StudentCode = user.StudentCode,
                 Email = user.Email,
@@ -69,7 +69,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                             RoleId = u.RoleId,
                                             SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                             UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                                            //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                                            MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                                             Fullname = u.Fullname,
                                             StudentCode = u.StudentCode,
                                             Email = u.Email,
@@ -98,7 +98,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleId = u.RoleId,
                 SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                 Fullname = u.Fullname,
                 StudentCode = u.StudentCode,
                 Email = u.Email,
@@ -130,10 +130,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
-                //Status = selector.u.Status
+                Status = selector.u.Status                
             }).FirstOrDefaultAsync();
-
-            //return await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
         }
 
         public async Task<UserTokenModel> GetUserTokenById(int id)
@@ -176,7 +174,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                               RoleId = u.RoleId,
                                               SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                               UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                                              //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                                              MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                                               Fullname = u.Fullname,
                                               StudentCode = u.StudentCode,
                                               Email = u.Email,
