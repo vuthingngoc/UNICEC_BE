@@ -4,7 +4,6 @@ using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
@@ -21,7 +20,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private ICompetitionRepo _competitionRepo;
        //private ITermRepo _termRepo;
         private IMemberRepo _memberRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
+       
         private IFileService _fileService;
         private IUserRepo _userRepo;
 
@@ -33,7 +32,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           ICompetitionRepo competitionRepo,
                                           //ITermRepo termRepo,
                                           IMemberRepo memberRepo,
-                                          ICompetitionManagerRepo competitionManagerRepo,
+                                        
                                           IActivitiesEntityRepo activitiesEntityRepo,
                                           IUserRepo userRepo,
                                           IFileService fileService)
@@ -44,7 +43,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _competitionRepo = competitionRepo;
             //_termRepo = termRepo;
             _memberRepo = memberRepo;
-            _competitionManagerRepo = competitionManagerRepo;
+            
             _activitiesEntityRepo = activitiesEntityRepo;
             _userRepo = userRepo;
             _fileService = fileService;

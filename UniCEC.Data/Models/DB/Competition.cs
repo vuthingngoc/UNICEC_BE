@@ -12,17 +12,18 @@ namespace UniCEC.Data.Models.DB
         {
             CompetitionActivities = new HashSet<CompetitionActivity>();
             CompetitionEntities = new HashSet<CompetitionEntity>();
+            CompetitionHistories = new HashSet<CompetitionHistory>();
             CompetitionInClubs = new HashSet<CompetitionInClub>();
             CompetitionInMajors = new HashSet<CompetitionInMajor>();
             CompetitionRounds = new HashSet<CompetitionRound>();
-            InfluencerInCompetitions = new HashSet<InfluencerInCompetition>();
+            MemberInCompetitions = new HashSet<MemberInCompetition>();
             Participants = new HashSet<Participant>();
-            SponsorInCompetitions = new HashSet<SponsorInCompetition>();
             Teams = new HashSet<Team>();
         }
 
         public int Id { get; set; }
         public int CompetitionTypeId { get; set; }
+        public int UniversityId { get; set; }
         public string Name { get; set; }
         public string AddressName { get; set; }
         public string Address { get; set; }
@@ -46,14 +47,15 @@ namespace UniCEC.Data.Models.DB
         public CompetitionStatus Status { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
+        public virtual University University { get; set; }
         public virtual ICollection<CompetitionActivity> CompetitionActivities { get; set; }
         public virtual ICollection<CompetitionEntity> CompetitionEntities { get; set; }
+        public virtual ICollection<CompetitionHistory> CompetitionHistories { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual ICollection<CompetitionInMajor> CompetitionInMajors { get; set; }
         public virtual ICollection<CompetitionRound> CompetitionRounds { get; set; }
-        public virtual ICollection<InfluencerInCompetition> InfluencerInCompetitions { get; set; }
+        public virtual ICollection<MemberInCompetition> MemberInCompetitions { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
-        public virtual ICollection<SponsorInCompetition> SponsorInCompetitions { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
@@ -9,7 +8,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
@@ -25,21 +24,21 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
         private ITeamRepo _teamRepo;
         private ICompetitionRepo _competitionRepo;
         private ICompetitionRoundRepo _competitionRoundRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
+        private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private IMemberRepo _memberRepo;
         private IClubRepo _clubRepo;
 
         private DecodeToken _decodeToken;
 
         public TeamInRoundService(ITeamInRoundRepo teamInRoundRepo, ICompetitionRepo competitionRepo, ITeamRepo teamRepo
-                                    , ICompetitionRoundRepo competitionRoundRepo, ICompetitionManagerRepo competitionManagerRepo
+                                    , ICompetitionRoundRepo competitionRoundRepo, IMemberInCompetitionRepo memberInCompetitionRepo
                                     , IClubRepo clubRepo, IMemberRepo memberRepo)
         {
             _teamInRoundRepo = teamInRoundRepo;
             _teamRepo = teamRepo;
             _competitionRepo = competitionRepo;
             _competitionRoundRepo = competitionRoundRepo;
-            _competitionManagerRepo = competitionManagerRepo;
+            _memberInCompetitionRepo = memberInCompetitionRepo;
             _clubRepo = clubRepo;
             _memberRepo = memberRepo;
             _decodeToken = new DecodeToken();
@@ -69,7 +68,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
         private void CheckValidAuthorized(string token, int competitionId)
         {
             int userId = _decodeToken.Decode(token, "Id");            
-            bool isValid = _competitionManagerRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isValid = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
             if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
@@ -80,7 +79,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             await CheckValidAuthorizedViewer(token, competitionId);            
             
             int userId = _decodeToken.Decode(token, "Id");
-            bool isManager = _competitionManagerRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
             if (!isManager) request.Status = true;
 
             PagingResult<ViewTeamInRound> teamInRounds = await _teamInRoundRepo.GetByConditions(request);

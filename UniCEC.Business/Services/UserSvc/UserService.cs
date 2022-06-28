@@ -132,11 +132,11 @@ namespace UniCEC.Business.Services.UserSvc
             if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
             if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
             if (!string.IsNullOrEmpty(model.Avatar)) user.Avatar = model.Avatar;
-            if (model.MajorId.HasValue) user.MajorId = model.MajorId;
+            //if (model.MajorId.HasValue) user.MajorId = model.MajorId;
 
             // for admin
             if (model.RoleId != 0 && roleId.Equals(1)) user.RoleId = model.RoleId.Value;
-            //if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
+            if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
 
             await _userRepo.Update();
             return true;

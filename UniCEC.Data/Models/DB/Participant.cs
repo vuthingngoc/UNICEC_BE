@@ -19,7 +19,6 @@ namespace UniCEC.Data.Models.DB
         public DateTime RegisterTime { get; set; }
 
         public virtual Competition Competition { get; set; }
-        public virtual Member Member { get; set; }
         public virtual User Student { get; set; }
         public virtual ICollection<ParticipantInTeam> ParticipantInTeams { get; set; }
     }
