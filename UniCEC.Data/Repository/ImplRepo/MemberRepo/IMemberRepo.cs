@@ -12,7 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
     {
         public Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, MemberStatus status, PagingRequest request);
         public Task<List<Member>> GetMembersByClub(int clubId);
-        public Task<ViewDetailMember> GetDetailById(int memberId);
+        public Task<ViewDetailMember> GetDetailById(int memberId, MemberStatus? status);
         public Task<ViewMember> GetById(int memberId);
         public Task<int> GetClubIdByMember(int memberId); // use to check role
         public Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId);

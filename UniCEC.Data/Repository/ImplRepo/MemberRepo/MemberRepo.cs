@@ -75,7 +75,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             }).ToListAsync();
         }
 
-        public async Task<ViewDetailMember> GetDetailById(int memberId)
+        public async Task<ViewDetailMember> GetDetailById(int memberId, MemberStatus? status)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
@@ -83,7 +83,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         where m.Id.Equals(memberId)
                         select new { m, u, cr };
 
-            DateTime joinDate = await GetJoinDate(memberId);
+            if(status.HasValue) query = query.Where(selector => selector.m.Status.Equals(status.Value));
+
             ViewDetailMember member = await query.Select(selector => new ViewDetailMember()
             {
                 Id = memberId,
@@ -92,7 +93,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
                 Email = selector.u.Email,
-                JoinDate = joinDate,
+                JoinDate = selector.m.StartTime,
                 PhoneNumber = selector.u.PhoneNumber,
                 IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync();
@@ -119,7 +120,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 Status = selector.m.Status,
-                IsOnline = selector.u.IsOnline
+                IsOnline = selector.u.IsOnline                
             }).FirstOrDefaultAsync();
 
             return (query.Count() > 0) ? member : null;
@@ -128,7 +129,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public async Task<int> GetClubIdByMember(int memberId)
         {
             return await (from m in context.Members
-                          where m.Id.Equals(memberId)
+                          where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
                           select m.ClubId).FirstOrDefaultAsync();
         }
 

@@ -80,13 +80,21 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            ViewDetailMember member = await _memberRepo.GetDetailById(memberId);
+            MemberStatus? status = null;
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
+            if (clubRoleId.Equals(3) || clubRoleId.Equals(4)) status = MemberStatus.Active; // manager or member
+
+            ViewDetailMember member = await _memberRepo.GetDetailById(memberId, status);
             if (member == null) throw new NullReferenceException("Not found this member");
             return member;
         }
 
-        public async Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId)
+        public async Task<List<ViewIntroClubMember>> GetLeadersByClub(string token, int clubId)
         {
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            bool isExisted = await _clubRepo.CheckExistedClubInUniversity(universityId, clubId);
+            if (!isExisted) throw new UnauthorizedAccessException("This club is not in your university");
+
             List<ViewIntroClubMember> members = await _memberRepo.GetLeadersByClub(clubId);
             foreach (var member in members)
             {
@@ -108,11 +116,11 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         //Insert-Member
-        public async Task<ViewMember> Insert(string token, MemberInsertModel model) // change business
+        public async Task<ViewMember> Insert(string token, MemberInsertModel model)
         {
             // check valid data 
             if (model.ClubId == 0 || model.UserId == 0 || model.ClubRoleId == 0 || model.StartTime.Equals(DateTime.MinValue))
-                throw new ArgumentException("ClubId Null || UserId Null || ClubRoleId Null || TermId Null || StartTime Null");
+                throw new ArgumentException("ClubId Null || UserId Null || ClubRoleId Null || StartTime Null");
 
             // check role
             int userId = _decodeToken.Decode(token, "Id");
@@ -152,7 +160,7 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         //Update-Member
-        public async Task Update(string token, MemberUpdateModel model) // change business
+        public async Task Update(string token, MemberUpdateModel model)
         {
             Member member = await _memberRepo.Get(model.Id);
             if (member == null) throw new NullReferenceException("Not found this member");
@@ -165,24 +173,12 @@ namespace UniCEC.Business.Services.MemberSvc
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             if (member.ClubRoleId.Equals(model.ClubRoleId)) return;
 
-            var currentTime = new LocalTime().GetLocalTime().DateTime;            
-            member.EndTime = currentTime;
-            member.Status = MemberStatus.Inactive;
+            member.ClubRoleId = clubRoleId;
             await _memberRepo.Update();
-
-            Member newRecord = new Member()
-            {
-                ClubId = member.ClubId,
-                ClubRoleId = model.ClubRoleId,
-                StartTime = currentTime,
-                UserId = member.UserId,
-                Status = MemberStatus.Active
-            };
-            await _memberRepo.Insert(newRecord);
         }
 
         public async Task Delete(string token, int memberId)
@@ -195,9 +191,9 @@ namespace UniCEC.Business.Services.MemberSvc
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (member.Status.Equals(MemberStatus.Inactive)) throw new ArgumentException("This member is inactive already");
+            if (member.Status.Equals(MemberStatus.Inactive)) return;
 
             member.Status = MemberStatus.Inactive;
             member.EndTime = new LocalTime().GetLocalTime().DateTime;

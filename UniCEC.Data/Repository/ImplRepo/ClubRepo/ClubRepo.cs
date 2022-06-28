@@ -23,9 +23,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             var query = from c in context.Clubs
                         join u in context.Universities on c.UniversityId equals u.Id
                         where c.Id.Equals(id)
-                        select new { c, u }; 
+                        select new { c, u };
 
-            if(status.HasValue) query = query.Where(selector => selector.c.Status.Equals(status.Value));
+            if (status.HasValue) query = query.Where(selector => selector.c.Status.Equals(status.Value));
 
             ViewClub club = await query.Select(x => new ViewClub()
             {
@@ -181,6 +181,15 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             return await (from c in context.Clubs
                           where c.Id.Equals(clubId)
                           select c.UniversityId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> CheckExistedClubInUniversity(int universityId, int clubId)
+        {
+            var query = from c in context.Clubs
+                        where c.Id.Equals(clubId) && c.UniversityId.Equals(universityId)
+                        select c;
+
+            return await query.AnyAsync();
         }
     }
 }
