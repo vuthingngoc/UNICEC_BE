@@ -16,7 +16,7 @@ namespace UniCEC.Data.Models.DB
         public int MajorId { get; set; }
         public int UniversityId { get; set; }
         public string Name { get; set; }
-        public string MajorCode { get; set; }
+        public string DepartmentCode { get; set; }
         public string Description { get; set; }
         public bool Status { get; set; }
 

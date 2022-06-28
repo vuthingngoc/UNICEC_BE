@@ -42,7 +42,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                                         UniversityId = m.UniversityId,
                                         MajorId = m.MajorId,
                                         Description = m.Description,
-                                        DepartmentCode = m.MajorCode,
+                                        //DepartmentCode = m.MajorCode,
                                         Name = m.Name,
                                         Status = m.Status
                                     }).ToListAsync();
@@ -65,7 +65,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                     UniversityId = m.UniversityId,
                     MajorId = m.MajorId,
                     Description = m.Description,
-                    MajorCode = m.MajorCode,
+                    //MajorCode = m.MajorCode,
                     Name = m.Name,
                     Status = m.Status
                 }).ToListAsync();
@@ -75,8 +75,8 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
 
         public async Task<int> CheckExistedDepartmentCode(int universityId, string code)
         {
-            Department department = await context.Departments.FirstOrDefaultAsync(d => d.UniversityId.Equals(universityId)
-                                                                        && d.MajorCode.Equals(code));
+            Department department = await context.Departments.FirstOrDefaultAsync(d => d.UniversityId.Equals(universityId));
+                                                                        //&& d.MajorCode.Equals(code));
             return (department != null) ? department.Id : 0;
         }
 
@@ -107,7 +107,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                 MajorId = m.MajorId,
                 Description = m.Description,
                 Id = m.Id,
-                DepartmentCode = m.MajorCode,
+                //DepartmentCode = m.MajorCode,
                 Name = m.Name,
                 Status = m.Status
             }).FirstOrDefaultAsync();
@@ -116,7 +116,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<ViewDepartment> GetByCode(string majorCode, bool? status, int? universityId)
         {
             var query = from d in context.Departments
-                        where d.MajorCode.Equals(majorCode)
+                        //where d.MajorCode.Equals(majorCode)
                         select d;
 
             if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
@@ -129,7 +129,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                 MajorId = m.MajorId,
                 Description = m.Description,
                 Id = m.Id,
-                DepartmentCode = m.MajorCode,
+                //DepartmentCode = m.MajorCode,
                 Name = m.Name,
                 Status = m.Status
             }).FirstOrDefaultAsync();

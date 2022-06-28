@@ -34,7 +34,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 Id = department.Id,
                 MajorId = department.MajorId,
                 Description = department.Description,
-                DepartmentCode = department.MajorCode,
+                //DepartmentCode = department.MajorCode,
                 Name = department.Name,
                 Status = department.Status,
                 UniversityId = department.UniversityId                
@@ -118,7 +118,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 UniversityId = model.UniversityId,
                 MajorId = model.MajorId,
                 Description = model.Description,
-                MajorCode = model.DepartmentCode,
+                //MajorCode = model.DepartmentCode,
                 Name = model.Name,
                 Status = status                
             };
@@ -144,7 +144,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             
             if (!string.IsNullOrEmpty(model.Description)) department.Description = model.Description;
             
-            if (!string.IsNullOrEmpty(model.DepartmentCode)) department.MajorCode = model.DepartmentCode;
+            //if (!string.IsNullOrEmpty(model.DepartmentCode)) department.MajorCode = model.DepartmentCode;
             
             if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
             

@@ -3,12 +3,10 @@ using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
-using UniCEC.Data.ViewModels.Entities.CompetitionInMajor;
-using UniCEC.Data.ViewModels.Entities.Influencer;
-using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
-using UniCEC.Data.ViewModels.Entities.SponsorInCompetition;
+using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
 
 namespace UniCEC.Business.Services.CompetitionSvc
 {
@@ -16,13 +14,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
     {      
         
 
-        //-----------------------------------------------------Role Manager
+        
         public Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel competition, string token);
        
         public Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token);
-        //public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
 
-        //-----------------------------------------------------Role In Competition Manager
+        //public Task<bool> LeaderDeleteSponsorInCompetition(SponsorInCompetitionDeleteModel model, string token);
+        
         //FE-Mobile use
         public Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel competition, string token);
         //BE  use to test
@@ -31,26 +29,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //public Task<List<ViewCompetitionInMajor>> AddCompetitionInDepartment(CompetitionInMajorInsertModel model, string token);
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
-        //Influencer
-        public Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token);
-        public Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token);
+        //--------------------------------------------------Influencer
+        //public Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token);
+        //public Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token);
 
+        //--------------------------------------------------Member In Competition
+        public Task<PagingResult<ViewMemberInCompetition>> GetAllManagerCompOrEve(MemberInCompetitionRequestModel request, string token);
 
-        //-----------------------------------------------------Sponsor       
-        //public Task<ViewDetailSponsorInCompetition> AddSponsorCollaborate(SponsorInCompetitionInsertModel sponsorInCompetition, string token);
+        public Task<ViewMemberInCompetition> AddMemberInCompetition(MemberInCompetitionInsertModel model, string token);
 
-        //public Task<bool> SponsorDenyInCompetition(SponsorInCompetitionDenyModel model, string token);
-
-        //public Task<PagingResult<ViewSponsorInCompetition>> GetSponsorViewAllApplyInCompOrEve(SponsorInCompetitionRequestModel request,string token);
-
-        //public Task<ViewDetailSponsorInCompetition> GetSponsorViewDetailApplyInCompOrEve(int sponsorInCompetitionId, string token);
-
-        //Get All Sponsor Apply in competition 
-        //public Task<PagingResult<ViewSponsorInCompetition>> GetViewAllApplyInCompOrEve(SponsorApplyRequestModel model, string token);
-
-        //public Task<ViewDetailSponsorInCompetition> GetViewDetailApplyInCompOrEve(int sponsorInCompetitionId, int clubId, string token);
-
-        //public Task<bool> FeedbackSponsorApply(FeedbackSponsorInCompetitionModel model, string token);
+        public Task<bool> UpdateMemberInCompetition(MemberInCompetitionUpdateModel model, string token);
 
 
         //-----------------------------------------------------Get       

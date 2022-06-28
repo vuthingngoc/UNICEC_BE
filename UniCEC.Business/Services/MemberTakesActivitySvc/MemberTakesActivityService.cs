@@ -3,7 +3,6 @@ using UniCEC.Business.Utilities;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
@@ -19,9 +18,9 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
 
         private ICompetitionRepo _competitionRepo;
         private IClubRepo _clubRepo;
-        //private ITermRepo _termRepo;
+       
         private IMemberRepo _memberRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
+       
         private IUserRepo _userRepo;
         private IFileService _fileService;
         private DecodeToken _decodeToken;
@@ -32,20 +31,20 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
                                           ICompetitionActivityRepo clubActivityRepo,
                                           ICompetitionRepo competitionRepo,
                                           IClubRepo clubRepo,
-                                          //ITermRepo termRepo,
+                                         
                                           IMemberRepo memberRepo,
                                           IUserRepo userRepo,
-                                          ICompetitionManagerRepo competitionManagerRepo,
+                                         
                                           IFileService fileService)
         {
             _memberTakesActivityRepo = memberTakesActivityRepo;
             _competitionActivityRepo = clubActivityRepo;
             _competitionRepo = competitionRepo;
             _clubRepo = clubRepo;
-            //_termRepo = termRepo;
+            
             _memberRepo = memberRepo;
             _userRepo = userRepo;
-            _competitionManagerRepo = competitionManagerRepo;
+           
             _fileService = fileService;
             _decodeToken = new DecodeToken();
         }

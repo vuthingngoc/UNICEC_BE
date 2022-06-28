@@ -19,7 +19,7 @@ namespace UniCEC.Data.Models.DB
         public int RoleId { get; set; }
         public int? SponsorId { get; set; }
         public int? UniversityId { get; set; }
-        public int? MajorId { get; set; }
+        public int? DepartmentId { get; set; }
         public string Fullname { get; set; }
         public string StudentCode { get; set; }
         public string Email { get; set; }
@@ -31,9 +31,8 @@ namespace UniCEC.Data.Models.DB
         public UserStatus Status { get; set; }
         public bool IsOnline { get; set; }
 
-        public virtual Department Major { get; set; }
+        public virtual Department Department { get; set; }
         public virtual Role Role { get; set; }
-        public virtual Sponsor Sponsor { get; set; }
         public virtual University University { get; set; }
         public virtual ICollection<Member> Members { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }

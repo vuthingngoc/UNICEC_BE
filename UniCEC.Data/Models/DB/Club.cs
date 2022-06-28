@@ -11,7 +11,6 @@ namespace UniCEC.Data.Models.DB
         {
             CompetitionInClubs = new HashSet<CompetitionInClub>();
             Members = new HashSet<Member>();
-            RegisterForms = new HashSet<RegisterForm>();
         }
 
         public int Id { get; set; }
@@ -28,6 +27,5 @@ namespace UniCEC.Data.Models.DB
         public virtual University University { get; set; }
         public virtual ICollection<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual ICollection<Member> Members { get; set; }
-        public virtual ICollection<RegisterForm> RegisterForms { get; set; }
     }
 }

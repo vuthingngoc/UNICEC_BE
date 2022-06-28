@@ -37,33 +37,33 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
         }
 
         //
-        public async Task<bool> CheckStudentInCom_In_Dep(List<int> listComp_In_Dep_Id, User stuInfo)
-        {
-            bool result = false;
+        //public async Task<bool> CheckStudentInCom_In_Dep(List<int> listComp_In_Dep_Id, User stuInfo)
+        //{
+        //    bool result = false;
 
-            foreach (var Com_In_Dep_Id in listComp_In_Dep_Id)
-            {
-                //tìm sinh viên thuộc 1 trường có mã nghành đó 
-                //stu -> major -> department -> department in University
-                //nó cứ đưa list Department Id vào nếu thỏa đúng thì nó sẽ trả ra user đó 
-                var query = from stu in context.Users
-                            where stu.Id == stuInfo.Id
-                            from dep in context.Departments
-                            where dep.Id == stuInfo.MajorId
-                            from mj in context.Majors
-                            where mj.Id == dep.Id && mj.Id == Com_In_Dep_Id
-                            select stu;
-                //
-                User student = await query.FirstOrDefaultAsync();
-                //
-                if (student != null)
-                {
-                    return true;
-                }
-            }
+        //    foreach (var Com_In_Dep_Id in listComp_In_Dep_Id)
+        //    {
+        //        //tìm sinh viên thuộc 1 trường có mã nghành đó 
+        //        //stu -> major -> department -> department in University
+        //        //nó cứ đưa list Department Id vào nếu thỏa đúng thì nó sẽ trả ra user đó 
+        //        var query = from stu in context.Users
+        //                    where stu.Id == stuInfo.Id
+        //                    from dep in context.Departments
+        //                    where dep.Id == stuInfo.MajorId
+        //                    from mj in context.Majors
+        //                    where mj.Id == dep.Id && mj.Id == Com_In_Dep_Id
+        //                    select stu;
+        //        //
+        //        User student = await query.FirstOrDefaultAsync();
+        //        //
+        //        if (student != null)
+        //        {
+        //            return true;
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         //
         public async Task<bool> CheckNumOfParticipant(int CompetitionId, int NumOfCompetition)

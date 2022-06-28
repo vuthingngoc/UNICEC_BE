@@ -9,12 +9,12 @@ namespace UniCEC.Data.Models.DB
     {
         public CompetitionRole()
         {
-            CompetitionManagers = new HashSet<CompetitionManager>();
+            MemberInCompetitions = new HashSet<MemberInCompetition>();
         }
 
         public int Id { get; set; }
         public string RoleName { get; set; }
 
-        public virtual ICollection<CompetitionManager> CompetitionManagers { get; set; }
+        public virtual ICollection<MemberInCompetition> MemberInCompetitions { get; set; }
     }
 }

@@ -7,7 +7,7 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
-using UniCEC.Data.Repository.ImplRepo.ICompetitionManagerRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionRound;
@@ -17,15 +17,17 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
     public class CompetitionRoundService : ICompetitionRoundService
     {
         private ICompetitionRoundRepo _competitionRoundRepo;
-        private ICompetitionManagerRepo _competitionManagerRepo;
+        
         private ICompetitionRepo _competitionRepo;
+
+        private IMemberInCompetitionRepo _memberInCompetitionRepo;
 
         private DecodeToken _decodeToken;
 
-        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo, ICompetitionManagerRepo competitionManager, ICompetitionRepo competitionRepo)
+        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo,  ICompetitionRepo competitionRepo, IMemberInCompetitionRepo memberInCompetitionRepo)
         {
             _competitionRoundRepo = competitionRoundRepo;
-            _competitionManagerRepo = competitionManager;
+            _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRepo = competitionRepo;
             _decodeToken = new DecodeToken();
         }
@@ -33,7 +35,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
         private void CheckValidAuthorized(string token, int competitionId)
         {
             int userId = _decodeToken.Decode(token, "Id");
-            bool isValidUser = _competitionManagerRepo.CheckValidManagerByUser(competitionId, userId);
+            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId);
             if (!isValidUser) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
@@ -50,7 +52,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (competitionRound == null) throw new NullReferenceException();
 
             int userId = _decodeToken.Decode(token, "Id");
-            bool isValidUser = _competitionManagerRepo.CheckValidManagerByUser(competitionRound.Id, userId);
+            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId);
             if (!isValidUser && competitionRound.Status.Equals(false)) throw new NullReferenceException();
 
             return competitionRound;

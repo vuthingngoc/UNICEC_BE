@@ -30,7 +30,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleId = user.RoleId,
                 SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
                 UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
-                MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
+                //MajorId = (user.MajorId.HasValue) ? user.MajorId.Value : 0,
                 Fullname = user.Fullname,
                 StudentCode = user.StudentCode,
                 Email = user.Email,
@@ -69,7 +69,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                             RoleId = u.RoleId,
                                             SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                             UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                                            MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                                            //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                                             Fullname = u.Fullname,
                                             StudentCode = u.StudentCode,
                                             Email = u.Email,
@@ -98,7 +98,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 RoleId = u.RoleId,
                 SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                 Fullname = u.Fullname,
                 StudentCode = u.StudentCode,
                 Email = u.Email,
@@ -163,7 +163,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
             if (request.UniversityId.HasValue) query = query.Where(u => u.UniversityId.Equals(request.UniversityId));
 
-            if (request.MajorId.HasValue) query = query.Where(u => u.MajorId.Equals(request.MajorId));
+            //if (request.MajorId.HasValue) query = query.Where(u => u.MajorId.Equals(request.MajorId));
 
             if (!string.IsNullOrEmpty(request.Fullname)) query = query.Where(u => u.Fullname.Equals(request.Fullname));
 
@@ -176,7 +176,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                               RoleId = u.RoleId,
                                               SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                               UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                                              MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
+                                              //MajorId = (u.MajorId.HasValue) ? u.MajorId.Value : 0,
                                               Fullname = u.Fullname,
                                               StudentCode = u.StudentCode,
                                               Email = u.Email,

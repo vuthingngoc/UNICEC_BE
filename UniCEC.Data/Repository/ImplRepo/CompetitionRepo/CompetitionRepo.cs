@@ -1,17 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UniCEC.Data.Common;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
-using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Competition;
-using UniCEC.Data.RequestModels;
-using System.Linq;
-using System.Collections.Generic;
-using UniCEC.Data.Enum;
-using System;
-using UniCEC.Data.Common;
-using UniCEC.Data.ViewModels.Entities.CompetitionManager;
-using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo

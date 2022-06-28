@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace UniCEC.Data.ViewModels.Entities.CompetitionManager
+namespace UniCEC.Data.ViewModels.Entities
 {
-    public class CompetitionManagerInsertModel
+    public class MemberInCompetitionInsertModel
     {
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
@@ -17,6 +12,5 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionManager
 
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }
-
     }
 }

@@ -7,7 +7,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 {
     public interface IParticipantRepo : IRepository<Participant>
     {
-        public Task<bool> CheckStudentInCom_In_Dep(List<int> listComp_In_Dep_Id, User stuInfo);
+       // public Task<bool> CheckStudentInCom_In_Dep(List<int> listComp_In_Dep_Id, User stuInfo);
 
         public Task<bool> CheckDuplicateUser(User stuInfo, int CompetitionId);
 

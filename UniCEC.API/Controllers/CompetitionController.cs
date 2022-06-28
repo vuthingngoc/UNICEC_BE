@@ -10,10 +10,11 @@ using UniCEC.Business.Services.CompetitionSvc;
 using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
-using UniCEC.Data.ViewModels.Entities.Influencer;
-using UniCEC.Data.ViewModels.Entities.InfluencerInComeptition;
+using UniCEC.Data.ViewModels.Entities.CompetitionInMajor;
+using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -51,82 +52,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // GET api/<CompetitionController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpGet("view-all-apply")]
-        //[SwaggerOperation(Summary = "Get ALL sponsor apllies in ONE competition or event")]
-        //public async Task<IActionResult> GetViewAllApplyInCompOrEve([FromQuery] SponsorApplyRequestModel request)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-
-        //        PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetViewAllApplyInCompOrEve(request, token);
-        //        return Ok(result);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new List<object>());
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
-
-
-        // GET api/<CompetitionController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpGet("view-detail-apply")]
-        //[SwaggerOperation(Summary = "Get Detail sponsor aplly in ONE competition or event")]
-        //public async Task<IActionResult> GetViewDetailApplyInCompOrEve([FromQuery(Name = "sponsorInCompetitionId")] int SponsorInCompetitionId, [FromQuery(Name = "clubId")] int ClubId)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-
-        //        ViewDetailSponsorInCompetition result = await _competitionService.GetViewDetailApplyInCompOrEve(SponsorInCompetitionId, ClubId, token);
-        //        return Ok(result);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new object());
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
-
-
+       
         // GET: api/<CompetitionController>
         [HttpGet("top3")]
         [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status, public")]
@@ -309,52 +235,6 @@ namespace UniCEC.API.Controllers
         }
 
 
-        // PUT api/<CompetitionController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpPut("feedback")]
-        //[SwaggerOperation(Summary = "Feedback sponsor apply in Competition or Event  Status:  1.Approved, 2.Rejected")]
-        //public async Task<IActionResult> FeedbackSponsorApply([FromBody] FeedbackSponsorInCompetitionModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-        //        Boolean check = false;
-        //        check = await _competitionService.FeedbackSponsorApply(model, token);
-        //        if (check)
-        //        {
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
-
-
-
         // DELETE api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete()]
@@ -399,107 +279,13 @@ namespace UniCEC.API.Controllers
             }
         }
 
-
-        // DELETE api/<CompetitionController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpDelete("remove-sponsor")]
-        //[SwaggerOperation(Summary = "Club manager delete sponsor in competition or event")]
-        //public async Task<IActionResult> LeaderDeleteSponsorInCompetition([FromBody] SponsorInCompetitionDeleteModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-        //        Boolean check = false;
-        //        check = await _competitionService.LeaderDeleteSponsorInCompetition(model, token);
-        //        if (check)
-        //        {
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
-
-
-
-        //---------------------------------------------------------------------------Competition In Department
+        //---------------------------------------------------------------------------Competition In Major
         //POST api/<CompetitionController>
 
-        //[Authorize(Roles = "Student")]
-        //[HttpPost("department")]
-        //[SwaggerOperation(Summary = "Add department for competition")]
-        //public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInMajorInsertModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-
-        //        List<ViewCompetitionInMajor> result = await _competitionService.AddCompetitionInDepartment(model, token);
-
-        //        if (result != null)
-        //        {
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
-
-
-        //---------------------------------------------------------------------------Influencer In Competition
-        //POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
-        [HttpPost("influencer")]
-        [SwaggerOperation(Summary = "Add influencer in competition")]
-        public async Task<IActionResult> AddInfluencerInCompetition([FromBody] InfluencerInComeptitionInsertModel model)
+        [HttpPost("department")]
+        [SwaggerOperation(Summary = "Add department for competition")]
+        public async Task<IActionResult> AddCompetitionInDepartment([FromBody] CompetitionInMajorInsertModel model)
         {
             try
             {
@@ -507,7 +293,8 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewInfluencerInCompetition> result = await _competitionService.AddInfluencerInCompetition(model, token);
+                //List<ViewCompetitionInMajor> result = await _competitionService.AddCompetitionInDepartment(model, token);
+                List<ViewCompetitionInMajor> result = null;
 
                 if (result != null)
                 {
@@ -541,49 +328,96 @@ namespace UniCEC.API.Controllers
         }
 
 
-        // DELETE api/<CompetitionController>/5
-        [Authorize(Roles = "Student")]
-        [HttpDelete("influencer")]
-        [SwaggerOperation(Summary = "Delete influencer in Competition")]
-        public async Task<IActionResult> DeleteInluencerInCompetition([FromBody] InfluencerInCompetitionDeleteModel model)
-        {
-            try
-            {
-                var header = Request.Headers;
-                if (!header.ContainsKey("Authorization")) return Unauthorized();
-                string token = header["Authorization"].ToString().Split(" ")[1];
-                Boolean check = false;
-                check = await _competitionService.DeleteInluencerInCompetition(model, token);
-                if (check)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //---------------------------------------------------------------------------Influencer
+        ////POST api/<CompetitionController>
+        //[Authorize(Roles = "Student")]
+        //[HttpPost("influencer")]
+        //[SwaggerOperation(Summary = "Add influencer ")]
+        //public async Task<IActionResult> AddInfluencerInCompetition([FromBody] InfluencerInComeptitionInsertModel model)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
+
+        //        List<ViewInfluencerInCompetition> result = await _competitionService.AddInfluencerInCompetition(model, token);
+
+        //        if (result != null)
+        //        {
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
+
+
+        //// DELETE api/<CompetitionController>/5
+        //[Authorize(Roles = "Student")]
+        //[HttpDelete("influencer")]
+        //[SwaggerOperation(Summary = "Delete influencer ")]
+        //public async Task<IActionResult> DeleteInluencerInCompetition([FromBody] InfluencerInCompetitionDeleteModel model)
+        //{
+        //    try
+        //    {
+        //        var header = Request.Headers;
+        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
+        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        //        Boolean check = false;
+        //        check = await _competitionService.DeleteInluencerInCompetition(model, token);
+        //        if (check)
+        //        {
+        //            return Ok();
+        //        }
+        //        else
+        //        {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
 
         //---------------------------------------------------------------------------Competition In Club
@@ -633,168 +467,139 @@ namespace UniCEC.API.Controllers
         }
 
 
-        //---------------------------------------------------------------------------Sponsor in Competition
+        //---------------------------------------------------------------------------Member In Competition
+        // GET api/<CompetitionManagerController>/5
+        [Authorize(Roles = "Student")]
+        [HttpGet("manager")]
+        [SwaggerOperation(Summary = "Get all manager in competition")]
+        public async Task<IActionResult> GetAllManagerInCompetition([FromQuery] MemberInCompetitionRequestModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //// GET api/<CompetitionController>/5
-        //[Authorize(Roles = "Sponsor")]
-        //[HttpGet("sponsor-view-apply")]
-        //[SwaggerOperation(Summary = "Sponsor view all applies")]
-        //public async Task<IActionResult> GetSponsorViewAllApplyInCompOrEve([FromQuery]SponsorInCompetitionRequestModel request)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewMemberInCompetition> result = await _competitionService.GetAllManagerCompOrEve(model, token);
+                
 
-        //        PagingResult<ViewSponsorInCompetition> result = await _competitionService.GetSponsorViewAllApplyInCompOrEve(request,token);
-        //        return Ok(result);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new List<object>());
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                return Ok(result);
 
-        //// GET api/<CompetitionController>/5
-        //[Authorize(Roles = "Sponsor")]
-        //[HttpGet("sponsor-view-detail-apply")]
-        //[SwaggerOperation(Summary = "Sponsor view detail apply")]
-        //public async Task<IActionResult> GetSponsorViewDetailApplyInCompOrEve([FromQuery(Name = "sponsorInCompetitionId")] int SponsorInCompetitionId)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-
-        //        ViewDetailSponsorInCompetition result = await _competitionService.GetSponsorViewDetailApplyInCompOrEve(SponsorInCompetitionId, token);
-        //        return Ok(result);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new object());
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
 
-        ////POST api/<SponsorInCompetitionController>
-        //[Authorize(Roles = "Sponsor")]
-        //[HttpPost("sponsor-apply")]
-        //[SwaggerOperation(Summary = "Sponsor apply in competition")]
-        //public async Task<IActionResult> AddSponsorCollaborate([FromBody] SponsorInCompetitionInsertModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        //POST api/<CompetitionManagerController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("member")]
+        [SwaggerOperation(Summary = "Add member to manage competition")]
+        public async Task<IActionResult> AddMemberInCompetition([FromBody] MemberInCompetitionInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //        ViewDetailSponsorInCompetition result = await _competitionService.AddSponsorCollaborate(model, token);
-        //        if (result != null)
-        //        {
+                ViewMemberInCompetition result = await _competitionService.AddMemberInCompetition(model, token);
+                
+                if (result != null)
+                {
 
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
 
-        //// DELETE api/<CompetitionController>/5
-        //[Authorize(Roles = "Sponsor")]
-        //[HttpDelete("sponsor-deny")]
-        //[SwaggerOperation(Summary = "Sponsor deny in Competition")]
-        //public async Task<IActionResult> SponsorDeny([FromBody] SponsorInCompetitionDenyModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-        //        Boolean check = false;
-        //        check = await _competitionService.SponsorDenyInCompetition(model, token);
-        //        if (check)
-        //        {
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+
+        // PUT api/<CompetitionManagerController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("member")]
+        [SwaggerOperation(Summary = "Update member role in Member In Competition")]
+        public async Task<IActionResult> UpdateMembeInCompetition([FromBody] MemberInCompetitionUpdateModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _competitionService.UpdateMemberInCompetition(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
 
     }
