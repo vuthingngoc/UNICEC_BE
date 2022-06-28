@@ -23,6 +23,7 @@ using UniCEC.Business.Services.CompetitionRoundSvc;
 using UniCEC.Business.Services.CompetitionSvc;
 using UniCEC.Business.Services.CompetitionTypeSvc;
 using UniCEC.Business.Services.DepartmentSvc;
+using UniCEC.Business.Services.EntityTypeSvc;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Business.Services.MajorSvc;
@@ -51,6 +52,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
+using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
@@ -102,14 +104,14 @@ namespace UniCEC.API
             services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();
             services.AddScoped<IClubRoleService, ClubRoleService>();
             services.AddScoped<IClubService, ClubService>();
-            services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();
-            
+            services.AddScoped<ICompetitionActivityService, CompetitionActivityService>();         
             services.AddScoped<ICompetitionRoleService, CompetitionRoleService>();
             services.AddScoped<ICompetitionEntityService, CompetitionEntityService>();
             services.AddScoped<ICompetitionService, CompetitionService>();
             services.AddScoped<ICompetitionTypeService, CompetitionTypeService>();
             services.AddScoped<ICompetitionRoundService, CompetitionRoundService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
+            services.AddScoped<IEntityTypeService, EntityTypeService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IMajorService, MajorService>();
             services.AddScoped<IMemberService, MemberService>();
@@ -139,7 +141,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionRepo, CompetitionRepo>();
             services.AddTransient<ICompetitionTypeRepo, CompetitionTypeRepo>();
             services.AddTransient<ICompetitionRoundRepo, CompetitionRoundRepo>();
-            
+            services.AddTransient<IEntityTypeRepo, EntityTypeRepo>();
             services.AddTransient<ICompetitionRoleRepo, CompetitionRoleRepo>();
             services.AddTransient<IMajorRepo, MajorRepo>();          
             services.AddTransient<IDepartmentRepo, DepartmentRepo>();

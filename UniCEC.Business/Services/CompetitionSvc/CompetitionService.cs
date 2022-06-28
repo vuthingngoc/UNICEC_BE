@@ -1692,7 +1692,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isClubLeader)
+        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
         {
             //------------- CHECK Competition in system
             Competition competition = await _competitionRepo.Get(CompetitionId);
@@ -1711,7 +1711,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
             if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
 
-            if (isClubLeader)
+            if (isOrganization)
             {
                 //------------- CHECK Role Is highest role
                 if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");

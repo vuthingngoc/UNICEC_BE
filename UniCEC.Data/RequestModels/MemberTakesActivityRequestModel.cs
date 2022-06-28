@@ -15,9 +15,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "competitionActivityId")]
         public int CompetitionActivityId { get; set; }
         
-        [FromQuery(Name = "status")]
-        public MemberTakesActivityStatus? Status { get; set; }
-
+        
         //Check
         [FromQuery(Name = "clubId")]
         public int ClubId { get; set; }

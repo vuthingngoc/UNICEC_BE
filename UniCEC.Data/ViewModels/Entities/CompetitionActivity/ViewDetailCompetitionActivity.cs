@@ -23,9 +23,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         public string Description { get; set; }
         public PriorityStatus Priority { get; set; }
 
-        [JsonPropertyName("process_status")]
-        public CompetitionActivityProcessStatus ProcessStatus { get; set; }
-
+        
         [JsonPropertyName("competition_activity_status")]
         public CompetitionActivityStatus Status { get; set; }
 

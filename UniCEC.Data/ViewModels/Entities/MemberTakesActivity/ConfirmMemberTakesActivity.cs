@@ -13,8 +13,7 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
         [JsonPropertyName("member_takes_activity_id")]
         public int MemberTakesActivityId { get; set; }
         
-        [JsonPropertyName("member_take_activity_status")]
-        public MemberTakesActivityStatus Status { get; set; }
+       
 
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }

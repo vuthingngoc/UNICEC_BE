@@ -21,6 +21,6 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
         [JsonPropertyName("start_time")]
         public DateTime StartTime { get; set; }
         public DateTime Deadline { get; set; }
-        public MemberTakesActivityStatus Status { get; set; }
+       
     }
 }
