@@ -34,6 +34,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime CreateTime { get; set; }
         public DateTime StartTimeRegister { get; set; }
         public DateTime EndTimeRegister { get; set; }
+        public DateTime CeremonyTime { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Content { get; set; }

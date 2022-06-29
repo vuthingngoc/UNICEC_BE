@@ -1,9 +1,15 @@
-﻿using UniCEC.Business.Services.FileSvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
+using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 
 namespace UniCEC.Business.Services.CompetitionEntitySvc
 {
@@ -15,7 +21,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         private ICompetitionRepo _competitionRepo;
         private IFileService _fileService;
         private IClubRepo _clubRepo;
-        
+        private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private IMemberRepo _memberRepo;
         private DecodeToken _decodeToken;
 
@@ -24,150 +30,269 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                                         ICompetitionRepo competitionRepo,
                                         IFileService fileService,
                                         IClubRepo clubRepo,
-                                        
+                                        IMemberInCompetitionRepo memberInCompetitionRepo,
                                         IMemberRepo memberRepo)
         {
             _competitionEntityRepo = competitionEntityRepo;
             _competitionRepo = competitionRepo;
             _fileService = fileService;
             _clubRepo = clubRepo;
-           
             _memberRepo = memberRepo;
-            _decodeToken = new DecodeToken() ;
+            _memberInCompetitionRepo = memberInCompetitionRepo;
+            _decodeToken = new DecodeToken();
         }
 
 
-        //public async Task<ViewCompetitionEntity> AddCompetitionEntity(CompetitionEntityInsertModel model, string token)
-        //{
-        //    try
-        //    {
-        //        if (model.CompetitionId == 0
-        //          || model.ClubId == 0)
-        //            throw new ArgumentNullException("|| Competition Id Null" +
-        //                                             " ClubId Null");
+        public async Task<List<ViewCompetitionEntity>> AddImage(ImageInsertModel model, string token)
+        {
+            try
+            {
+                List<ViewCompetitionEntity> ViewCompetitionEntities = new List<ViewCompetitionEntity>();
 
-        //        bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
-        //        if (Check)
-        //        {
-        //            //------------- CHECK Status Competition
-        //            Competition c = await _competitionRepo.Get(model.CompetitionId);
-        //            if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
-        //            {
+                if (model.CompetitionId == 0 || model.ClubId == 0 || model.Images.Count < 0)
+                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL || Image is NULL");
 
-        //                //------------ Insert Competition-Entities-----------
-        //                string Url = await _fileService.UploadFile(model.Base64String);
-        //                CompetitionEntity competitionEntity = new CompetitionEntity()
-        //                {
-        //                    CompetitionId = model.CompetitionId,
-        //                    Name = model.Name,
-        //                    ImageUrl = Url
-        //                };
+                foreach (AddImageModel modelItem in model.Images)
+                {
+                    if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image is NULL");
+                }
 
-        //                int id = await _competitionEntityRepo.Insert(competitionEntity);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
+                if (Check)
+                {
+                    //------------ Insert Competition-Entities-----------
+                    foreach (AddImageModel modelItem in model.Images)
+                    {
 
-        //                if (id > 0)
-        //                {
-        //                    CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
+                            CompetitionId = model.CompetitionId,
+                            Name = modelItem.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 1, //1 là hình ảnh
+                        };
 
-        //                    //get IMG from Firebase                        
-        //                    string imgUrl;
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
 
-        //                    try
-        //                    {
-        //                        imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        imgUrl = "";
-        //                    }
+                        if (id > 0)
+                        {
+                            CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
-        //                    return new ViewCompetitionEntity()
-        //                    {
-        //                        Id = entity.Id,
-        //                        Name = entity.Name,
-        //                        CompetitionId = entity.CompetitionId,
-        //                        ImageUrl = imgUrl,
-        //                    };
-        //                }
-        //                return null;
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-        //            }
-        //        }
-        //        //end if check
-        //        else
-        //        {
-        //            return null;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                        }
+
+                    }
+                    return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
+                }
+                //end if check
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ViewCompetitionEntity>> AddInfluencer(InfluencerInsertModel model, string token)
+        {
+            try
+            {
+                List<ViewCompetitionEntity> ViewCompetitionEntities = new List<ViewCompetitionEntity>();
+
+                if (model.CompetitionId == 0 || model.ClubId == 0 || model.Influencers.Count < 0)
+                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL || Influencer is NULL");
+
+                foreach (AddInfluencerModel modelItem in model.Influencers)
+                {
+                    if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image of Influencer is NULL");
+                }
+
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
+                if (Check)
+                {
+                    //------------ Insert Competition-Entities-----------
+                    foreach (AddInfluencerModel modelItem in model.Influencers)
+                    {
+
+                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
+                            CompetitionId = model.CompetitionId,
+                            Name = modelItem.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 2, //1 là influencer
+                        };
+
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
+
+                        if (id > 0)
+                        {
+                            CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+
+                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                        }
+
+                    }
+                    return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
+                }
+                //end if check
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
-        //private async Task<bool> CheckConditions(string Token, int CompetitionId, int ClubId)
-        //{
-        //    //
-        //    int UserId = _decodeToken.Decode(Token, "Id");
+        public async Task<List<ViewCompetitionEntity>> AddSponsor(SponsorInsertModel model, string token)
+        {
+            try
+            {
+                List<ViewCompetitionEntity> ViewCompetitionEntities = new List<ViewCompetitionEntity>();
 
-        //    //------------- CHECK Competition is have in system or not
-        //    Competition competition = await _competitionRepo.Get(CompetitionId);           
-        //    if (competition != null)
-        //    {
-        //        //------------- CHECK Club in system
-        //        Club club = await _clubRepo.Get(ClubId);
-        //        if (club != null)
-        //        {
-        //            ViewTerm CurrentTermOfCLub = await _termRepo.GetCurrentTermByClub(ClubId);
-        //            if (CurrentTermOfCLub != null)
-        //            {
-        //                GetMemberInClubModel conditions = new GetMemberInClubModel()
-        //                {
-        //                    UserId = UserId,
-        //                    ClubId = ClubId,
-        //                    TermId = CurrentTermOfCLub.Id
-        //                };
-        //                ViewBasicInfoMember infoClubMem = await _memberRepo.GetBasicInfoMember(conditions);
-        //                //------------- CHECK Mem in that club
-        //                if (infoClubMem != null)
-        //                {
-        //                    //------------- CHECK is in CompetitionManger table                
-        //                    CompetitionManager isAllow = await _competitionManagerRepo.GetMemberInCompetitionManager(CompetitionId, infoClubMem.UserId, ClubId);
-        //                    if (isAllow != null)
-        //                    {                          
-        //                            return true;                      
-        //                    }
-        //                    else
-        //                    {
-        //                        throw new UnauthorizedAccessException("You do not in Competition Manager");
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    throw new UnauthorizedAccessException("You are not member in Club");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("Term of ClubId is End");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            throw new ArgumentException("Club is not found");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw new ArgumentException("Competition or Event not found ");
-        //    }
-        //}
+                if (model.CompetitionId == 0 || model.ClubId == 0 || model.Sponsors.Count < 0)
+                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL || Sponsor is NULL");
 
-      
+                foreach (AddSponsorModel modelItem in model.Sponsors)
+                {
+                    if (string.IsNullOrEmpty(modelItem.Base64StringImg)
+                       || string.IsNullOrEmpty(modelItem.Name)
+                       || string.IsNullOrEmpty(modelItem.Email)
+                       || string.IsNullOrEmpty(modelItem.Description)
+                       || string.IsNullOrEmpty(modelItem.Website))
+                        throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL || Description is NULL|| Website is NULL");
+                }
+
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
+                if (Check == false) return null;
+
+                foreach (AddSponsorModel modelItem in model.Sponsors)
+                {
+                    string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                    CompetitionEntity competitionEntity = new CompetitionEntity()
+                    {
+
+                        CompetitionId = model.CompetitionId,
+                        Name = modelItem.Name,
+                        ImageUrl = Url,
+                        EntityTypeId = 3, //3 là Sponsor
+                        Description = modelItem.Description,
+                        Website = modelItem.Website,
+                        Email = modelItem.Email,
+                    };
+
+                    int id = await _competitionEntityRepo.Insert(competitionEntity);
+
+                    if (id > 0)
+                    {
+                        CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+
+                        ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                    }
+
+                }
+
+                return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteCompetitionEntity(CompetitionEntityDeleteModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0 || model.ClubId == 0 || model.CompetitionEntityId == 0)
+                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL || Competition Entity Id is NULL");
+
+                CompetitionEntity entity = await _competitionEntityRepo.Get(model.CompetitionId);
+                if (entity == null) throw new ArgumentException("Competition Entity not found ");
+
+                if (entity.CompetitionId != model.CompetitionId) throw new ArgumentException("Competition Entity not belong to this Competition ");
+
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
+
+                if (Check == false) return false;
+
+                await _competitionEntityRepo.DeleteCompetitionEntity(model.CompetitionEntityId);
+
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<ViewCompetitionEntity> TransferViewCompetitionEntity(CompetitionEntity entity)
+        {
+            //get IMG from Firebase                        
+            string imgUrl;
+            try
+            {
+                imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
+            }
+            catch (Exception)
+            {
+                imgUrl = "";
+            }
+
+            return new ViewCompetitionEntity()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                CompetitionId = entity.CompetitionId,
+                ImageUrl = imgUrl,
+                EntityTypeId = entity.EntityTypeId,
+                EntityTypeName = entity.EntityType.Name,
+                Website = (entity.Website != null) ? entity.Website : null,
+                Email = (entity.Email != null) ? entity.Email : null,
+                Description = (entity.Description != null) ? entity.Description : null,
+            };
+        }
+        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
+        {
+            //------------- CHECK Competition in system
+            Competition competition = await _competitionRepo.Get(CompetitionId);
+            if (competition == null) throw new ArgumentException("Competition or Event not found ");
+
+            //------------- CHECK Club in system
+            Club club = await _clubRepo.Get(ClubId);
+            if (club == null) throw new ArgumentException("Club in not found");
+
+            //------------- CHECK Is Member in Club
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
+            Member member = await _memberRepo.Get(memberId);
+            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+            //------------- CHECK User is in CompetitionManger table                
+            MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
+            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+
+            if (isOrganization)
+            {
+                //------------- CHECK Role Is highest role
+                if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                return true;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
 
     }
 }

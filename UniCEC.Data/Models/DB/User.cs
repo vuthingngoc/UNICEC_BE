@@ -17,7 +17,6 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int RoleId { get; set; }
-        public int? SponsorId { get; set; }
         public int? UniversityId { get; set; }
         public int? DepartmentId { get; set; }
         public string Fullname { get; set; }

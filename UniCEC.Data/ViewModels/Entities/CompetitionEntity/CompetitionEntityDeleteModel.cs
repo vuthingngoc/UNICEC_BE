@@ -8,12 +8,9 @@ using UniCEC.Data.ViewModels.Entities.Competition;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
 {
-    public class AddImageModel 
+    public class CompetitionEntityDeleteModel : CompetitionEntityInsertModel
     {
-       
-        public string Name { get; set; }
-        [JsonPropertyName("base64_string_img")]
-        public string Base64StringImg { get; set;}
-       
+        [JsonPropertyName("competition_entity_id")]
+        public int CompetitionEntityId;
     }
 }

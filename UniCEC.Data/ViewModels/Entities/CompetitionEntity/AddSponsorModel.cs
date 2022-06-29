@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
 {
-    internal class AddSponsorModel
+    public class AddSponsorModel
     {
         public string Name { get; set; }
         [JsonPropertyName("base64_string_img")]
