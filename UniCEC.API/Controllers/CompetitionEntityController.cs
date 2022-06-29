@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionEntitySvc;
 using UniCEC.Data.ViewModels.Entities.Competition;
@@ -27,52 +28,191 @@ namespace UniCEC.API.Controllers
 
         //---------------------------------------------------------------------------Competition Entity
         //POST api/<CompetitionEntityController>
-        //[Authorize(Roles = "Student")]
-        //[HttpPost("image")]
-        //[SwaggerOperation(Summary = "Add image for competition")]
-        //public async Task<IActionResult> AddCompetitionEntity([FromBody] CompetitionEntityInsertModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        [Authorize(Roles = "Student")]
+        [HttpPost("images")]
+        [SwaggerOperation(Summary = "Add images for competition")]
+        public async Task<IActionResult> AddImages([FromBody] ImageInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
 
-        //        ViewCompetitionEntity result = await _competitionEntityService.AddCompetitionEntity(model, token);
+                List<ViewCompetitionEntity> result = await _competitionEntityService.AddImage(model, token);
 
-        //        if (result != null)
-        //        {
+                if (result != null)
+                {
 
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
+
+        [Authorize(Roles = "Student")]
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete competition entity")]
+        public async Task<IActionResult> DeleteImage([FromBody] CompetitionEntityDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                bool result = await _competitionEntityService.DeleteCompetitionEntity(model, token);
+
+                if (result)
+                {
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        //POST api/<CompetitionEntityController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("sponsors")]
+        [SwaggerOperation(Summary = "Add Sponsors for competition")]
+        public async Task<IActionResult> AddSponsors([FromBody] SponsorInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+
+                List<ViewCompetitionEntity> result = await _competitionEntityService.AddSponsor(model, token);
+
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        //POST api/<CompetitionEntityController>
+        [Authorize(Roles = "Student")]
+        [HttpPost("influencers")]
+        [SwaggerOperation(Summary = "Add Influencers for competition")]
+        public async Task<IActionResult> AddInfludencers([FromBody] InfluencerInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+
+                List<ViewCompetitionEntity> result = await _competitionEntityService.AddInfluencer(model, token);
+
+                if (result != null)
+                {
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
     }
 }

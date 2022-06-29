@@ -28,7 +28,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             {
                 Id = user.Id,
                 RoleId = user.RoleId,
-                SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
+                //SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
                 UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
                 MajorId = (user.DepartmentId.HasValue) ? user.DepartmentId.Value : 0,
                 Fullname = user.Fullname,
@@ -46,7 +46,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 {
                     Id = user.Id,
                     RoleId = user.RoleId,
-                    SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
+                    //SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
                     UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
                     Fullname = user.Fullname,
                     Gender = user.Gender,
@@ -67,7 +67,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                         {
                                             Id = u.Id,
                                             RoleId = u.RoleId,
-                                            SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
+                                            //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                             UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                                             MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                                             Fullname = u.Fullname,
@@ -96,7 +96,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             {
                 Id = u.Id,
                 RoleId = u.RoleId,
-                SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
+                //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                 MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                 Fullname = u.Fullname,
@@ -126,7 +126,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 Id = selector.u.Id,
                 RoleId = selector.u.RoleId,
                 UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
+                //SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
@@ -146,7 +146,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 Id = selector.u.Id,
                 RoleId = selector.u.RoleId,
                 UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
+                //SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
@@ -172,7 +172,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                           {
                                               Id = u.Id,
                                               RoleId = u.RoleId,
-                                              SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
+                                              //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                                               UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                                               MajorId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                                               Fullname = u.Fullname,

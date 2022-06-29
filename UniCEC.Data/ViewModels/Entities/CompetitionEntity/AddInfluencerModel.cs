@@ -9,8 +9,8 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
 {
     public class AddInfluencerModel
     {
-        string Name { get; set; }
+       public string Name { get; set; }
         [JsonPropertyName("base64_string_img")]
-        string Base64StringImg { get; set; }
+       public string Base64StringImg { get; set; }
     }
 }
