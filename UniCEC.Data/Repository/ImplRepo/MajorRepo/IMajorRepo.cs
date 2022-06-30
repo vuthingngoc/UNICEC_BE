@@ -15,7 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
         public Task<PagingResult<ViewMajor>> GetByCompetition(int competitionId, PagingRequest request);
         public Task<int> CheckDuplicatedName(string name);
         //
-        public Task<bool> checkMajor(List<int> listMajorId);
+        public Task<bool> CheckMajor(List<int> listMajorId);
         public Task<bool> CheckMajorBelongToUni(List<int> listMajorId, int universityId); 
     }
 }
