@@ -89,35 +89,34 @@ namespace UniCEC.API.Controllers
         }
 
 
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "Insert user")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> InsertUser([FromBody] UserInsertModel request)
-        //{
-        //    try
-        //    {
-        //        ViewUser user = await _userService.Insert(request);
-        //        return Created($"api/v1/[controller]/{user.Id}", user);
-        //        //get RoleName
-        //        //ViewRole role = await _roleService.GetByRoleId(user.RoleId);
-        //        //string roleName = role.RoleName;
-        //        //string clientTokenUser = JWTUserToken.GenerateJWTTokenStudent(user, roleName);
-        //        //return Ok(clientTokenUser);
-
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exception");
-        //    }
-        //}
+        [HttpPost("grant-account")]
+        [SwaggerOperation(Summary = "Grant account for university admin")]
+        [Authorize(Roles = "System Admin")]
+        public async Task<IActionResult> InsertUser([FromBody] UserAccountInsertModel request)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                bool result = await _userService.Insert(token, request);
+                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPut]
         [SwaggerOperation(Summary = "Update user")]
@@ -151,6 +150,30 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpPost("login")]        
+        [SwaggerOperation(Summary = "Log in account for university admin")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginAccount([FromBody] UserLoginModel model)
+        {
+            try
+            {
+                string token = await _userService.LoginAccount(model);
+                return Ok(token);                
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("logout")]
         [SwaggerOperation(Summary = "Log out account")]
         public async Task<IActionResult> LogoutAccount()
@@ -164,15 +187,14 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
             }
         }
-
-        //-------------------LOGIN
+        
         [Authorize(Roles = "Student")]
         [HttpPut("{id}/token")]
         [SwaggerOperation(Summary = "Update university of student")]
@@ -204,8 +226,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-
-
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete user")]
         [Authorize(Roles = "Admin")]
@@ -218,7 +238,7 @@ namespace UniCEC.API.Controllers
             }
             catch (NullReferenceException ex)
             {
-                return NotFound(ex.Message);
+                return Ok(ex.Message);
             }
             catch (SqlException)
             {
