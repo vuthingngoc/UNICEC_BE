@@ -18,6 +18,7 @@ using UniCEC.Business.Services.ClubRoleSvc;
 using UniCEC.Business.Services.ClubSvc;
 using UniCEC.Business.Services.CompetitionActivitySvc;
 using UniCEC.Business.Services.CompetitionEntitySvc;
+using UniCEC.Business.Services.CompetitionHistorySvc;
 using UniCEC.Business.Services.CompetitionRoleSvc;
 using UniCEC.Business.Services.CompetitionRoundSvc;
 using UniCEC.Business.Services.CompetitionSvc;
@@ -45,6 +46,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
@@ -119,8 +121,8 @@ namespace UniCEC.API
             services.AddScoped<IParticipantInTeamService, ParticipantInTeamService>();
             services.AddScoped<IParticipantService, ParticipantService>();
             services.AddScoped<IRoleService, RoleService>();
-            services.AddScoped<ISeedsWalletService, SeedsWalletService>();          
-           
+            services.AddScoped<ISeedsWalletService, SeedsWalletService>();
+            services.AddScoped<ICompetitionHistoryStatusService, CompetitionHistoryStatusService>();
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<ITeamInRoundService, TeamInRoundService>();
             services.AddScoped<IUniversityService, UniversityService>();
@@ -134,6 +136,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<IClubRepo, ClubRepo>();
             services.AddTransient<IClubRoleRepo, ClubRoleRepo>();
+            services.AddTransient<ICompetitionHistoryStatusRepo, CompetitionHistoryStatusRepo>();
             services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<ICompetitionEntityRepo, CompetitionEntityRepo>();
             services.AddTransient<ICompetitionInClubRepo, CompetitionInClubRepo>();

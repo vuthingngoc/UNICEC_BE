@@ -6,7 +6,7 @@ using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class CompetitionHistory
+    public partial class CompetitionHistoryStatus
     {
         public int Id { get; set; }
         public int CompetitionId { get; set; }

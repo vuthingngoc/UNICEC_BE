@@ -154,7 +154,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 bool round2 = false;
                 if (round1)
                 {
-                    if (competition.Status == CompetitionStatus.Registering)
+                    if (competition.Status == CompetitionStatus.Register)
                     {
                         round2 = true;
                     }//end check Registering

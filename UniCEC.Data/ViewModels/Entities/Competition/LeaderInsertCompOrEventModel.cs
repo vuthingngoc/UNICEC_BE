@@ -19,7 +19,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         [JsonPropertyName("min_number_member_in_team")]
         public int? MinNumberMemberInTeam { get; set; }
-        
+        [JsonPropertyName("start_time_register")]
+        public DateTime StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
         public DateTime EndTimeRegister { get; set; }
         [JsonPropertyName("start_time")]
@@ -37,16 +38,23 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_point")]
         public double SeedsPoint { get; set; }
 
-        //List Department Id Belong To University
-        [JsonPropertyName("list_department_id")]
-        public List<int>? ListMajorId { get; set; }
-        
-        //Add competition entity
-        public AddCompetitionEntity? CompetitionEntity { get; set; }
 
-        //List Influencer Id Belong To System
-        //[JsonPropertyName("list_influencer")]
-        //public List<InfluencerInsertModel>? ListInfluencer { get; set; }
+        //List Department Id Belong To University
+        [JsonPropertyName("list_major_id")]
+        public List<int>? ListMajorId { get; set; }
+
+        //List Image
+        [JsonPropertyName("list_image")]
+        public List<AddImageModel>? ListImage { get; set; }
+
+        //List Influencer
+        [JsonPropertyName("list_influencer")]
+        public List<AddInfluencerModel>? ListInfluencer { get; set; }
+
+        //List Sponsor
+        [JsonPropertyName("list_sponsor")]
+        public List<AddSponsorModel>? ListSponsor { get; set; }
+
 
         //---------Author to check user is Leader of Club   
         [JsonPropertyName("club_id")]

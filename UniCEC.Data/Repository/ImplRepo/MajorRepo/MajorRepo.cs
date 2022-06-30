@@ -82,7 +82,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MajorRepo
         }
 
         // TA
-        public async Task<bool> checkMajor(List<int> listMajorId)
+        public async Task<bool> CheckMajor(List<int> listMajorId)
         {
             bool result = true;
             foreach (int majorId in listMajorId)

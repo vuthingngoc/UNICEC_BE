@@ -46,6 +46,10 @@ namespace UniCEC.API.Controllers
             {
                 return Ok(new List<object>());
             }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
@@ -66,6 +70,10 @@ namespace UniCEC.API.Controllers
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (SqlException)
             {

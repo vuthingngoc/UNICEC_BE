@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
@@ -47,6 +48,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         {
             try
             {
+
                 List<ViewCompetitionEntity> ViewCompetitionEntities = new List<ViewCompetitionEntity>();
 
                 if (model.CompetitionId == 0 || model.ClubId == 0 || model.Images.Count < 0)
@@ -60,6 +62,11 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check)
                 {
+
+                    Competition competition = await _competitionRepo.Get(model.CompetitionId);
+
+
+
                     //------------ Insert Competition-Entities-----------
                     foreach (AddImageModel modelItem in model.Images)
                     {
@@ -108,12 +115,20 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 foreach (AddInfluencerModel modelItem in model.Influencers)
                 {
-                    if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image of Influencer is NULL");
+                    if (string.IsNullOrEmpty(modelItem.Base64StringImg) || string.IsNullOrEmpty(modelItem.Name))
+                        throw new ArgumentNullException("Image of Influencer is NULL || Influencer name is NULL");
                 }
 
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check)
                 {
+
+                    //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                        throw new ArgumentException("Competition State is not suitable to do this action");
+
+
                     //------------ Insert Competition-Entities-----------
                     foreach (AddInfluencerModel modelItem in model.Influencers)
                     {
@@ -124,7 +139,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                             CompetitionId = model.CompetitionId,
                             Name = modelItem.Name,
                             ImageUrl = Url,
-                            EntityTypeId = 2, //1 là influencer
+                            EntityTypeId = 2, //2 là influencer
                         };
 
                         int id = await _competitionEntityRepo.Insert(competitionEntity);
@@ -173,6 +188,11 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check == false) return null;
+
+                //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
+                Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                    throw new ArgumentException("Competition State is not suitable to do this action");
 
                 foreach (AddSponsorModel modelItem in model.Sponsors)
                 {
@@ -284,7 +304,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             if (isOrganization)
             {
                 //------------- CHECK Role Is highest role
-                if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                if (isAllow.CompetitionRoleId != 1 || isAllow.CompetitionRoleId != 2) throw new UnauthorizedAccessException("Only role Manager can do this action");
                 return true;
             }
             else

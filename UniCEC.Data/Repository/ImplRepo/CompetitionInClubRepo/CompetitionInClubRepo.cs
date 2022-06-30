@@ -40,7 +40,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
             }
         }
 
-        public async Task<List<ViewClubInComp>> GetListClub_In_Competition(int CompetitionId)
+        public async Task<List<ViewClubInComp>> GetListClubInCompetition(int CompetitionId)
         {
             List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
                                                       where CompetitionId == cic.CompetitionId

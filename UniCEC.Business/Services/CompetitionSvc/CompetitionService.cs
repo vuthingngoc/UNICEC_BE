@@ -10,11 +10,14 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionHistoryRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
+using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
@@ -25,6 +28,7 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
+using UniCEC.Data.ViewModels.Entities.CompetitionHistory;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
 
@@ -35,62 +39,58 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionRepo _competitionRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionInClubRepo _competitionInClubRepo;
-        
-
         private IClubRepo _clubRepo;
         private IParticipantRepo _participantRepo;
         private ICompetitionTypeRepo _competitionTypeRepo;
         private IFileService _fileService;
         private ICompetitionEntityRepo _competitionEntityRepo;
-
-        
         private ICompetitionRoleRepo _competitionRoleRepo;
         private IDepartmentRepo _departmentRepo;
         private ITeamRepo _teamRepo;
         private IUserRepo _userRepo;
-      
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
-
+        private IMajorRepo _majorRepo;
+        private ICompetitionInMajorRepo _competitionInMajorRepo;
+        private ICompetitionHistoryStatusRepo _competitionHistoryRepo;
         private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
                                   ICompetitionInClubRepo competitionInClubRepo,
-                                  
                                   IClubRepo clubRepo,
                                   IParticipantRepo participantRepo,
                                   ICompetitionTypeRepo competitionTypeRepo,
                                   ICompetitionEntityRepo competitionEntityRepo,
-
                                   IMemberInCompetitionRepo memberInCompetitionRepo,
                                   IConfiguration configuration,
                                   IDepartmentRepo departmentRepo,
                                   ITeamRepo teamRepo,
                                   IUserRepo userRepo,
-                             
+                                  IMajorRepo majorRepo,
+                                  ICompetitionInMajorRepo competitionInMajorRepo,
+                                  ICompetitionHistoryStatusRepo competitionHistoryRepo,
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
             _memberRepo = memberRepo;
             _competitionInClubRepo = competitionInClubRepo;
-            
             _clubRepo = clubRepo;
             _participantRepo = participantRepo;
             _competitionTypeRepo = competitionTypeRepo;
             _fileService = fileService;
             _competitionEntityRepo = competitionEntityRepo;
-
-           
             _configuration = configuration;
             _departmentRepo = departmentRepo;
             _userRepo = userRepo;
             _teamRepo = teamRepo;
-            
+            _majorRepo = majorRepo;
             _decodeToken = new DecodeToken();
             _competitionRoleRepo = competitionRoleRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
+            _competitionInMajorRepo = competitionInMajorRepo;
+            _competitionHistoryRepo = competitionHistoryRepo;
         }
 
 
@@ -228,13 +228,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || string.IsNullOrEmpty(model.AddressName)
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
+                    || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.SeedsPoint < 0
                     || model.ClubId == 0)
                     throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null" +
-                                                    " EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
+                                                    " ||StartTimeRegister Null ||EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
 
                 //------------- CHECK Club in system
                 Club club = await _clubRepo.Get(model.ClubId);
@@ -246,12 +247,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
 
                 //------------ Check Role Member Is Leader Of Club
-                if (member.ClubRoleId != 1 || member.ClubRoleId != 2) throw new UnauthorizedAccessException("You do not a role Leader to insert this Competititon");
+                if (member.ClubRoleId != 1) throw new UnauthorizedAccessException("You do not a role Leader to insert this Competititon");
 
                 //----------------------------------------------------------------------------CREATE COMPETITION
                 //------------ Check Date
                 //StartTimeRegister == local time
-                bool checkDate = CheckDate(localTime, localTime, model.EndTimeRegister, model.StartTime, model.EndTime, false);
+                bool checkDate = CheckDate(localTime, model.StartTimeRegister, model.EndTimeRegister, model.StartTime, model.EndTime, false);
                 if (checkDate == false) throw new ArgumentException("Date not suitable");
 
                 //Check Competition Type 
@@ -260,81 +261,103 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //------------ Check FK
 
-                //// Department ID
-                //bool insertDepartment;
-                //if (model.ListDepartmentId.Count > 0)
-                //{
-                //    //TH1: InterUniversity
-                //    if (model.Scope == CompetitionScopeStatus.InterUniversity)
-                //    {
-                //        bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
-                //        if (check)
-                //        {
-                //            insertDepartment = true;
-                //        }
-                //        else
-                //        {
-                //            throw new ArgumentException("Department Id not have in System");
-                //        }
-                //    }
-                //    //TH2: University-Club
-                //    else
-                //    {
-                //        bool check = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
-                //        if (check)
-                //        {
-                //            insertDepartment = true;
-                //        }
-                //        else
-                //        {
-                //            throw new ArgumentException("Department Id not have in University");
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    insertDepartment = false;
-                //}
+                // MajorId
+                bool insertMajor;
+                if (model.ListMajorId.Count > 0)
+                {
+                    //TH1: InterUniversity
+                    if (model.Scope == CompetitionScopeStatus.InterUniversity)
+                    {
+                        bool Check = await _majorRepo.CheckMajor(model.ListMajorId);
+                        if (Check)
+                        {
+                            insertMajor = true;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Major not have in System");
+                        }
+                    }
+                    //TH2: University-Club
+                    else
+                    {
+                        bool Check = await _majorRepo.CheckMajorBelongToUni(model.ListMajorId, UniversityId);
+                        if (Check)
+                        {
+                            insertMajor = true;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Major Id not have in University");
+                        }
+                    }
+                }
+                else
+                {
+                    insertMajor = false;
+                }
 
-                //List Influencer ID
-                //bool insertInfluencer;
-                //if (model.ListInfluencer.Count > 0)
-                //{
-                //    bool check = true;
+                //List Image 
+                bool insertImage;
+                if (model.ListImage.Count > 0)
+                {
 
-                //    foreach (var influencer in model.ListInfluencer)
-                //    {
-                //        if (string.IsNullOrEmpty(influencer.Name) || string.IsNullOrEmpty(influencer.ImageUrl))
-                //        {
-                //            check = false;
-                //        }
-                //    }
-                //    if (check)
-                //    {
-                //        insertInfluencer = true;
-                //    }
-                //    else
-                //    {
-                //        throw new ArgumentException("Name or Base64 can not null");
-                //    }
-                //}
-                //else
-                //{
-                //    insertInfluencer = false;
-                //}
+                    foreach (AddImageModel image in model.ListImage)
+                    {
 
-                //Add Competition Entity
-                //bool insertCompetitionEntity;
-                //if (!string.IsNullOrEmpty(model.CompetitionEntity.Base64StringEntity))
-                //{
-                //    insertCompetitionEntity = true;
-                //}
-                //else
-                //{
-                //    insertCompetitionEntity = false;
-                //}
+                        if (string.IsNullOrEmpty(image.Base64StringImg))
+                            throw new ArgumentNullException("Image is NULL");
+                    }
+                    insertImage = true;
+                }
+                else
+                {
+                    insertImage = false;
+                }
 
-                //------------ Insert Competition
+                //List Influencer 
+                bool insertInfluencer;
+                if (model.ListInfluencer.Count > 0)
+                {
+
+                    foreach (AddInfluencerModel influencer in model.ListInfluencer)
+                    {
+
+                        if (string.IsNullOrEmpty(influencer.Base64StringImg) || string.IsNullOrEmpty(influencer.Name))
+                            throw new ArgumentNullException("Image of Influencer is NULL || Influencer name is NULL");
+                    }
+                    insertInfluencer = true;
+                }
+                else
+                {
+                    insertInfluencer = false;
+                }
+
+
+                //List Sponsor
+                bool insertSponsor;
+                if (model.ListSponsor.Count > 0)
+                {
+
+                    foreach (AddSponsorModel sponsor in model.ListSponsor)
+                    {
+                        if (string.IsNullOrEmpty(sponsor.Base64StringImg)
+                           || string.IsNullOrEmpty(sponsor.Name)
+                           || string.IsNullOrEmpty(sponsor.Email)
+                           || string.IsNullOrEmpty(sponsor.Description)
+                           || string.IsNullOrEmpty(sponsor.Website))
+                            throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL || Description is NULL|| Website is NULL");
+                    }
+                    insertSponsor = true;
+                }
+                else
+                {
+                    insertSponsor = false;
+                }
+
+
+
+                //----------------------------------------------------------- Insert Competition
                 //ở trong trường hợp này phân biệt EVENT - COMPETITION
                 //thì ta sẽ phân biệt bằng ==> NumberOfGroup = 0
                 Competition competition = new Competition();
@@ -348,7 +371,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
                 else
                 {
-                    competition.NumberOfTeam = -2; // Offical Team is shown when Competition is in starting time
+                    competition.NumberOfTeam = -1; // Offical Team is shown when Competition is in starting time
                 }
 
                 //Create Competition
@@ -373,17 +396,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
                 competition.NumberOfParticipation = model.NumberOfParticipations;
                 competition.CreateTime = localTime;
-                competition.StartTime = model.StartTime;
-                competition.EndTime = model.EndTime;
                 competition.StartTimeRegister = localTime;
                 competition.EndTimeRegister = model.EndTimeRegister;
+                competition.CeremonyTime = model.StartTime.AddMinutes(30); // auto add 30 minutes để state là Start
+                competition.StartTime = model.StartTime;
+                competition.EndTime = model.EndTime;
                 competition.Content = model.Content;
                 competition.Fee = model.Fee;
                 competition.SeedsPoint = model.SeedsPoint;
                 competition.SeedsDeposited = Math.Round(model.SeedsPoint * percentPoint, 0); // 20%
                 competition.SeedsCode = await CheckExistCode();
                 competition.IsSponsor = false;
-                competition.Status = CompetitionStatus.Launching;
+                competition.Status = CompetitionStatus.Draft; // status draft
                 competition.Scope = model.Scope; // change to Scope  1.InterUniversity, 2.University 3.Club
                 competition.View = 0; // auto
 
@@ -391,64 +415,84 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (competitionId <= 0) throw new ArgumentException("Add Competition Or Event Failed");
                 Competition comp = await _competitionRepo.Get(competitionId);
 
-                ////------------ Insert Competition-In-Department  
-                //if (insertDepartment)
-                //{
-                //    foreach (int dep_id in model.ListDepartmentId)
-                //    {
-                //        CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-                //        {
-                //            DepartmentId = dep_id,
-                //            CompetitionId = comp.Id
-                //        };
-                //        await _competitionInDepartmentRepo.Insert(comp_in_dep);
-                //    }
-                //}
+                //------------ Insert Competition-In-Major  
+                if (insertMajor)
+                {
+                    foreach (int majorId in model.ListMajorId)
+                    {
+                        CompetitionInMajor competitionInMajor = new CompetitionInMajor()
+                        {
+                            MajorId = majorId,
+                            CompetitionId = comp.Id
+                        };
+                        await _competitionInMajorRepo.Insert(competitionInMajor);
+                    }
+                }
 
-                //------------ Insert Competition Entity
-                //if (insertCompetitionEntity)
-                //{
-                //    string Url = await _fileService.UploadFile(model.CompetitionEntity.Base64StringEntity);
-                //    CompetitionEntity competitionEntity = new CompetitionEntity()
-                //    {
-                //        CompetitionId = comp.Id,
-                //        Name = model.CompetitionEntity.NameEntity,
-                //        ImageUrl = Url
-                //    };
-                //    await _competitionEntityRepo.Insert(competitionEntity);
-                //}
+                //------------Insert Image Entity
+                if (insertImage)
+                {
+                    foreach (AddImageModel Image in model.ListImage)
+                    {
+                        string Url = await _fileService.UploadFile(Image.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
+                            CompetitionId = comp.Id,
+                            Name = Image.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 1, //1 là image
+                        };
 
-                ////------------ Insert Influencer-In-Competition
-                //if (insertInfluencer)
-                //{
-                //    foreach (InfluencerInsertModel influ in model.ListInfluencer)
-                //    {
-                //        Influencer influencer = new Influencer()
-                //        {
-                //            Name = influ.Name,
-                //            ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
-                //        };
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
+                    }
+                }
 
-                //        int result = await _influencerRepo.Insert(influencer);
-                //        if (result > 0)
-                //        {
-                //            //add in Influencer in competition
-                //            InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
-                //            {
-                //                CompetitionId = comp.Id,
-                //                InfluencerId = result
-                //            };
-                //            await _influencerInCompetitionRepo.Insert(influ_in_comp);
-                //        }
-                //    }
-                //}
+                //------------ Insert Influencer
+                if (insertInfluencer)
+                {
+                    foreach (AddInfluencerModel influencer in model.ListInfluencer)
+                    {
+                        string Url = await _fileService.UploadFile(influencer.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
+                            CompetitionId = comp.Id,
+                            Name = influencer.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 2, //2 là influencer
+                        };
+
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
+                    }
+                }
+
+                //------------ Insert Sponsor
+                if (insertSponsor)
+                {
+                    foreach (AddSponsorModel sponsor in model.ListSponsor)
+                    {
+                        string Url = await _fileService.UploadFile(sponsor.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
+
+                            CompetitionId = comp.Id,
+                            Name = sponsor.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 3, //3 là Sponsor
+                            Description = sponsor.Description,
+                            Website = sponsor.Website,
+                            Email = sponsor.Email,
+                        };
+
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
+                    }
+                }
+
                 //------------ Insert Competition-In-Club
                 CompetitionInClub competitionInClub = new CompetitionInClub();
                 competitionInClub.ClubId = model.ClubId;
                 competitionInClub.CompetitionId = comp.Id;
                 competitionInClub.IsOwner = true;
                 int compInClub_Id = await _competitionInClubRepo.Insert(competitionInClub);
-
 
                 //------------ Insert Member In Competition
                 MemberInCompetition mic = new MemberInCompetition()
@@ -458,8 +502,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     CompetitionRoleId = 1,
                     Status = true,
                 };
-
                 int micId = await _memberInCompetitionRepo.Insert(mic);
+
+
+                //----------- InsertCompetition History
+                CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                {
+                    CompetitionId = comp.Id,
+                    ChangerId = member.Id,
+                    ChangeDate = localTime,
+                    Description = "Create Competition", // auto des when create Competition
+                    Status = CompetitionStatus.Draft,   // when create status draft
+                };
+                InsertCompetitionHistoryStatus(chim);
+
 
                 ViewDetailCompetition viewDetailCompetition = await TransferViewDetailCompetition(comp);
                 return viewDetailCompetition;
@@ -472,7 +528,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //----ROLE IN COMPETITION MANAGER
-
         public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token)
         {
             try
@@ -484,19 +539,34 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
-                    //
+
                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    if (comp != null)
+
+                    //Ở trạng thái này thì có thể xóa
+                    if (comp.Status != CompetitionStatus.Draft
+                     || comp.Status != CompetitionStatus.Approve
+                     || comp.Status != CompetitionStatus.Publish
+                     || comp.Status != CompetitionStatus.Register
+                     || comp.Status != CompetitionStatus.UpComing)
+                        throw new ArgumentException("Competition State is not suitable to do this action");
+
+                    comp.Status = CompetitionStatus.Canceling;
+                    await _competitionRepo.Update();
+
+
+                    //----------- InsertCompetition History
+                    CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
                     {
-                        comp.Status = CompetitionStatus.Canceling;
-                        //
-                        await _competitionRepo.Update();
-                        return true;
-                    }//end if comp != null
-                    else
-                    {
-                        return false;
-                    }
+                        CompetitionId = comp.Id,
+                        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
+                        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                        Description = "Delete Competition", // auto des when Delete Competition
+                        Status = CompetitionStatus.Canceling,   // when create status draft
+                    };
+                    InsertCompetitionHistoryStatus(chim);
+
+                    return true;
+
                 }//end if check
                 else
                 {
@@ -510,6 +580,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
+
+        //---------------------------------------------------------------------------------- STATE DRAFT
         public async Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel model, string token)
         {
             try
@@ -519,13 +591,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     throw new ArgumentNullException("Competition Id Null  || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
+
+
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
-                    
+
+                    //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp.Status != CompetitionStatus.Draft) throw new ArgumentException("Competition State is not suitable to do this action");
+
 
                     bool checkDate = false;
-                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
                     //------------- CHECK Date Update  
                     //------------- FE,MOBILE TEST                       
                     //TH CHung
@@ -679,8 +756,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     //------------- CHECK Max,Min,NumberOfParticipant Update                          
                     bool checkMaxMin = false;
-                    bool SetStatusAllTeam_Available = false;
-
                     //------------- FE,MOBILE TEST
                     //TH CHung
                     if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
@@ -720,42 +795,42 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (Max && Min && NumOfParticipant)
                         {
                             checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 1    1     0
                         if (Max && Min && NumOfParticipant == false)
                         {
                             checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, comp.NumberOfParticipation);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 1    0     1
                         if (Max && Min == false && NumOfParticipant)
                         {
                             checkMaxMin = CheckMaxMin(model.MaxNumber.Value, (int)comp.MinNumber, model.NumberOfParticipant.Value);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 1    0     0
                         if (Max && Min == false && NumOfParticipant == false)
                         {
                             checkMaxMin = CheckMaxMin(model.MaxNumber.Value, comp.MinNumber.Value, comp.NumberOfParticipation);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 0    1     1                              
                         if (Max == false && Min && NumOfParticipant)
                         {
                             checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, model.NumberOfParticipant.Value);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 0    1     0 
                         if (Max == false && Min && NumOfParticipant == false)
                         {
                             checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
-                            SetStatusAllTeam_Available = true;
+
                         }
 
                         // 0    0     1
@@ -783,18 +858,49 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
                     comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
                     comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
                     comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
                     comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
                     comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
                     comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
-                    // nếu có thay đổi về Max Min thì sẽ cập nhật Team Status của tất cả team là Available
-                    if (SetStatusAllTeam_Available)
-                    {
-                        await _teamRepo.UpdateStatusAvailableForAllTeam(comp.Id);
-                    }
                     comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
                     comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
                     comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+
+                    ////có 2 trạng thái để chuyển State khi update
+                    ////nếu là Draft thì vẫn như cũ
+                    ////nếu đã là Approve thì chuyển về pendding review
+                    //if (comp.Status == CompetitionStatus.Approve)
+                    //{
+                    //    comp.Status = CompetitionStatus.PendingReview;
+
+                    //    //----------- InsertCompetition History
+                    //    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
+                    //    {
+                    //        CompetitionId = comp.Id,
+                    //        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
+                    //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                    //        Description = "Update Competition", // auto des when Delete Competition
+                    //        Status = CompetitionStatus.PendingReview,   // when create status draft
+                    //    };
+                    //    InsertCompetitionHistory(chim);
+                    //}
+                    //if (comp.Status == CompetitionStatus.Draft)
+                    //{
+                    //    comp.Status = CompetitionStatus.PendingReview;
+
+                    //    //----------- InsertCompetition History
+                    //    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
+                    //    {
+                    //        CompetitionId = comp.Id,
+                    //        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
+                    //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                    //        Description = "Update Competition", // auto des when Delete Competition
+                    //        Status = CompetitionStatus.Draft,   // when create status draft
+                    //    };
+                    //    InsertCompetitionHistory(chim);
+                    //}
+
                     await _competitionRepo.Update();
                     return true;
                 }//end if check
@@ -809,262 +915,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<bool> UpdateBE(LeaderUpdateCompOrEventModel model, string token)
-        {
-            try
-            {
-                if (model.CompetitionId == 0
-                   || model.ClubId == 0)
-                    throw new ArgumentNullException("Competition Id Null || ClubId Null");
-                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+        //---------------------------------------------------------------------------------- STATE PENDING REVIEW
 
-                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
-                if (Check)
-                {
-                   
-                        bool checkDate = false;
-                        Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                        //------------- CHECK Date Update
-                        //------------- BE TEST
-                        //TH1 STR
-                        if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH2 ETR
-                        if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
-                        }
-                        //TH3 ST
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
-                        }
-                        //TH4 ET
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
-                        }
-                        //TH5 not thing happen with date
-                        if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
-                        {
-                            checkDate = true;
-                        }
-                        //TH 6 All
-                        if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
-                        {
-                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
-                        }
-                        if (checkDate)
-                        {
-                            //------------- CHECK Max,Min,NumberOfParticipant Update                          
-                            bool checkMaxMin = false;
-                            bool SetStatusAllTeam_Available = false;
-                            //------------- BE TEST
-                            //Max
-                            if (model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
-                            {
-                                checkMaxMin = CheckMaxMin(model.MaxNumber.Value, (int)comp.MinNumber, comp.NumberOfParticipation);
-                                SetStatusAllTeam_Available = true;
-                            }
-                            //Min
-                            if (!model.MaxNumber.HasValue && model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
-                            {
-                                checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
-                                SetStatusAllTeam_Available = true;
-                            }
-                            //NumberOfParticipant
-                            if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
-                            {
-                                checkMaxMin = CheckMaxMin((int)comp.MaxNumber, (int)comp.MinNumber, model.NumberOfParticipant.Value);
-                            }
-                            //Max,Min,NumberOfParticipant no Update
-                            if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
-                            {
-                                checkMaxMin = true;
-                            }
-                            //Max Min Num Update
-                            if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
-                            {
-                                checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
-                                SetStatusAllTeam_Available = true;
-                            }
-                            if (checkMaxMin)
-                            {
-                                comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
-                                comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
-                                comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
-                                comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
-                                comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
-                                comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                                comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                                comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                                comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-                                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
-                                comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
-                                // nếu có thay đổi về Max Min thì sẽ cập nhật Team Status của tất cả team là Available
-                                if (SetStatusAllTeam_Available)
-                                {
-                                    await _teamRepo.UpdateStatusAvailableForAllTeam(comp.Id);
-                                }
-                                comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
-                                comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
-                                comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
-                                await _competitionRepo.Update();
-                                return true;
-                            }
-                            else
-                            {
-                                throw new ArgumentException("Max Number or Min Number or Number Of Participant is not suitable");
-                            }
-                        }//end check date
-                        else
-                        {
-                            throw new ArgumentException("Date not suitable");
-                        }
-                   
-                }//end if check
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-
-
-
-        //----------------------------------------------------------------Add Competition In Department
-
-        //public async Task<List<ViewCompetitionInDepartment>> AddCompetitionInDepartment(CompetitionInDepartmentInsertModel model, string token)
-        //{
-        //    try
-        //    {
-        //        if (model.CompetitionId == 0
-        //          || model.ClubId == 0
-        //          || model.ListDepartmentId.Count < 0)
-        //            throw new ArgumentNullException("Competition Id Null  || Department Null || ClubId Null");
-
-        //        bool Check = await CheckConditions(token, model.CompetitionId, model.ClubId);
-        //        if (Check)
-        //        {
-        //            //------------- CHECK Status Competition
-        //            Competition c = await _competitionRepo.Get(model.CompetitionId);
-        //            if (c.Status != CompetitionStatus.Happening && c.Status != CompetitionStatus.Ending && c.Status != CompetitionStatus.Canceling)
-        //            {
-        //                bool addDepartment = false;
-        //                //------------ CHECK Scope
-        //                //TH 1
-        //                if (c.Scope == CompetitionScopeStatus.InterUniversity)
-        //                {
-        //                    bool check = await _departmentRepo.checkDepartment(model.ListDepartmentId);
-        //                    if (check)
-        //                    {
-        //                        addDepartment = true;
-        //                    }
-        //                    else
-        //                    {
-        //                        throw new ArgumentException("Department Id not have in System");
-        //                    }
-        //                }
-        //                // TH 2
-        //                else
-        //                {
-        //                    //add extra parameter
-        //                    int UniversityId = _decodeToken.Decode(token, "UniversityId");
-        //                    //------------- CHECK Department belong to University
-        //                    bool departmentBelongToUni = await _departmentRepo.CheckDepartmentBelongToUni(model.ListDepartmentId, UniversityId);
-
-        //                    if (departmentBelongToUni)
-        //                    {
-        //                        addDepartment = true;
-        //                    }
-        //                    // end if CheckDepartmentId
-        //                    else
-        //                    {
-        //                        throw new ArgumentException("Department Id not have in University");
-        //                    }
-        //                }
-        //                if (addDepartment)
-        //                {
-        //                    //------------- CHECK Add Department is existed
-        //                    bool DepartmentIsExsited = true;
-        //                    foreach (int dep_id in model.ListDepartmentId)
-        //                    {
-        //                        //
-        //                        CompetitionInDepartment cid = await _competitionInDepartmentRepo.GetDepartment_In_Competition(dep_id, model.CompetitionId);
-        //                        if (cid != null)
-        //                        {
-        //                            DepartmentIsExsited = false;
-        //                        }
-        //                    }
-        //                    if (DepartmentIsExsited)
-        //                    {
-        //                        List<int> list_dic_Id = new List<int>();
-        //                        List<ViewCompetitionInDepartment> list_result = new List<ViewCompetitionInDepartment>();
-
-        //                        foreach (int dep_id in model.ListDepartmentId)
-        //                        {
-        //                            CompetitionInDepartment comp_in_dep = new CompetitionInDepartment()
-        //                            {
-        //                                DepartmentId = dep_id,
-        //                                CompetitionId = model.CompetitionId
-        //                            };
-        //                            int id = await _competitionInDepartmentRepo.Insert(comp_in_dep);
-        //                            list_dic_Id.Add(id);
-        //                        }
-        //                        if (list_dic_Id.Count > 0)
-        //                        {
-        //                            foreach (int id in list_dic_Id)
-        //                            {
-        //                                CompetitionInDepartment cid = await _competitionInDepartmentRepo.Get(id);
-
-        //                                ViewCompetitionInDepartment vcid = new ViewCompetitionInDepartment()
-        //                                {
-        //                                    Id = cid.Id,
-        //                                    CompetitionId = cid.CompetitionId,
-        //                                    DepartmentId = cid.DepartmentId
-        //                                };
-        //                                list_result.Add(vcid);
-        //                            }
-        //                            return list_result;
-        //                        }//
-        //                        else
-        //                        {
-        //                            throw new ArgumentException("Add in DB Department Failed");
-        //                        }
-        //                    }//
-        //                    else
-        //                    {
-        //                        throw new ArgumentException("Department already in Competition");
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    throw new ArgumentException("Add Department Failed");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
-        //            }
-        //        }
-        //        //end if check
-        //        else
-        //        {
-        //            return null;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+        //---------------------------------------------------------------------------------- STATE APPROVE
 
         public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
         {
@@ -1078,8 +931,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
-                    
-                    
+
+                    //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                        throw new ArgumentException("Competition State is not suitable to do this action");
+
                     //add 2 parameter to check
                     int UniversityId = _decodeToken.Decode(token, "UniversityId");
                     Competition competition = await _competitionRepo.Get(model.CompetitionId);
@@ -1155,129 +1012,159 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        //public async Task<List<ViewInfluencerInCompetition>> AddInfluencerInCompetition(InfluencerInComeptitionInsertModel model, string token)
-        //{
-        //    try
-        //    {
-        //        if (model.CompetitionId == 0
-        //             || model.ClubId == 0
-        //             || model.ListInfluencer.Count < 0)
-        //            throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Null");
 
-        //        bool check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
-        //        if (check)
-        //        {
-                    
-        //            List<int> list_iic_Id = new List<int>();
-        //            List<ViewInfluencerInCompetition> list_result = new List<ViewInfluencerInCompetition>();
+        //---------------------------------------------------------------------------------- STATE PUBLISH
 
-        //            foreach (InfluencerInsertModel influ in model.ListInfluencer)
-        //            {
+        //---------------------------------------------------------------------------------- STATE REGISTER - UPCOMMING
 
-        //                Influencer influencer = new Influencer()
-        //                {
-        //                    Name = influ.Name,
-        //                    ImageUrl = await _fileService.UploadFile(influ.ImageUrl)
-        //                };
+        //HÀM NÀY CHỈ TEST UPDATE THÔI
+        public async Task<bool> UpdateBE(LeaderUpdateCompOrEventModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionId == 0
+                   || model.ClubId == 0)
+                    throw new ArgumentNullException("Competition Id Null || ClubId Null");
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-        //                int result = await _influencerRepo.Insert(influencer);
+                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
+                if (Check)
+                {
 
-        //                //add in Influencer in competition
-        //                if (result > 0)
-        //                {
-        //                    InfluencerInCompetition influ_in_comp = new InfluencerInCompetition()
-        //                    {
-        //                        CompetitionId = model.CompetitionId,
-        //                        InfluencerId = result
-        //                    };
+                    //Chỉ Cho những Trạng Thái này update
+                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    if (comp.Status != CompetitionStatus.Draft)throw new ArgumentException("Competition State is not suitable to do this action");
 
-        //                    int id = await _influencerInCompetitionRepo.Insert(influ_in_comp);
-        //                    list_iic_Id.Add(id);
-        //                }
-        //            }
-        //            if (list_iic_Id.Count > 0)
-        //            {
-        //                foreach (int id in list_iic_Id)
-        //                {
-        //                    InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
+                    bool checkDate = false;
+                    //------------- CHECK Date Update
+                    //------------- BE TEST
+                    //TH1 STR
+                    if (model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                    }
+                    //TH2 ETR
+                    if (!model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                    }
+                    //TH3 ST
+                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                    }
+                    //TH4 ET
+                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                    }
+                    //TH5 not thing happen with date
+                    if (!model.StartTimeRegister.HasValue && !model.EndTimeRegister.HasValue && !model.StartTime.HasValue && !model.EndTime.HasValue)
+                    {
+                        checkDate = true;
+                    }
+                    //TH 6 All
+                    if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                    {
+                        checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
+                    }
+                    if (checkDate)
+                    {
+                        //------------- CHECK Max,Min,NumberOfParticipant Update                          
+                        bool checkMaxMin = false;
 
-        //                    //get IMG from Firebase                        
-        //                    string imgUrl;
+                        //------------- BE TEST
+                        //Max
+                        if (model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, (int)comp.MinNumber, comp.NumberOfParticipation);
 
-        //                    try
-        //                    {
-        //                        imgUrl = await _fileService.GetUrlFromFilenameAsync(iic.Influencer.ImageUrl);
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        imgUrl = "";
-        //                    }
+                        }
+                        //Min
+                        if (!model.MaxNumber.HasValue && model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                        {
+                            checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
 
-        //                    ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
-        //                    {
-        //                        CompetitionId = iic.CompetitionId,
-        //                        InfluencerInCompetitionId = iic.Id,
-        //                        Id = iic.Influencer.Id,
-        //                        ImageUrl = imgUrl,
-        //                        Name = iic.Influencer.Name
-        //                    };
-        //                    list_result.Add(viic);
-        //                }
-        //                return list_result;
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("Add Influencer Failed");
-        //            }
-        //        }//end if check
-        //        else
-        //        {
-        //            return null;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+                        }
+                        //NumberOfParticipant
+                        if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                        {
+                            checkMaxMin = CheckMaxMin((int)comp.MaxNumber, (int)comp.MinNumber, model.NumberOfParticipant.Value);
+                        }
+                        //Max,Min,NumberOfParticipant no Update
+                        if (!model.MaxNumber.HasValue && !model.MinNumber.HasValue && !model.NumberOfParticipant.HasValue)
+                        {
+                            checkMaxMin = true;
+                        }
+                        //Max Min Num Update
+                        if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
 
-        //public async Task<bool> DeleteInluencerInCompetition(InfluencerInCompetitionDeleteModel model, string token)
-        //{
-        //    try
-        //    {
-        //        if (model.CompetitionId == 0
-        //             || model.ClubId == 0
-        //             || model.InfluencerId == 0)
-        //            throw new ArgumentNullException("Competition Id Null || ClubId Null || List Influencer Id Null");
+                        }
+                        if (checkMaxMin)
+                        {
+                            comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
+                            comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
+                            comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
+                            comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
+                            comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
+                            comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                            comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                            comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
+                            comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                            comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                            comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                            comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
+                            comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
+                            comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
+                            comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
 
-        //        bool check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
-        //        if (check)
-        //        {
-        //            ////------------- CHECK Status Competition
-        //            //Competition c = await _competitionRepo.Get(model.CompetitionId);
-        //            //if (c.Status == CompetitionStatus.Happening || c.Status == CompetitionStatus.Ending || c.Status == CompetitionStatus.Canceling)
-        //            //    throw new ArgumentException("Can't Update Competition when it has Status Happenning or Ending or Canceling");
 
-        //            ////------------- CHECK Influencer in system
-        //            //Influencer influencer = await _influencerRepo.Get(model.InfluencerId);
-        //            //if (influencer == null) throw new ArgumentException("Influencer Id not have in System");
+                            //có 2 trạng thái để chuyển State khi update
+                            //nếu là Draft thì vẫn như cũ
+                            //nếu đã là Approve thì chuyển về pendding review
+                            //if (comp.Status == CompetitionStatus.Approve)
+                            //{
+                            //    comp.Status = CompetitionStatus.PendingReview;
 
-        //            ////------------- CHECK Influencer in competition
-        //            //InfluencerInCompetition iic = await _influencerInCompetitionRepo.GetInfluencerInCompetition(model.InfluencerId, model.CompetitionId);
-        //            //if (iic == null) throw new ArgumentException("Influencer Id not in Competition");
-        //            //await _influencerInCompetitionRepo.DeleteInfluencerInCompetition(iic.Id);
-        //            return true;
-        //        }
-        //        else
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
+                            //    //----------- InsertCompetition History
+                            //    CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                            //    {
+                            //        CompetitionId = comp.Id,
+                            //        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
+                            //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                            //        Description = "Delete Competition", // auto des when Delete Competition
+                            //        Status = CompetitionStatus.PendingReview,   // when create status draft
+                            //    };
+                            //    InsertCompetitionHistoryStatus(chim);
+                            //}
+
+                            await _competitionRepo.Update();
+                            return true;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Max Number or Min Number or Number Of Participant is not suitable");
+                        }
+                    }//end check date
+                    else
+                    {
+                        throw new ArgumentException("Date not suitable");
+                    }
+
+                }//end if check
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         //-----------------------------------------------------------Manager In Competition
         public async Task<PagingResult<ViewMemberInCompetition>> GetAllManagerCompOrEve(MemberInCompetitionRequestModel request, string token)
@@ -1329,7 +1216,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (isMemberInCompetition != null) throw new ArgumentException("Member has already joined");
 
                     MemberInCompetition memberInCompetition = new MemberInCompetition();
-                    memberInCompetition.CompetitionRoleId = 2;
+                    memberInCompetition.CompetitionRoleId = 3;
                     memberInCompetition.MemberId = mem.Id;
                     memberInCompetition.CompetitionId = model.CompetitionId;
                     memberInCompetition.Status = true;
@@ -1403,9 +1290,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-
-
-
         //transfer view
 
         private ViewMemberInCompetition TransferViewMemberInCompetition(MemberInCompetition memberInCompetition)
@@ -1434,52 +1318,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         public async Task<ViewDetailCompetition> TransferViewDetailCompetition(Competition competition)
         {
-            //List Influencer In Competition (id img)
-            //List<ViewInfluencerInCompetition> list_InfluencerInCompetition = new List<ViewInfluencerInCompetition>();
-
-            //List<int> list_InfluencerInCompetition_Id = await _influencerInCompetitionRepo.GetListInfluencer_In_Competition_Id(competition.Id);
-
-            //if (list_InfluencerInCompetition_Id != null)
-            //{
-            //    foreach (int id in list_InfluencerInCompetition_Id)
-            //    {
-            //        InfluencerInCompetition iic = await _influencerInCompetitionRepo.Get(id);
-
-            //        //get IMG from Firebase                        
-            //        string imgUrl_Influencer;
-
-            //        try
-            //        {
-            //            imgUrl_Influencer = await _fileService.GetUrlFromFilenameAsync(iic.Influencer.ImageUrl);
-            //        }
-            //        catch (Exception)
-            //        {
-            //            imgUrl_Influencer = "";
-            //        }
-
-            //        ViewInfluencerInCompetition viic = new ViewInfluencerInCompetition()
-            //        {
-            //            CompetitionId = iic.CompetitionId,
-            //            InfluencerInCompetitionId = iic.Id,
-            //            Id = iic.Influencer.Id,
-            //            ImageUrl = imgUrl_Influencer,
-            //            Name = iic.Influencer.Name
-            //        };
-            //        list_InfluencerInCompetition.Add(viic);
-            //    }
-            //}
-
-            //List Sponsors in Competition
-            //List<ViewSponsorInComp> SponsorsInCompetition = await _sponsorInCompetitionRepo.GetListSponsor_In_Competition(competition.Id);
 
             //List Clubs in Comeptition
-            List<ViewClubInComp> ClubsInCompetition = await _competitionInClubRepo.GetListClub_In_Competition(competition.Id);
+            List<ViewClubInComp> viewClubsInCompetition = await _competitionInClubRepo.GetListClubInCompetition(competition.Id);
 
-            //List Department in Competition
-            //List<ViewDeparmentInComp> DepartmentsInCompetition_Id = await _competitionInDepartmentRepo.GetListDepartment_In_Competition(competition.Id);
+            //List Majors in Competition
+            List<ViewMajorInComp> viewMajorsInCompetition = await _competitionInMajorRepo.GetListMajorInCompetition(competition.Id);
 
             //List Competition Entity
-            List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+            List<ViewCompetitionEntity> viewCompetitionEntities = new List<ViewCompetitionEntity>();
 
             List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(competition.Id);
 
@@ -1504,9 +1351,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = competitionEntity.CompetitionId,
                         Name = competitionEntity.Name,
                         ImageUrl = imgUrl_CompetitionEntity,
+                        EntityTypeId = competitionEntity.EntityTypeId,
+                        EntityTypeName = competitionEntity.EntityType.Name,
+                        Email = (competitionEntity.Email != null) ? competitionEntity.Email : null,
+                        Website = (competitionEntity.Website != null) ? competitionEntity.Website : null,
+                        Description = (competitionEntity.Description != null) ? competitionEntity.Description : null,
                     };
                     //
-                    ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                    viewCompetitionEntities.Add(viewCompetitionEntity);
                 }
             }
 
@@ -1541,20 +1393,27 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Scope = competition.Scope,
                 Status = competition.Status,
                 View = competition.View,
-                //
-                //InfluencerInCompetition = (list_InfluencerInCompetition != null) ? list_InfluencerInCompetition : new List<ViewInfluencerInCompetition>(),
-                //
-                ClubInCompetition = (ClubsInCompetition != null) ? ClubsInCompetition : new List<ViewClubInComp>(),
-                //
-                //SponsorInCompetition = (SponsorsInCompetition != null) ? SponsorsInCompetition : new List<ViewSponsorInComp>(),
-                //
-                //DepartmentInCompetition = (DepartmentsInCompetition_Id != null) ? DepartmentsInCompetition_Id : new List<ViewDeparmentInComp>(),
-                // 
-                CompetitionEntities = (ListView_CompetitionEntities != null) ? ListView_CompetitionEntities : new List<ViewCompetitionEntity>(),
-                //
+                ClubInCompetition = (viewClubsInCompetition != null) ? viewClubsInCompetition : null,
+                CompetitionEntities = (viewCompetitionEntities != null) ? viewCompetitionEntities : null,
+                MajorsInCompetition = (viewMajorsInCompetition != null) ? viewMajorsInCompetition : null,
                 NumberOfParticipantJoin = NumberOfParticipantJoin,
-
             };
+        }
+
+
+        private async void InsertCompetitionHistoryStatus(CompetitionHistoryStatusInsertModel model)
+        {
+            CompetitionHistoryStatus competitionHistory = new CompetitionHistoryStatus()
+            {
+                CompetitionId = model.CompetitionId,
+                ChangerId = (model.ChangerId.HasValue) ? model.ChangerId.Value : null,
+                ChangeDate = model.ChangeDate,
+                Description = (string.IsNullOrEmpty(model.Description)) ? null : model.Description,
+                Status = model.Status,
+            };
+
+            int result = await _competitionHistoryRepo.Insert(competitionHistory);
+            if (result == 0) throw new ArgumentException("Add Competition History Failed");
         }
 
         private string GenerateSeedCode()
@@ -1714,7 +1573,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (isOrganization)
             {
                 //------------- CHECK Role Is highest role
-                if (isAllow.CompetitionRoleId != 1) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                if (isAllow.CompetitionRoleId != 1 || isAllow.CompetitionRoleId != 2) throw new UnauthorizedAccessException("Only role Manager can do this action");
                 return true;
             }
             else
