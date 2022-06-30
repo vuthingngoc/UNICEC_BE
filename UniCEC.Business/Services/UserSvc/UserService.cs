@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Firebase.Auth;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
-using UniCEC.Data.Models.DB;
+using UniCEC.Data.JWT;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -14,11 +16,13 @@ namespace UniCEC.Business.Services.UserSvc
     {
         private IUserRepo _userRepo;
         private DecodeToken _decodeToken;
+        private IConfiguration _configuration;
 
-        public UserService(IUserRepo userRepo)
+        public UserService(IUserRepo userRepo, IConfiguration configuration)
         {
             _userRepo = userRepo;
             _decodeToken = new DecodeToken();
+            _configuration = configuration;
         }
 
         public int DecodeToken(string token, string nameClaim)
@@ -31,7 +35,7 @@ namespace UniCEC.Business.Services.UserSvc
             int userId = _decodeToken.Decode(token, "Id");
             int roleId = _decodeToken.Decode(token, "RoleId");
             bool isFullInfo = false;
-            
+
             // if admin or him/her-self call api
             if (roleId.Equals(1) || userId.Equals(id)) isFullInfo = true;
             ViewUser user = await _userRepo.GetById(id, isFullInfo);
@@ -72,43 +76,70 @@ namespace UniCEC.Business.Services.UserSvc
             return users;
         }
 
-        //public async Task<ViewUser> Insert(UserInsertModel user)
-        //{
-        //    if (string.IsNullOrEmpty(user.Description) || string.IsNullOrEmpty(user.Dob) || string.IsNullOrEmpty(user.Fullname)
-        //        || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Gender) || user.RoleId == 0 || string.IsNullOrEmpty(user.UserCode))
-        //        throw new ArgumentNullException("Description Null || Dob Null || Fullname Null || Email Null || Gender Null || RoleId || UserId Null");
+        public async Task<bool> Insert(string token, UserAccountInsertModel account)
+        {
+            if (string.IsNullOrEmpty(account.Email) || string.IsNullOrEmpty(account.Password))
+                throw new ArgumentException("Email Null || Password Null");
 
-        //    bool isInvalid = await CheckDuplicatedEmailAndUserCode(user.UniversityId, user.Email, user.UserCode);
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-        //    if (isInvalid) return null;
+            bool isExisted = await _userRepo.CheckExistedEmail(account.Email);
+            if (isExisted) throw new ArgumentException("The email is already existed");
 
-        //    // default status when insert is true
-        //    UserStatus status = UserStatus.Active;
-        //    User element = new User()
-        //    {
-        //        Description = user.Description,
-        //        Dob = user.Dob,
-        //        Email = user.Email,
-        //        Fullname = user.Fullname,
-        //        Gender = user.Gender,
-        //        MajorId = user.MajorId,
-        //        RoleId = user.RoleId,
-        //        Status = status,
-        //        UniversityId = user.UniversityId,
-        //        UserCode = user.UserCode,
-        //        Avatar = user.Avatar,
-        //        IsOnline = true // default status when log in
-        //    };
+            try
+            {
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(_configuration.GetSection("Firebase:ApiKey").Value));
+                var userAccount = await auth.CreateUserWithEmailAndPasswordAsync(account.Email, account.Password, "Admin", true);
+                if (userAccount != null)
+                {
+                    Data.Models.DB.User user = new Data.Models.DB.User()
+                    {
+                        Email = account.Email,
+                        RoleId = 1, // university admin
+                        UniversityId = account.UniversityId,
+                        Fullname = account.Fullname,
+                        Dob = account.Dob,
+                        Gender = account.Gender,
+                        Status = UserStatus.Active, // default status when insert                        
+                        IsOnline = false // default status
+                    };
 
-        //    int id = await _userRepo.Insert(element);
-        //    if (id > 0)
-        //    {
-        //        element.Id = id;
-        //        return TransformViewModel(element);
-        //    }
+                    int id = await _userRepo.Insert(user);
+                    return (id > 0) ? true : false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
 
-        //    return null;
-        //}
+            return false;
+        }
+
+        public async Task<string> LoginAccount(UserLoginModel model)
+        {
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+                throw new ArgumentException("Email Null || Password Nulll");
+
+            try
+            {
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(_configuration.GetSection("Firebase:ApiKey").Value));
+                var account = await auth.SignInWithEmailAndPasswordAsync(model.Email, model.Password);
+                if(account != null)
+                {
+                    UserTokenModel user = await _userRepo.GetByEmail(model.Email);
+                    return (user != null) 
+                        ? JWTUserToken.GenerateJWTTokenUser(user) 
+                        : throw new ArgumentException();
+                }
+                return null;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         public async Task<bool> Update(UserUpdateModel model, string token)
         {
@@ -117,7 +148,7 @@ namespace UniCEC.Business.Services.UserSvc
 
             if (!userId.Equals(model.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            User user = await _userRepo.Get(model.Id);
+            Data.Models.DB.User user = await _userRepo.Get(model.Id);
             if (user == null) throw new NullReferenceException("Not found this user");
 
             bool isInvalid = await CheckDuplicatedEmailAndUserCode(user.UniversityId, user.Email, user.StudentCode);
@@ -142,7 +173,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task UpdateStatusOnline(int id, bool status)
         {
-            User element = await _userRepo.Get(id);
+            Data.Models.DB.User element = await _userRepo.Get(id);
             if (element == null) throw new NullReferenceException("Not found this user");
 
             element.IsOnline = status;
@@ -151,7 +182,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task<bool> Delete(int id)
         {
-            User user = await _userRepo.Get(id);
+            Data.Models.DB.User user = await _userRepo.Get(id);
             if (user == null) throw new NullReferenceException("Not found this user");
 
             user.Status = UserStatus.InActive;
@@ -175,7 +206,7 @@ namespace UniCEC.Business.Services.UserSvc
         {
             try
             {
-                User user = new User
+                Data.Models.DB.User user = new Data.Models.DB.User
                 {
                     RoleId = userModel.RoleId,
                     Email = email,
@@ -186,7 +217,7 @@ namespace UniCEC.Business.Services.UserSvc
                     //auto
                     Dob = "",
                     Gender = "",
-                    StudentCode = "",                    
+                    StudentCode = "",
                     Description = "",
                     IsOnline = true // default status when log in
                 };
@@ -201,7 +232,7 @@ namespace UniCEC.Business.Services.UserSvc
             int idUser = _decodeToken.Decode(token, "Id");
             if (!userId.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            User user = await _userRepo.Get(userId);
+            Data.Models.DB.User user = await _userRepo.Get(userId);
             if (user == null) throw new NullReferenceException("Not found this user");
 
             if (!user.UniversityId.HasValue) user.UniversityId = universityId;
@@ -215,7 +246,7 @@ namespace UniCEC.Business.Services.UserSvc
 
         public async Task UpdateAvatar(int userId, string srcAvatar)
         {
-            User user = await _userRepo.Get(userId);
+            Data.Models.DB.User user = await _userRepo.Get(userId);
             if (user == null) throw new NullReferenceException("Not found this user");
 
             user.Avatar = srcAvatar;

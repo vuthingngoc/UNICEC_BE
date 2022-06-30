@@ -97,7 +97,7 @@ namespace UniCEC.Business.Services.CitySvc
         {
             int roleId = DecodeToken(token, "RoleId");
             if (!roleId.Equals(4)) request.Status = true;
-            
+
             PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(request);
 
             if (result == null) throw new NullReferenceException();
