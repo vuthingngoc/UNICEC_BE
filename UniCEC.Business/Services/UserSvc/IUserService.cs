@@ -12,17 +12,18 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<ViewUser> GetById(string token, int id);
         public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
         public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
-        //public Task<ViewUser> Insert(UserInsertModel user);
+        public Task<bool> Insert(string token, UserAccountInsertModel user);
         public Task<bool> Delete(int id);
         public Task<bool> CheckUserEmailExsit(string email);
         // Login
         public Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber);
+        public Task<string> LoginAccount(UserLoginModel model);
         public Task<bool> Update(UserUpdateModel user, string token);
         // firebase
         public Task<UserTokenModel> GetUserByEmail(string email);
         public Task<UserTokenModel> GetUserTokenById(int id, string token);
         public Task UpdateAvatar(int userId, string srcAvatar);
         public Task UpdateInfoToken(int userId, int universityId, string token);
-        public Task UpdateStatusOnline(int id, bool status);        
+        public Task UpdateStatusOnline(int id, bool status);           
     }
 }
