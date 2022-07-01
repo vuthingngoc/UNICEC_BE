@@ -8,9 +8,11 @@ using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
-    public class UpdateConstraintBeforePublishModel
+    public class UpdateConstraintCompetitionWithStateApproveModel
     {
         public int Id { get; set; }
+
+        public string? Name { get; set; }
 
         public string? Content { get; set; }
 

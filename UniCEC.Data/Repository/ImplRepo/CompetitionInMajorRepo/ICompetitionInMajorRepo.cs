@@ -10,8 +10,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
     {
         public Task<List<ViewMajorInComp>> GetListMajorInCompetition(int competitionId);
 
-        public Task<List<int>> GetListMajorIdInCompetition(int competitionId);
+        //public Task<List<int>> GetListMajorIdInCompetition(int competitionId);
 
         public Task<CompetitionInMajor> GetMajorInCompetition(int majorId, int competitionId);
+
+        public Task DeleteCompetitionInMajor(int competitionInMajorId);
     }
 }
