@@ -43,6 +43,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             _decodeToken = new DecodeToken();
         }
 
+        //State Draft - Approve for Sponsor, Influncer
+        //Every State for Image
 
         public async Task<List<ViewCompetitionEntity>> AddImage(ImageInsertModel model, string token)
         {
@@ -238,6 +240,11 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 CompetitionEntity entity = await _competitionEntityRepo.Get(model.CompetitionId);
                 if (entity == null) throw new ArgumentException("Competition Entity not found ");
+
+                Competition competition = await _competitionRepo.Get(entity.CompetitionId);
+                if ((entity.EntityTypeId == 2 || entity.EntityTypeId == 3) == true
+                    && (competition.Status != CompetitionStatus.Draft || competition.Status != CompetitionStatus.Approve) == true)
+                    throw new ArgumentException("Can't Remove Sponsor or Influencer");
 
                 if (entity.CompetitionId != model.CompetitionId) throw new ArgumentException("Competition Entity not belong to this Competition ");
 

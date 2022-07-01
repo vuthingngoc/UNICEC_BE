@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
-    public class LeaderUpdateCompOrEventModel
+    public class UpdateBeforePublishModel
     {
-
         public int Id { get; set; }
         public string? Name { get; set; }
         [JsonPropertyName("start_time_register")]
@@ -21,7 +19,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime? StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
-        public string? Content { get; set; }
+        //public string? Content { get; set; }
         public double? Fee { get; set; }
         [JsonPropertyName("seeds_point")]
         public double? SeedsPoint { get; set; }
@@ -36,13 +34,11 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int? MaxNumber { get; set; }
         [JsonPropertyName("min_number")]
         public int? MinNumber { get; set; }
-        public CompetitionScopeStatus Scope { get; set; }
+
+        //public CompetitionScopeStatus Scope { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition
         [JsonPropertyName("club_id")]
         public int ClubId { get; set; }
-
-        
-       
     }
 }
