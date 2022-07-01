@@ -212,7 +212,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
         //----ROLE LEADER OF CLUB
-        public async Task<ViewDetailCompetition> LeaderInsert(LeaderInsertCompOrEventModel model, string token)
+        public async Task<ViewDetailCompetition> InsertCompetitionOrEvent(LeaderInsertCompOrEventModel model, string token)
         {
             try
             {
@@ -406,7 +406,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 competition.SeedsPoint = model.SeedsPoint;
                 competition.SeedsDeposited = Math.Round(model.SeedsPoint * percentPoint, 0); // 20%
                 competition.SeedsCode = await CheckExistCode();
-                competition.IsSponsor = false;
+                //isSponsor
+                if (insertSponsor) competition.IsSponsor = true;
+                if (insertSponsor == false) competition.IsSponsor = false;
                 competition.Status = CompetitionStatus.Draft; // status draft
                 competition.Scope = model.Scope; // change to Scope  1.InterUniversity, 2.University 3.Club
                 competition.View = 0; // auto
@@ -528,7 +530,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //----ROLE IN COMPETITION MANAGER
-        public async Task<bool> LeaderDelete(LeaderDeleteCompOrEventModel model, string token)
+        public async Task<bool> DeleteCompetitionOrEvent(LeaderDeleteCompOrEventModel model, string token)
         {
             try
             {
@@ -550,7 +552,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                      || comp.Status != CompetitionStatus.UpComing)
                         throw new ArgumentException("Competition State is not suitable to do this action");
 
-                    comp.Status = CompetitionStatus.Canceling;
+                    comp.Status = CompetitionStatus.Cancel;
                     await _competitionRepo.Update();
 
 
@@ -561,7 +563,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
                         ChangeDate = new LocalTime().GetLocalTime().DateTime,
                         Description = "Delete Competition", // auto des when Delete Competition
-                        Status = CompetitionStatus.Canceling,   // when create status draft
+                        Status = CompetitionStatus.Cancel,   // when create status draft
                     };
                     InsertCompetitionHistoryStatus(chim);
 
@@ -580,25 +582,24 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-
-        //---------------------------------------------------------------------------------- STATE DRAFT
-        public async Task<bool> LeaderUpdate(LeaderUpdateCompOrEventModel model, string token)
+        //---------------------------------------------------------------------------------- STATE DRAFT - APPROVE
+        public async Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel model, string token)
         {
             try
             {
-                if (model.CompetitionId == 0
+                if (model.Id == 0
                    || model.ClubId == 0)
                     throw new ArgumentNullException("Competition Id Null  || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
 
 
-                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
+                bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
                 if (Check)
                 {
 
                     //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
-                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
+                    Competition comp = await _competitionRepo.Get(model.Id);
                     if (comp.Status != CompetitionStatus.Draft) throw new ArgumentException("Competition State is not suitable to do this action");
 
 
@@ -866,40 +867,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
                     comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
                     comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
-
-                    ////có 2 trạng thái để chuyển State khi update
-                    ////nếu là Draft thì vẫn như cũ
-                    ////nếu đã là Approve thì chuyển về pendding review
-                    //if (comp.Status == CompetitionStatus.Approve)
-                    //{
-                    //    comp.Status = CompetitionStatus.PendingReview;
-
-                    //    //----------- InsertCompetition History
-                    //    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
-                    //    {
-                    //        CompetitionId = comp.Id,
-                    //        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
-                    //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                    //        Description = "Update Competition", // auto des when Delete Competition
-                    //        Status = CompetitionStatus.PendingReview,   // when create status draft
-                    //    };
-                    //    InsertCompetitionHistory(chim);
-                    //}
-                    //if (comp.Status == CompetitionStatus.Draft)
-                    //{
-                    //    comp.Status = CompetitionStatus.PendingReview;
-
-                    //    //----------- InsertCompetition History
-                    //    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
-                    //    {
-                    //        CompetitionId = comp.Id,
-                    //        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
-                    //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                    //        Description = "Update Competition", // auto des when Delete Competition
-                    //        Status = CompetitionStatus.Draft,   // when create status draft
-                    //    };
-                    //    InsertCompetitionHistory(chim);
-                    //}
+                    comp.Scope = model.Scope; //auto
 
                     await _competitionRepo.Update();
                     return true;
@@ -914,10 +882,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw;
             }
         }
-
-        //---------------------------------------------------------------------------------- STATE PENDING REVIEW
-
-        //---------------------------------------------------------------------------------- STATE APPROVE
 
         public async Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token)
         {
@@ -1013,27 +977,395 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        //---------------------------------------------------------------------------------- STATE PUBLISH
+        //---------------------------------------------------------------------------------- STATE PENDING REVIEW
 
-        //---------------------------------------------------------------------------------- STATE REGISTER - UPCOMMING
+
+        //---------------------------------------------------------------------------------- STATE APPROVE
+        public async Task<bool> UpdateConstraintBeforePublish(UpdateConstraintBeforePublishModel model, string token)
+        {
+            try
+            {
+                if (model.ClubId == 0 || model.Id == 0 || string.IsNullOrEmpty(model.Content) || !model.Scope.HasValue || string.IsNullOrEmpty(model.Comment))
+                    throw new ArgumentException("Club Id NULL || Competition Id NULL || Content NULL || Scope NULL || Comment NULL");
+
+                bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
+
+                if (Check == false) return false;
+
+                Competition comp = await _competitionRepo.Get(model.Id);
+                if (comp.Status != CompetitionStatus.Approve) throw new ArgumentException("Competition State is not suitable to do this action");
+
+
+                comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
+                comp.Scope = (model.Scope.HasValue) ? model.Scope.Value : comp.Scope;
+                await _competitionRepo.Update();
+
+                //Insert Competition History Status
+                //có 2 trạng thái để chuyển State khi update
+                //nếu là Draft thì vẫn như cũ
+                //nếu đã là Approve thì chuyển về pendding review
+                if (comp.Status == CompetitionStatus.Approve)
+                {
+                    comp.Status = CompetitionStatus.PendingReview;
+
+                    //----------- InsertCompetition History
+                    CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                    {
+                        CompetitionId = comp.Id,
+                        ChangerId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId),
+                        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                        Description = model.Comment, // auto des when Delete Competition
+                        Status = CompetitionStatus.PendingReview,   // when create status draft
+                    };
+                    InsertCompetitionHistoryStatus(chim);
+                }
+
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateBeforePublish(UpdateBeforePublishModel model, string token)
+        {
+            try
+            {
+                if (model.Id == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null  || ClubId Null");
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+
+                bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
+                if (Check)
+                {
+
+                    //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
+                    Competition comp = await _competitionRepo.Get(model.Id);
+                    if (comp.Status != CompetitionStatus.Approve) throw new ArgumentException("Competition State is not suitable to do this action");
+
+
+                    bool checkDate = false;
+                    //------------- CHECK Date Update  
+                    //------------- FE,MOBILE TEST                       
+                    //TH CHung
+                    if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+                    {
+                        bool STR = false;
+                        bool ETR = false;
+                        bool ST = false;
+                        bool ET = false;
+                        //STR Update = STR 
+                        if (DateTime.Compare(model.StartTimeRegister.Value, comp.StartTimeRegister) != 0) // data mới
+                        {
+                            STR = true;
+                        }
+                        //ETR Update = ETR 
+                        if (DateTime.Compare(model.EndTimeRegister.Value, comp.EndTimeRegister) != 0) // data mới
+                        {
+                            ETR = true;
+                        }
+                        //ST Update = ST
+                        if (DateTime.Compare(model.StartTime.Value, comp.StartTime) != 0) // data mới
+                        {
+                            ST = true;
+                        }
+                        //ET Update = ET
+                        if (DateTime.Compare(model.EndTime.Value, comp.EndTime) != 0) // data mới
+                        {
+                            ST = true;
+                        }
+
+                        // STR - ETR - ST - ET
+                        //  1  -  1  - 1  - 1   all true
+                        //  1  -  1  - 1  - 2
+                        //  1  -  1  - 2  - 1
+                        //  1  -  1  - 2  - 2
+                        //  1  -  2  - 1  - 1
+                        //  1  -  2  - 1  - 2
+                        //  1  -  2  - 2  - 1
+                        //  1  -  2  - 2  - 2
+                        //  2  -  1  - 1  - 1
+                        //  2  -  1  - 1  - 2
+                        //  2  -  1  - 2  - 1
+                        //  2  -  1  - 2  - 2  
+                        //  2  -  2  - 1  - 1
+                        //  2  -  2  - 1  - 2
+                        //  2  -  2  - 2  - 1
+                        //  2  -  2  - 2  - 2   all false
+
+                        //All true
+                        if (STR && ETR && ST && ET)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
+                        }
+
+                        //  1  -  1  - 1  - 2
+                        if (STR && ETR && ST && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                        }
+
+                        //  1  -  1  - 2  - 1
+                        if (STR && ETR && ST == false && ET)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, true);
+                        }
+
+                        //  1  -  1  - 2  - 2
+                        if (STR && ETR && ST == false && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                        }
+
+                        //  1  -  2  - 1  - 1
+                        if (STR && ETR == false && ST && ET)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, true);
+                        }
+
+                        //  1  -  2  - 1  - 2
+                        if (STR && ETR == false && ST && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                        }
+
+                        //  1  -  2  - 2  - 1
+                        if (STR && ETR == false && ST && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                        }
+
+                        //  1  -  2  - 2  - 2
+                        if (STR && ETR == false && ST == false && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, true);
+                        }
+
+                        //  2  -  1  - 1  - 1
+                        if (STR == false && ETR && ST && ET)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
+                        }
+
+                        //  2  -  1  - 1  - 2
+                        if (STR == false && ETR && ST && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                        }
+
+                        //  2  -  1  - 2  - 1
+                        if (STR == false && ETR && ST == false && ET)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, true);
+                        }
+
+                        //  2  -  1  - 2  - 2  
+                        if (STR == false && ETR && ST == false && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, true);
+                        }
+
+                        //  2  -  2  - 1  - 1
+                        if (STR == false && ETR == false && ST && ET)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, true);
+                        }
+
+                        //  2  -  2  - 1  - 2
+                        if (STR == false && ETR == false && ST && ET == false)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, true);
+                        }
+
+                        //  2  -  2  - 2  - 1
+                        if (STR == false && ETR == false && ST == false && ET)
+                        {
+                            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
+                        }
+
+                        //All false
+                        if (STR == false && ETR == false && ST == false && ET == false)
+                        {
+                            checkDate = true;
+                        }
+
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Missing Field Date");
+                    }
+                    if (checkDate) throw new ArgumentException("Date not suitable");
+
+                    //------------- CHECK Max,Min,NumberOfParticipant Update                          
+                    bool checkMaxMin = false;
+                    //------------- FE,MOBILE TEST
+                    //TH CHung
+                    if (model.MaxNumber.HasValue && model.MinNumber.HasValue && model.NumberOfParticipant.HasValue)
+                    {
+                        bool Max = false;
+                        bool Min = false;
+                        bool NumOfParticipant = false;
+
+                        //Max Update = Max
+                        if (model.MaxNumber.Value != comp.MaxNumber)                // data mới
+                        {
+                            Max = true;
+                        }
+                        //Min Update = Min
+                        if (model.MinNumber.Value != comp.MinNumber)                // data mới
+                        {
+                            Min = true;
+                        }
+                        //Number Of Participant Update = Number Of Participant
+                        if (model.NumberOfParticipant.Value != comp.NumberOfParticipation)  // data mới
+                        {
+                            NumOfParticipant = true;
+                        }
+
+                        // Max  Min  Num
+                        // 1    1     1     //All True
+                        // 1    1     0
+                        // 1    0     1
+                        // 1    0     0     //Max Update                               
+                        // 0    1     1
+                        // 0    1     0     //Min Update
+                        // 0    0     1     //Number Of Participant Update 
+                        // 0    0     0     //All False
+
+
+                        // 1    1     1
+                        if (Max && Min && NumOfParticipant)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, model.NumberOfParticipant.Value);
+
+                        }
+
+                        // 1    1     0
+                        if (Max && Min && NumOfParticipant == false)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, model.MinNumber.Value, comp.NumberOfParticipation);
+
+                        }
+
+                        // 1    0     1
+                        if (Max && Min == false && NumOfParticipant)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, (int)comp.MinNumber, model.NumberOfParticipant.Value);
+
+                        }
+
+                        // 1    0     0
+                        if (Max && Min == false && NumOfParticipant == false)
+                        {
+                            checkMaxMin = CheckMaxMin(model.MaxNumber.Value, comp.MinNumber.Value, comp.NumberOfParticipation);
+
+                        }
+
+                        // 0    1     1                              
+                        if (Max == false && Min && NumOfParticipant)
+                        {
+                            checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, model.NumberOfParticipant.Value);
+
+                        }
+
+                        // 0    1     0 
+                        if (Max == false && Min && NumOfParticipant == false)
+                        {
+                            checkMaxMin = CheckMaxMin((int)comp.MaxNumber, model.MinNumber.Value, comp.NumberOfParticipation);
+
+                        }
+
+                        // 0    0     1
+                        if (Max == false && Min == false && NumOfParticipant)
+                        {
+                            checkMaxMin = CheckMaxMin((int)comp.MaxNumber, (int)comp.MinNumber, model.NumberOfParticipant.Value);
+                        }
+
+                        // 0    0     0 
+                        if (Max == false && Min == false && NumOfParticipant == false)
+                        {
+                            checkMaxMin = true;
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Missing Field Max or Min or Number Of Participant");
+                    }
+                    if (checkMaxMin == false) throw new ArgumentException("Max Number or Min Number or Number Of Participant is not suitable");
+
+                    comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
+                    comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
+                    comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
+                    comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
+                    comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
+                    comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                    comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
+                    comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                    comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                    comp.Fee = (double)((model.Fee.HasValue) ? model.Fee : comp.Fee);
+                    comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
+                    comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
+                    comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+                    await _competitionRepo.Update();
+                    return true;
+                }//end if check
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //---------------------------------------------------------------------------------- STATE PUBLISH - STATE REGISTER - UPCOMMING
+        public async Task<bool> UpdateBeforeCeremonyTime(UpdateBeforeCeremonyModel model, string token)
+        {
+            try
+            {
+                if (model.Id == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null  || ClubId Null");
+                DateTime localTime = new LocalTime().GetLocalTime().DateTime;
+
+                bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
+
+                return Check;
+
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //---------------------------------------------------------------------------------- STATE AFTER END
+        //---------------------------------------------------------------------------------- STATE AFTER END
+        //---------------------------------------------------------------------------------- STATE AFTER END
+        //---------------------------------------------------------------------------------- STATE AFTER END
+        //---------------------------------------------------------------------------------- STATE AFTER END
+        //---------------------------------------------------------------------------------- STATE AFTER END
 
         //HÀM NÀY CHỈ TEST UPDATE THÔI
         public async Task<bool> UpdateBE(LeaderUpdateCompOrEventModel model, string token)
         {
             try
             {
-                if (model.CompetitionId == 0
+                if (model.Id == 0
                    || model.ClubId == 0)
                     throw new ArgumentNullException("Competition Id Null || ClubId Null");
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
-                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
+                bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
                 if (Check)
                 {
 
                     //Chỉ Cho những Trạng Thái này update
-                    Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    if (comp.Status != CompetitionStatus.Draft)throw new ArgumentException("Competition State is not suitable to do this action");
+                    Competition comp = await _competitionRepo.Get(model.Id);
+                    if (comp.Status != CompetitionStatus.Draft) throw new ArgumentException("Competition State is not suitable to do this action");
 
                     bool checkDate = false;
                     //------------- CHECK Date Update

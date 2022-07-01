@@ -10,17 +10,17 @@ namespace UniCEC.Data.Enum
     {       
         Register,
         UpComing, 
-        StartCompetition,
+        Start,
         OnGoing,
-        EndCompetition,
-        Publish,                    //--> đã chốt chỉ cho Update DateTime
+        End,
+        Publish,                    
         Draft,
         PendingReview,
         Approve,       
         Pending,
-        Complete, 
-        Evaluation,
-        Closed,
-        Canceling
+        Finish, 
+        Evaluate,
+        Complete,
+        Cancel
     }
 }

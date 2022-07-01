@@ -119,7 +119,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
 
-                ViewDetailCompetition viewCompetition = await _competitionService.LeaderInsert(model, token);
+                ViewDetailCompetition viewCompetition = await _competitionService.InsertCompetitionOrEvent(model, token);
                 if (viewCompetition != null)
                 {
 
@@ -165,7 +165,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _competitionService.LeaderUpdate(model, token);
+                check = await _competitionService.UpdateCompetitionOrEvent(model, token);
                 if (check)
                 {
                     return Ok();
@@ -255,7 +255,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _competitionService.LeaderDelete(model, token);
+                check = await _competitionService.DeleteCompetitionOrEvent(model, token);
                 if (check)
                 {
                     return Ok();
