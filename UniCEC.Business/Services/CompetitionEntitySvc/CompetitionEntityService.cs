@@ -254,6 +254,18 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 await _competitionEntityRepo.DeleteCompetitionEntity(model.CompetitionEntityId);
 
+
+                //Check Sponsor in Competition if there is NO-> update Status 
+                if (entity.EntityTypeId == 3)
+                {
+                    bool checkIsHasSponsor = await _competitionEntityRepo.CheckSponsorStillInCompetition(model.CompetitionId, 3);
+                    if (checkIsHasSponsor == false)
+                    {
+                        competition.IsSponsor = false;
+                        await _competitionRepo.Update();
+                    }
+                }
+
                 return true;
 
             }

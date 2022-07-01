@@ -29,20 +29,20 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
             return null;
         }
 
-        public async Task<List<int>> GetListMajorIdInCompetition(int competitionId)
-        {
-            List<int> majorIdList = await (from cid in context.CompetitionInMajors
-                                           where competitionId == cid.CompetitionId
-                                           select cid.MajorId).ToListAsync();
-            if (majorIdList.Count > 0)
-            {
-                return majorIdList;
-            }
-            else
-            {
-                return null;
-            }
-        }
+        //public async Task<List<int>> GetListMajorIdInCompetition(int competitionId)
+        //{
+        //    List<int> majorIdList = await (from cid in context.CompetitionInMajors
+        //                                   where competitionId == cid.CompetitionId
+        //                                   select cid.MajorId).ToListAsync();
+        //    if (majorIdList.Count > 0)
+        //    {
+        //        return majorIdList;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
 
         public async Task<List<ViewMajorInComp>> GetListMajorInCompetition(int CompetitionId)
         {
@@ -72,6 +72,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
                 }
             }
             return null;
+        }
+
+        public async Task DeleteCompetitionInMajor(int competitionInMajorId)
+        {
+            CompetitionInMajor competitionInMajor = await(from cim in context.CompetitionInMajors
+                                           where cim.Id == competitionInMajorId
+                                           select cim).FirstOrDefaultAsync();
+            context.CompetitionInMajors.Remove(competitionInMajor);
+            await Update();
         }
     }
 }

@@ -16,6 +16,14 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo
 
         }
 
+        public async Task<bool> CheckSponsorStillInCompetition(int competitionId, int entityTypeId)
+        {
+            List<CompetitionEntity> competitionEntities = await (from ce in context.CompetitionEntities
+                                                                 where ce.CompetitionId == competitionId && ce.EntityTypeId == entityTypeId
+                                                                 select ce).ToListAsync();
+            return (competitionEntities.Count > 0) ? true : false;
+        }
+
         public async Task DeleteCompetitionEntity(int competitionEntityId)
         {
             CompetitionEntity entity = await (from ce in context.CompetitionEntities

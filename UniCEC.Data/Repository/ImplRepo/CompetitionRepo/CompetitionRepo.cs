@@ -17,7 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
     public class CompetitionRepo : Repository<Competition>, ICompetitionRepo
     {
 
-       
+
         public CompetitionRepo(UniCECContext context) : base(context)
         {
 
@@ -63,7 +63,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             {
                 //lấy department ID
                 List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
-                
+
                 var query_List_CompetitionInDepartment = compe.CompetitionInMajors;
                 List<CompetitionInMajor> listCompetitionInMajor = query_List_CompetitionInDepartment.ToList();
 
@@ -98,8 +98,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
                 {
                     Major major = await (from m in context.Majors
-                                            where m.Id == competitionInMajor.MajorId
-                                            select m).FirstOrDefaultAsync();
+                                         where m.Id == competitionInMajor.MajorId
+                                         select m).FirstOrDefaultAsync();
                     if (major != null)
                     {
                         ViewMajorInComp vdic = new ViewMajorInComp()
@@ -114,7 +114,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 //cb tạo View
                 ViewCompetition vc = new ViewCompetition()
                 {
-                    CompetitionId = compe.Id,
+                    Id = compe.Id,
                     CompetitionTypeName = compe.CompetitionType.TypeName,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
@@ -126,7 +126,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
-                   
+
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -150,7 +150,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 query = from cic in context.CompetitionInClubs
                         where cic.ClubId == ClubId
                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                        where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Canceling
+                        where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel
                         orderby comp.StartTime
                         select comp;
             }
@@ -177,7 +177,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<Competition> list_Competition = await query.Take(3).ToListAsync();
 
             foreach (Competition compe in list_Competition)
-            {                
+            {
 
                 //lấy major ID
                 List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
@@ -224,8 +224,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
                 {
                     Major major = await (from m in context.Majors
-                                            where m.Id == competitionInMajor.MajorId
-                                            select m).FirstOrDefaultAsync();
+                                         where m.Id == competitionInMajor.MajorId
+                                         select m).FirstOrDefaultAsync();
                     if (major != null)
                     {
                         ViewMajorInComp vdic = new ViewMajorInComp()
@@ -240,7 +240,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 //cb tạo View
                 ViewCompetition vc = new ViewCompetition()
                 {
-                    CompetitionId = compe.Id,
+                    Id = compe.Id,
                     Name = compe.Name,
                     CompetitionTypeId = compe.CompetitionTypeId,
                     CompetitionTypeName = competitionTypeName,
@@ -252,7 +252,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     DepartmentInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
-                    
+
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -273,9 +273,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public async Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId)
         {
             return await (from cic in context.CompetitionInClubs
-                               join c in context.Clubs on cic.ClubId equals c.Id
-                               where cic.CompetitionId.Equals(competitionId) && c.UniversityId.Equals(universityId)
-                               select c.UniversityId).FirstOrDefaultAsync() > 0;
+                          join c in context.Clubs on cic.ClubId equals c.Id
+                          where cic.CompetitionId.Equals(competitionId) && c.UniversityId.Equals(universityId)
+                          select c.UniversityId).FirstOrDefaultAsync() > 0;
         }
 
         public async Task<bool> CheckExistedCompetition(int competitionId)

@@ -18,6 +18,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 
         }
 
+        public async Task DeleteCompetitionInClub(int competitionInClubId)
+        {
+            CompetitionInClub competitionInClub = await (from cic in context.CompetitionInClubs
+                                                         where cic.Id == competitionInClubId
+                                                         select cic).FirstOrDefaultAsync();
+            context.CompetitionInClubs.Remove(competitionInClub);
+            await Update();
+        }
+
         public async Task<ViewCompetitionInClub> GetCompetitionInClub(int clubId, int competitionId)
         {
             CompetitionInClub query = await (from cic in context.CompetitionInClubs

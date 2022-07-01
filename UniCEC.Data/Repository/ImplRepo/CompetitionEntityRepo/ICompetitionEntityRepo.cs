@@ -10,6 +10,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo
     {
         public Task<List<CompetitionEntity>> GetListCompetitionEntity(int competitionId);
 
+        public Task<bool> CheckSponsorStillInCompetition(int competitionId, int entityTypeId);
+
         public Task DeleteCompetitionEntity(int competitionEntityId);
     }
 }

@@ -36,7 +36,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int? MaxNumber { get; set; }
         [JsonPropertyName("min_number")]
         public int? MinNumber { get; set; }
-        public CompetitionScopeStatus Scope { get; set; }
+        public CompetitionScopeStatus? Scope { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition
         [JsonPropertyName("club_id")]
