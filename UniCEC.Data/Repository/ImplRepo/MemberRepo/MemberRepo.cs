@@ -44,6 +44,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                     {
                                                         Id = selector.m.Id,
                                                         Name = selector.u.Fullname,
+                                                        StudentCode = selector.u.StudentCode,
                                                         Avatar = selector.u.Avatar,
                                                         ClubRoleId = selector.cr.Id,
                                                         ClubRoleName = selector.cr.Name,
@@ -83,18 +84,20 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                         where m.Id.Equals(memberId)
                         select new { m, u, cr };
 
-            if(status.HasValue) query = query.Where(selector => selector.m.Status.Equals(status.Value));
+            if (status.HasValue) query = query.Where(selector => selector.m.Status.Equals(status.Value));
 
             ViewDetailMember member = await query.Select(selector => new ViewDetailMember()
             {
                 Id = memberId,
                 Name = selector.u.Fullname,
+                StudentCode = selector.u.StudentCode,
                 Avatar = selector.u.Avatar,
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
                 Email = selector.u.Email,
                 JoinDate = selector.m.StartTime,
                 PhoneNumber = selector.u.PhoneNumber,
+                Status = selector.m.Status,
                 IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync();
 
@@ -114,22 +117,23 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             {
                 Id = memberId,
                 Name = selector.u.Fullname,
+                StudentCode = selector.u.StudentCode,
                 Avatar = selector.u.Avatar,
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 Status = selector.m.Status,
-                IsOnline = selector.u.IsOnline                
+                IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync();
 
             return (query.Count() > 0) ? member : null;
         }
 
-        public async Task<int> GetClubIdByMember(int memberId)
+        public async Task<int> GetClubIdByMember(int memberId) // just use to check the condition => no need to check status active
         {
             return await (from m in context.Members
-                          where m.Id.Equals(memberId) && m.Status.Equals(MemberStatus.Active)
+                          where m.Id.Equals(memberId)
                           select m.ClubId).FirstOrDefaultAsync();
         }
 
@@ -226,22 +230,29 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (member != null) ? member.Id : 0;
         }
 
-        public async Task<PagingResult<ViewMember>> GetByConditions(int clubId, MemberRequestModel request)
+        public async Task<PagingResult<ViewMember>> GetByConditions(MemberRequestModel request)
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join c in context.Clubs on m.ClubId equals c.Id
-                        where m.ClubId.Equals(clubId)
+                        where m.ClubId.Equals(request.ClubId)
                         select new { m, u, cr, c };
 
-            if (request.ClubRoleId.HasValue) query = query.Where(x => x.m.ClubRoleId.Equals(request.ClubRoleId));
+            if (request.ClubRoleId.HasValue) query = query.Where(selector => selector.m.ClubRoleId.Equals(request.ClubRoleId));
 
-            if (request.StartTime.HasValue) query = query.Where(x => x.m.StartTime.Equals(request.StartTime));
+            if (!string.IsNullOrEmpty(request.SearchString)) query = query.Where(selector => selector.u.Fullname.Contains(request.SearchString)
+                                                                                         || selector.u.StudentCode.Contains(request.SearchString));
 
-            if (request.EndTime.HasValue) query = query.Where(x => x.m.EndTime.Equals(request.EndTime));
+            if (request.StartTime.HasValue) query = query.Where(selector => selector.m.StartTime.Year.Equals(request.StartTime.Value.Year)
+                                                                            && selector.m.StartTime.Month.Equals(request.StartTime.Value.Month)
+                                                                            && selector.m.StartTime.Day.Equals(request.StartTime.Value.Day));
 
-            if (request.Status.HasValue) query = query.Where(x => x.m.Status.Equals(request.Status));
+            if (request.EndTime.HasValue) query = query.Where(selector => selector.m.EndTime.Value.Year.Equals(request.EndTime.Value.Year)
+                                                                          && selector.m.EndTime.Value.Month.Equals(request.EndTime.Value.Month)
+                                                                          && selector.m.EndTime.Value.Day.Equals(request.EndTime.Value.Day));
+
+            if (request.Status.HasValue) query = query.Where(selector => selector.m.Status.Equals(request.Status));
 
             int totalCount = query.Count();
             List<ViewMember> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
@@ -249,6 +260,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                      {
                                                          Id = x.m.Id,
                                                          Name = x.u.Fullname,
+                                                         StudentCode = x.u.StudentCode,
                                                          ClubRoleId = x.m.ClubRoleId,
                                                          ClubRoleName = x.cr.Name,
                                                          StartTime = x.m.StartTime,

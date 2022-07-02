@@ -5,10 +5,8 @@ namespace UniCEC.Data.ViewModels.Entities.User
 {
     public class UserUpdateModel
     {
-        public int Id { get; set; }
-        [JsonPropertyName("role_id")]
-        public int? RoleId { get; set; }
-        [JsonPropertyName("major_id")]
+        public int Id { get; set; }       
+        [JsonPropertyName("department_id")]
         public int? DepartmentId { get; set; }
         [JsonPropertyName("user_code")]
         public string StudentCode { get; set; }
