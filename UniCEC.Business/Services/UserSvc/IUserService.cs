@@ -13,7 +13,7 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
         public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
         public Task<bool> Insert(string token, UserAccountInsertModel user);
-        public Task<bool> Delete(int id);
+        public Task<bool> Delete(string token, int id);
         public Task<bool> CheckUserEmailExsit(string email);
         // Login
         public Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber);

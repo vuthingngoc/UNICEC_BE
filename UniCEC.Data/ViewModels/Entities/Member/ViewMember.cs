@@ -8,6 +8,8 @@ namespace UniCEC.Data.ViewModels.Entities.Member
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        [JsonPropertyName("student_code")]
+        public string StudentCode { get; set; }
         [JsonPropertyName("club_role_id")]
         public int ClubRoleId { get; set; }
         [JsonPropertyName("club_role_name")]

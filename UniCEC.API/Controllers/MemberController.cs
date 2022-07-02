@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Data.Enum;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 
@@ -29,14 +30,14 @@ namespace UniCEC.API.Controllers
             _memberService = memberService;
         }
 
-        [HttpGet("club/{id}")]
-        [SwaggerOperation(Summary = "Get all members in a club - club member")]
-        public async Task<IActionResult> GetAllMembersByClub(int id, [FromQuery] MemberStatus? status, [FromQuery] PagingRequest request)
+        [HttpGet("search")]
+        [SwaggerOperation(Summary = "Get members by conditions - club member")]
+        public async Task<IActionResult> GetMembersByConditions([FromQuery] MemberRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewMember> members = await _memberService.GetByClub(token, id, status, request);
+                PagingResult<ViewMember> members = await _memberService.GetByConditions(token, request);
                 return Ok(members);
             }
             catch(UnauthorizedAccessException ex)
@@ -126,16 +127,45 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        // Add Member In Club
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert member - leader or vice president")]
-        public async Task<IActionResult> InsertMember([FromBody] MemberInsertModel model)
+        // Student apply to club
+        [HttpPost("apply")]
+        [SwaggerOperation(Summary = "Student apply to a club - student")]
+        public async Task<IActionResult> ApplyToBecomeMember([FromBody] MemberInsertModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 ViewMember result = await _memberService.Insert(token, model);
                 return Ok(result);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        // Confirm student to become member
+        [HttpPut("confirm-member")]
+        [SwaggerOperation(Summary = "Confirm member to join club - leader or vice president")]
+        public async Task<IActionResult> ConfirmMember([FromBody, BindRequired] ConfirmMemberModel model)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _memberService.ConfirmMember(token, model);
+                return Ok();
             }
             catch (UnauthorizedAccessException ex)
             {

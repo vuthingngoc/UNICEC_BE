@@ -118,38 +118,6 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpPut]
-        [SwaggerOperation(Summary = "Update user")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateModel request)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                bool result = await _userService.Update(request, token);
-                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
         [HttpPost("login")]        
         [SwaggerOperation(Summary = "Log in account for university admin")]
         [AllowAnonymous]
@@ -226,15 +194,51 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateModel request)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                bool result = await _userService.Update(request, token);
+                return (result) ? Ok() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete user")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
-                bool result = await _userService.Delete(id);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                bool result = await _userService.Delete(token, id);
                 return (result) ? NoContent() : StatusCode(500, "Internal Server Exception");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException ex)
             {

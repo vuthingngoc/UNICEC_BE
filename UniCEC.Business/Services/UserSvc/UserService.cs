@@ -50,18 +50,18 @@ namespace UniCEC.Business.Services.UserSvc
             return users;
         }
 
-        private async Task<bool> CheckDuplicatedEmailAndUserCode(int? universityId, string email, string userCode)
+        private async Task<bool> CheckDuplicatedEmailAndStudentCode(int? universityId, string email, string studentCode)
         {
             bool isExisted = await _userRepo.CheckExistedEmail(email);
             if (isExisted) throw new ArgumentException("Duplicated Email");
 
             if (universityId != null)
             {
-                isExisted = await _userRepo.CheckExistedUser(universityId.Value, userCode);
+                isExisted = await _userRepo.CheckExistedUser(universityId.Value, studentCode);
             }
             else
             {
-                isExisted = await _userRepo.CheckExistedUser(userCode);
+                isExisted = await _userRepo.CheckExistedUser(studentCode);
             }
 
             if (isExisted) throw new ArgumentException("Duplicated UserCode");
@@ -146,12 +146,17 @@ namespace UniCEC.Business.Services.UserSvc
             int userId = _decodeToken.Decode(token, "Id");
             int roleId = _decodeToken.Decode(token, "RoleId");
 
-            if (!userId.Equals(model.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if ((!userId.Equals(model.Id) && !roleId.Equals(1))) // if not admin the userself
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             Data.Models.DB.User user = await _userRepo.Get(model.Id);
             if (user == null) throw new NullReferenceException("Not found this user");
 
-            bool isInvalid = await CheckDuplicatedEmailAndUserCode(user.UniversityId, user.Email, user.StudentCode);
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            if (!universityId.Equals(user.UniversityId))
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            bool isInvalid = await CheckDuplicatedEmailAndStudentCode(user.UniversityId, user.Email, user.StudentCode);
             if (isInvalid) return isInvalid;
 
             if (!string.IsNullOrEmpty(model.Description)) user.Description = model.Description;
@@ -164,7 +169,6 @@ namespace UniCEC.Business.Services.UserSvc
             if (model.DepartmentId.HasValue) user.DepartmentId = model.DepartmentId;
 
             // for admin
-            if (model.RoleId != 0 && roleId.Equals(1)) user.RoleId = model.RoleId.Value;
             if (model.Status.HasValue && roleId.Equals(1)) user.Status = model.Status.Value;
 
             await _userRepo.Update();
@@ -180,17 +184,32 @@ namespace UniCEC.Business.Services.UserSvc
             await _userRepo.Update();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(string token, int id)
         {
             Data.Models.DB.User user = await _userRepo.Get(id);
             if (user == null) throw new NullReferenceException("Not found this user");
+
+            bool isUnauthorized = false;
+            int roleId = _decodeToken.Decode(token, "RoleId");
+
+            // System admin can not delete student account
+            if (!user.RoleId.Equals(1) && roleId.Equals(4)) isUnauthorized = true;                
+
+            if (!roleId.Equals(4))
+            {
+                int universityId = _decodeToken.Decode(token, "UniversityId");
+
+                if ((user.RoleId.Equals(3) && !roleId.Equals(1)) 
+                        || !user.UniversityId.Equals(universityId)) 
+                    isUnauthorized = true;
+            }
+
+            if (isUnauthorized) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             user.Status = UserStatus.InActive;
             await _userRepo.Update();
             return true;
         }
-
-
 
         //------------------------------------------------LOGIN------------------------------------------------
 

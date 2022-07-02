@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 
@@ -12,6 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
     {
         public Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, MemberStatus status, PagingRequest request);
         public Task<List<Member>> GetMembersByClub(int clubId);
+        public Task<PagingResult<ViewMember>> GetByConditions(MemberRequestModel request);
         public Task<ViewDetailMember> GetDetailById(int memberId, MemberStatus? status);
         public Task<ViewMember> GetById(int memberId);
         public Task<int> GetClubIdByMember(int memberId); // use to check role

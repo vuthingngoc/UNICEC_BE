@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
@@ -13,6 +11,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
 
@@ -41,10 +40,10 @@ namespace UniCEC.Business.Services.MemberSvc
 
         private async Task<string> GetUrlImageAsync(string filename)
         {
-            string urlImage = string.Empty;
+            string urlImage;
             try
             {
-                urlImage = await _fileService.GetUrlFromFilenameAsync(filename);                
+                urlImage = await _fileService.GetUrlFromFilenameAsync(filename);
             }
             catch (Exception)
             {
@@ -65,11 +64,33 @@ namespace UniCEC.Business.Services.MemberSvc
             if ((clubRoldId.Equals(1) || clubRoldId.Equals(2)) && status.HasValue) memberStatus = status.Value;
 
             PagingResult<ViewMember> members = await _memberRepo.GetMembersByClub(clubId, memberStatus, request);
-            foreach(var member in members.Items)
+            if (members == null) throw new NullReferenceException("Not found any member in this club");
+
+            foreach (var member in members.Items)
             {
                 member.Avatar = await GetUrlImageAsync(member.Avatar);
-            }
+            }            
+
+            return members;
+        }
+
+        public async Task<PagingResult<ViewMember>> GetByConditions(string token, MemberRequestModel request)
+        {
+            int userId = _decodeToken.Decode(token, "Id");
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, request.ClubId);
+            if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            int clubRoldId = await _memberRepo.GetRoleMemberInClub(userId, request.ClubId);
+            if ((!clubRoldId.Equals(1) && !clubRoldId.Equals(2)) || !request.Status.HasValue) request.Status = MemberStatus.Active;
+
+            PagingResult<ViewMember> members = await _memberRepo.GetByConditions(request);
             if (members == null) throw new NullReferenceException("Not found any member in this club");
+            
+            foreach (var member in members.Items)
+            {
+                member.Avatar = await GetUrlImageAsync(member.Avatar);
+            }            
+            
             return members;
         }
 
@@ -119,13 +140,8 @@ namespace UniCEC.Business.Services.MemberSvc
         public async Task<ViewMember> Insert(string token, MemberInsertModel model)
         {
             // check valid data 
-            if (model.ClubId == 0 || model.UserId == 0 || model.ClubRoleId == 0 || model.StartTime.Equals(DateTime.MinValue))
-                throw new ArgumentException("ClubId Null || UserId Null || ClubRoleId Null || StartTime Null");
-
-            // check role
-            int userId = _decodeToken.Decode(token, "Id");
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
-            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (model.ClubId == 0 || model.UserId == 0)
+                throw new ArgumentException("ClubId Null || UserId Null");            
 
             Club club = await _clubRepo.Get(model.ClubId);
             if (club == null) throw new NullReferenceException("Not found this club");
@@ -136,16 +152,13 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(model.UserId, model.ClubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
 
-            bool isExistedClubRoleId = await _clubRoleRepo.CheckExistedClubRole(model.ClubRoleId);
-            if (!isExistedClubRoleId) throw new ArgumentException("Not found this club role");
-
             Member member = new Member()
             {
                 UserId = model.UserId,
                 ClubId = model.ClubId,
-                ClubRoleId = model.ClubRoleId,
+                ClubRoleId = 4, // is member by default
                 Status = MemberStatus.Active, // default status
-                StartTime = DateTime.Now,
+                StartTime = new LocalTime().GetLocalTime().DateTime,
             };
             int memberId = await _memberRepo.Insert(member);
             if (memberId == 0) throw new DbUpdateException();
@@ -154,9 +167,28 @@ namespace UniCEC.Business.Services.MemberSvc
             await _clubRepo.Update();
 
             ViewMember viewMember = await _memberRepo.GetById(memberId);
-            if(viewMember != null) viewMember.Avatar = await GetUrlImageAsync(viewMember.Avatar);
+            if (viewMember != null) viewMember.Avatar = await GetUrlImageAsync(viewMember.Avatar);
 
             return viewMember;
+        }
+
+        public async Task ConfirmMember(string token, ConfirmMemberModel model)
+        {
+            if (model.MemberId.Equals(0) || model.ClubId.Equals(0) || model.status.Equals(MemberStatus.Pending))
+                throw new ArgumentException("MemberId Null || ClubId Null || MemberStatus Null");
+
+            // check role
+            int userId = _decodeToken.Decode(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, model.ClubId);
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) 
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            Member member = await _memberRepo.Get(model.MemberId);
+            if (member == null || (member != null && !member.ClubId.Equals(model.ClubId))) 
+                throw new NullReferenceException("Not found this member");
+
+            member.Status = model.status;
+            await _memberRepo.Update();
         }
 
         //Update-Member
