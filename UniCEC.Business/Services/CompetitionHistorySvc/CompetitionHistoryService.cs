@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
@@ -14,15 +12,15 @@ using UniCEC.Data.ViewModels.Entities.CompetitionHistory;
 
 namespace UniCEC.Business.Services.CompetitionHistorySvc
 {
-    public class CompetitionHistoryStatusService : ICompetitionHistoryStatusService
+    public class CompetitionHistoryService : ICompetitionHistoryService
     {
-        private ICompetitionHistoryStatusRepo _competitionHistoryRepo;
+        private ICompetitionHistoryRepo _competitionHistoryRepo;
         private ICompetitionRepo _competitionRepo;
         private IClubRepo _clubRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private IMemberRepo _memberRepo;
         private DecodeToken _decodeToken;
-        public CompetitionHistoryStatusService(ICompetitionHistoryStatusRepo competitionHistoryRepo,
+        public CompetitionHistoryService(ICompetitionHistoryRepo competitionHistoryRepo,
                                          ICompetitionRepo competitionRepo,
                                          IClubRepo clubRepo,
                                          IMemberInCompetitionRepo memberInCompetitionRepo,
@@ -38,7 +36,7 @@ namespace UniCEC.Business.Services.CompetitionHistorySvc
 
 
 
-        public async Task<List<ViewCompetitionHistoryStatus>> GetAllHistoryOfCompetition(int competitionId, int clubId, string token)
+        public async Task<List<ViewCompetitionHistory>> GetAllHistoryOfCompetition(int competitionId, int clubId, string token)
         {
             try
             {
@@ -47,7 +45,7 @@ namespace UniCEC.Business.Services.CompetitionHistorySvc
                 bool Check = await CheckMemberInCompetition(token, competitionId, clubId, true);
                 if (Check == false) throw new NullReferenceException();
 
-                List<ViewCompetitionHistoryStatus> result = await _competitionHistoryRepo.GetAllHistoryOfCompetition(competitionId);
+                List<ViewCompetitionHistory> result = await _competitionHistoryRepo.GetAllHistoryOfCompetition(competitionId);
 
                 return (result != null) ? result : throw new NullReferenceException();
 

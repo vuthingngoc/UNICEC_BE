@@ -122,7 +122,7 @@ namespace UniCEC.API
             services.AddScoped<IParticipantService, ParticipantService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<ISeedsWalletService, SeedsWalletService>();
-            services.AddScoped<ICompetitionHistoryStatusService, CompetitionHistoryStatusService>();
+            services.AddScoped<ICompetitionHistoryService, CompetitionHistoryService>();
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<ITeamInRoundService, TeamInRoundService>();
             services.AddScoped<IUniversityService, UniversityService>();
@@ -136,7 +136,7 @@ namespace UniCEC.API
             services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<IClubRepo, ClubRepo>();
             services.AddTransient<IClubRoleRepo, ClubRoleRepo>();
-            services.AddTransient<ICompetitionHistoryStatusRepo, CompetitionHistoryStatusRepo>();
+            services.AddTransient<ICompetitionHistoryRepo, CompetitionHistoryRepo>();
             services.AddTransient<ICompetitionActivityRepo, CompetitionActivityRepo>();
             services.AddTransient<ICompetitionEntityRepo, CompetitionEntityRepo>();
             services.AddTransient<ICompetitionInClubRepo, CompetitionInClubRepo>();

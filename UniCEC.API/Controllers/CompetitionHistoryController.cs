@@ -11,16 +11,16 @@ using UniCEC.Data.ViewModels.Entities.CompetitionHistory;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/competition-history-status")]
+    [Route("api/v1/competition-histories")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class CompetitionHistoryStatusController : ControllerBase
+    public class CompetitionHistoryController : ControllerBase
     {
-        private ICompetitionHistoryStatusService _competitionHistoryStatusService;
+        private ICompetitionHistoryService _competitionHistoryService;
 
-        public CompetitionHistoryStatusController(ICompetitionHistoryStatusService competitionHistoryStatusService)
+        public CompetitionHistoryController(ICompetitionHistoryService competitionHistoryService)
         {
-            _competitionHistoryStatusService = competitionHistoryStatusService;
+            _competitionHistoryService = competitionHistoryService;
         }
 
         [HttpGet]
@@ -33,7 +33,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                List<ViewCompetitionHistoryStatus> result = await _competitionHistoryStatusService.GetAllHistoryOfCompetition(CompetitionId, ClubId, token);
+                List<ViewCompetitionHistory> result = await _competitionHistoryService.GetAllHistoryOfCompetition(CompetitionId, ClubId, token);
                 return Ok(result);
             }
             catch (NullReferenceException)
