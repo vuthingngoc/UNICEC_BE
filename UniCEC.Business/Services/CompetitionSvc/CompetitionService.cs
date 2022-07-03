@@ -52,7 +52,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private IMajorRepo _majorRepo;
         private ICompetitionInMajorRepo _competitionInMajorRepo;
-        private ICompetitionHistoryStatusRepo _competitionHistoryRepo;
+        private ICompetitionHistoryRepo _competitionHistoryRepo;
         private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
 
@@ -70,7 +70,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IUserRepo userRepo,
                                   IMajorRepo majorRepo,
                                   ICompetitionInMajorRepo competitionInMajorRepo,
-                                  ICompetitionHistoryStatusRepo competitionHistoryRepo,
+                                  ICompetitionHistoryRepo competitionHistoryRepo,
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IFileService fileService)
         {
@@ -508,7 +508,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 //----------- InsertCompetition History
-                CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                 {
                     CompetitionId = comp.Id,
                     ChangerId = member.Id,
@@ -593,7 +593,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = mem.Id,
@@ -940,7 +940,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     await _competitionRepo.Update();
 
                     //----------- InsertCompetition History
-                    CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                     {
                         CompetitionId = comp.Id,
                         ChangerId = adminUni.Id,
@@ -958,7 +958,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     comp.Status = CompetitionStatus.Draft;
                     await _competitionRepo.Update();
                     //----------- InsertCompetition History
-                    CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                    CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                     {
                         CompetitionId = comp.Id,
                         ChangerId = adminUni.Id,
@@ -1008,7 +1008,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1029,7 +1029,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1054,7 +1054,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1076,7 +1076,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1098,7 +1098,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1118,7 +1118,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1148,7 +1148,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1174,7 +1174,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1196,7 +1196,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1218,7 +1218,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         await _competitionRepo.Update();
 
                         //----------- InsertCompetition History
-                        CompetitionHistoryStatusInsertModel chim = new CompetitionHistoryStatusInsertModel()
+                        CompetitionHistoryInsertModel chim = new CompetitionHistoryInsertModel()
                         {
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
@@ -1606,9 +1606,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
-        private async void InsertCompetitionHistoryStatus(CompetitionHistoryStatusInsertModel model)
+        private async void InsertCompetitionHistoryStatus(CompetitionHistoryInsertModel model)
         {
-            CompetitionHistoryStatus competitionHistory = new CompetitionHistoryStatus()
+            CompetitionHistory competitionHistory = new CompetitionHistory()
             {
                 CompetitionId = model.CompetitionId,
                 ChangerId = (model.ChangerId.HasValue) ? model.ChangerId.Value : null,

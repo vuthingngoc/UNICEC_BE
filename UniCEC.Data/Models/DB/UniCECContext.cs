@@ -10,6 +10,7 @@ namespace UniCEC.Data.Models.DB
     public partial class UniCECContext : DbContext
     {
         private IConfiguration _configuration;
+
         public UniCECContext()
         {
         }
@@ -20,7 +21,6 @@ namespace UniCEC.Data.Models.DB
             _configuration = configuration;
         }
 
-
         public virtual DbSet<ActivitiesEntity> ActivitiesEntities { get; set; }
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<Club> Clubs { get; set; }
@@ -28,7 +28,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Competition> Competitions { get; set; }
         public virtual DbSet<CompetitionActivity> CompetitionActivities { get; set; }
         public virtual DbSet<CompetitionEntity> CompetitionEntities { get; set; }
-        public virtual DbSet<CompetitionHistoryStatus> CompetitionHistoryStatuses { get; set; }
+        public virtual DbSet<CompetitionHistory> CompetitionHistories { get; set; }
         public virtual DbSet<CompetitionInClub> CompetitionInClubs { get; set; }
         public virtual DbSet<CompetitionInMajor> CompetitionInMajors { get; set; }
         public virtual DbSet<CompetitionRole> CompetitionRoles { get; set; }
@@ -273,9 +273,9 @@ namespace UniCEC.Data.Models.DB
                     .HasConstraintName("FK__Competiti__Entit__5DCAEF64");
             });
 
-            modelBuilder.Entity<CompetitionHistoryStatus>(entity =>
+            modelBuilder.Entity<CompetitionHistory>(entity =>
             {
-                entity.ToTable("CompetitionHistoryStatus");
+                entity.ToTable("CompetitionHistory");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
@@ -288,7 +288,7 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.Description).HasMaxLength(255);
 
                 entity.HasOne(d => d.Competition)
-                    .WithMany(p => p.CompetitionHistoryStatuses)
+                    .WithMany(p => p.CompetitionHistories)
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__5EBF139D");

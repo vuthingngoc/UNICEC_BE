@@ -9,7 +9,8 @@ namespace UniCEC.Data.Models.DB
     {
         public string Id { get; set; }
         public int StudentId { get; set; }
-        public double Ammount { get; set; }
+        public double Amount { get; set; }
+        public bool Status { get; set; }
 
         public virtual User Student { get; set; }
     }

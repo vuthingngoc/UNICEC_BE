@@ -203,9 +203,11 @@ namespace UniCEC.Business.Services.MemberSvc
             // if user is not leader or vice president
             int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
-            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) 
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (clubRoleId <= member.ClubRoleId) 
+                throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             if (member.ClubRoleId.Equals(model.ClubRoleId)) return;
 
