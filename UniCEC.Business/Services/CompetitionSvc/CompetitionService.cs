@@ -95,29 +95,42 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
+        public async Task<PagingResult<ViewCompetition>> GetCompetitionByAdminUni(AdminUniGetCompetitionRequestModel request, string token)
+        {
+            try
+            {
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveByAdminUni(request, _decodeToken.Decode(token, "UniversityId"));
+                if (result == null) throw new NullReferenceException();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //Get
         public async Task<ViewDetailCompetition> GetById(int id)
         {
             //
             Competition comp = await _competitionRepo.Get(id);
             //
-            if (comp != null)
+            if (comp == null) throw new NullReferenceException();
+
+            if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.PendingReview || comp.Status != CompetitionStatus.Approve)
             {
                 comp.View += 1;
                 await _competitionRepo.Update();
+            }
+            return await TransferViewDetailCompetition(comp);
 
-                return await TransferViewDetailCompetition(comp);
-            }
-            else
-            {
-                throw new NullReferenceException();
-            }
         }
 
         //Get top 3 EVENT or COMPETITION by Status
-        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope)
+        public async Task<List<ViewCompetition>> GetTopCompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope, int Top)
         {
-            List<ViewCompetition> result = await _competitionRepo.GetTop3CompOrEve(ClubId, Event, Status, Scope);
+
+            List<ViewCompetition> result = await _competitionRepo.GetTopCompOrEve(ClubId, Event, Status, Scope, Top);
 
 
             foreach (ViewCompetition item in result)
@@ -516,7 +529,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     Description = "Create Competition", // auto des when create Competition
                     Status = CompetitionStatus.Draft,   // when create status draft
                 };
-                InsertCompetitionHistoryStatus(chim);
+                InsertCompetitionHistory(chim);
 
 
                 ViewDetailCompetition viewDetailCompetition = await TransferViewDetailCompetition(comp);
@@ -601,7 +614,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = mem.User.Fullname + " Change Rule Or Condition Of Competition",
                             Status = CompetitionStatus.PendingReview,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
 
                         return true;
                     }
@@ -635,6 +648,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 //-------------------------------------------------------State Pending
+                //State pending move to State Publish - Register - UpComing
                 //Update Date
                 if (comp.Status == CompetitionStatus.Pending)
                 {
@@ -948,7 +962,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Description = "Admin University: " + adminUni.Fullname + "Approve",
                         Status = CompetitionStatus.Draft,
                     };
-                    InsertCompetitionHistoryStatus(chim);
+                    InsertCompetitionHistory(chim);
                     return true;
 
                 }
@@ -966,7 +980,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Description = "Admin University: " + adminUni.Fullname + "Rejected",
                         Status = CompetitionStatus.Draft,
                     };
-                    InsertCompetitionHistoryStatus(chim);
+                    InsertCompetitionHistory(chim);
                     return true;
                 }
 
@@ -1016,7 +1030,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status Draft",
                             Status = CompetitionStatus.Draft,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
@@ -1037,7 +1051,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status Pending Review",
                             Status = CompetitionStatus.PendingReview,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
@@ -1062,7 +1076,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status Publish",
                             Status = CompetitionStatus.Publish,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
@@ -1084,7 +1098,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + " Update Status Finish",
                             Status = CompetitionStatus.Finish,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
 
                         return true;
                     }
@@ -1106,7 +1120,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + " Update Status Evaluate",
                             Status = CompetitionStatus.Evaluate,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                     }
 
                     //-----------------------------------------------------------------Complete
@@ -1126,7 +1140,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + " Update Status Complete",
                             Status = CompetitionStatus.Complete,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                     }
 
                     //-----------------------------------------------------------------Cancel
@@ -1156,7 +1170,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + " Update Status Cancel",
                             Status = CompetitionStatus.Cancel,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
                 }
@@ -1182,14 +1196,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status Publish",
                             Status = CompetitionStatus.Publish,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
                     //-----------------------------------------------------------------Register
                     if (model.Status == CompetitionStatus.Register)
                     {
-                        bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime);
+                        bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
                         if (checkStateRegister == false) throw new ArgumentException("Date in Competition not suitable");
 
                         comp.Status = CompetitionStatus.Register;
@@ -1204,14 +1218,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status Register",
                             Status = CompetitionStatus.Register,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
                     //-----------------------------------------------------------------Up-Comming
                     if (model.Status == CompetitionStatus.UpComing)
                     {
-                        bool checkStateUpComing = CheckStateUpComing(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.CeremonyTime, comp.EndTime);
+                        bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
                         if (checkStateUpComing == false) throw new ArgumentException("Date in Competition not suitable");
 
                         comp.Status = CompetitionStatus.UpComing;
@@ -1226,7 +1240,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Description = member.User.Fullname + "Update Status UpComing",
                             Status = CompetitionStatus.UpComing,
                         };
-                        InsertCompetitionHistoryStatus(chim);
+                        InsertCompetitionHistory(chim);
                         return true;
                     }
 
@@ -1606,7 +1620,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             };
         }
 
-        private async void InsertCompetitionHistoryStatus(CompetitionHistoryInsertModel model)
+        private async void InsertCompetitionHistory(CompetitionHistoryInsertModel model)
         {
             CompetitionHistory competitionHistory = new CompetitionHistory()
             {
@@ -1757,13 +1771,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Check state Register
-        private bool CheckStateRegister(DateTime localTime, DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime StartTime, DateTime EndTime)
+        private bool CheckStateRegister(DateTime localTime, DateTime StartTimeRegister, DateTime EndTimeRegister)
         {
             bool result = false;
-
-            bool checkDate = CheckDate(localTime, StartTimeRegister, EndTimeRegister, StartTime, EndTime, false); // đúng thứ tự
-
-            if (checkDate == false) return false;
 
             // Register < localTime < EndRegister
             int result1 = DateTime.Compare(localTime, StartTimeRegister); // > 0 later
@@ -1779,13 +1789,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Check state UpComing
-        private bool CheckStateUpComing(DateTime localTime, DateTime StartTimeRegister, DateTime EndTimeRegister, DateTime CeremonyTime, DateTime EndTime)
+        private bool CheckStateUpComing(DateTime localTime, DateTime EndTimeRegister, DateTime CeremonyTime)
         {
             bool result = false;
-
-            bool checkDate = CheckDate(localTime, StartTimeRegister, EndTimeRegister, CeremonyTime, EndTime, false); // đúng thứ tự date
-
-            if (checkDate == false) return false;
 
             // EndRegister < localTime < Ceremony time
             int result1 = DateTime.Compare(localTime, EndTimeRegister); // > 0 later
@@ -2120,6 +2126,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             return comp;
         }
+
 
 
 
