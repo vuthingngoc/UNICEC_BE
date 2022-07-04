@@ -1259,7 +1259,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (result == 0) throw new ArgumentException("Add Competition History Failed");
                         return true;
                     }
-                   
+
 
                     //-----------------------------------------------------------------Register
                     if ((model.Status == CompetitionStatus.Register && compeHis.Status == CompetitionStatus.Register)
@@ -1285,37 +1285,32 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (result == 0) throw new ArgumentException("Add Competition History Failed");
                         return true;
                     }
-                    
+
 
                     throw new ArgumentException("The Nearest Status Of Competition is " + CompetitionStatusToString(compeHis.Status) + ", you must update from this Status");
-                    ////-----------------------------------------------------------------Up - Comming
-                    ////if (model.Status == CompetitionStatus.UpComing)
-                    ////{
+                    //-----------------------------------------------------------------Up - Comming
+                    if ((model.Status == CompetitionStatus.UpComing && compeHis.Status == CompetitionStatus.Register)
+                      || (model.Status == CompetitionStatus.UpComing && compeHis.Status == CompetitionStatus.UpComing))
+                    {
+                        bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
+                        if (checkStateUpComing == false) throw new ArgumentException("Date in Competition not suitable");
 
+                        comp.Status = CompetitionStatus.UpComing;
+                        await _competitionRepo.Update();
 
-
-                    ////    bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
-                    ////    if (checkStateUpComing == false) throw new ArgumentException("Date in Competition not suitable");
-
-                    ////    comp.Status = CompetitionStatus.UpComing;
-                    ////    await _competitionRepo.Update();
-
-                    ////    -----------InsertCompetition History
-                    ////   CompetitionHistory chim = new CompetitionHistory()
-                    ////   {
-                    ////       CompetitionId = comp.Id,
-                    ////       ChangerId = member.Id,
-                    ////       ChangeDate = localTime,
-                    ////       Description = member.User.Fullname + " Update Status UpComing",
-                    ////       Status = CompetitionStatus.UpComing,
-                    ////   };
-                    ////    int result = await _competitionHistoryRepo.Insert(chim);
-                    ////    if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                    ////    return true;
-                    ////}
-
-
-
+                        //-----------InsertCompetition History
+                        CompetitionHistory chim = new CompetitionHistory()
+                        {
+                            CompetitionId = comp.Id,
+                            ChangerId = member.Id,
+                            ChangeDate = localTime,
+                            Description = member.User.Fullname + " Update Status UpComing",
+                            Status = CompetitionStatus.UpComing,
+                        };
+                        int result = await _competitionHistoryRepo.Insert(chim);
+                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                        return true;
+                    }
                 }
                 throw new ArgumentException("Can not update this Status at present !");
 
@@ -2356,7 +2351,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (competitionStatus == CompetitionStatus.Register)
             {
                 return "Register";
-            }         
+            }
             if (competitionStatus == CompetitionStatus.Publish)
             {
                 return "Publish";
