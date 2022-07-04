@@ -9,5 +9,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionHistoryRepo
     public interface ICompetitionHistoryRepo : IRepository<CompetitionHistory>
     {
         public Task<List<ViewCompetitionHistory>> GetAllHistoryOfCompetition(int competitionId);
+
+        public Task<CompetitionHistory> GetNearestStateAfterPending(int competitionId);
     }
 }
