@@ -7,7 +7,7 @@ namespace UniCEC.Data.Models.DB
 {
     public partial class SeedsWallet
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public int StudentId { get; set; }
         public double Amount { get; set; }
         public bool Status { get; set; }
