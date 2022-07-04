@@ -127,34 +127,37 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                     //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
-                        throw new ArgumentException("Competition State is not suitable to do this action");
-
-
-                    //------------ Insert Competition-Entities-----------
-                    foreach (AddInfluencerModel modelItem in model.Influencers)
+                    if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
                     {
-
-                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        //------------ Insert Competition-Entities-----------
+                        foreach (AddInfluencerModel modelItem in model.Influencers)
                         {
-                            CompetitionId = model.CompetitionId,
-                            Name = modelItem.Name,
-                            ImageUrl = Url,
-                            EntityTypeId = 2, //2 là influencer
-                        };
 
-                        int id = await _competitionEntityRepo.Insert(competitionEntity);
+                            string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                            CompetitionEntity competitionEntity = new CompetitionEntity()
+                            {
+                                CompetitionId = model.CompetitionId,
+                                Name = modelItem.Name,
+                                ImageUrl = Url,
+                                EntityTypeId = 2, //2 là influencer
+                            };
 
-                        if (id > 0)
-                        {
-                            CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+                            int id = await _competitionEntityRepo.Insert(competitionEntity);
 
-                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                            if (id > 0)
+                            {
+                                CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+
+                                ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                            }
+
                         }
-
+                        return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
                     }
-                    return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
+                    else
+                    {
+                        throw new ArgumentException("Competition State is not suitable to do this action");
+                    }
                 }
                 //end if check
                 else
@@ -193,37 +196,41 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
                 Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
-                    throw new ArgumentException("Competition State is not suitable to do this action");
-
-                foreach (AddSponsorModel modelItem in model.Sponsors)
+                if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
                 {
-                    string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                    CompetitionEntity competitionEntity = new CompetitionEntity()
+
+                    foreach (AddSponsorModel modelItem in model.Sponsors)
                     {
+                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                        CompetitionEntity competitionEntity = new CompetitionEntity()
+                        {
 
-                        CompetitionId = model.CompetitionId,
-                        Name = modelItem.Name,
-                        ImageUrl = Url,
-                        EntityTypeId = 3, //3 là Sponsor
-                        Description = modelItem.Description,
-                        Website = modelItem.Website,
-                        Email = modelItem.Email,
-                    };
+                            CompetitionId = model.CompetitionId,
+                            Name = modelItem.Name,
+                            ImageUrl = Url,
+                            EntityTypeId = 3, //3 là Sponsor
+                            Description = modelItem.Description,
+                            Website = modelItem.Website,
+                            Email = modelItem.Email,
+                        };
 
-                    int id = await _competitionEntityRepo.Insert(competitionEntity);
+                        int id = await _competitionEntityRepo.Insert(competitionEntity);
 
-                    if (id > 0)
-                    {
-                        CompetitionEntity entity = await _competitionEntityRepo.Get(id);
+                        if (id > 0)
+                        {
+                            CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
-                        ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                        }
+
                     }
 
+                    return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
                 }
-
-                return (ViewCompetitionEntities.Count > 0) ? ViewCompetitionEntities : null;
-
+                else
+                {
+                    throw new ArgumentException("Competition State is not suitable to do this action");
+                }
             }
             catch (Exception)
             {
@@ -243,7 +250,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                 Competition competition = await _competitionRepo.Get(entity.CompetitionId);
                 if ((entity.EntityTypeId == 2 || entity.EntityTypeId == 3) == true
-                    && (competition.Status != CompetitionStatus.Draft || competition.Status != CompetitionStatus.Approve) == true)
+                    && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
                     throw new ArgumentException("Can't Remove Sponsor or Influencer");
 
                 if (entity.CompetitionId != model.CompetitionId) throw new ArgumentException("Competition Entity not belong to this Competition ");
@@ -322,8 +329,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
             if (isOrganization)
             {
-                //------------- CHECK Role Is highest role
-                if (isAllow.CompetitionRoleId != 1 || isAllow.CompetitionRoleId != 2) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                //1,2 accept
+                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
                 return true;
             }
             else

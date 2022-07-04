@@ -80,7 +80,8 @@ namespace UniCEC.Business.Services.CompetitionHistorySvc
             if (isOrganization)
             {
                 //------------- CHECK Role Is highest role
-                if (isAllow.CompetitionRoleId != 1 || isAllow.CompetitionRoleId != 2) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                //1,2 accept
+                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
                 return true;
             }
             else
