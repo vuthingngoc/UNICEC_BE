@@ -42,7 +42,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             var query = from cic in context.CompetitionInClubs
                         where cic.ClubId == request.ClubId
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id
+                        where cic.CompetitionId == comp.Id 
                         select comp;
             //status
             if (request.Status.HasValue) query = query.Where(comp => comp.Status == request.Status);
@@ -137,7 +137,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //Get top 3 EVENT or COMPETITION by Status
         //gần ngày hiện tại
         //Thuộc Club
-        public async Task<List<ViewCompetition>> GetTop3CompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope)
+        public async Task<List<ViewCompetition>> GetTopCompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope, int Top)
         {
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
@@ -174,7 +174,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();
 
-            List<Competition> list_Competition = await query.Take(3).ToListAsync();
+            List<Competition> list_Competition = await query.Take(Top).ToListAsync();
 
             foreach (Competition compe in list_Competition)
             {
@@ -260,6 +260,103 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return (competitions.Count > 0) ? competitions : null;
         }
 
+
+
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveByAdminUni(AdminUniGetCompetitionRequestModel request,int universityId)
+        {
+            List<Competition> list_Competition = await (from c in context.Competitions
+                                                         where c.UniversityId == universityId && c.Status == CompetitionStatus.PendingReview
+                                                         select c).ToListAsync();
+            int totalCount = list_Competition.Count();
+
+            List<ViewCompetition> competitions = new List<ViewCompetition>();
+
+            foreach (Competition compe in list_Competition)
+            {
+
+                //lấy major ID
+                List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
+
+                var queryListCompetitionInMajor = compe.CompetitionInMajors;
+                List<CompetitionInMajor> listCompetitionInMajor = queryListCompetitionInMajor.ToList();
+
+                //lấy Club Owner
+                List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
+                                                          where compe.Id == cic.CompetitionId
+                                                          select cic).ToListAsync();
+
+                List<ViewClubInComp> listVcip = new List<ViewClubInComp>();
+
+                if (clubList.Count > 0)
+                {
+                    foreach (var competitionInClub in clubList)
+                    {
+                        Club club = await (from c in context.Clubs
+                                           where c.Id == competitionInClub.ClubId
+                                           select c).FirstOrDefaultAsync();
+
+                        ViewClubInComp vcip = new ViewClubInComp()
+                        {
+                            Id = club.Id,
+                            Name = club.Name,
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage
+                        };
+
+                        listVcip.Add(vcip);
+                    }
+                }
+
+                //lấy competition type name
+                CompetitionType competitionType = await (from c in context.Competitions
+                                                         where c.Id == compe.Id
+                                                         from ct in context.CompetitionTypes
+                                                         where ct.Id == c.CompetitionTypeId
+                                                         select ct).FirstOrDefaultAsync();
+
+                string competitionTypeName = competitionType.TypeName;
+
+                foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
+                {
+                    Major major = await (from m in context.Majors
+                                         where m.Id == competitionInMajor.MajorId
+                                         select m).FirstOrDefaultAsync();
+                    if (major != null)
+                    {
+                        ViewMajorInComp vdic = new ViewMajorInComp()
+                        {
+                            Id = major.Id,
+                            Name = major.Name,
+                        };
+                        listViewMajorInComp.Add(vdic);
+                    }
+                }
+
+                //cb tạo View
+                ViewCompetition vc = new ViewCompetition()
+                {
+                    Id = compe.Id,
+                    Name = compe.Name,
+                    CompetitionTypeId = compe.CompetitionTypeId,
+                    CompetitionTypeName = competitionTypeName,
+                    Scope = compe.Scope,
+                    Status = compe.Status,
+                    View = compe.View,
+                    CreateTime = compe.CreateTime,
+                    StartTime = compe.StartTime,
+                    IsSponsor = compe.IsSponsor,
+                    DepartmentInCompetition = listViewMajorInComp,
+                    ClubInCompetition = listVcip,
+
+                };
+                competitions.Add(vc);
+            }//end each competition
+
+            return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
+
+        }
+
+
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
         {
@@ -282,5 +379,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         {
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
+
+
     }
 }

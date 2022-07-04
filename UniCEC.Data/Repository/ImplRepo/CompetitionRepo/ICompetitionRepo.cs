@@ -12,13 +12,14 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
     public interface ICompetitionRepo : IRepository<Competition>
     {
         public Task<bool> CheckExistCode(string code);
-
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
-        //Get top 3 EVENT or COMPETITION by Status
-        public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId , bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
+        //Get top EVENT or COMPETITION by Status
+        public Task<List<ViewCompetition>> GetTopCompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope, int Top);
+        //Get Comp by Admin Uni
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveByAdminUni(AdminUniGetCompetitionRequestModel request, int universityId);
 
-       
+
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
         public Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId);

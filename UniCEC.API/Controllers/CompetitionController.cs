@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -58,13 +59,13 @@ namespace UniCEC.API.Controllers
 
 
         // GET: api/<CompetitionController>
-        [HttpGet("top3")]
-        [SwaggerOperation(Summary = "Get top 3 EVENT or COMPETITION by club, status")]
-        public async Task<IActionResult> GetTop3CompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? status, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope)
+        [HttpGet("top")]
+        [SwaggerOperation(Summary = "Get top X EVENT or COMPETITION by club, status")]
+        public async Task<IActionResult> GetTopCompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope, [FromQuery, BindRequired] int top)
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTop3CompOrEve(ClubId, Event, status, Scope);
+                List<ViewCompetition> result = await _competitionService.GetTopCompOrEve(ClubId, Event, Status, Scope, top);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -208,7 +209,7 @@ namespace UniCEC.API.Controllers
             {
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
-                string token = header["Authorization"].ToString().Split(" ")[1];             
+                string token = header["Authorization"].ToString().Split(" ")[1];
                 bool check = await _competitionService.ChangeStateByAdminUni(model, token);
                 if (check)
                 {
@@ -234,6 +235,34 @@ namespace UniCEC.API.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [Authorize(Roles = "University Admin")]
+        [HttpGet("university-admin")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION State Pending Review by Admin University")]
+        public async Task<IActionResult> GetCompOrEveByStatePendingReview([FromQuery] AdminUniGetCompetitionRequestModel request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompetitionByAdminUni(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (SqlException)
             {

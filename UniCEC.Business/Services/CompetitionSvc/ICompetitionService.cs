@@ -14,15 +14,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
     public interface ICompetitionService
     {
 
+        //--------------------------------------------------Admin University
+        //Admin University get Competition With State Pending Review
+        public Task<PagingResult<ViewCompetition>> GetCompetitionByAdminUni(AdminUniGetCompetitionRequestModel request, string token);
+
+        //Admin University change state Approve or Draft
+        public Task<bool> ChangeStateByAdminUni(AdminUniUpdateCompetitionStatusModel model, string token);
+
+        //---------------------------------------------------CRUD-Competition
         public Task<ViewDetailCompetition> InsertCompetitionOrEvent(LeaderInsertCompOrEventModel competition, string token);
 
-        //--------------------------------------------------Update
-        //FE-Mobile use
         //update Status
         public Task<bool> CompetitionStatusUpdate(CompetitionStatusUpdateModel model, string token);
-
-        //Admin University chang state Approve or Draft
-        public Task<bool> ChangeStateByAdminUni(AdminUniUpdateCompetitionStatusModel model, string token);
 
         public Task<bool> UpdateCompetitionByState(LeaderUpdateCompOrEventModel model, string token);
         
@@ -52,10 +55,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
 
         //Get top 3 EVENT or COMPETITION by Status
-        public Task<List<ViewCompetition>> GetTop3CompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope);
+        public Task<List<ViewCompetition>> GetTopCompOrEve(int? clubId, bool? Event, CompetitionStatus? status, CompetitionScopeStatus? scope, int top);
 
         //Get
         public Task<ViewDetailCompetition> GetById(int CompetitionId);
+
 
         ////-----------------------------------------State Draft
         //public Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel competition, string token);
