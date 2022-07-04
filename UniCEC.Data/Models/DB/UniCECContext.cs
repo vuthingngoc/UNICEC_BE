@@ -612,7 +612,7 @@ namespace UniCEC.Data.Models.DB
                 entity.ToTable("SeedsWallet");
 
                 entity.Property(e => e.Id)
-                    .HasMaxLength(20)
+                    .ValueGeneratedNever()
                     .HasColumnName("ID");
 
                 entity.Property(e => e.StudentId).HasColumnName("StudentID");
