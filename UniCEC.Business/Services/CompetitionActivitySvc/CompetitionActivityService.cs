@@ -475,9 +475,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 throw;
             }
         }
-
-
-
+   
         //transform View Model
         public async Task<ViewDetailCompetitionActivity> TransformViewDetailCompetitionActivity(CompetitionActivity competitionActivity)
         {
@@ -585,7 +583,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             };
         }
 
-
         //generate Seed code length 8
         private string generateSeedCode()
         {
@@ -663,6 +660,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
-
+        public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId, int clubId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
