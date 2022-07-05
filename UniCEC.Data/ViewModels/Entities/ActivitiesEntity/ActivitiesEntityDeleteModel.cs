@@ -7,13 +7,10 @@ using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.ActivitiesEntity
 {
-    public class ActivitiesEntityInsertModel
+    public class ActivitiesEntityDeleteModel
     {
-        [JsonPropertyName("competition_activity_id")]
-        public int CompetitionActivityId { get; set; }
-        
-        [JsonPropertyName("list_activities_entities")]
-        public List<AddActivitiesEntity> ListActivitiesEntities { get; set; }
+        [JsonPropertyName("activities_entity_id")]
+        public int ActivitiesEntityId { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]

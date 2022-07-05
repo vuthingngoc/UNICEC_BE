@@ -78,7 +78,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete competition entity")]
-        public async Task<IActionResult> DeleteImage([FromBody] CompetitionEntityDeleteModel model)
+        public async Task<IActionResult> DeleteCompetitionEntity([FromBody] CompetitionEntityDeleteModel model)
         {
             try
             {

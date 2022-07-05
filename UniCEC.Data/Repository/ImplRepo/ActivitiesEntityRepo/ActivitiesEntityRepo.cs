@@ -15,6 +15,16 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
         {
         }
 
+        public async Task DeleteActivitiesEntity(int activitiesEntityId)
+        {
+            ActivitiesEntity activitiesEntity = await (from ae in context.ActivitiesEntities
+                                                       where ae.Id == activitiesEntityId
+                                                       select ae).FirstOrDefaultAsync();
+
+            context.ActivitiesEntities.Remove(activitiesEntity);
+            await Update();
+        }
+
         //public async Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId)
         //{
         //    List<ActivitiesEntity> activitiesEntities = await (from ca in context.CompetitionActivities

@@ -1,9 +1,12 @@
 ﻿namespace UniCEC.Data.Enum
 {
     public enum CompetitionActivityStatus
-    {        
-        Happenning,
-        Ending,
-        Canceling,       
+    {
+        Open,
+        OnGoing,
+        Pending,
+        Finished,
+        Completed,
+        Cancelling,
     }
 }

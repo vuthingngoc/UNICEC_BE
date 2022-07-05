@@ -117,51 +117,50 @@ namespace UniCEC.API.Controllers
         //    }
         //}
 
-        //// POST api/<ClubActivityController>
-        //[Authorize(Roles = "Student")]
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "Insert competition activity")]
-        //public async Task<IActionResult> InsertClubActivity([FromBody] CompetitionActivityInsertModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        // POST api/<ClubActivityController>
+        [Authorize(Roles = "Student")]
+        [HttpPost]
+        [SwaggerOperation(Summary = "Insert competition activity")]
+        public async Task<IActionResult> InsertClubActivity([FromBody] CompetitionActivityInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //        ViewDetailCompetitionActivity result = await _competitionActivityService.Insert(model, token);
-        //        if (result != null)
-        //        {
+                ViewDetailCompetitionActivity result = await _competitionActivityService.Insert(model, token);
+                if (result != null)
+                {
 
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-
-        //}
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
         //// PUT api/<ClubActivityController>/5
         //[Authorize(Roles = "Student")]

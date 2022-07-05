@@ -21,17 +21,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         }
 
         //check exist code
-        //public async Task<bool> CheckExistCode(string code)
-        //{
-        //    bool check = false;
-        //    CompetitionActivity competitionActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
-        //    if (competitionActivity != null)
-        //    {
-        //        check = true;
-        //        return check;
-        //    }
-        //    return check;
-        //}
+        public async Task<bool> CheckExistCode(string code)
+        {
+            bool check = false;
+            CompetitionActivity competitionActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
+            if (competitionActivity != null)
+            {
+                check = true;
+                return check;
+            }
+            return check;
+        }
 
         ////use with method top 3 Competition
         //public async Task<List<ViewProcessCompetitionActivity>> GetTop3CompetitionActivity(int clubId)
@@ -64,7 +64,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //        //mỗi task sẽ có người tham gia
         //        foreach (CompetitionActivity activity in list_CompetitionActivity)
         //        {
-                    
+
 
         //            ViewProcessCompetitionActivity vcpa = new ViewProcessCompetitionActivity()
         //            {
@@ -73,7 +73,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //                CompetitionName = comp.Name,    
         //                ProcessStatus = activity.Process,
         //                Status = activity.Status
-                        
+
         //            };
 
         //            listVPCA.Add(vcpa);
@@ -100,8 +100,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //                from ca in context.CompetitionActivities
         //                where ca.CompetitionId == c.Id                      
         //                select ca;
-           
-            
+
+
         //    //ProcessStatus
         //    if (conditions.ProcessStatus.HasValue) query = query.Where(ca => ca.Process == conditions.ProcessStatus);
 

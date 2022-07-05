@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
     public interface ICompetitionActivityService
     {
         //public Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token);
-        //public Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel clubActivity, string token);
+        public Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel clubActivity, string token);
         //public Task<bool> Update(CompetitionActivityUpdateModel clubActivity, string token);
         //public Task<bool> Delete(CompetitionActivityDeleteModel model, string token);
         ////Get List ClubActivity By Conditions
