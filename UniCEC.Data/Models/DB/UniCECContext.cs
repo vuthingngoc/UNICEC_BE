@@ -10,7 +10,6 @@ namespace UniCEC.Data.Models.DB
     public partial class UniCECContext : DbContext
     {
         private IConfiguration _configuration;
-
         public UniCECContext()
         {
         }
@@ -611,9 +610,7 @@ namespace UniCEC.Data.Models.DB
             {
                 entity.ToTable("SeedsWallet");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
