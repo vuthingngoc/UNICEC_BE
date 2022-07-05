@@ -1633,10 +1633,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         Id = competitionEntity.Id,
                         CompetitionId = competitionEntity.CompetitionId,
-                        Name = competitionEntity.Name,
+                        Name = (competitionEntity.Name != null) ? competitionEntity.Name : null,
                         ImageUrl = imgUrl_CompetitionEntity,
                         EntityTypeId = competitionEntity.EntityTypeId,
-                        EntityTypeName = competitionEntity.EntityType.Name,
+                        //EntityTypeName = competitionEntity.EntityType.Name,  // why Null???
                         Email = (competitionEntity.Email != null) ? competitionEntity.Email : null,
                         Website = (competitionEntity.Website != null) ? competitionEntity.Website : null,
                         Description = (competitionEntity.Description != null) ? competitionEntity.Description : null,
@@ -2359,6 +2359,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return null;
         }
 
+        
 
         //---------------------------------------------------------------------------------- STATE DRAFT - APPROVE
         //public async Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel model, string token)

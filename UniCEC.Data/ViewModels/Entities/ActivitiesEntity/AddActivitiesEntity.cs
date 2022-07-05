@@ -9,11 +9,12 @@ namespace UniCEC.Data.ViewModels.Entities.ActivitiesEntity
 {
     public class AddActivitiesEntity
     {
-        //Activities Entity
-        [JsonPropertyName("name_entity")]
-        public string NameEntity { get; set; }
+        //Activities Entity      
+        public string Name { get; set; }
 
-        [JsonPropertyName("base64_string_entity")]
-        public string Base64StringEntity { get; set; }
+        [JsonPropertyName("base64_string_img")]
+        public string Base64StringImg { get; set; }
+
+
     }
 }

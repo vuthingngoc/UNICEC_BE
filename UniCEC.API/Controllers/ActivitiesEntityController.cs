@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ActivitiesEntitySvc;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
@@ -25,51 +26,96 @@ namespace UniCEC.API.Controllers
 
         //---------------------------------------------------------------------------Competition Entity
         //POST api/<CompetitionEntityController>
-        //[Authorize(Roles = "Student")]
-        //[HttpPost("image")]
-        //[SwaggerOperation(Summary = "Add image for Competition Activity")]
-        //public async Task<IActionResult> AddEntityForCompetitionActivities([FromBody] ActivitiesEntityInsertModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        [Authorize(Roles = "Student")]
+        [HttpPost("image")]
+        [SwaggerOperation(Summary = "Add image for Competition Activity")]
+        public async Task<IActionResult> AddEntityForCompetitionActivities([FromBody] ActivitiesEntityInsertModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
 
-        //        ViewActivitiesEntity result = await _activitiesEntityService.AddActivitiesEntity(model, token);
+                List<ViewActivitiesEntity> result = await _activitiesEntityService.AddActivitiesEntity(model, token);
 
-        //        if (result != null)
-        //        {
+                if (result != null)
+                {
 
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete Activities Entity for Competition Activity")]
+        public async Task<IActionResult> DeleteActivityEntity([FromBody] ActivitiesEntityDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                bool result = await _activitiesEntityService.DeleteActivitiesEntity(model, token);
+
+                if (result)
+                {
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
     }
 }

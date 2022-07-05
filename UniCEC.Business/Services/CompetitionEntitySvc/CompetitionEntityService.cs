@@ -242,10 +242,10 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         {
             try
             {
-                if (model.CompetitionId == 0 || model.ClubId == 0 || model.CompetitionEntityId == 0)
-                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL || Competition Entity Id is NULL");
+                if (model.ClubId == 0 || model.CompetitionEntityId == 0)
+                    throw new ArgumentNullException("ClubId NULL || Competition Entity Id is NULL");
 
-                CompetitionEntity entity = await _competitionEntityRepo.Get(model.CompetitionId);
+                CompetitionEntity entity = await _competitionEntityRepo.Get(model.CompetitionEntityId);
                 if (entity == null) throw new ArgumentException("Competition Entity not found ");
 
                 Competition competition = await _competitionRepo.Get(entity.CompetitionId);
@@ -253,10 +253,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                     && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
                     throw new ArgumentException("Can't Remove Sponsor or Influencer");
 
-                if (entity.CompetitionId != model.CompetitionId) throw new ArgumentException("Competition Entity not belong to this Competition ");
-
-                bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
-
+                bool Check = await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
                 if (Check == false) return false;
 
                 await _competitionEntityRepo.DeleteCompetitionEntity(model.CompetitionEntityId);
@@ -265,7 +262,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 //Check Sponsor in Competition if there is NO-> update Status 
                 if (entity.EntityTypeId == 3)
                 {
-                    bool checkIsHasSponsor = await _competitionEntityRepo.CheckSponsorStillInCompetition(model.CompetitionId, 3);
+                    bool checkIsHasSponsor = await _competitionEntityRepo.CheckSponsorStillInCompetition(competition.Id, 3);
                     if (checkIsHasSponsor == false)
                     {
                         competition.IsSponsor = false;
@@ -302,7 +299,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 CompetitionId = entity.CompetitionId,
                 ImageUrl = imgUrl,
                 EntityTypeId = entity.EntityTypeId,
-                EntityTypeName = entity.EntityType.Name,
+                //EntityTypeName = entity.EntityType.Name,
                 Website = (entity.Website != null) ? entity.Website : null,
                 Email = (entity.Email != null) ? entity.Email : null,
                 Description = (entity.Description != null) ? entity.Description : null,
