@@ -119,7 +119,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPost]
         [SwaggerOperation(Summary = "Insert competition activity")]
-        public async Task<IActionResult> InsertClubActivity([FromBody] CompetitionActivityInsertModel model)
+        public async Task<IActionResult> InsertCompetitionActivity([FromBody] CompetitionActivityInsertModel model)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPut]
         [SwaggerOperation(Summary = "Update Competition Activity by Id ")]
-        public async Task<IActionResult> UpdateClubActivity([FromBody] CompetitionActivityUpdateModel model)
+        public async Task<IActionResult> UpdateCompetitionActivity([FromBody] CompetitionActivityUpdateModel model)
         {
             try
             {
@@ -205,7 +205,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
-        public async Task<IActionResult> DeleteClubAcitvityById([FromBody] CompetitionActivityDeleteModel model)
+        public async Task<IActionResult> DeleteCompetitionAcitvityById([FromBody] CompetitionActivityDeleteModel model)
         {
             try
             {

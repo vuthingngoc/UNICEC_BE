@@ -483,7 +483,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             //List Activities Entity
             List<ViewActivitiesEntity> ListViewAE = new List<ViewActivitiesEntity>();
 
-            List<ActivitiesEntity> ActivitiesEntities = (List<ActivitiesEntity>)competitionActivity.ActivitiesEntities;
+            List<ActivitiesEntity> ActivitiesEntities = competitionActivity.ActivitiesEntities.ToList();
 
             if (ActivitiesEntities != null)
             {
