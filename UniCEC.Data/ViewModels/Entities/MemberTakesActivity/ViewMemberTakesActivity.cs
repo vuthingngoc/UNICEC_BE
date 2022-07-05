@@ -18,9 +18,12 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
 
         [JsonPropertyName("member_name")]
         public string MemberName { get; set; }
-        [JsonPropertyName("start_time")]
-        public DateTime StartTime { get; set; }
-        public DateTime Deadline { get; set; }
        
+        [JsonPropertyName("booker_id")]
+        public int BookerId { get; set; }
+
+        [JsonPropertyName("booker_name")]
+        public string BookerName { get; set; }
+
     }
 }

@@ -11,8 +11,6 @@ namespace UniCEC.Business.Services.MemberTakesActivitySvc
               
         //public Task<bool> ApprovedOrRejectedTask(ConfirmMemberTakesActivity model, string token);
 
-
-
         //----- Refactor code
         //public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksByConditions(MemberTakesActivityRequestModel request, string token);
 

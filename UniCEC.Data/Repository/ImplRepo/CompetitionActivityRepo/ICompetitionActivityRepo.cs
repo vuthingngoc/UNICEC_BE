@@ -14,9 +14,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         
         public Task<bool> CheckExistCode(string code);
         ////
-        //public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions);
+        public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions);
 
-        //public Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions);
+        public Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions);
 
         //public Task<List<ViewProcessCompetitionActivity>> GetTop3CompetitionActivity(int clubId);
 

@@ -12,15 +12,12 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "competitionId")]
         public int? CompetitionId { get; set; }
 
-        
-
         [FromQuery(Name = "priorityStatus")]
         public PriorityStatus? PriorityStatus { get; set; }
-
         public CompetitionActivityStatus? Status { get; set; }   
 
         //Club Id
-        [FromQuery(Name = "clubId")]
+        [FromQuery(Name = "clubId"), BindRequired]
         public int ClubId { get; set; }
 
     }

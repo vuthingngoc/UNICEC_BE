@@ -19,14 +19,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         ////Member
         //public Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksMemberByConditions(MemberTakesActivityRequestModel request, int userId);
 
-        ////check mem take task
-        //public Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId);
+        //check mem take task
+        public Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId);
 
         ////remove member take task 
         //public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId);
-
-        ////
-        //public Task<bool> CheckTaskBelongToStudent(int memberTakesActivityId, int userId, int clubId);
 
         ////
         //public Task<int> GetNumberOfMemberIsSubmitted(int competitionActivityId);
