@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
+using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -26,6 +27,9 @@ namespace UniCEC.Business.Services.SeedsWalletSvc
         {
             int userId = _decodeToken.Decode(token, "Id");
             int roleId = _decodeToken.Decode(token, "RoleId");
+
+            if (roleId.Equals(4)) return true;
+
             int universityId = _decodeToken.Decode(token, "UniversityId");
             bool isSameUniversity = await _userRepo.CheckExistedUser(universityId, studentId);
 
@@ -49,25 +53,74 @@ namespace UniCEC.Business.Services.SeedsWalletSvc
 
         public async Task<PagingResult<ViewSeedsWallet>> GetByConditions(string token, SeedsWalletRequestModel request)
         {
-            //bool isValid = CheckAuthorized(token, request.)
-
             PagingResult<ViewSeedsWallet> seedsWallets = await _seedsWalletRepo.GetByConditions(request);
-            throw new NotImplementedException();
+            if (seedsWallets == null) throw new NullReferenceException("Not found any seedswallets");
+
+            bool valid = await CheckAuthorized(token, seedsWallets.Items[0].StudentId);
+            if (valid) return seedsWallets;
+
+            throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
-        public Task<ViewSeedsWallet> Insert(string token, SeedsWalletInsertModel seedsWallet)
+        private ViewSeedsWallet TransferViewModel(SeedsWallet seedsWallet)
         {
-            throw new NotImplementedException();
+            return new ViewSeedsWallet()
+            {
+                Id = seedsWallet.Id,
+                StudentId = seedsWallet.StudentId,
+                Amount = seedsWallet.Amount,
+                Status = seedsWallet.Status
+            };
         }
 
-        public Task<bool> Update(string token, ViewSeedsWallet seedsWallet)
+        public async Task<ViewSeedsWallet> Insert(string token, int studentId) // future ...
         {
-            throw new NotImplementedException();
+            if (studentId.Equals(0)) throw new ArgumentException("Student Null");
+
+            int userId = _decodeToken.Decode(token, "Id");
+            if (!userId.Equals(studentId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            SeedsWallet seedsWallet = new SeedsWallet()
+            {
+                Amount = 0, // default amount
+                StudentId = studentId,
+                Status = true // default status
+            };
+
+            int id = await _seedsWalletRepo.Insert(seedsWallet);
+            seedsWallet.Id = id;
+            return TransferViewModel(seedsWallet);
         }
 
-        public Task<bool> Delete(string token, int id)
+        public async Task Update(string token, SeedsWalletUpdateModel model) // future ...
         {
-            throw new NotImplementedException();
+            bool isValid = await CheckAuthorized(token, model.StudentId);
+            if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            SeedsWallet seedsWallet = await _seedsWalletRepo.Get(model.Id);
+            if (seedsWallet == null) throw new NullReferenceException("Not found this seeds wallet");
+
+            int userId = _decodeToken.Decode(token, "Id");
+
+            if(model.Amount.HasValue && model.Amount.Value >= 0) seedsWallet.Amount = model.Amount.Value;
+
+            if(model.Status.HasValue && model.Status.Value.Equals(true) 
+                && userId.Equals(model.StudentId)) 
+                    seedsWallet.Status = model.Status.Value;
+
+            await _seedsWalletRepo.Update();
+        }
+
+        public async Task Delete(string token, int id) // future ...
+        {
+            SeedsWallet seedsWallet = await  _seedsWalletRepo.Get(id);
+            if (seedsWallet == null) throw new NullReferenceException("Not found this seeds wallet");
+
+            int userId = _decodeToken.Decode(token, "Id");
+            if (!userId.Equals(seedsWallet.StudentId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            seedsWallet.Status = false;
+            await _seedsWalletRepo.Update();
         }
     }
 }

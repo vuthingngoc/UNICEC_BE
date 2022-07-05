@@ -52,9 +52,9 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //GET CITY BY ID
+
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get city by id - Authenticated user")]
+        [SwaggerOperation(Summary = "Get seeds wallet by id - Authenticated user")]
         public async Task<IActionResult> GetSeedsWalletById(int id)
         {
             try
@@ -78,94 +78,94 @@ namespace UniCEC.API.Controllers
 
         }
 
-        [HttpPost]
-        [SwaggerOperation(Summary = "Insert seeds wallet - Authenticated user")]
-        public async Task<IActionResult> InsertSeedsWallet([FromBody] SeedsWalletInsertModel model)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewSeedsWallet result = await _seedsWalletService.Insert(token, model);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        // maybe open in the future
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "Insert seeds wallet - Authenticated user")]
+        //public async Task<IActionResult> InsertSeedsWallet([FromQuery] int studentId)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        ViewSeedsWallet result = await _seedsWalletService.Insert(token, studentId);
+        //        return Ok(result);
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
         
-        [HttpPut]
-        [SwaggerOperation(Summary = "Update seeds wallet - Authenticated user")]
-        public async Task<IActionResult> UpdateSeedsWallet([FromBody] ViewSeedsWallet model)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                bool check = await _seedsWalletService.Update(token, model);
-                return (check == true) ? Ok() : Ok(new object());
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
+        //[HttpPut]
+        //[SwaggerOperation(Summary = "Update seeds wallet - Authenticated user")]
+        //public async Task<IActionResult> UpdateSeedsWallet([FromBody] SeedsWalletUpdateModel model)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        await _seedsWalletService.Update(token, model);
+        //        return Ok();
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
 
-        [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete seeds wallet - Authenticated user")]
-        public async Task<IActionResult> DeleteSeedsWallet(int id)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _seedsWalletService.Delete(token, id);
-                return Ok();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal server exception");
-            }
-        }
-
+        //[HttpDelete("{id}")]
+        //[SwaggerOperation(Summary = "Delete seeds wallet - Authenticated user")]
+        //public async Task<IActionResult> DeleteSeedsWallet(int id)
+        //{
+        //    try
+        //    {
+        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+        //        await _seedsWalletService.Delete(token, id);
+        //        return Ok();
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Unauthorized(ex.Message);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //    catch (SqlException)
+        //    {
+        //        return StatusCode(500, "Internal server exception");
+        //    }
+        //}
     }
 }
