@@ -78,21 +78,19 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         //}
 
-        //public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
-        //{
-        //    var query = await (from mta in context.MemberTakesActivities
-        //                       where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
-        //                       select mta).FirstOrDefaultAsync();
+        public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
+        {
+            var query = await (from mta in context.MemberTakesActivities
+                               where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
+                               select mta).FirstOrDefaultAsync();
 
-        //    return (query != null) ? true : false;
-        //}
+            return (query != null) ? true : false;
+        }
 
-        ////Check task belong to student 
+        //Check task belong to student 
         //public async Task<bool> CheckTaskBelongToStudent(int MemberTakeActivityId, int UserId, int ClubId)
         //{
-        //    //hàm này cho dù Member có qua term khác thì vẫn tìm ra task Member đó lấy từ của chính nó khi ở term cũ
-        //    //ví dụ member id = 1 sang term mới thì member id = 3 nhưng vẫn còn thông tin ở task cũ 
-
+            
         //    MemberTakesActivity query = await (from m in context.Members
         //                                       where m.UserId == UserId && m.ClubId == ClubId
         //                                       from mta in context.MemberTakesActivities

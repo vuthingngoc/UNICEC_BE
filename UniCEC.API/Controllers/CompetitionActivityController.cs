@@ -56,66 +56,64 @@ namespace UniCEC.API.Controllers
         //    }
         //}
 
-        //[Authorize(Roles = "Student")]
-        //[HttpGet]
-        //[SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
-        //public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        [Authorize(Roles = "Student")]
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get Competition Activity by Conditions")]
+        public async Task<IActionResult> GetListClubActivitiesByConditions([FromQuery] CompetitionActivityRequestModel conditions)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //        PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListActivitiesByConditions(conditions, token);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListActivitiesByConditions(conditions, token);
 
-        //        return Ok(result);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new List<object>());
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
+        // GET api/<ClubActivityController>/5
+        [Authorize(Roles = "Student")]
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get Competition Activity by Id")]
+        public async Task<IActionResult> GetCompetitionActivityById(int id, [FromQuery(Name = "clubId")] int clubId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //}
+                ViewDetailCompetitionActivity result = await _competitionActivityService.GetCompetitionActivityById(id, clubId, token);
+                return Ok(result);
 
-        //// GET api/<ClubActivityController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpGet("{id}")]
-        //[SwaggerOperation(Summary = "Get Competition Activity by Id")]
-        //public async Task<IActionResult> GetCompetitionActivityById(int id, [FromQuery(Name = "clubId")] int clubId)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
-
-        //        ViewDetailCompetitionActivity result = await _competitionActivityService.GetCompetitionActivityById(id, clubId, token);
-        //        return Ok(result);
-
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new object());
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
         // POST api/<ClubActivityController>
         [Authorize(Roles = "Student")]
@@ -162,86 +160,90 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        //// PUT api/<ClubActivityController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpPut]
-        //[SwaggerOperation(Summary = "Update Competition Activity by Id ")]
-        //public async Task<IActionResult> UpdateClubActivity([FromBody] CompetitionActivityUpdateModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        // PUT api/<ClubActivityController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update Competition Activity by Id ")]
+        public async Task<IActionResult> UpdateClubActivity([FromBody] CompetitionActivityUpdateModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //        Boolean check = false;
-        //        check = await _competitionActivityService.Update(model, token);
-        //        if (check)
-        //        {
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                Boolean check = false;
+                check = await _competitionActivityService.Update(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
-        //// DELETE api/<ClubActivityController>/5
-        //[Authorize(Roles = "Student")]
-        //[HttpDelete]
-        //[SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
-        //public async Task<IActionResult> DeleteClubAcitvityById([FromBody] CompetitionActivityDeleteModel model)
-        //{
-        //    try
-        //    {
-        //        var header = Request.Headers;
-        //        if (!header.ContainsKey("Authorization")) return Unauthorized();
-        //        string token = header["Authorization"].ToString().Split(" ")[1];
+        // DELETE api/<ClubActivityController>/5
+        [Authorize(Roles = "Student")]
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
+        public async Task<IActionResult> DeleteClubAcitvityById([FromBody] CompetitionActivityDeleteModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
 
-        //        bool result = false;
-        //        result = await _competitionActivityService.Delete(model, token);
-        //        if (result)
-        //        {
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+                bool result = false;
+                result = await _competitionActivityService.Delete(model, token);
+                if (result)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        //-----------------------------------MEMBER TAKES ACTIVITY
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
@@ -14,8 +15,12 @@ using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
+using UniCEC.Data.ViewModels.Entities.Member;
+using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.Business.Services.CompetitionActivitySvc
 {
@@ -56,7 +61,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
 
-
         //Get Process + Top 3
         //public async Task<List<ViewProcessCompetitionActivity>> GetTop3TasksOfCompetition(int clubId, string token)
         //{
@@ -73,98 +77,86 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //    }
         //}
 
-        //public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
-        //{
-        //    try
-        //    {
-        //        if (conditions.ClubId == 0) throw new ArgumentException("Club Id Null");
+        //Get By Condition
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
+        {
+            try
+            {
+                if (conditions.ClubId == 0) throw new ArgumentException("Club Id Null");
 
-        //        //có Competition Id
-        //        if (conditions.CompetitionId.HasValue)
-        //        {
-        //            bool check = await CheckConditions(token, conditions.CompetitionId.Value, conditions.ClubId);
+                //có Competition Id
+                if (conditions.CompetitionId.HasValue)
+                {
+                    await CheckMemberInCompetition(token, conditions.CompetitionId.Value, conditions.ClubId, true);
+                    //
+                    PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                    //
+                    if (result == null) throw new NullReferenceException();
 
-        //            if (check)
-        //            {
+                    List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
-        //                //
-        //                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                    foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                    {
+                        //List Activities Entity
+                        List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
 
-        //                //
-        //                if (result == null) throw new NullReferenceException();
+                        List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
 
-        //                List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+                        if (ActivitiesEntities != null)
+                        {
+                            foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                            {
+                                //get IMG from Firebase                        
+                                string imgUrl_ActivitiesEntity;
+                                try
+                                {
+                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                }
+                                catch (Exception ex)
+                                {
+                                    imgUrl_ActivitiesEntity = "";
+                                }
 
-        //                foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
-        //                {
-
-        //                    //List Activities Entity
-        //                    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
-
-        //                    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
-
-        //                    if (ActivitiesEntities != null)
-        //                    {
-        //                        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
-        //                        {
-        //                            //get IMG from Firebase                        
-        //                            string imgUrl_ActivitiesEntity;
-        //                            try
-        //                            {
-        //                                imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-        //                            }
-        //                            catch (Exception ex)
-        //                            {
-        //                                imgUrl_ActivitiesEntity = "";
-        //                            }
-
-        //                            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
-        //                            {
-        //                                Id = ActivitiesEntity.Id,
-        //                                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-        //                                ImageUrl = imgUrl_ActivitiesEntity,
-        //                                Name = ActivitiesEntity.Name,
-        //                            };
-        //                            //
-        //                            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
-        //                        }
-        //                    }
-        //                    viewDetailCompetitionActivity.ActivitiesEntities = ListView_ActivitiesEntity;
-        //                }
-
-        //                return result;
-
-
-        //            }
-        //            else
-        //            {
-        //                throw new NullReferenceException();
-        //            }
-
-        //        }
-        //        //kh có Competition Id
-        //        else
-        //        {
-        //            //thì thằng này phải là club leader 
-        //            Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
-        //            if (clubLeader.UserId == _decodeToken.Decode(token, "Id"))
-        //            {
-        //                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListProcessActivitiesByConditions(conditions);
-        //                if (result == null) throw new NullReferenceException();
-        //                return result;
-        //            }
-        //            else
-        //            {
-        //                throw new ArgumentException("You don't have permission to do this action");
-        //            }
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
-
+                                ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                                {
+                                    Id = ActivitiesEntity.Id,
+                                    CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                                    ImageUrl = imgUrl_ActivitiesEntity,
+                                    Name = ActivitiesEntity.Name,
+                                };
+                                //
+                                ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                            }
+                        }
+                        else
+                        {
+                            viewDetailCompetitionActivity.ActivitiesEntities = null;
+                        }
+                    }
+                    return result;
+                }
+                //kh có Competition Id
+                else
+                {
+                    //thì thằng này phải là club leader 
+                    Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
+                    if (clubLeader.UserId == _decodeToken.Decode(token, "Id"))
+                    {
+                        PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListProcessActivitiesByConditions(conditions);
+                        if (result == null) throw new NullReferenceException();
+                        return result;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("You don't have permission to do this action");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         //Get ClubActivity-By-Id
         public async Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token)
@@ -181,7 +173,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
                 // khi check đến MemberInCompetition thì sẽ thấy được là User đó kh thuộc trong Competition
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, clubId, false);
-                
+
                 return await TransformViewDetailCompetitionActivity(competitionActivity);
 
             }
@@ -190,8 +182,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 throw;
             }
         }
-
-        //Insert
 
         //Insert
         public async Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel model, string token)
@@ -320,12 +310,23 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 }
                 if (checkDateUpdate == false) { throw new ArgumentException("Date not suitable"); }
 
-                competitionActivity.Name = (model.Name.Length > 0) ? model.Name : competitionActivity.Name;
-                competitionActivity.Description = (model.Description.Length > 0) ? model.Description : competitionActivity.Description;
+                competitionActivity.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : competitionActivity.Name;
+                competitionActivity.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : competitionActivity.Description;
                 competitionActivity.SeedsPoint = (model.SeedsPoint.HasValue) ? model.SeedsPoint.Value : competitionActivity.SeedsPoint;
                 competitionActivity.Ending = (model.Ending.HasValue) ? model.Ending.Value : competitionActivity.Ending;
                 competitionActivity.Priority = (model.Priority.HasValue) ? model.Priority.Value : competitionActivity.Priority;
-                competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
+                if (model.Status.HasValue)
+                {
+                    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling)
+                    {
+                        competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Status Cancelling and Completed can Update");
+                    }
+                }
+
                 await _competitionActivityRepo.Update();
                 return true;
             }
@@ -365,12 +366,124 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
 
+
+        //-------------------------------------------MEMBER TAKE ACTIVITY 
+        public async Task<ViewDetailMemberTakesActivity> AssignTaskForMember(MemberTakesActivityInsertModel model, string token)
+        {
+            try
+            {
+                if (model.MemberId == 0
+                    || model.CompetitionActivityId == 0
+                    || model.ClubId == 0)
+                    throw new ArgumentNullException("MemberId Null || CompetitionActivityId Null || ClubId Null");
+
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.CompetitionActivityId);
+
+                //Check Competition Activity
+                if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
+
+                //Check là người add có quyền trong ban tổ chức hay không?
+                await CheckMemberInCompetition(token, competitionActivity.Id, model.ClubId, false);
+
+                //
+                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+
+                //Competition Activity Status Canceling or Completed
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling || competitionActivity.Status == CompetitionActivityStatus.Completed)
+                    throw new ArgumentException("Competition Activity is Cancelling or Completed");
+
+                //Check Member Id có status true
+                Member member = await _memberRepo.Get(model.MemberId);
+                if (member == null && member.Status == MemberStatus.Active) throw new ArgumentException("Member not found");
+
+                //Check member is belong to club
+                //chỉ có người trong club mình add người trong club mình
+                if (member.ClubId != model.ClubId) throw new ArgumentException("Member are not belong to this club");
+
+                //Check booker can not assign task for yourself 
+                int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
+                ViewMember vdm = await _memberRepo.GetById(memId);
+                if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself");
+
+                //Check add the same task for this member 
+                bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, model.MemberId);
+                if (mtaCheck) throw new ArgumentException("This member is already take this task");
+
+                //-----------INSERT
+                MemberTakesActivity mtaInsert = new MemberTakesActivity();
+                mtaInsert.CompetitionActivityId = model.CompetitionActivityId;
+                mtaInsert.MemberId = model.MemberId;
+                mtaInsert.BookerId = _decodeToken.Decode(token, "Id");
+
+                int result = await _memberTakesActivityRepo.Insert(mtaInsert);
+
+                if (result == 0) throw new ArgumentException("Insert Failed !");
+
+                //+ 1 number Of Member
+                competitionActivity.NumOfMember = competitionActivity.NumOfMember + 1;
+                await _competitionActivityRepo.Update();
+
+                return await TransferViewDetailMTA(mtaInsert);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> MemberUpdateStatusTask(MemberUpdateStatusTaskModel model, string token)
+        {
+            try
+            {
+                if (model.CompetitionActivityId == 0 || model.ClubId == 0)
+                    throw new ArgumentNullException("CompetitionActivityId Null || ClubId Null");
+
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.CompetitionActivityId);
+
+                //Check Competition Activity
+                if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
+
+                //
+                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+
+                //Competition Activity Status Canceling or Completed
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling || competitionActivity.Status == CompetitionActivityStatus.Completed)
+                    throw new ArgumentException("Competition Activity is Cancelling or Completed");
+
+                //Check User is Member of club
+                int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
+                Member member = await _memberRepo.Get(memberId);
+                if (member == null && member.Status == MemberStatus.Active) throw new ArgumentException("Member not found");
+
+                //Check Member belong to this task
+                bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, memberId);
+                if (mtaCheck == false) throw new ArgumentException("This member is not inthis task");
+
+                //
+                if (model.Status == CompetitionActivityStatus.Cancelling || model.Status == CompetitionActivityStatus.Completed)
+                    throw new ArgumentException("You don't have permission to update this Status");
+
+                competitionActivity.Status = model.Status;
+                await _competitionActivityRepo.Update();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
         //transform View Model
         public async Task<ViewDetailCompetitionActivity> TransformViewDetailCompetitionActivity(CompetitionActivity competitionActivity)
         {
 
             //List Activities Entity
-            List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+            List<ViewActivitiesEntity> ListViewAE = new List<ViewActivitiesEntity>();
 
             List<ActivitiesEntity> ActivitiesEntities = (List<ActivitiesEntity>)competitionActivity.ActivitiesEntities;
 
@@ -397,7 +510,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         Name = ActivitiesEntity.Name,
                     };
                     //
-                    ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                    ListViewAE.Add(viewActivitiesEntity);
                 }
             }
 
@@ -406,6 +519,29 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
 
             //List Member Takes Activity
+            List<MemberTakesActivity> membersTakesActivity = competitionActivity.MemberTakesActivities.ToList();
+            List<ViewMemberTakesActivity> listViewMTA = new List<ViewMemberTakesActivity>();
+            if (membersTakesActivity != null)
+            {
+
+                foreach (MemberTakesActivity memberTakesActivity in membersTakesActivity)
+                {
+                    User booker = await _userRepo.Get(memberTakesActivity.BookerId);
+
+                    Member mem = await _memberRepo.Get(memberTakesActivity.MemberId);
+
+                    ViewMemberTakesActivity MTA = new ViewMemberTakesActivity()
+                    {
+                        Id = memberTakesActivity.Id,
+                        CompetitionActivityId = memberTakesActivity.CompetitionActivityId,
+                        BookerId = memberTakesActivity.BookerId,
+                        BookerName = booker.Fullname,
+                        MemberId = memberTakesActivity.MemberId,
+                        MemberName = mem.User.Fullname,
+                    };
+                    listViewMTA.Add(MTA);
+                }
+            }
 
 
             return new ViewDetailCompetitionActivity()
@@ -424,7 +560,28 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 CreatorId = creator.Id,
                 CreatorName = creator.Fullname,
                 CreatorEmail = creator.Email,
-                ActivitiesEntities = ListView_ActivitiesEntity
+                ActivitiesEntities = ListViewAE,
+                MemberTakesActivities = listViewMTA
+            };
+        }
+
+        private async Task<ViewDetailMemberTakesActivity> TransferViewDetailMTA(MemberTakesActivity mta)
+        {
+            // Booker           
+            User booker = await _userRepo.Get(mta.BookerId);
+
+            // Member
+            Member m2 = await _memberRepo.Get(mta.MemberId);
+            User member = await _userRepo.Get(m2.UserId);
+
+            return new ViewDetailMemberTakesActivity()
+            {
+                Id = mta.Id,
+                MemberId = mta.MemberId,
+                MemberName = member.Fullname,
+                CompetitionActivityId = mta.CompetitionActivityId,
+                BookerId = mta.BookerId,
+                BookerName = booker.Fullname
             };
         }
 

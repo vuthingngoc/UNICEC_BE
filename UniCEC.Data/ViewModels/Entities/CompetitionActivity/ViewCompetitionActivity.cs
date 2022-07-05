@@ -20,8 +20,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         public DateTime Ending { get; set; }
         public string Name { get; set; }
 
-        
-
         public PriorityStatus Priority { get; set; }
 
         [JsonPropertyName("competition_activity_status")]
@@ -29,6 +27,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
        
         //------------- ADD Field Activities Entities -> Object Array  
         [JsonPropertyName("activities_entities")]
-        public List<ViewActivitiesEntity> ActivitiesEntities { get; set; }
+        public List<ViewActivitiesEntity>? ActivitiesEntities { get; set; }
     }
 }

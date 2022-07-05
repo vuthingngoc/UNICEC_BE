@@ -9,21 +9,14 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
         
         public int Id { get; set; }
 
+        [JsonPropertyName("competition_activity_id")]
+        public int CompetitionActivityId { get; set; }
+
         [JsonPropertyName("member_id")]
         public int MemberId { get; set; }
 
         [JsonPropertyName("member_name")]
         public string MemberName { get; set; }
-
-        [JsonPropertyName("competition_activity_id")]
-        public int CompetitionActivityId { get; set; }
-        [JsonPropertyName("start_time")]
-        public DateTime StartTime { get; set; }
-        [JsonPropertyName("end_time")]
-        public DateTime? EndTime { get; set; }
-        
-        public DateTime Deadline { get; set; }
-      
 
         [JsonPropertyName("booker_id")]
         public int BookerId { get; set; }

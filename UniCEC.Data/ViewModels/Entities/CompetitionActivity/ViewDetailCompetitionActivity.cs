@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
+using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
@@ -23,13 +24,12 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         public string Description { get; set; }
         public PriorityStatus Priority { get; set; }
 
-        
         [JsonPropertyName("competition_activity_status")]
         public CompetitionActivityStatus Status { get; set; }
 
-
         [JsonPropertyName("num_of_member")]
         public int NumOfMember { get; set; }
+
         //------------- ADD Field Member info who create task 
         [JsonPropertyName("creator_id")]
         public int CreatorId { get; set; }
@@ -42,9 +42,9 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         [JsonPropertyName("activities_entities")]
         public List<ViewActivitiesEntity> ActivitiesEntities { get; set; }
 
-       
-        
-
+        //------------- ADD Field Member Take Activity -> Object Array
+        [JsonPropertyName("member_takes_activities")]
+        public List<ViewMemberTakesActivity> MemberTakesActivities { get; set; }
 
     }
 }

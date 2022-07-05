@@ -10,7 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
 {
     public interface IActivitiesEntityRepo : IRepository<ActivitiesEntity>
     {
-        //public Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId);
+        public Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId);
 
         public Task DeleteActivitiesEntity(int activitiesEntityId);
     }

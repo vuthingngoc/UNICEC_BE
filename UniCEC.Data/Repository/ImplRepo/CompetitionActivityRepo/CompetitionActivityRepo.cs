@@ -85,99 +85,87 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //    return (listVPCA.Count > 0) ? listVPCA : null;  
         //}
 
-        //public async Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions)
-        //{
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        {
 
-        //    List<ViewCompetitionActivity> listVCA = new List<ViewCompetitionActivity>();
+            List<ViewCompetitionActivity> listVCA = new List<ViewCompetitionActivity>();
 
-        //    //LocalTime
-        //    DateTimeOffset localTime = new LocalTime().GetLocalTime();
+            //LocalTime
+            //DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-        //    var query = from cic in context.CompetitionInClubs
-        //                where cic.ClubId == conditions.ClubId
-        //                from c in context.Competitions
-        //                where c.Id == cic.CompetitionId
-        //                from ca in context.CompetitionActivities
-        //                where ca.CompetitionId == c.Id                      
-        //                select ca;
+            var query = from cic in context.CompetitionInClubs
+                        where cic.ClubId == conditions.ClubId
+                        from c in context.Competitions
+                        where c.Id == cic.CompetitionId
+                        from ca in context.CompetitionActivities
+                        where ca.CompetitionId == c.Id
+                        select ca;
 
+            //PriorityStatus
+            if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
-        //    //ProcessStatus
-        //    if (conditions.ProcessStatus.HasValue) query = query.Where(ca => ca.Process == conditions.ProcessStatus);
+            //Status
+            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
+          
+            List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
 
-        //    //PriorityStatus
-        //    if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
+            int totalCount = query.Count();
 
-        //    //Status
-        //    if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
+            foreach (CompetitionActivity activity in list_CompetitionActivity)
+            {
 
-        //    //query = (IQueryable<CompetitionActivity>)query.GroupBy(x => x.CompetitionId);
+                ViewCompetitionActivity vca = new ViewCompetitionActivity()
+                {
+                    Id = activity.Id,
+                    CompetitionId = activity.Competition.Id,                
+                    Status = activity.Status
+                };
 
-        //    List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
+                listVCA.Add(vca);
+            }//end task
 
-        //    int totalCount = query.Count();
+            return (listVCA.Count > 0) ? new PagingResult<ViewCompetitionActivity>(listVCA, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
 
-        //    foreach (CompetitionActivity activity in list_CompetitionActivity)
-        //    {
-
-        //        ViewCompetitionActivity vca = new ViewCompetitionActivity()
-        //        {
-        //            Id = activity.Id,
-        //            CompetitionId = activity.Competition.Id,                   
-        //            ProcessStatus = activity.Process,
-        //            Status = activity.Status
-        //        };
-
-        //        listVCA.Add(vca);
-        //    }//end task
-
-        //    return (listVCA.Count > 0) ? new PagingResult<ViewCompetitionActivity>(listVCA, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
-
-        //}
+        }
 
 
-        //////Get List ClubActivity By Conditions
-        //public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions)
-        //{
-        //    //LocalTime
-        //    DateTimeOffset localTime = new LocalTime().GetLocalTime();
+        //Get List ClubActivity By Conditions
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions)
+        {
+            //LocalTime
+            DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-        //    var query = from c in context.Competitions
-        //                where c.Id == conditions.CompetitionId
-        //                from ca in context.CompetitionActivities
-        //                where ca.CompetitionId == c.Id && ca.CreateTime >= localTime
-        //                orderby ca.CreateTime
-        //                select ca;
+            var query = from c in context.Competitions
+                        where c.Id == conditions.CompetitionId
+                        from ca in context.CompetitionActivities
+                        where ca.CompetitionId == c.Id && ca.CreateTime >= localTime
+                        orderby ca.CreateTime
+                        select ca;        
 
+            //PriorityStatus
+            if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
-        //    //ProcessStatus
-        //    if (conditions.ProcessStatus.HasValue) query = query.Where(ca => ca.Process == conditions.ProcessStatus);
-
-        //    //PriorityStatus
-        //    if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
-
-        //    //Status
-        //    if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
+            //Status
+            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
 
 
-        //    int totalCount = query.Count();
+            int totalCount = query.Count();
 
-        //    List<ViewCompetitionActivity> Activities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
-        //                                            .Select(ca => new ViewCompetitionActivity
-        //                                            {
-        //                                                Id = ca.Id,
-        //                                                CompetitionId = ca.CompetitionId,
-        //                                                Name = ca.Name,
-        //                                                CreateTime = ca.CreateTime,
-        //                                                Ending = ca.Ending,
-        //                                                ProcessStatus = ca.Process,
-        //                                                Priority = ca.Priority,
-        //                                                Status = ca.Status,
-        //                                            }).ToListAsync();
+            List<ViewCompetitionActivity> Activities = await query.Skip((conditions.CurrentPage - 1) * conditions.PageSize).Take(conditions.PageSize)
+                                                    .Select(ca => new ViewCompetitionActivity
+                                                    {
+                                                        Id = ca.Id,
+                                                        CompetitionId = ca.CompetitionId,
+                                                        Name = ca.Name,
+                                                        CreateTime = ca.CreateTime,
+                                                        Ending = ca.Ending,                                                     
+                                                        Priority = ca.Priority,
+                                                        Status = ca.Status,
+                                                    }).ToListAsync();
 
-        //    return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
+            return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
 
-        //}
+        }
 
         // Nhat
         public async Task<int> GetTotalActivityByClub(int clubId)
