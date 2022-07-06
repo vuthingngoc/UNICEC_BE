@@ -73,6 +73,30 @@ namespace UniCEC.Business.Services.SeedsWalletSvc
             };
         }
 
+        public async Task InsertSeedsWallet(int studentId) // for new user
+        {
+            SeedsWallet seedsWallet = await _seedsWalletRepo.GetByStudentId(studentId);
+            if (seedsWallet != null) return;
+
+            seedsWallet = new SeedsWallet()
+            {
+                StudentId = studentId,
+                Amount = 100, // default scores
+                Status = true // default status
+            };
+
+            await _seedsWalletRepo.Insert(seedsWallet);
+        }
+
+        public async Task UpdateAmount(int studentId, double amount) 
+        {
+            SeedsWallet seedsWallet = await _seedsWalletRepo.GetByStudentId(studentId);
+            if (seedsWallet == null) throw new NullReferenceException("Not found this seeds wallet");
+
+            seedsWallet.Amount += amount;
+            await _seedsWalletRepo.Update();
+        }
+
         public async Task<ViewSeedsWallet> Insert(string token, int studentId) // future ...
         {
             if (studentId.Equals(0)) throw new ArgumentException("Student Null");
@@ -97,18 +121,20 @@ namespace UniCEC.Business.Services.SeedsWalletSvc
             bool isValid = await CheckAuthorized(token, model.StudentId);
             if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            SeedsWallet seedsWallet = await _seedsWalletRepo.Get(model.Id);
-            if (seedsWallet == null) throw new NullReferenceException("Not found this seeds wallet");
+            //SeedsWallet seedsWallet = await _seedsWalletRepo.Get(model.Id);
+            //if (seedsWallet == null) throw new NullReferenceException("Not found this seeds wallet");
 
-            int userId = _decodeToken.Decode(token, "Id");
+            //int userId = _decodeToken.Decode(token, "Id");
 
-            if(model.Amount.HasValue && model.Amount.Value >= 0) seedsWallet.Amount = model.Amount.Value;
+            //if(model.Amount.HasValue && model.Amount.Value >= 0) seedsWallet.Amount = model.Amount.Value;
 
-            if(model.Status.HasValue && model.Status.Value.Equals(true) 
-                && userId.Equals(model.StudentId)) 
-                    seedsWallet.Status = model.Status.Value;
+            //if(model.Status.HasValue && model.Status.Value.Equals(true) 
+            //    && userId.Equals(model.StudentId)) 
+            //        seedsWallet.Status = model.Status.Value;
 
-            await _seedsWalletRepo.Update();
+            await UpdateAmount(model.StudentId, model.Amount.Value);
+
+            //await _seedsWalletRepo.Update();
         }
 
         public async Task Delete(string token, int id) // future ...

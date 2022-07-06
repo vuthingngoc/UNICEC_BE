@@ -44,7 +44,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo
                 }).ToListAsync();
 
             return (items.Count() > 0)
-                        ? new PagingResult<ViewSeedsWallet>(items, totalCount, request.CurrentPage, request.PageSize) 
+                        ? new PagingResult<ViewSeedsWallet>(items, totalCount, request.CurrentPage, request.PageSize)
                         : null;
         }
 
@@ -55,10 +55,19 @@ namespace UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo
                           select new ViewSeedsWallet()
                           {
                               Id = sw.Id,
-                              StudentId= sw.StudentId,
-                              Amount= sw.Amount,
+                              StudentId = sw.StudentId,
+                              Amount = sw.Amount,
                               Status = sw.Status
                           }).FirstOrDefaultAsync();
+        }
+
+        public async Task<SeedsWallet> GetByStudentId(int studentId)
+        {
+            var id =  await (from sw in context.SeedsWallets
+                          where sw.StudentId.Equals(studentId)
+                          select sw.Id).FirstOrDefaultAsync();
+
+            return (id > 0) ? await Get(id) : null; // just for update amount
         }
     }
 }

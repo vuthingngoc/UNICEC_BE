@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.RoleSvc;
+using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Enum;
@@ -19,12 +20,15 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUserService _userService;
         private IUniversityService _universityService;
         private IRoleService _roleService;
+        private ISeedsWalletService _seedsWalletService;
 
-        public FirebaseService(IUserService userService, IUniversityService universityService, IRoleService roleService)
+        public FirebaseService(IUserService userService, IUniversityService universityService
+                                , IRoleService roleService, ISeedsWalletService seedsWalletService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
+            _seedsWalletService = seedsWalletService;
         }
 
         public async Task<ViewUserInfo> Authentication(string token)
@@ -58,6 +62,9 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     ViewRole role = await _roleService.GetByRoleId(userModel.RoleId);
                     userModel.RoleName = role.RoleName;
                     userModel.UniversityId = 0;
+
+                    // create seeds wallet
+                    await _seedsWalletService.InsertSeedsWallet(userModel.Id);
 
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
                     string userToken = JWTUserToken.GenerateJWTTokenUser(userModel);
