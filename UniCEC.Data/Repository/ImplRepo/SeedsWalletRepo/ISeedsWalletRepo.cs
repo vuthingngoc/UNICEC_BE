@@ -10,6 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo
     public interface ISeedsWalletRepo : IRepository<SeedsWallet>
     {
         public Task<ViewSeedsWallet> GetById(int id);
+        public Task<SeedsWallet> GetByStudentId(int studentId);
         public Task<PagingResult<ViewSeedsWallet>> GetByConditions(SeedsWalletRequestModel request);
     }
 }

@@ -107,38 +107,38 @@ namespace UniCEC.API.Controllers
         //    }
         //}
 
-        
-        //[HttpPut]
-        //[SwaggerOperation(Summary = "Update seeds wallet - Authenticated user")]
-        //public async Task<IActionResult> UpdateSeedsWallet([FromBody] SeedsWalletUpdateModel model)
-        //{
-        //    try
-        //    {
-        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-        //        await _seedsWalletService.Update(token, model);
-        //        return Ok();
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal server exception");
-        //    }
-        //}
+
+        [HttpPut]
+        [SwaggerOperation(Summary = "Update seeds wallet - Authenticated user")]
+        public async Task<IActionResult> UpdateSeedsWallet([FromBody] SeedsWalletUpdateModel model)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _seedsWalletService.Update(token, model);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
 
         //[HttpDelete("{id}")]
         //[SwaggerOperation(Summary = "Delete seeds wallet - Authenticated user")]
