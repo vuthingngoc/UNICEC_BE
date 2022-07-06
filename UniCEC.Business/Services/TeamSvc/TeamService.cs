@@ -386,10 +386,20 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
 
+                //Competition Status UpComming mới được ấn
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition.Status == CompetitionStatus.Draft
+                 || competition.Status == CompetitionStatus.PendingReview
+                 || competition.Status == CompetitionStatus.Pending
+                 || competition.Status == CompetitionStatus.Approve
+                 || competition.Status == CompetitionStatus.Publish)
+                    throw new ArgumentException("Can't do this action at this Competition State");
+                 
                 //Count số team Locked
                 int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(model.CompetitionId);
-
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (numberOfTeamIsLocked == 0) throw new ArgumentException("There is no team Locked");
+                
+                //update Number of team
                 competition.NumberOfTeam = numberOfTeamIsLocked;
                 await _competitionRepo.Update();
 
