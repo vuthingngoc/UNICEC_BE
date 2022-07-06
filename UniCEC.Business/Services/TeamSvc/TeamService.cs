@@ -397,7 +397,7 @@ namespace UniCEC.Business.Services.TeamSvc
                  
                 //Count số team Locked
                 int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(model.CompetitionId);
-                if (numberOfTeamIsLocked == 0) throw new ArgumentException("There is no team Locked");
+                if (numberOfTeamIsLocked == -1) throw new ArgumentException("There is no team Locked");
                 
                 //update Number of team
                 competition.NumberOfTeam = numberOfTeamIsLocked;
