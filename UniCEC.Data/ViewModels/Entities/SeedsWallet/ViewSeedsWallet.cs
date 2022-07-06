@@ -4,7 +4,7 @@ namespace UniCEC.Data.ViewModels.Entities.SeedsWallet
 {
     public class ViewSeedsWallet
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonPropertyName("student_id")]
         public int StudentId { get; set; }
         public double Amount { get; set; }
