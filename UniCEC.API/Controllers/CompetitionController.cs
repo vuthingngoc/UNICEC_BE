@@ -61,11 +61,11 @@ namespace UniCEC.API.Controllers
         // GET: api/<CompetitionController>
         [HttpGet("top")]
         [SwaggerOperation(Summary = "Get top X EVENT or COMPETITION by club, status")]
-        public async Task<IActionResult> GetTopCompOrEve([FromQuery(Name = "clubId")] int? ClubId, [FromQuery(Name = "event")] bool? Event, [FromQuery(Name = "status")] CompetitionStatus? Status, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope, [FromQuery, BindRequired] int top)
+        public async Task<IActionResult> GetTopCompOrEve([FromQuery(Name = "clubId"), BindRequired] int ClubId, [FromQuery(Name = "event")] bool? Event/*, [FromQuery(Name = "status")] CompetitionStatus? Status*/, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope, [FromQuery, BindRequired] int top)
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTopCompOrEve(ClubId, Event, Status, Scope, top);
+                List<ViewCompetition> result = await _competitionService.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, top);
                 return Ok(result);
             }
             catch (NullReferenceException)

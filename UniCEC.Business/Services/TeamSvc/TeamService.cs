@@ -6,6 +6,8 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
@@ -26,6 +28,8 @@ namespace UniCEC.Business.Services.TeamSvc
         private IParticipantInTeamRepo _participantInTeamRepo;
         private IClubRepo _clubRepo;
         private DecodeToken _decodeToken;
+        private IMemberRepo _memberRepo;
+        private IMemberInCompetitionRepo _memberInCompetitionRepo;
 
 
 
@@ -34,7 +38,9 @@ namespace UniCEC.Business.Services.TeamSvc
                            ICompetitionRepo competitionRepo,
                            ITeamRoleRepo teamRoleRepo,
                            IClubRepo clubRepo,
-                           IParticipantInTeamRepo participantInTeamRepo)
+                           IParticipantInTeamRepo participantInTeamRepo,
+                           IMemberRepo memberRepo,
+                           IMemberInCompetitionRepo memberInCompetitionRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
@@ -42,6 +48,8 @@ namespace UniCEC.Business.Services.TeamSvc
             _teamRoleRepo = teamRoleRepo;
             _clubRepo = clubRepo;
             _participantInTeamRepo = participantInTeamRepo;
+            _memberRepo = memberRepo;
+            _memberInCompetitionRepo = memberInCompetitionRepo;
             _decodeToken = new DecodeToken();
 
         }
@@ -156,6 +164,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (competition == null) throw new ArgumentException("Competition is not found");
 
                 //Check Competition can create Team StartTimeRegister < local time < StartTime
+                //nên chỉnh sang status
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Can't create Team at this moment !!!");
 
                 //check competition is Event or not -> if event can't create team
@@ -320,10 +329,6 @@ namespace UniCEC.Business.Services.TeamSvc
                 }
                 await _teamRepo.Update();
                 return true;
-
-
-
-
             }
             catch (Exception)
             {
@@ -379,15 +384,16 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 if (model.CompetitionId == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null || Club Id Null");
 
+                await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
+
+                //Count số team Locked
+                int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(model.CompetitionId);
+
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
-                if (competition == null) throw new ArgumentException("Competition not found");
+                competition.NumberOfTeam = numberOfTeamIsLocked;
+                await _competitionRepo.Update();
 
-                Club club = await _clubRepo.Get(model.ClubId);
-                if (club == null) throw new ArgumentException("Club not found");
-
-                //CompetitionManager competitionManager = await 
-                return false;
-
+                return true;
             }
             catch (Exception)
             {
@@ -542,6 +548,37 @@ namespace UniCEC.Business.Services.TeamSvc
             return check;
         }
 
+
+        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
+        {
+            //------------- CHECK Competition in system
+            Competition competition = await _competitionRepo.Get(CompetitionId);
+            if (competition == null) throw new ArgumentException("Competition or Event not found ");
+
+            //------------- CHECK Club in system
+            Club club = await _clubRepo.Get(ClubId);
+            if (club == null) throw new ArgumentException("Club in not found");
+
+            //------------- CHECK Is Member in Club
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
+            Member member = await _memberRepo.Get(memberId);
+            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+            //------------- CHECK User is in CompetitionManger table                
+            MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
+            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+
+            if (isOrganization)
+            {
+                //1,2 accept
+                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                return true;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
     }
 }

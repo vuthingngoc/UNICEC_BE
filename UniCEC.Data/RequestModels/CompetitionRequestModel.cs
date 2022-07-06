@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace UniCEC.Data.RequestModels
     {
         //Club Id
         [FromQuery(Name = "clubId")]
-        public int ClubId { get; set; }
+        public int? ClubId { get; set; }
         //Serach Event
         [FromQuery(Name = "event")]
         public bool? Event { get; set; }
@@ -21,7 +22,7 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "scope")]
         public CompetitionScopeStatus? Scope { get; set; }
         //Status
-        [FromQuery(Name = "status")]
-        public CompetitionStatus? Status { get; set; }
+        [FromQuery(Name = "statuses")]
+        public List<CompetitionStatus>? Statuses { get; set; }
     }
 }

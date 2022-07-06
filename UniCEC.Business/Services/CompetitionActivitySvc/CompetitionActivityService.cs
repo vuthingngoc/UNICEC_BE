@@ -61,21 +61,21 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
 
-        //Get Process + Top 3
-        //public async Task<List<ViewProcessCompetitionActivity>> GetTop3TasksOfCompetition(int clubId, string token)
-        //{
-        //    try
-        //    {
-        //        if (clubId == 0) throw new ArgumentException("Club Id Null");
-        //        List<ViewProcessCompetitionActivity> result = await _competitionActivityRepo.GetTop3CompetitionActivity(clubId);
-        //        if (result == null) throw new NullReferenceException();
-        //        return result;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw new NullReferenceException("Not Has Data !!!");
-        //    }
-        //}
+        //Get Process
+        public async Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token)
+        {
+            try
+            {
+                if (clubId == 0 || topCompetition == 0 || topCompetitionActivity == 0) throw new ArgumentException("Club Id Null || Top Competition Null || Top Competition Activity Null");
+                List<ViewProcessCompetitionActivity> result = await _competitionActivityRepo.GetTopCompetitionActivity(clubId, topCompetition, topCompetitionActivity);
+                if (result == null) throw new NullReferenceException();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw new NullReferenceException("Not Has Data !!!");
+            }
+        }
 
         //Get By Condition
         public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token)
@@ -285,12 +285,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
+                //Check Task Status
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling) throw new ArgumentException("Competition Activity is Cancel");
+
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
                 if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
-
-                //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling) throw new ArgumentException("Competition Activity is Cancel");
 
                 //------------ Check date update
                 bool checkDateUpdate = false;
@@ -385,13 +385,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //Check là người add có quyền trong ban tổ chức hay không?
                 await CheckMemberInCompetition(token, competitionActivity.Id, model.ClubId, false);
 
-                //
-                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
-
                 //Competition Activity Status Canceling or Completed
                 if (competitionActivity.Status == CompetitionActivityStatus.Cancelling || competitionActivity.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
+
+                //Competition Status
+                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
 
                 //Check Member Id có status true
                 Member member = await _memberRepo.Get(model.MemberId);
@@ -444,13 +444,14 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //Check Competition Activity
                 if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
 
-                //
-                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
-
                 //Competition Activity Status Canceling or Completed
                 if (competitionActivity.Status == CompetitionActivityStatus.Cancelling || competitionActivity.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
+
+                //Competition Status
+                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+
 
                 //Check User is Member of club
                 int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
@@ -475,7 +476,42 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 throw;
             }
         }
-   
+
+        public async Task<bool> RemoveMemberTakeTask(RemoveMemberTakeActivityModel model, string token)
+        {
+            try
+            {
+                if (model.ClubId == 0) throw new ArgumentNullException("ClubId Null");
+
+                //Check task exsited
+                MemberTakesActivity mta = await _memberTakesActivityRepo.Get(model.MemberTakesActivityId);
+                if (mta == null) throw new ArgumentException("This member task not found !");
+
+                //Competition Activity Status Canceling or Completed
+                CompetitionActivity ca = await _competitionActivityRepo.Get(mta.CompetitionActivityId);
+                if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
+                    throw new ArgumentException("Competition Activity is Cancelling or Completed");
+
+                //Check Competition Status
+                Competition competition = await _competitionRepo.Get(ca.CompetitionId);
+                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+
+                //Check Condition
+                await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
+
+                // -1 Number Of Participant
+                ca.NumOfMember = ca.NumOfMember - 1;
+                await _competitionActivityRepo.Update();
+
+                return await _memberTakesActivityRepo.RemoveMemberTakeTask(model.MemberTakesActivityId);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //transform View Model
         public async Task<ViewDetailCompetitionActivity> TransformViewDetailCompetitionActivity(CompetitionActivity competitionActivity)
         {
@@ -660,9 +696,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
-        public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId, int clubId)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

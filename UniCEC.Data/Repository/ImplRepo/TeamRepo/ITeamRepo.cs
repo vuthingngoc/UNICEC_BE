@@ -21,6 +21,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 
         public Task DeleteTeam(int TeamId);
 
+        public Task<int> CountNumberOfTeamIsLocked(int competitionId);
+
         public Task<bool> UpdateStatusAvailableForAllTeam(int CompetitionId);
 
         //
