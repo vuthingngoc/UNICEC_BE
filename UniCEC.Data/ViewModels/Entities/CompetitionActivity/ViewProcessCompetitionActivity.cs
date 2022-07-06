@@ -19,8 +19,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         [JsonPropertyName("competition_name")]
         public string CompetitionName { get; set; }
 
-       
-
         public CompetitionActivityStatus Status { get; set; }
 
         //[JsonPropertyName("create_time")]

@@ -33,57 +33,57 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             return check;
         }
 
-        ////use with method top 3 Competition
-        //public async Task<List<ViewProcessCompetitionActivity>> GetTop3CompetitionActivity(int clubId)
-        //{
-        //    //
-        //    List<ViewProcessCompetitionActivity> listVPCA = new List<ViewProcessCompetitionActivity>();
+        //use with method top 3 Competition
+        public async Task<List<ViewProcessCompetitionActivity>> GetTopCompetitionActivity(int clubId, int topCompetition, int topCompetitionActivity)
+        {
+            //
+            List<ViewProcessCompetitionActivity> listVPCA = new List<ViewProcessCompetitionActivity>();
 
-        //    //LocalTime
-        //    DateTimeOffset localTime = new LocalTime().GetLocalTime();
+            //LocalTime
+            DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-        //    List<Competition> listCompe = await (from cic in context.CompetitionInClubs
-        //                                         where cic.ClubId == clubId
-        //                                         join comp in context.Competitions on cic.CompetitionId equals comp.Id
-        //                                         where comp.StartTime >= localTime && comp.Status != CompetitionStatus.Canceling
-        //                                         orderby comp.StartTime
-        //                                         select comp).ToListAsync();
-        //    //top 3 compe
-        //    listCompe = listCompe.Take(3).ToList();
+            List<Competition> listCompe = await (from cic in context.CompetitionInClubs
+                                                 where cic.ClubId == clubId
+                                                 join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                                                 where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel && comp.Status == CompetitionStatus.Publish
+                                                 orderby comp.StartTime
+                                                 select comp).ToListAsync();
+            //top x compe
+            listCompe = listCompe.Take(topCompetition).ToList();
 
-        //    //cứ mỗi list compe sẽ có top 3 task
-        //    foreach (Competition comp in listCompe)
-        //    {
-        //        var query = from ca in context.CompetitionActivities
-        //                    where ca.CompetitionId == comp.Id && ca.CreateTime >= localTime
-        //                    orderby ca.CreateTime
-        //                    select ca;
+            //cứ mỗi list compe sẽ có top 3 task
+            foreach (Competition comp in listCompe)
+            {
+                var query = from ca in context.CompetitionActivities
+                            where ca.CompetitionId == comp.Id && ca.CreateTime >= localTime
+                            orderby ca.CreateTime
+                            select ca;
 
-        //        List<CompetitionActivity> list_CompetitionActivity = await query.Take(3).ToListAsync();
+                List<CompetitionActivity> list_CompetitionActivity = await query.Take(topCompetitionActivity).ToListAsync();
 
-        //        //mỗi task sẽ có người tham gia
-        //        foreach (CompetitionActivity activity in list_CompetitionActivity)
-        //        {
-
-
-        //            ViewProcessCompetitionActivity vcpa = new ViewProcessCompetitionActivity()
-        //            {
-        //                Id = activity.Id,
-        //                CompetitionId = comp.Id,
-        //                CompetitionName = comp.Name,    
-        //                ProcessStatus = activity.Process,
-        //                Status = activity.Status
-
-        //            };
-
-        //            listVPCA.Add(vcpa);
-        //        }//end task
+                //mỗi task sẽ có người tham gia
+                foreach (CompetitionActivity activity in list_CompetitionActivity)
+                {
 
 
-        //    }//end competition
+                    ViewProcessCompetitionActivity vcpa = new ViewProcessCompetitionActivity()
+                    {
+                        Id = activity.Id,
+                        CompetitionId = comp.Id,
+                        CompetitionName = comp.Name,
+                        //ProcessStatus = activity.Process,
+                        Status = activity.Status
 
-        //    return (listVPCA.Count > 0) ? listVPCA : null;  
-        //}
+                    };
+
+                    listVPCA.Add(vcpa);
+                }//end task
+
+
+            }//end competition
+
+            return (listVPCA.Count > 0) ? listVPCA : null;
+        }
 
         public async Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions)
         {
@@ -104,9 +104,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             //PriorityStatus
             if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
-            //Status
-            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
-          
+            //Statuses
+            if (conditions.Statuses.Count > 0) query = query.Where(ca => conditions.Statuses.Count == 0 || conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
+
             List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
 
             int totalCount = query.Count();
@@ -145,8 +145,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             //PriorityStatus
             if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
-            //Status
-            if (conditions.Status.HasValue) query = query.Where(ca => ca.Status == conditions.Status);
+            //Statuses
+            if (conditions.Statuses.Count > 0) query = query.Where(ca => conditions.Statuses.Count == 0 || conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
 
 
             int totalCount = query.Count();

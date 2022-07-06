@@ -18,7 +18,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
         public Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions);
 
-        //public Task<List<ViewProcessCompetitionActivity>> GetTop3CompetitionActivity(int clubId);
+        public Task<List<ViewProcessCompetitionActivity>> GetTopCompetitionActivity(int clubId, int topCompetition, int topCompetitionActivity);
 
         // Nhat
         public Task<int> GetTotalActivityByClub(int clubId);

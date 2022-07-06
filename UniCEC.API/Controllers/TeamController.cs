@@ -106,7 +106,6 @@ namespace UniCEC.API.Controllers
         }
 
 
-
         // POST api/<TeamController>
         [Authorize(Roles = "Student")]
         [HttpPost()]
@@ -318,7 +317,6 @@ namespace UniCEC.API.Controllers
         }
 
 
-
         [Authorize(Roles = "Student")]
         [HttpDelete("team/{id}")]
         [SwaggerOperation(Summary = "Delete team by leader")]
@@ -397,7 +395,6 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
-
 
     }
 }

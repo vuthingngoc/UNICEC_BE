@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Collections.Generic;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 
@@ -14,7 +15,9 @@ namespace UniCEC.Data.RequestModels
 
         [FromQuery(Name = "priorityStatus")]
         public PriorityStatus? PriorityStatus { get; set; }
-        public CompetitionActivityStatus? Status { get; set; }   
+
+        [FromQuery(Name = "statuses")]
+        public List<CompetitionActivityStatus>? Statuses { get; set; }   
 
         //Club Id
         [FromQuery(Name = "clubId"), BindRequired]

@@ -17,6 +17,27 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public MemberTakesActivityRepo(UniCECContext context) : base(context) { }
 
 
+        
+
+        public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
+        {
+            var query = await (from mta in context.MemberTakesActivities
+                               where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
+                               select mta).FirstOrDefaultAsync();
+
+            return (query != null) ? true : false;
+        }
+
+        
+
+        public async Task<bool> RemoveMemberTakeTask(int memberTakeActivityId)
+        {
+            MemberTakesActivity result = await (from mta in context.MemberTakesActivities where mta.Id == memberTakeActivityId select mta).FirstOrDefaultAsync();
+            context.MemberTakesActivities.Remove(result);
+            await Update();
+            return true;
+        }
+
         //Get-All-Taskes-By-Conditions 
         //lấy tất cả task được assigned cho member và thuộc Competition Activity - CompetitionManager Role
         //public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksByConditions(MemberTakesActivityRequestModel request)
@@ -78,19 +99,22 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         //}
 
-        public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
-        {
-            var query = await (from mta in context.MemberTakesActivities
-                               where mta.CompetitionActivityId == competitionActivityId && mta.MemberId == memberId
-                               select mta).FirstOrDefaultAsync();
-
-            return (query != null) ? true : false;
-        }
+        //public async Task<int> GetNumberOfMemberIsSubmitted(int competitionActivityId)
+        //{
+        //   var query = from mta in context.MemberTakesActivities
+        //               where mta.CompetitionActivityId == competitionActivityId && mta.Status != MemberTakesActivityStatus.Doing
+        //                                                                        && mta.Status != MemberTakesActivityStatus.LateTime
+        //                                                                        && mta.Status != MemberTakesActivityStatus.Finished
+        //                                                                        && mta.Status != MemberTakesActivityStatus.FinishedLate
+        //                                                                        select mta;
+        //    int result = await query.CountAsync();
+        //    return (result > 0) ? result : 0;    
+        //}
 
         //Check task belong to student 
         //public async Task<bool> CheckTaskBelongToStudent(int MemberTakeActivityId, int UserId, int ClubId)
         //{
-            
+
         //    MemberTakesActivity query = await (from m in context.Members
         //                                       where m.UserId == UserId && m.ClubId == ClubId
         //                                       from mta in context.MemberTakesActivities
@@ -119,25 +143,5 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         //    context.SaveChanges();
         //}
 
-        //public async Task<bool> RemoveMemberTakeTask(int memberTakeActivityId)
-        //{
-        //    MemberTakesActivity result = await (from mta in context.MemberTakesActivities where mta.Id == memberTakeActivityId select mta).FirstOrDefaultAsync();
-
-        //    context.MemberTakesActivities.Remove(result);
-        //    await Update();
-        //    return true;
-        //}
-
-        //public async Task<int> GetNumberOfMemberIsSubmitted(int competitionActivityId)
-        //{
-        //   var query = from mta in context.MemberTakesActivities
-        //               where mta.CompetitionActivityId == competitionActivityId && mta.Status != MemberTakesActivityStatus.Doing
-        //                                                                        && mta.Status != MemberTakesActivityStatus.LateTime
-        //                                                                        && mta.Status != MemberTakesActivityStatus.Finished
-        //                                                                        && mta.Status != MemberTakesActivityStatus.FinishedLate
-        //                                                                        select mta;
-        //    int result = await query.CountAsync();
-        //    return (result > 0) ? result : 0;    
-        //}
     }
 }

@@ -182,7 +182,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 //ROUND 4 - Create Participant
                 if (round1 && round2 && round3)
                 {
-
+                    //-------------- INSERT PARTICIPANT
                     Participant participant = new Participant();
                     participant.StudentId = studentInfo.Id;
                     participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
@@ -206,7 +206,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                         participant.MemberId = member.Id;
                     }
 
-                    //-------------- INSERT PARTICIPANT
+                   
                     int result = await _participantRepo.Insert(participant);
                     if (result != 0)
                     {

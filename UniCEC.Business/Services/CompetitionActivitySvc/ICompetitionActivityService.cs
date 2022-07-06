@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 {
     public interface ICompetitionActivityService
     {
-        //public Task<List<ViewProcessCompetitionActivity>> GetTop3TasksOfCompetition(int clubId, string token);
+        public Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token);
 
         public Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token);
         public Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel clubActivity, string token);
@@ -27,11 +27,11 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //------------------------------------Member Take Activity
         public Task<ViewDetailMemberTakesActivity> AssignTaskForMember(MemberTakesActivityInsertModel model, string token);
 
-        //
+        //Member Update Task Status
         public Task<bool> MemberUpdateStatusTask(MemberUpdateStatusTaskModel model, string token);
 
         //Remove member take task 
-        public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId, int clubId);
+        public Task<bool> RemoveMemberTakeTask(RemoveMemberTakeActivityModel model, string token);
 
 
     }

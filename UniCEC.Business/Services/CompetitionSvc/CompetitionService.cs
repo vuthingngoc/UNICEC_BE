@@ -17,6 +17,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
+using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
@@ -55,6 +56,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private ICompetitionHistoryRepo _competitionHistoryRepo;
         private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
+        private IEntityTypeRepo _entityTypeRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -72,6 +74,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionInMajorRepo competitionInMajorRepo,
                                   ICompetitionHistoryRepo competitionHistoryRepo,
                                   ICompetitionRoleRepo competitionRoleRepo,
+                                  IEntityTypeRepo entityTypeRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -92,6 +95,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionInMajorRepo = competitionInMajorRepo;
             _competitionHistoryRepo = competitionHistoryRepo;
+            _entityTypeRepo = entityTypeRepo;
         }
 
 
@@ -127,10 +131,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get top 3 EVENT or COMPETITION by Status
-        public async Task<List<ViewCompetition>> GetTopCompOrEve(int? ClubId, bool? Event, CompetitionStatus? Status, CompetitionScopeStatus? Scope, int Top)
+        public async Task<List<ViewCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
         {
 
-            List<ViewCompetition> result = await _competitionRepo.GetTopCompOrEve(ClubId, Event, Status, Scope, Top);
+            List<ViewCompetition> result = await _competitionRepo.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, Top);
 
 
             foreach (ViewCompetition item in result)
@@ -183,7 +187,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             foreach (ViewCompetition item in resultList)
             {
-
                 //List Competition Entity
                 List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
 
@@ -223,6 +226,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
 
         }
+
+
 
         public async Task<ViewDetailCompetition> InsertCompetitionOrEvent(LeaderInsertCompOrEventModel model, string token)
         {
@@ -1629,6 +1634,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         imgUrl_CompetitionEntity = "";
                     }
 
+                    EntityType entityType = await _entityTypeRepo.Get(competitionEntity.EntityTypeId);
+
                     ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
                     {
                         Id = competitionEntity.Id,
@@ -1636,7 +1643,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         Name = (competitionEntity.Name != null) ? competitionEntity.Name : null,
                         ImageUrl = imgUrl_CompetitionEntity,
                         EntityTypeId = competitionEntity.EntityTypeId,
-                        //EntityTypeName = competitionEntity.EntityType.Name,  // why Null???
+                        EntityTypeName = entityType.Name,
                         Email = (competitionEntity.Email != null) ? competitionEntity.Email : null,
                         Website = (competitionEntity.Website != null) ? competitionEntity.Website : null,
                         Description = (competitionEntity.Description != null) ? competitionEntity.Description : null,

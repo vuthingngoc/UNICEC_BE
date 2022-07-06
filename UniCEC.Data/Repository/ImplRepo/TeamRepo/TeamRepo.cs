@@ -201,5 +201,13 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         {
             return await context.Teams.FirstOrDefaultAsync(team => team.Id.Equals(teamId)) != null;
         }
+
+        public async Task<int> CountNumberOfTeamIsLocked(int competitionId)
+        {
+            var query = from t in context.Teams
+                        where t.Status == Enum.TeamStatus.IsLocked && t.CompetitionId == competitionId
+                        select t;
+            return (await query.CountAsync() > 0) ? await query.CountAsync() : -1;
+        }
     }
 }
