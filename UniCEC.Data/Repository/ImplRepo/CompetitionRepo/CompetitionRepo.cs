@@ -380,6 +380,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
+        public async Task<Competition> GetCompetitionBySeedsCode(string seedsCode)
+        {
+            return await (from c in context.Competitions
+                          where c.SeedsCode == seedsCode 
+                          select c).FirstOrDefaultAsync();
+        }
+
 
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
@@ -404,6 +411,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-
+       
     }
 }

@@ -21,17 +21,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         }
 
         //check exist code
-        public async Task<bool> CheckExistCode(string code)
-        {
-            bool check = false;
-            CompetitionActivity competitionActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
-            if (competitionActivity != null)
-            {
-                check = true;
-                return check;
-            }
-            return check;
-        }
+        //public async Task<bool> CheckExistCode(string code)
+        //{
+        //    bool check = false;
+        //    CompetitionActivity competitionActivity = await context.CompetitionActivities.FirstOrDefaultAsync(x => x.SeedsCode.Equals(code));
+        //    if (competitionActivity != null)
+        //    {
+        //        check = true;
+        //        return check;
+        //    }
+        //    return check;
+        //}
 
         //use with method top 3 Competition
         public async Task<List<ViewProcessCompetitionActivity>> GetTopCompetitionActivity(int clubId, int topCompetition, int topCompetitionActivity)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -24,6 +25,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
 
         //remove member take task 
         public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId);
+
+        //get list member take activity
+        public Task<List<MemberTakesActivity>> ListMemberTakesActivity(int competitionActivityId);
 
         ////
         //public Task<int> GetNumberOfMemberIsSubmitted(int competitionActivityId);

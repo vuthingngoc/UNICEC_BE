@@ -17,6 +17,7 @@ namespace UniCEC.Data.Models.DB
         public int StudentId { get; set; }
         public int CompetitionId { get; set; }
         public DateTime RegisterTime { get; set; }
+        public bool IsPresent { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual User Student { get; set; }

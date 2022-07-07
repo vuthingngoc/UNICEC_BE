@@ -10,6 +10,7 @@ using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
+using UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Participant;
@@ -23,12 +24,14 @@ namespace UniCEC.Business.Services.ParticipantSvc
         private IClubRepo _clubRepo;
         private IMemberRepo _memberRepo;
         private IUserRepo _userRepo;
+        private ISeedsWalletRepo _seedsWalletRepo;
         private DecodeToken _decodeToken;
 
         public ParticipantService(IParticipantRepo participantRepo,
                                   ICompetitionRepo competitionRepo,
                                   IClubRepo clubRepo,
                                   IMemberRepo memberRepo,
+                                  ISeedsWalletRepo seedsWalletRepo,
                                   IUserRepo userRepo)
         {
             _participantRepo = participantRepo;
@@ -36,6 +39,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             _clubRepo = clubRepo;
             _memberRepo = memberRepo;
             _userRepo = userRepo;
+            _seedsWalletRepo = seedsWalletRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -82,7 +86,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 //check add duplicate student 
                 //false -> student can add
                 //true -> student can't add
-                if (await _participantRepo.CheckDuplicateUser(studentInfo, model.CompetitionId)) 
+                if (await _participantRepo.CheckDuplicateUser(studentInfo, model.CompetitionId))
                     throw new ArgumentException("Student already join in this Competition");
 
                 //ROUND 1 - Kiểm tra User có nằm trong đối tượng tham gia Competition or Event này hay không ?
@@ -179,8 +183,27 @@ namespace UniCEC.Business.Services.ParticipantSvc
                     }
                 }
 
-                //ROUND 4 - Create Participant
+                //ROUND 4 - Check seed Deposited
+                bool round4 = false;
                 if (round1 && round2 && round3)
+                {
+                    if (competition.SeedsDeposited != 0)
+                    {
+                        SeedsWallet sw = await _seedsWalletRepo.GetByStudentId(_decodeToken.Decode(token,"Id"));
+                        //
+                        if (sw.Amount - competition.SeedsDeposited < 0) throw new ArgumentException("You don't have enough seeds point");
+                        sw.Amount = sw.Amount - competition.SeedsDeposited;
+                        await _seedsWalletRepo.Update();
+                        round4 = true;
+                    }
+                    else
+                    {
+                        round4 = true;
+                    }
+                }
+
+                //ROUND 5 - Create Participant
+                if (round1 && round2 && round3 && round4)
                 {
                     //-------------- INSERT PARTICIPANT
                     Participant participant = new Participant();
@@ -188,6 +211,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                     participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
                     participant.StudentId = UserId;
                     participant.CompetitionId = competition.Id;
+                    participant.IsPresent = false;     // not check attendence yet
 
 
                     //IsMember
@@ -206,7 +230,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                         participant.MemberId = member.Id;
                     }
 
-                   
+
                     int result = await _participantRepo.Insert(participant);
                     if (result != 0)
                     {
@@ -217,6 +241,36 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 }
                 return null;
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateAttendance(string seedsCode, string token)
+        {
+            try
+            {
+                //Check seedsCode
+                if (string.IsNullOrEmpty(seedsCode)) throw new ArgumentException("seedsCode Null");
+
+                //Get competition
+                Competition competition = await _competitionRepo.GetCompetitionBySeedsCode(seedsCode);
+                if (competition == null) throw new ArgumentException("Competition not found");
+
+                //Check Participant in this Competition 
+                User studentInfo = await _userRepo.Get(_decodeToken.Decode(token, "Id"));
+                bool check = await _participantRepo.CheckDuplicateUser(studentInfo, competition.Id);
+                if (check == false) throw new ArgumentException("You are not participant in this Competition");
+
+                //Check if they call again
+                Participant participant = await _participantRepo.ParticipantInCompetition(_decodeToken.Decode(token, "Id"), competition.Id);
+                if (participant.IsPresent == true) throw new ArgumentException("You already attendance in Competition");
+
+                participant.IsPresent = true;
+                await _participantRepo.Update();
+                return true;
             }
             catch (Exception)
             {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -57,6 +58,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
         private IEntityTypeRepo _entityTypeRepo;
+        private ISeedsWalletService _seedsWalletService;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -75,6 +77,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionHistoryRepo competitionHistoryRepo,
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IEntityTypeRepo entityTypeRepo,
+                                  ISeedsWalletService seedsWalletService,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -96,6 +99,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionInMajorRepo = competitionInMajorRepo;
             _competitionHistoryRepo = competitionHistoryRepo;
             _entityTypeRepo = entityTypeRepo;
+            _seedsWalletService = seedsWalletService;
         }
 
 
@@ -226,8 +230,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
 
         }
-
-
 
         public async Task<ViewDetailCompetition> InsertCompetitionOrEvent(LeaderInsertCompOrEventModel model, string token)
         {
@@ -1149,6 +1151,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         int result = await _competitionHistoryRepo.Insert(chim);
                         if (result == 0) throw new ArgumentException("Add Competition History Failed");
 
+                        //----------- Add Seeds Ponit to Participant
+                        //Condition IsPresent = true, and In Team status = InTeam
+
+                        //1. Get List Participant
+                        List<Participant> participants = await _participantRepo.ListParticipantToAddPoint(comp.Id);
+                        if (participants != null)
+                        {
+                            foreach (Participant participant in participants)
+                            {
+                                await _seedsWalletService.UpdateAmount(participant.StudentId, comp.SeedsPoint + comp.SeedsDeposited);
+                            }
+                        }
                         return true;
                     }
 
@@ -1691,21 +1705,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 NumberOfParticipantJoin = NumberOfParticipantJoin,
             };
         }
-
-        //private async void InsertCompetitionHistory()
-        //{
-        //    CompetitionHistory competitionHistory = new CompetitionHistory()
-        //    {
-        //        CompetitionId = model.CompetitionId,
-        //        ChangerId = (model.ChangerId.HasValue) ? model.ChangerId.Value : null,
-        //        ChangeDate = model.ChangeDate,
-        //        Description = (string.IsNullOrEmpty(model.Description)) ? null : model.Description,
-        //        Status = model.Status,
-        //    };
-
-        //    int result = await _competitionHistoryRepo.Insert(competitionHistory);
-        //    if (result == 0) throw new ArgumentException("Add Competition History Failed");
-        //}
 
         private string GenerateSeedCode()
         {
@@ -2366,7 +2365,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return null;
         }
 
-        
+
 
         //---------------------------------------------------------------------------------- STATE DRAFT - APPROVE
         //public async Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel model, string token)
