@@ -20,7 +20,6 @@ namespace UniCEC.Data.Models.DB
         public string Name { get; set; }
         public string Description { get; set; }
         public double SeedsPoint { get; set; }
-        public string SeedsCode { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime Ending { get; set; }
         public int NumOfMember { get; set; }

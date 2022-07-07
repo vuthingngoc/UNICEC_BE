@@ -17,7 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         public MemberTakesActivityRepo(UniCECContext context) : base(context) { }
 
 
-        
+
 
         public async Task<bool> CheckMemberTakesTask(int competitionActivityId, int memberId)
         {
@@ -28,7 +28,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return (query != null) ? true : false;
         }
 
-        
+
 
         public async Task<bool> RemoveMemberTakeTask(int memberTakeActivityId)
         {
@@ -36,6 +36,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             context.MemberTakesActivities.Remove(result);
             await Update();
             return true;
+        }
+
+        public async Task<List<MemberTakesActivity>> ListMemberTakesActivity(int competitionActivityId)
+        {
+            List<MemberTakesActivity> result = await (from mta in context.MemberTakesActivities
+                                                      where mta.CompetitionActivityId == competitionActivityId
+                                                      select mta).ToListAsync();
+            return (result.Count > 0) ? result : null;
         }
 
         //Get-All-Taskes-By-Conditions 

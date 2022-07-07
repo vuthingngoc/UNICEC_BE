@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -23,12 +24,6 @@ namespace UniCEC.API.Controllers
         {
             _participantService = participantService;   
         }
-
-
-
-
-
-
 
         // POST api/<ParticipantController>
         [Authorize(Roles = "Student")]
@@ -70,6 +65,47 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
-      
+
+        // PUT api/<ParticipantController>
+        [Authorize(Roles = "Student")]
+        [HttpPut("attendance")]
+        [SwaggerOperation(Summary = "Update Attendance of paritcipant in Competition Or Event")]
+        public async Task<IActionResult> UpdateAttendance([FromQuery(Name ="seeds_code"), BindRequired] string seedsCode)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                bool viewParticipant = await _participantService.UpdateAttendance(seedsCode, token);
+                if (viewParticipant)
+                {
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
     }
 }

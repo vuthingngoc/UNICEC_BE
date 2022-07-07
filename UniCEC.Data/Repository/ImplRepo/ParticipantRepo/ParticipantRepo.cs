@@ -5,6 +5,7 @@ using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 {
@@ -110,6 +111,16 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
             int totalNumOfParticipant = await query.CountAsync();
 
             return totalNumOfParticipant;
+        }
+
+        public async Task<List<Participant>> ListParticipantToAddPoint(int CompetitionId)
+        {
+            List<Participant> participants = await (from p in context.Participants
+                                                    join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+                                                    where p.CompetitionId == CompetitionId && p.IsPresent == true && pit.Status == ParticipantInTeamStatus.InTeam
+                                                    select p).ToListAsync();
+
+            return (participants.Count > 0) ? participants : null;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -36,6 +37,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private IFileService _fileService;
         private IUserRepo _userRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
+        private ISeedsWalletService _seedsWalletService;
         private DecodeToken _decodeToken;
 
         public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo,
@@ -46,6 +48,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           IActivitiesEntityRepo activitiesEntityRepo,
                                           IUserRepo userRepo,
                                           IMemberInCompetitionRepo memberInCompetitionRepo,
+                                          ISeedsWalletService seedsWalletService,
                                           IFileService fileService)
         {
             _competitionActivityRepo = clubActivityRepo;
@@ -56,6 +59,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _activitiesEntityRepo = activitiesEntityRepo;
             _userRepo = userRepo;
             _fileService = fileService;
+            _seedsWalletService = seedsWalletService;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _decodeToken = new DecodeToken();
         }
@@ -232,7 +236,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 competitionActivity.SeedsPoint = model.SeedsPoint;
                 competitionActivity.CreateTime = new LocalTime().GetLocalTime().DateTime;         //LocalTime
                 competitionActivity.Ending = model.Ending;
-                competitionActivity.SeedsCode = await checkExistCode();                           //Check Code                       
+                //competitionActivity.SeedsCode = await checkExistCode();                           //Check Code                       
                 competitionActivity.Status = CompetitionActivityStatus.Open;                      //Check Status
                 competitionActivity.Priority = model.Priority;
                 competitionActivity.CreatorId = _decodeToken.Decode(token, "Id");
@@ -317,9 +321,18 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 competitionActivity.Priority = (model.Priority.HasValue) ? model.Priority.Value : competitionActivity.Priority;
                 if (model.Status.HasValue)
                 {
-                    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling)
+                    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling || model.Status.Value == CompetitionActivityStatus.Open)
                     {
                         competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
+                        //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
+                        if ((model.Status.Value == CompetitionActivityStatus.Completed))
+                        {
+                            List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
+                            foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
+                            {
+                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint); 
+                            }
+                        }
                     }
                     else
                     {
@@ -584,7 +597,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 CompetitionId = competitionActivity.CompetitionId,
                 Name = competitionActivity.Name,
                 Description = competitionActivity.Description,
-                SeedsCode = competitionActivity.SeedsCode,
+                //SeedsCode = competitionActivity.SeedsCode,
                 SeedsPoint = competitionActivity.SeedsPoint,
                 NumOfMember = competitionActivity.NumOfMember,
                 Ending = competitionActivity.Ending,
@@ -620,34 +633,34 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
         //generate Seed code length 8
-        private string generateSeedCode()
-        {
-            string codePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            char[] chars = new char[8];
-            string code = "";
-            var random = new Random();
+        //private string generateSeedCode()
+        //{
+        //    string codePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        //    char[] chars = new char[8];
+        //    string code = "";
+        //    var random = new Random();
 
-            for (int i = 0; i < chars.Length; i++)
-            {
-                code += string.Concat(codePool[random.Next(codePool.Length)]);
-            }
-            return code;
-        }
+        //    for (int i = 0; i < chars.Length; i++)
+        //    {
+        //        code += string.Concat(codePool[random.Next(codePool.Length)]);
+        //    }
+        //    return code;
+        //}
 
         //check exist code
-        private async Task<string> checkExistCode()
-        {
-            //auto generate seedCode
-            bool check = true;
-            string seedCode = "";
-            while (check)
-            {
-                string generateCode = generateSeedCode();
-                check = await _competitionActivityRepo.CheckExistCode(generateCode);
-                seedCode = generateCode;
-            }
-            return seedCode;
-        }
+        //private async Task<string> checkExistCode()
+        //{
+        //    //auto generate seedCode
+        //    bool check = true;
+        //    string seedCode = "";
+        //    while (check)
+        //    {
+        //        string generateCode = generateSeedCode();
+        //        check = await _competitionActivityRepo.CheckExistCode(generateCode);
+        //        seedCode = generateCode;
+        //    }
+        //    return seedCode;
+        //}
 
 
         //Check date 

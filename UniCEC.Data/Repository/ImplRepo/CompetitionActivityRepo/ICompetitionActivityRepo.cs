@@ -12,7 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
     public interface ICompetitionActivityRepo : IRepository<CompetitionActivity>
     {
         
-        public Task<bool> CheckExistCode(string code);
+        //public Task<bool> CheckExistCode(string code);
         ////
         public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions);
 

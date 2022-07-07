@@ -15,6 +15,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 
         public Task<Participant> ParticipantInCompetition(int UserId, int CompetitionId);
 
+        public Task<List<Participant>> ListParticipantToAddPoint(int CompetitionId);
+
         public Task<int> NumOfParticipant(int CompetitionId);
 
 

@@ -19,6 +19,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //Get Comp by Admin Uni
         public Task<PagingResult<ViewCompetition>> GetCompOrEveByAdminUni(AdminUniGetCompetitionRequestModel request, int universityId);
 
+        //Get Competition by SeedCode
+        public Task<Competition> GetCompetitionBySeedsCode(string seedsCode);
+
 
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
