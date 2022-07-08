@@ -30,31 +30,6 @@ namespace UniCEC.API.Controllers
             _cityService = ICityService;
         }
 
-        // Test upload file
-        //[AllowAnonymous]
-        //[HttpGet("update-image")]
-        //[SwaggerOperation(Summary = "update image")]
-        //public async Task<IActionResult> CreateImage([FromQuery] string filename)
-        //{
-        //    try
-        //    {
-        //        return Ok(await _cityService.GetUrlFromFilenameAsync(filename));
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex.Message);
-        //    }
-        //}
-
-
         // Search cities
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search cities by name - Authenticated user")]
