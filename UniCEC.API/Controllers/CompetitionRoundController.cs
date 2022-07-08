@@ -146,6 +146,10 @@ namespace UniCEC.API.Controllers
             {
                 return Unauthorized(ex.Message);
             }
+            catch(NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
