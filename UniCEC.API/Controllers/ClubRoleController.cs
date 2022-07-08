@@ -12,7 +12,7 @@ using UniCEC.Data.ViewModels.Entities.ClubRole;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/club-roles")]
+    [Route("api/v1/club-roles")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]

@@ -18,6 +18,7 @@ namespace UniCEC.API.Controllers
 {
     [Route("api/v1/teams")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class TeamController : ControllerBase
     {
         //

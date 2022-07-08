@@ -14,7 +14,7 @@ using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/competition-entities")]
+    [Route("api/v1/competition-entities")]
     [ApiController]
     [ApiVersion("1.0")]
     public class CompetitionEntityController : ControllerBase
