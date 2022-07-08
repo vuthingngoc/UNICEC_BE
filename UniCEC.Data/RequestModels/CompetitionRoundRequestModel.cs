@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
+using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
@@ -15,7 +16,7 @@ namespace UniCEC.Data.RequestModels
         public DateTime? StartTime { get; set; }
         [FromQuery(Name = "endTime")]
         public DateTime? EndTime { get; set; }
-        [FromQuery(Name = "status")]
-        public bool? Status { get; set; }
+        [FromQuery(Name = "statuses")]
+        public List<int> Statuses { get; set; }
     }
 }
