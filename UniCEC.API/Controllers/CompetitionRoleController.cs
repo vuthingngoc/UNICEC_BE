@@ -13,7 +13,7 @@ using UniCEC.Data.ViewModels.Entities.CompetitionRole;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/competition-role")]
+    [Route("api/v1/competition-roles")]
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize(Roles = "System Admin")]

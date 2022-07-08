@@ -13,8 +13,9 @@ using UniCEC.Data.ViewModels.Entities.EntityType;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/entity-types")]
     [ApiController]
+    [ApiVersion("1.0")]
     //[Authorize(Roles = "System Admin")]
     public class EntityTypeController : ControllerBase
     {

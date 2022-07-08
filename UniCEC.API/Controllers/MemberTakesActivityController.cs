@@ -1,15 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 using UniCEC.Business.Services.MemberTakesActivitySvc;
-using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
