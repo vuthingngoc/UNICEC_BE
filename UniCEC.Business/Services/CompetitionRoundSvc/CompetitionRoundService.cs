@@ -191,7 +191,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (model.NumberOfTeam.HasValue)
             {
-                if (model.NumberOfTeam.Value <= 0) throw new ArgumentException("Number of team must greater than 0");
+                if (model.NumberOfTeam.Value < 0) throw new ArgumentException("Number of team must greater than 0");
                 competitionRound.NumberOfTeam = model.NumberOfTeam.Value;
             }
 
@@ -206,11 +206,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
         public async Task Delete(string token, int id)
         {
-            CheckValidAuthorized(token, id);
-
             CompetitionRound competitionRound = await _competitionRoundRepo.Get(id);
-            if (competitionRound == null || (competitionRound != null && !competitionRound.CompetitionId.Equals(id)))
-                throw new NullReferenceException("Not found this competition round");
+            if (competitionRound == null) throw new NullReferenceException("Not found this competition round");
+
+            CheckValidAuthorized(token, competitionRound.CompetitionId);
 
             competitionRound.Status = CompetitionRoundStatus.Cancel;
             await _competitionRoundRepo.Update();

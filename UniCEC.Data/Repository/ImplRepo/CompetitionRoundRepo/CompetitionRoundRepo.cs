@@ -36,7 +36,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
             if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) query = query.Where(cr => cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
 
-            if (request.Statuses.Count() > 0) query = query.Where(cr => request.Statuses.Contains((int)cr.Status));
+            if (request.Statuses != null) query = query.Where(cr => request.Statuses.Contains((int)cr.Status));
 
             query = query.OrderBy(cr => cr.StartTime);
 
