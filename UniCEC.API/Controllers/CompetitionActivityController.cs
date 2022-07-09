@@ -32,7 +32,7 @@ namespace UniCEC.API.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("top-process")]
-        [SwaggerOperation(Summary = "Get top  competition activities of Competition by club with now and process")]
+        [SwaggerOperation(Summary = "Get top competition activities of Competition by club with now and process")]
         public async Task<IActionResult> GetTopProcess([FromQuery(Name = "clubId"), BindRequired] int ClubId,
                                                        [FromQuery(Name = "topCompetition"), BindRequired] int TopCompetition,
                                                        [FromQuery(Name = "topCompetitionActivity"), BindRequired] int TopCompetitionActivity)

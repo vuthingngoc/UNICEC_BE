@@ -13,7 +13,7 @@ using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/activities-entity")]
+    [Route("api/v1/activities-entity")]
     [ApiController]
     [ApiVersion("1.0")]
     public class ActivitiesEntityController : ControllerBase
