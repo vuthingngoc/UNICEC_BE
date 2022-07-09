@@ -145,7 +145,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = listViewMajorInComp,
+                    MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
 
                 };
@@ -273,7 +273,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = listViewMajorInComp,
+                    MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
 
                 };
@@ -369,7 +369,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     CreateTime = compe.CreateTime,
                     StartTime = compe.StartTime,
                     IsSponsor = compe.IsSponsor,
-                    DepartmentInCompetition = listViewMajorInComp,
+                    MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
 
                 };
