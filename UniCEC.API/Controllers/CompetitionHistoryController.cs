@@ -36,11 +36,15 @@ namespace UniCEC.API.Controllers
                 List<ViewCompetitionHistory> result = await _competitionHistoryService.GetAllHistoryOfCompetition(CompetitionId, ClubId, token);
                 return Ok(result);
             }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (NullReferenceException)
             {
                 return Ok(new List<object>());
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
