@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
@@ -25,7 +26,8 @@ namespace UniCEC.API.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all history status of competition")]
-        public async Task<IActionResult> GetAllHistoryOfCompetition ([FromQuery(Name = "competitionId")] int CompetitionId, [FromQuery(Name = "clubId")] int ClubId)
+        public async Task<IActionResult> GetAllHistoryOfCompetition ([FromQuery(Name = "competitionId"), BindRequired] int CompetitionId
+                                                                        , [FromQuery(Name = "clubId"), BindRequired] int ClubId)
         {
             try
             {
