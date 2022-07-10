@@ -32,7 +32,7 @@ namespace UniCEC.API.Controllers
         }
 
 
-        [HttpGet("universities")]
+        [HttpGet("search")]
         [SwaggerOperation(Summary = "Get universities by conditions - All roles")]
         public async Task<IActionResult> GetUniversityByConditions([FromQuery] UniversityRequestModel request)
         {
