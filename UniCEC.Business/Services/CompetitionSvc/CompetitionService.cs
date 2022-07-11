@@ -103,6 +103,25 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request)
+        {
+            try
+            {
+                List<CompetitionStatus> listCompetitionStatus = new List<CompetitionStatus>();
+                listCompetitionStatus.Add(CompetitionStatus.Register); // register
+                listCompetitionStatus.Add(CompetitionStatus.Publish); // publish
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveUnAuthorize(request,listCompetitionStatus);
+                if (result == null) throw new NullReferenceException();
+                return result;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task<PagingResult<ViewCompetition>> GetCompetitionByAdminUni(AdminUniGetCompetitionRequestModel request, string token)
         {
             try
@@ -2364,6 +2383,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return null;
         }
+
 
 
 
