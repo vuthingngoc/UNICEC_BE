@@ -22,6 +22,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //Get Competition by SeedCode
         public Task<Competition> GetCompetitionBySeedsCode(string seedsCode);
 
+        //Get Competition - UnAuthorize
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request,List<CompetitionStatus> listCompetitionStatus);
 
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);

@@ -52,6 +52,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         select comp;
             }
             //Không có club chỉ status publish
+            // cái này đang dư cần chỉnh lại
             else
             {  
                 query = from comp in context.Competitions
@@ -387,6 +388,105 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                           select c).FirstOrDefaultAsync();
         }
 
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request, List<CompetitionStatus> listCompetitionStatus)
+        {
+            List<Competition> list_competition = await (from c in context.Competitions
+                                                    where c.Status != CompetitionStatus.Cancel
+                                                    orderby c.View descending
+                                                    select c).ToListAsync();
+
+            if (listCompetitionStatus.Count > 0) list_competition = list_competition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
+
+            int totalCount = list_competition.Count();
+
+            List<ViewCompetition> competitions = new List<ViewCompetition>();
+
+            foreach (Competition compe in list_competition)
+            {
+
+                //lấy major ID
+                List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
+
+                var queryListCompetitionInMajor = compe.CompetitionInMajors;
+                List<CompetitionInMajor> listCompetitionInMajor = queryListCompetitionInMajor.ToList();
+
+                //lấy Club Owner
+                List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
+                                                          where compe.Id == cic.CompetitionId
+                                                          select cic).ToListAsync();
+
+                List<ViewClubInComp> listVcip = new List<ViewClubInComp>();
+
+                if (clubList.Count > 0)
+                {
+                    foreach (var competitionInClub in clubList)
+                    {
+                        Club club = await (from c in context.Clubs
+                                           where c.Id == competitionInClub.ClubId
+                                           select c).FirstOrDefaultAsync();
+
+                        ViewClubInComp vcip = new ViewClubInComp()
+                        {
+                            Id = club.Id,
+                            Name = club.Name,
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage,
+                            IsOwner = competitionInClub.IsOwner
+                        };
+
+                        listVcip.Add(vcip);
+                    }
+                }
+
+                //lấy competition type name
+                CompetitionType competitionType = await (from c in context.Competitions
+                                                         where c.Id == compe.Id
+                                                         from ct in context.CompetitionTypes
+                                                         where ct.Id == c.CompetitionTypeId
+                                                         select ct).FirstOrDefaultAsync();
+
+                string competitionTypeName = competitionType.TypeName;
+
+                foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
+                {
+                    Major major = await (from m in context.Majors
+                                         where m.Id == competitionInMajor.MajorId
+                                         select m).FirstOrDefaultAsync();
+                    if (major != null)
+                    {
+                        ViewMajorInComp vdic = new ViewMajorInComp()
+                        {
+                            Id = major.Id,
+                            Name = major.Name,
+                        };
+                        listViewMajorInComp.Add(vdic);
+                    }
+                }
+
+                //cb tạo View
+                ViewCompetition vc = new ViewCompetition()
+                {
+                    Id = compe.Id,
+                    Name = compe.Name,
+                    CompetitionTypeId = compe.CompetitionTypeId,
+                    CompetitionTypeName = competitionTypeName,
+                    Scope = compe.Scope,
+                    Status = compe.Status,
+                    View = compe.View,
+                    CreateTime = compe.CreateTime,
+                    StartTime = compe.StartTime,
+                    IsSponsor = compe.IsSponsor,
+                    MajorInCompetition = listViewMajorInComp,
+                    ClubInCompetition = listVcip,
+
+                };
+                competitions.Add(vc);
+            }//end each competition
+
+            return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
+
+
+        }
 
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)

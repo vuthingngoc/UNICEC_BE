@@ -33,7 +33,34 @@ namespace UniCEC.API.Controllers
             _competitionService = competitionService;
         }
 
+
+        //UNAUTHORIZE
+        [HttpGet("guest")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION by Condition - UnAuthorize")]
+        public async Task<IActionResult> GetCompOrEveUnAuthorize([FromQuery] PagingRequest model)
+        {
+            try
+            {
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveUnAuthorize(model);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
         // GET: api/<CompetitionController>
+        [Authorize(Roles = "Student")]
         [HttpGet]
         [SwaggerOperation(Summary = "Get EVENT or COMPETITION by Condition")]
         public async Task<IActionResult> GetCompOrEve([FromQuery] CompetitionRequestModel request)
@@ -59,6 +86,7 @@ namespace UniCEC.API.Controllers
 
 
         // GET: api/<CompetitionController>
+        [Authorize(Roles = "Student")]
         [HttpGet("top")]
         [SwaggerOperation(Summary = "Get top X EVENT or COMPETITION by club, status")]
         public async Task<IActionResult> GetTopCompOrEve([FromQuery(Name = "clubId"), BindRequired] int ClubId, [FromQuery(Name = "event")] bool? Event/*, [FromQuery(Name = "status")] CompetitionStatus? Status*/, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope, [FromQuery, BindRequired] int top)
