@@ -103,7 +103,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request)
         {
             try
             {

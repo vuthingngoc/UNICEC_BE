@@ -37,7 +37,7 @@ namespace UniCEC.API.Controllers
         //UNAUTHORIZE
         [HttpGet("guest")]
         [SwaggerOperation(Summary = "Get EVENT or COMPETITION by Condition - UnAuthorize")]
-        public async Task<IActionResult> GetCompOrEveUnAuthorize([FromQuery] PagingRequest model)
+        public async Task<IActionResult> GetCompOrEveUnAuthorize([FromQuery] CompetitionUnAuthorizeRequestModel model)
         {
             try
             {

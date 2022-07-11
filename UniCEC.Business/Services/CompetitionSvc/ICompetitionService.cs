@@ -14,7 +14,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
     public interface ICompetitionService
     {
         //--------------------------------------------------UnAuthorize
-        public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request);
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request);
 
         //--------------------------------------------------Admin University
         //Admin University get Competition With State Pending Review

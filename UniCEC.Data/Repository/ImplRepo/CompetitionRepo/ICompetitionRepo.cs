@@ -23,7 +23,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<Competition> GetCompetitionBySeedsCode(string seedsCode);
 
         //Get Competition - UnAuthorize
-        public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request,List<CompetitionStatus> listCompetitionStatus);
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request,List<CompetitionStatus> listCompetitionStatus);
 
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);

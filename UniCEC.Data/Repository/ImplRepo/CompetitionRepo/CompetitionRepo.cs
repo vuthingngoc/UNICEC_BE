@@ -54,7 +54,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //Không có club chỉ status publish
             // cái này đang dư cần chỉnh lại
             else
-            {  
+            {
                 query = from comp in context.Competitions
                         where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel && comp.Status == CompetitionStatus.Publish
                         orderby comp.StartTime
@@ -384,18 +384,24 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public async Task<Competition> GetCompetitionBySeedsCode(string seedsCode)
         {
             return await (from c in context.Competitions
-                          where c.SeedsCode == seedsCode 
+                          where c.SeedsCode == seedsCode
                           select c).FirstOrDefaultAsync();
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(PagingRequest request, List<CompetitionStatus> listCompetitionStatus)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request, List<CompetitionStatus> listCompetitionStatus)
         {
             List<Competition> list_competition = await (from c in context.Competitions
-                                                    where c.Status != CompetitionStatus.Cancel
-                                                    orderby c.View descending
-                                                    select c).ToListAsync();
-
+                                                        where c.Status != CompetitionStatus.Cancel && c.Scope == CompetitionScopeStatus.InterUniversity
+                                                        orderby c.View descending
+                                                        select c).ToListAsync();
+            //
             if (listCompetitionStatus.Count > 0) list_competition = list_competition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
+
+            //
+            if (request.Sponsor.HasValue) list_competition = list_competition.Where(comp => comp.IsSponsor == true).ToList();
+
+            //
+            if(!string.IsNullOrEmpty(request.Name)) list_competition = list_competition.Where(comp => comp.Name.Contains(request.Name)).ToList();
 
             int totalCount = list_competition.Count();
 
@@ -511,6 +517,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-       
+
     }
 }
