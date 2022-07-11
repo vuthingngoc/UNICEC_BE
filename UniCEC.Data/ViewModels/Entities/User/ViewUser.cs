@@ -8,8 +8,6 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public int Id { get; set; }
         [JsonPropertyName("role_id")]
         public int RoleId { get; set; }
-        [JsonPropertyName("sponsor_id")]
-        public int SponsorId { get; set; }
         [JsonPropertyName("university_id")]
         public int? UniversityId { get; set; }
         public string Fullname { get; set; }
