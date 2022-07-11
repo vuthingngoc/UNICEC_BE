@@ -205,7 +205,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Status Competition
                 Competition compe = await _competitionRepo.Get(model.CompetitionId);
-                if (compe.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (compe.Status == CompetitionStatus.Cancel
+                  || compe.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
                 //Check Ending date
                 bool checkDate = CheckDate(model.Ending);
@@ -294,7 +295,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel
+                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
                 //------------ Check date update
                 bool checkDateUpdate = false;
@@ -330,7 +332,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
                             foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
                             {
-                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint); 
+                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
                             }
                         }
                     }
@@ -366,7 +368,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel
+                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
                 competitionActivity.Status = CompetitionActivityStatus.Cancelling;
                 await _competitionActivityRepo.Update();
@@ -404,7 +407,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel
+                 || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
                 //Check Member Id có status true
                 Member member = await _memberRepo.Get(model.MemberId);
@@ -463,7 +467,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel
+                 || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
 
                 //Check User is Member of club
@@ -507,7 +512,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(ca.CompetitionId);
-                if (competition.Status == CompetitionStatus.Finish) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel
+                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
 
                 //Check Condition
                 await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
