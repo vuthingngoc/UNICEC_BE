@@ -295,6 +295,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();
 
+            list_Competition =  list_Competition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
+
             foreach (Competition compe in list_Competition)
             {
 
@@ -390,24 +392,67 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request, List<CompetitionStatus> listCompetitionStatus)
         {
-            List<Competition> list_competition = await (from c in context.Competitions
-                                                        where c.Status != CompetitionStatus.Cancel && c.Scope == CompetitionScopeStatus.InterUniversity
-                                                        orderby c.View descending
-                                                        select c).ToListAsync();
-            //
-            if (listCompetitionStatus.Count > 0) list_competition = list_competition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
+            List<Competition> listCompetition = new List<Competition>();
+
+            //lấy cả 2 
+            if (request.MostView.HasValue && request.NearlyDate.HasValue)
+            {
+                listCompetition = await (from c in context.Competitions
+                                          where c.Status != CompetitionStatus.Cancel
+                                             && c.Scope == CompetitionScopeStatus.InterUniversity
+                                             //&& c.StartTimeRegister >= new LocalTime().GetLocalTime().DateTime
+                                          orderby c.View descending
+                                          select c).ToListAsync();
+
+                listCompetition = listCompetition.OrderByDescending(c => c.CreateTime).ToList();
+            }
+
+            //lấy thời gian đăng ký gần hiện tại
+            if (!request.MostView.HasValue && request.NearlyDate.HasValue)
+            {
+                listCompetition = await (from c in context.Competitions
+                                          where c.Status != CompetitionStatus.Cancel
+                                             && c.Scope == CompetitionScopeStatus.InterUniversity
+                                             //&& c.StartTimeRegister >= new LocalTime().GetLocalTime().DateTime
+                                          orderby c.CreateTime descending
+                                          select c).ToListAsync();
+            }
+
+            //lấy số lượng view nhiều 
+            if (request.MostView.HasValue && !request.NearlyDate.HasValue)
+            {
+                listCompetition = await (from c in context.Competitions
+                                          where c.Status != CompetitionStatus.Cancel
+                                             && c.Scope == CompetitionScopeStatus.InterUniversity
+                                          orderby c.View descending
+                                          select c).ToListAsync();
+            }
+
+            //Không sort theo cái nào cả
+            if (!request.MostView.HasValue && !request.NearlyDate.HasValue)
+            {
+                listCompetition = await (from c in context.Competitions
+                                          where c.Status != CompetitionStatus.Cancel && c.Scope == CompetitionScopeStatus.InterUniversity
+                                          select c).ToListAsync();
+            }
 
             //
-            if (request.Sponsor.HasValue) list_competition = list_competition.Where(comp => comp.IsSponsor == true).ToList();
+            if (listCompetitionStatus.Count > 0) listCompetition = listCompetition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
 
             //
-            if(!string.IsNullOrEmpty(request.Name)) list_competition = list_competition.Where(comp => comp.Name.Contains(request.Name)).ToList();
+            if (request.Sponsor.HasValue) listCompetition = listCompetition.Where(comp => comp.IsSponsor == true).ToList();
 
-            int totalCount = list_competition.Count();
+            //
+            if (!string.IsNullOrEmpty(request.Name)) listCompetition = listCompetition.Where(comp => comp.Name.Contains(request.Name)).ToList();
+
+            int totalCount = listCompetition.Count();
+
+            //
+            listCompetition = listCompetition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();
 
-            foreach (Competition compe in list_competition)
+            foreach (Competition compe in listCompetition)
             {
 
                 //lấy major ID

@@ -338,7 +338,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     }
                     else
                     {
-                        throw new ArgumentException("Status Cancelling and Completed can Update");
+                        throw new ArgumentException("Status Cancelling and Completed and Open can Update");
                     }
                 }
 
