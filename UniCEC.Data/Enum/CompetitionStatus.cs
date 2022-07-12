@@ -19,7 +19,6 @@ namespace UniCEC.Data.Enum
         Approve,       
         Pending,
         Finish, 
-        Evaluate,
         Complete,
         Cancel
     }

@@ -1187,31 +1187,31 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     //-----------------------------------------------------------------Evaluate
                     //State Condition : Finish
-                    if (model.Status == CompetitionStatus.Evaluate)
-                    {
-                        if (comp.Status != CompetitionStatus.Finish) throw new ArgumentException("Competition can't change to Evaluate Status");
-                        comp.Status = CompetitionStatus.Evaluate;
-                        await _competitionRepo.Update();
+                    //if (model.Status == CompetitionStatus.Evaluate)
+                    //{
+                    //    if (comp.Status != CompetitionStatus.Finish) throw new ArgumentException("Competition can't change to Evaluate Status");
+                    //    comp.Status = CompetitionStatus.Evaluate;
+                    //    await _competitionRepo.Update();
 
-                        //----------- InsertCompetition History
-                        CompetitionHistory chim = new CompetitionHistory()
-                        {
-                            CompetitionId = comp.Id,
-                            ChangerId = member.Id,
-                            ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                            Description = member.User.Fullname + " Update Status Evaluate",
-                            Status = CompetitionStatus.Evaluate,
-                        };
-                        int result = await _competitionHistoryRepo.Insert(chim);
-                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                        return true;
-                    }
+                    //    //----------- InsertCompetition History
+                    //    CompetitionHistory chim = new CompetitionHistory()
+                    //    {
+                    //        CompetitionId = comp.Id,
+                    //        ChangerId = member.Id,
+                    //        ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                    //        Description = member.User.Fullname + " Update Status Evaluate",
+                    //        Status = CompetitionStatus.Evaluate,
+                    //    };
+                    //    int result = await _competitionHistoryRepo.Insert(chim);
+                    //    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    //    return true;
+                    //}
 
                     //-----------------------------------------------------------------Complete
-                    //State Condition : Evaluate
+                    //State Condition : Finish
                     if (model.Status == CompetitionStatus.Complete)
                     {
-                        if (comp.Status != CompetitionStatus.Evaluate) throw new ArgumentException("Competition can't change to Complete Status");
+                        if (comp.Status != CompetitionStatus.Finish) throw new ArgumentException("Competition can't change to Complete Status");
                         comp.Status = CompetitionStatus.Complete;
                         await _competitionRepo.Update();
 
