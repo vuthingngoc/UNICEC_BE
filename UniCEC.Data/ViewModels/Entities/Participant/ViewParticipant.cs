@@ -8,8 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.Participant
         public int Id { get; set; }
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
-        [JsonPropertyName("member_id")]
-        public int? MemberId { get; set; }
+        
         [JsonPropertyName("student_id")]
         public int StudentId { get; set; }
 

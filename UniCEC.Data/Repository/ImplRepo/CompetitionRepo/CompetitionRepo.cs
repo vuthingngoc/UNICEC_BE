@@ -75,6 +75,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             {
                 if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
             }
+
+            //Name
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+
             int totalCount = query.Count();
             //
             List<ViewCompetition> competitions = new List<ViewCompetition>();
