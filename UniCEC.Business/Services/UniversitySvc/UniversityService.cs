@@ -35,7 +35,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uniView.Description = uni.Description;
                 uniView.Phone = uni.Phone;
                 uniView.Email = uni.Email;
-                uniView.Openning = uni.Openning;
+                uniView.Opening = uni.Openning;
                 uniView.Closing = uni.Closing;
                 uniView.CityId = uni.CityId;
                 uniView.Status = uni.Status;
@@ -99,7 +99,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                     viewUniversity.Description = u.Description;
                     viewUniversity.Phone = u.Phone;
                     viewUniversity.Email = u.Email;
-                    viewUniversity.Openning = u.Openning;
+                    viewUniversity.Opening = u.Openning;
                     viewUniversity.Closing = u.Closing;
                     viewUniversity.Founding = u.Founding;
                     viewUniversity.Status = u.Status;
@@ -129,7 +129,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                     uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
                     uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
                     uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
-                    uni.Openning = (!string.IsNullOrEmpty(university.Openning)) ? university.Openning : uni.Openning;
+                    uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
                     uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
                     uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
                     uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;

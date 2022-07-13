@@ -78,7 +78,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 viewUniversity.Phone = u.Phone;
                 viewUniversity.Email = u.Email;
                 viewUniversity.Founding = u.Founding;
-                viewUniversity.Openning = u.Openning;
+                viewUniversity.Opening = u.Openning;
                 viewUniversity.Closing = u.Closing;
                 viewUniversity.Status = u.Status;
                 //
@@ -134,7 +134,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                     viewUniversity.Phone = u.Phone;
                     viewUniversity.Email = u.Email;
                     viewUniversity.Founding = u.Founding;
-                    viewUniversity.Openning = u.Openning;
+                    viewUniversity.Opening = u.Openning;
                     viewUniversity.Closing = u.Closing;
                     viewUniversity.Status = u.Status;
                     //
@@ -184,7 +184,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                     viewUniversity.Phone = u.Phone;
                     viewUniversity.Email = u.Email;
                     viewUniversity.Founding = u.Founding;
-                    viewUniversity.Openning = u.Openning;
+                    viewUniversity.Opening = u.Openning;
                     viewUniversity.Closing = u.Closing;
                     viewUniversity.Status = u.Status;
                     //
