@@ -208,29 +208,9 @@ namespace UniCEC.Business.Services.ParticipantSvc
                     //-------------- INSERT PARTICIPANT
                     Participant participant = new Participant();
                     participant.StudentId = studentInfo.Id;
-                    participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;
-                    participant.StudentId = UserId;
+                    participant.RegisterTime = new LocalTime().GetLocalTime().DateTime;                  
                     participant.CompetitionId = competition.Id;
-                    participant.IsPresent = false;     // not check attendence yet
-
-
-                    //IsMember
-                    List<CompetitionInClub> listComp_In_Club = competition.CompetitionInClubs.ToList();
-
-                    List<int> listClub_Id = new List<int>();
-
-                    foreach (CompetitionInClub cic in listComp_In_Club)
-                    {
-                        listClub_Id.Add(cic.Club.Id);
-                    }
-
-                    Member member = await _memberRepo.IsMemberInListClubCompetition(listClub_Id, studentInfo);
-                    if (member != null)
-                    {
-                        participant.MemberId = member.Id;
-                    }
-
-
+                    participant.Attendance = false;     // not check attendence yet    
                     int result = await _participantRepo.Insert(participant);
                     if (result != 0)
                     {
@@ -266,9 +246,9 @@ namespace UniCEC.Business.Services.ParticipantSvc
 
                 //Check if they call again
                 Participant participant = await _participantRepo.ParticipantInCompetition(_decodeToken.Decode(token, "Id"), competition.Id);
-                if (participant.IsPresent == true) throw new ArgumentException("You already attendance in Competition");
+                if (participant.Attendance == true) throw new ArgumentException("You already attendance in Competition");
 
-                participant.IsPresent = true;
+                participant.Attendance = true;
                 await _participantRepo.Update();
                 return true;
             }
@@ -284,7 +264,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             {
                 Id = participant.Id,
                 CompetitionId = participant.CompetitionId,
-                MemberId = participant.MemberId,
+                //MemberId = participant.MemberId,
                 RegisterTime = participant.RegisterTime,
                 StudentId = participant.StudentId,
                 Avatar = student.Avatar,

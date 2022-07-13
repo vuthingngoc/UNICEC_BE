@@ -154,7 +154,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                     {
                         Id = participant.Id,
                         CompetitionId = participant.CompetitionId,
-                        MemberId = participant.MemberId,
+                        //MemberId = participant.MemberId,
                         RegisterTime = participant.RegisterTime,
                         StudentId = participant.StudentId,
                         Avatar = user.Avatar,

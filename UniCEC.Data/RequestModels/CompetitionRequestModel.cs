@@ -13,9 +13,12 @@ namespace UniCEC.Data.RequestModels
         //Search Event
         [FromQuery(Name = "event")]
         public bool? Event { get; set; }
-        //Public
+        //Scope
         [FromQuery(Name = "scope")]
         public CompetitionScopeStatus? Scope { get; set; }
+        //Name
+        [FromQuery(Name = "name")]
+        public string? Name { get; set; }
         //Status
         [FromQuery(Name = "statuses")]
         public List<CompetitionStatus>? Statuses { get; set; }
