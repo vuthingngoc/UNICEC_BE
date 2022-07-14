@@ -23,7 +23,7 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<UserTokenModel> GetUserByEmail(string email);
         public Task<UserTokenModel> GetUserTokenById(int id, string token);
         public Task UpdateAvatar(int userId, string srcAvatar);
-        public Task UpdateInfoToken(int userId, int universityId, string token);
+        public Task UpdateInfoToken(UserUpdateWithJWTModel model, string token);
         public Task UpdateStatusOnline(int id, bool status);           
     }
 }

@@ -246,15 +246,15 @@ namespace UniCEC.Business.Services.UserSvc
             catch (Exception) { throw; }
         }
 
-        public async Task UpdateInfoToken(int userId, int universityId, string token)
+        public async Task UpdateInfoToken(UserUpdateWithJWTModel model, string token)
         {
             int idUser = _decodeToken.Decode(token, "Id");
-            if (!userId.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (!model.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            Data.Models.DB.User user = await _userRepo.Get(userId);
+            Data.Models.DB.User user = await _userRepo.Get(idUser);
             if (user == null) throw new NullReferenceException("Not found this user");
 
-            if (!user.UniversityId.HasValue) user.UniversityId = universityId;
+            if (!user.UniversityId.HasValue) user.UniversityId = model.UniversityId;
             await _userRepo.Update();
         }
 
