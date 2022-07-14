@@ -295,6 +295,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<Competition> list_Competition = await (from c in context.Competitions
                                                         where c.UniversityId == universityId && c.Status == CompetitionStatus.PendingReview
                                                         select c).ToListAsync();
+            //Name
+            if (!string.IsNullOrEmpty(request.Name)) list_Competition = list_Competition.Where(comp => comp.Name.Contains(request.Name)).ToList();
+
             int totalCount = list_Competition.Count();
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();

@@ -10,6 +10,7 @@ namespace UniCEC.Data.RequestModels
 {
     public class AdminUniGetCompetitionRequestModel : PagingRequest
     {
-        
+        [FromQuery(Name = "name")]
+        public string Name { get; set; }
     }
 }
