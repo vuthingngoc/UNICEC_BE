@@ -164,15 +164,15 @@ namespace UniCEC.API.Controllers
         }
         
         [Authorize(Roles = "Student")]
-        [HttpPut("{id}/token")]
+        [HttpPut("token")]
         [SwaggerOperation(Summary = "Update university of student")]
-        public async Task<IActionResult> UpdateUserWithJWT(int id, [FromBody] int universityId)
+        public async Task<IActionResult> UpdateUserWithJWT(UserUpdateWithJWTModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _userService.UpdateInfoToken(id, universityId, token);
-                UserTokenModel user = await _userService.GetUserTokenById(id, token);
+                await _userService.UpdateInfoToken(model, token);
+                UserTokenModel user = await _userService.GetUserTokenById(model.Id, token);
                 string userToken = JWTUserToken.GenerateJWTTokenUser(user);
                 return Ok(userToken);
             }
