@@ -254,7 +254,13 @@ namespace UniCEC.Business.Services.UserSvc
             Data.Models.DB.User user = await _userRepo.Get(idUser);
             if (user == null) throw new NullReferenceException("Not found this user");
 
-            if (!user.UniversityId.HasValue) user.UniversityId = model.UniversityId;
+            if (!string.IsNullOrEmpty(model.Description)) user.Description = model.Description;
+            if (!string.IsNullOrEmpty(model.Dob)) user.Dob = model.Dob;
+            if (model.UniversityId.HasValue) user.UniversityId = model.UniversityId;
+            if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
+            if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
+            if (model.DepartmentId.HasValue) user.DepartmentId = model.DepartmentId;
+
             await _userRepo.Update();
         }
 
