@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -12,10 +13,12 @@ namespace UniCEC.Business.Services.UniversitySvc
     public class UniversityService : IUniversityService
     {
         private IUniversityRepo _universityRepo;
+        private ICityRepo _cityRepo; 
 
-        public UniversityService(IUniversityRepo universityRepo)
+        public UniversityService(IUniversityRepo universityRepo, ICityRepo cityRepo)
         {
             _universityRepo = universityRepo;
+            _cityRepo = cityRepo;
         }
 
         //
@@ -25,6 +28,8 @@ namespace UniCEC.Business.Services.UniversitySvc
         public async Task<ViewUniversity> GetUniversityById(int id)
         {
             University uni = await _universityRepo.Get(id);
+            //
+            City city = await _cityRepo.Get(uni.CityId);
             //
             ViewUniversity uniView = new ViewUniversity();
             //
@@ -38,6 +43,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uniView.Opening = uni.Openning;
                 uniView.Closing = uni.Closing;
                 uniView.CityId = uni.CityId;
+                uniView.CityName = city.Name;
                 uniView.Status = uni.Status;
                 uniView.Id = id;
                 uniView.Founding = uni.Founding;
@@ -92,8 +98,11 @@ namespace UniCEC.Business.Services.UniversitySvc
                     //
                     University u = await _universityRepo.Get(result);
 
+                    City c = await _cityRepo.Get(result);
+
                     viewUniversity.Id = u.Id;
                     viewUniversity.CityId = u.CityId;
+                    viewUniversity.CityName = c.Name;
                     viewUniversity.UniCode = u.UniCode;
                     viewUniversity.Name = u.Name;
                     viewUniversity.Description = u.Description;
