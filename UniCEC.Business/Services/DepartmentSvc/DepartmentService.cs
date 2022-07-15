@@ -74,11 +74,11 @@ namespace UniCEC.Business.Services.DepartmentSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             
             if (!roleId.Equals(1) && !roleId.Equals(4)) request.Status = true;            
-            if(!roleId.Equals(4) && !roleId.Equals(2))
-            {
-                int universityId = _decodeToken.Decode(token, "UniversityId");
-                if (!universityId.Equals(request.UniversityId)) throw new NullReferenceException();
-            }
+            //if(!roleId.Equals(4) && !roleId.Equals(2))
+            //{
+            //    //int universityId = _decodeToken.Decode(token, "UniversityId");
+            //    //if (!universityId.Equals(request.UniversityId)) throw new NullReferenceException();
+            //}
 
             PagingResult<ViewDepartment> departments = await _departmentRepo.GetByConditions(request);
             if(departments == null) throw new NullReferenceException();
