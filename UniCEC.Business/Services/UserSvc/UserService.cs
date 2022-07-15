@@ -259,6 +259,7 @@ namespace UniCEC.Business.Services.UserSvc
             if (model.UniversityId.HasValue) user.UniversityId = model.UniversityId;
             if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
             if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
+            if (!string.IsNullOrEmpty(model.Phone)) user.PhoneNumber = model.Phone;
             if (model.DepartmentId.HasValue) user.DepartmentId = model.DepartmentId;
 
             await _userRepo.Update();
