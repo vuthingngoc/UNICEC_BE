@@ -249,7 +249,7 @@ namespace UniCEC.Business.Services.UserSvc
         public async Task UpdateInfoToken(UserUpdateWithJWTModel model, string token)
         {
             int idUser = _decodeToken.Decode(token, "Id");
-            if (!model.Equals(idUser)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (idUser != model.Id) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             Data.Models.DB.User user = await _userRepo.Get(idUser);
             if (user == null) throw new NullReferenceException("Not found this user");
