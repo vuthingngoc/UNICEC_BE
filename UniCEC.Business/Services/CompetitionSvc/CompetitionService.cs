@@ -993,7 +993,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         ChangerId = adminUni.Id,
                         ChangeDate = localTime,
                         Description = "Admin University: " + adminUni.Fullname + "Approve",
-                        Status = CompetitionStatus.Draft,
+                        Status = CompetitionStatus.Approve,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
