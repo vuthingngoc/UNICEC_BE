@@ -13,8 +13,8 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public string Fullname { get; set; }
         public string Avatar { get; set; }
         public string Gender { get; set; }
-        [JsonPropertyName("major_id")]
-        public int? MajorId { get; set; }
+        [JsonPropertyName("department_id")]
+        public int? DepartmentId { get; set; }
         [JsonPropertyName("user_code")]
         public string StudentCode { get; set; }
         public string Email { get; set; }
