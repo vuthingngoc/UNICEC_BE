@@ -9,6 +9,8 @@ namespace UniCEC.Data.ViewModels.Entities.Department
         public int UniversityId { get; set; }
         [JsonPropertyName("major_id")]
         public int MajorId { get; set; }
+        [JsonPropertyName("major_name")]
+        public string MajorName { get; set; }
         [JsonPropertyName("department_code")]
         public string DepartmentCode { get; set; }
         public string Name { get; set; }
