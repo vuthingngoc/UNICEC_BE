@@ -28,6 +28,12 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("number_of_team")]
         public int? NumberOfTeam { get; set; }
 
+        [JsonPropertyName("max_number")]
+        public int? MaxNumber { get; set; }
+
+        [JsonPropertyName("min_number")]
+        public int? MinNumber { get; set; }
+
         [JsonPropertyName("create_time")]
         public DateTime CreateTime { get; set; }
 

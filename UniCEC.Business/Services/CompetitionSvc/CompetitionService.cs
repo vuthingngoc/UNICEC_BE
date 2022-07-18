@@ -654,7 +654,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
 
                 //-------------------------------------------------------State Publish
-                //Update Date, Location, Number Of Participant, max ,min
+                //Update Date, location, Number Of Participant, max ,min
                 if (comp.Status == CompetitionStatus.Publish)
                 {
                     bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
@@ -1703,6 +1703,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 Address = competition.Address,
                 NumberOfParticipation = competition.NumberOfParticipation,
                 NumberOfTeam = (int)competition.NumberOfTeam,
+                MinNumber = (int)competition.MinNumber,
+                MaxNumber = (int)competition.MaxNumber,
                 AddressName = competition.AddressName,
                 CreateTime = competition.CreateTime,
                 StartTime = competition.StartTime,
