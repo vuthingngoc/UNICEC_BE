@@ -15,7 +15,7 @@ namespace UniCEC.Data.ViewModels.Entities.User
 
         [JsonPropertyName("department_id")]
         public int? DepartmentId { get; set; }
-        [JsonPropertyName("user_code")]
+        [JsonPropertyName("student_code")]
         public string StudentCode { get; set; }
         public string Phone { get; set; }
         public string Gender { get; set; }
