@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Utilities;
@@ -242,36 +243,43 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         {
             try
             {
-                if (model.ClubId == 0 || model.CompetitionEntityId == 0)
-                    throw new ArgumentNullException("ClubId NULL || Competition Entity Id is NULL");
+                if (model.ClubId == 0 || model.CompetitionId == 0)
+                    throw new ArgumentNullException("ClubId NULL || Competition Id is NULL");
 
-                CompetitionEntity entity = await _competitionEntityRepo.Get(model.CompetitionEntityId);
-                if (entity == null) throw new ArgumentException("Competition Entity not found ");
-
-                Competition competition = await _competitionRepo.Get(entity.CompetitionId);
-                if ((entity.EntityTypeId == 2 || entity.EntityTypeId == 3) == true
-                    && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
-                    throw new ArgumentException("Can't Remove Sponsor or Influencer");
-
-                bool Check = await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
-                if (Check == false) return false;
-
-                await _competitionEntityRepo.DeleteCompetitionEntity(model.CompetitionEntityId);
-
-
-                //Check Sponsor in Competition if there is NO-> update Status 
-                if (entity.EntityTypeId == 3)
+                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                if (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve)
                 {
+
+                    //if ((entity.EntityTypeId == 2 || entity.EntityTypeId == 3) == true
+                    //    && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
+                    //    throw new ArgumentException("Can't Remove Sponsor or Influencer");
+
+                    bool Check = await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
+                    if (Check == false) return false;
+
+                    List<CompetitionEntity> competitionEntities = competition.CompetitionEntities.ToList();
+
+                    foreach (CompetitionEntity entity in competitionEntities)
+                    {
+                        await _competitionEntityRepo.DeleteCompetitionEntity(entity.Id);
+                    }
+
+                    //Check Sponsor in Competition if there is NO-> update Status 
+                    //if (entity.EntityTypeId == 3)
+                    //{
                     bool checkIsHasSponsor = await _competitionEntityRepo.CheckSponsorStillInCompetition(competition.Id, 3);
                     if (checkIsHasSponsor == false)
                     {
                         competition.IsSponsor = false;
                         await _competitionRepo.Update();
                     }
+                    //}
+                    return true;
                 }
-
-                return true;
-
+                else
+                {
+                    throw new ArgumentException("Competition State is not suitable to do this action");
+                }
             }
             catch (Exception)
             {

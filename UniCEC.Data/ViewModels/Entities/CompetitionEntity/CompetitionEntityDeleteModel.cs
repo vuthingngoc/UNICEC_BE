@@ -10,8 +10,8 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
 {
     public class CompetitionEntityDeleteModel 
     {
-        [JsonPropertyName("competition_entity_id")]
-        public int CompetitionEntityId;
+        [JsonPropertyName("competition_id")]
+        public int CompetitionId { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition       
         [JsonPropertyName("club_id")]
