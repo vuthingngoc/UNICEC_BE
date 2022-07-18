@@ -75,6 +75,30 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpGet("club-manager/search")]
+        [SwaggerOperation(Summary = "Get club by conditions - Authenticated user in the university")]
+        public async Task<IActionResult> SearchClubsByManager([FromQuery] ClubRequestByManagerModel request)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewClub> clubs = await _clubService.GetByManager(token, request);
+                return Ok(clubs);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
         [HttpGet("user/{id}")]
         [SwaggerOperation(Summary = "Get club of this user - Student")]
         public async Task<IActionResult> GetClubByUser(int id)
