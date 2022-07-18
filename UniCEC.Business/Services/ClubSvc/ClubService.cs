@@ -186,6 +186,17 @@ namespace UniCEC.Business.Services.ClubSvc
             throw new UnauthorizedAccessException("You can not access this resource");
         }
 
+        public async Task<PagingResult<ViewClub>> GetByManager(string token, ClubRequestByManagerModel request)
+        {
+            int userId = _decodeToken.Decode(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, request.clubId);
+            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            PagingResult<ViewClub> clubs = await _clubRepo.GetByManager(request);
+            if (clubs == null) throw new NullReferenceException();
+            return clubs;
+        }
+
         //public async Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request)
         //{
 

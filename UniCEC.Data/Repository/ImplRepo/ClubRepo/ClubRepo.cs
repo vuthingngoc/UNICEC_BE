@@ -107,6 +107,39 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
             return (query.Any()) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
+        public async Task<PagingResult<ViewClub>> GetByManager(ClubRequestByManagerModel request)
+        {
+            var query = from c in context.Clubs
+                        join u in context.Universities on c.UniversityId equals u.Id
+                        where c.Status.Equals(true)
+                        select new { c, u };
+
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(x => x.c.Name.Contains(request.Name));
+
+            if (request.UniversityIds != null) query = query.Where(selector => request.UniversityIds.Contains(selector.c.UniversityId));
+
+            int totalCount = query.Count();
+
+            List<ViewClub> clubs = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).Select(x =>
+                new ViewClub()
+                {
+                    Id = x.c.Id,
+                    Description = x.c.Description,
+                    Founding = x.c.Founding,
+                    Name = x.c.Name,
+                    TotalMember = x.c.TotalMember,
+                    UniversityId = x.c.UniversityId,
+                    UniversityName = x.u.Name,
+                    Image = x.c.Image,
+                    ClubContact = x.c.ClubContact,
+                    ClubFanpage = x.c.ClubFanpage,
+                    Status = x.c.Status,
+                }
+            ).ToListAsync();
+
+            return (query.Any()) ? new PagingResult<ViewClub>(clubs, totalCount, request.CurrentPage, request.PageSize) : null;
+        }
+
         public async Task<List<ViewClub>> GetByUser(int userId)
         {
             var query = from m in context.Members
