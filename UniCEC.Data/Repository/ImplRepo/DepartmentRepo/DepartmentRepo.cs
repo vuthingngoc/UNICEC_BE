@@ -6,7 +6,6 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.ViewModels.Common;
 using System.Collections.Generic;
-using UniCEC.Data.ViewModels.Entities.Major;
 using UniCEC.Data.ViewModels.Entities.Department;
 
 namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
@@ -21,28 +20,30 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<PagingResult<ViewDepartment>> GetByConditions(DepartmentRequestModel request)
         {
             var query = from d in context.Departments
+                        join m in context.Majors on d.MajorId equals m.Id
                         where d.UniversityId.Equals(request.UniversityId)
-                        select d;
+                        select new { d, m };
 
 
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(d => d.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(selector => selector.d.Name.Contains(request.Name));
 
-            if (request.MajorId.HasValue) query = query.Where(d => d.MajorId.Equals(request.MajorId));
+            if (request.MajorId.HasValue) query = query.Where(selector => selector.d.MajorId.Equals(request.MajorId));
 
-            if (request.Status.HasValue) query = query.Where(m => m.Status.Equals(request.Status.Value));
+            if (request.Status.HasValue) query = query.Where(selector => selector.d.Status.Equals(request.Status.Value));
 
             int totalCount = query.Count();
 
             var items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                    .Select(d => new ViewDepartment()
+                                    .Select(selector => new ViewDepartment()
                                     {
-                                        Id = d.Id,
-                                        UniversityId = d.UniversityId,
-                                        MajorId = d.MajorId,
-                                        Description = d.Description,
-                                        DepartmentCode = d.DepartmentCode,
-                                        Name = d.Name,
-                                        Status = d.Status
+                                        Id = selector.d.Id,
+                                        UniversityId = selector.d.UniversityId,
+                                        MajorId = selector.d.MajorId,
+                                        MajorName = selector.m.Name,
+                                        Description = selector.d.Description,
+                                        DepartmentCode = selector.d.DepartmentCode,
+                                        Name = selector.d.Name,
+                                        Status = selector.d.Status
                                     }).ToListAsync();
 
             return (query.Any()) ? new PagingResult<ViewDepartment>(items, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -92,21 +93,23 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<ViewDepartment> GetById(int id, bool? status, int? universityId)
         {
             var query = from d in context.Departments
+                        join m in context.Majors on d.MajorId equals m.Id
                         where d.Id.Equals(id)
-                        select d;
+                        select new { d, m };
 
-            if (status.HasValue) query = query.Where(d => d.Status.Equals(status.Value));
-            if (universityId.HasValue) query = query.Where(d => d.UniversityId.Equals(universityId));
+            if (status.HasValue) query = query.Where(selector => selector.d.Status.Equals(status.Value));
+            if (universityId.HasValue) query = query.Where(selector => selector.d.UniversityId.Equals(universityId));
 
-            return await query.Select(d => new ViewDepartment()
+            return await query.Select(selector => new ViewDepartment()
             {
-                UniversityId = d.UniversityId,
-                MajorId = d.MajorId,
-                Description = d.Description,
-                Id = d.Id,
-                DepartmentCode = d.DepartmentCode,
-                Name = d.Name,
-                Status = d.Status
+                UniversityId = selector.d.UniversityId,
+                MajorId = selector.d.MajorId,
+                MajorName = selector.m.Name,
+                Description = selector.d.Description,
+                Id = selector.d.Id,
+                DepartmentCode = selector.d.DepartmentCode,
+                Name = selector.d.Name,
+                Status = selector.d.Status
             }).FirstOrDefaultAsync();
         }
 
