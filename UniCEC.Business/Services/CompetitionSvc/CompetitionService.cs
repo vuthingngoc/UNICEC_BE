@@ -655,7 +655,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //-------------------------------------------------------State Publish
                 //Update Date, location, Number Of Participant, max ,min
-                if (comp.Status == CompetitionStatus.Publish)
+                if (comp.Status == CompetitionStatus.Publish || comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
                 {
                     bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
                     if (dateInsertCases == false) throw new ArgumentException("Date not suitable");
