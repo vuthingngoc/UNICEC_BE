@@ -12,6 +12,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     {
 
         public int Id { get; set; }
+        [JsonPropertyName("competition_type_id")]
+        public int? CompetitionTypeId { get; set; }
         public string? Name { get; set; }
         [JsonPropertyName("start_time_register")]
         public DateTime? StartTimeRegister { get; set; }
@@ -25,8 +27,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public double? Fee { get; set; }
         [JsonPropertyName("seeds_point")]
         public double? SeedsPoint { get; set; }
-        [JsonPropertyName("seeds_deposited")]
-        public double? SeedsDeposited { get; set; }
+        //[JsonPropertyName("seeds_deposited")]
+        //public double? SeedsDeposited { get; set; }
         [JsonPropertyName("address_name")]
         public string? AddressName { get; set; }
         public string? Address { get; set; }
@@ -37,6 +39,10 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("min_number")]
         public int? MinNumber { get; set; }
         public CompetitionScopeStatus? Scope { get; set; }
+
+        //---------List DepartmentID belong to University Insert in Competition
+        [JsonPropertyName("list_major_id")]
+        public List<int> ListMajorId { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition
         [JsonPropertyName("club_id")]
