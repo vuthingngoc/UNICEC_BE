@@ -21,36 +21,38 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public async Task<ViewUser> GetById(int id, bool isFullInfo)
         {
             var query = from u in context.Users
+                        join uni in context.Universities on u.UniversityId equals uni.Id
+                        join d in context.Departments on u.DepartmentId equals d.Id
                         where u.Id.Equals(id)
-                        select u;
+                        select new { u, uni, d };
 
-            return (isFullInfo) ? await query.Select(user => new ViewUser()
+            return (isFullInfo) ? await query.Select(selector => new ViewUser()
             {
-                Id = user.Id,
-                RoleId = user.RoleId,
-                //SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
-                UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
-                DepartmentId = (user.DepartmentId.HasValue) ? user.DepartmentId.Value : 0,
-                Fullname = user.Fullname,
-                StudentCode = user.StudentCode,
-                Email = user.Email,
-                PhoneNumber = (!string.IsNullOrEmpty(user.PhoneNumber)) ? user.PhoneNumber : "",
-                Gender = user.Gender,
-                Dob = user.Dob,
-                Description = (!string.IsNullOrEmpty(user.Description)) ? user.Description : "",
-                Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
-                Status = user.Status,
-                IsOnline = user.IsOnline
+                Id = selector.u.Id,
+                RoleId = selector.u.RoleId,
+                UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
+                DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
+                departmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                Fullname = selector.u.Fullname,
+                StudentCode = selector.u.StudentCode,
+                Email = selector.u.Email,
+                PhoneNumber = (!string.IsNullOrEmpty(selector.u.PhoneNumber)) ? selector.u.PhoneNumber : "",
+                Gender = selector.u.Gender,
+                Dob = selector.u.Dob,
+                Description = (!string.IsNullOrEmpty(selector.u.Description)) ? selector.u.Description : "",
+                Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
+                Status = selector.u.Status,
+                IsOnline = selector.u.IsOnline
             }).FirstOrDefaultAsync()
-                : await query.Select(user => new ViewUser()
+                : await query.Select(selector => new ViewUser()
                 {
-                    Id = user.Id,
-                    RoleId = user.RoleId,
-                    //SponsorId = (user.SponsorId.HasValue) ? user.SponsorId.Value : 0,
-                    UniversityId = (user.UniversityId.HasValue) ? user.UniversityId.Value : 0,
-                    Fullname = user.Fullname,
-                    Gender = user.Gender,
-                    Avatar = (!string.IsNullOrEmpty(user.Avatar)) ? user.Avatar : "",
+                    Id = selector.u.Id,
+                    RoleId = selector.u.RoleId,
+                    UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                    Fullname = selector.u.Fullname,
+                    Gender = selector.u.Gender,
+                    Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
                 }).FirstOrDefaultAsync();
         }
 
@@ -67,8 +69,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                         {
                                             Id = u.Id,
                                             RoleId = u.RoleId,
-                                            //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
-                                            UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
+                                            UniversityId = universityId,
                                             DepartmentId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                                             Fullname = u.Fullname,
                                             StudentCode = u.StudentCode,
@@ -96,7 +97,6 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             {
                 Id = u.Id,
                 RoleId = u.RoleId,
-                //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
                 UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
                 DepartmentId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
                 Fullname = u.Fullname,
@@ -110,8 +110,6 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 Status = u.Status,
                 IsOnline = u.IsOnline
             }).FirstOrDefaultAsync();
-
-            //return await context.Users.FirstOrDefaultAsync(u => u.StudentCode.Equals(StudentCode));
         }
 
         public async Task<UserTokenModel> GetByEmail(string email)
@@ -126,11 +124,10 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 Id = selector.u.Id,
                 RoleId = selector.u.RoleId,
                 UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                //SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
-                Status = selector.u.Status                
+                Status = selector.u.Status
             }).FirstOrDefaultAsync();
         }
 
@@ -146,7 +143,6 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 Id = selector.u.Id,
                 RoleId = selector.u.RoleId,
                 UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                //SponsorId = (selector.u.SponsorId.HasValue) ? selector.u.SponsorId.Value : 0,
                 RoleName = selector.r.RoleName,
                 Fullname = selector.u.Fullname,
                 Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
@@ -157,34 +153,37 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public async Task<PagingResult<ViewUser>> GetByCondition(UserRequestModel request)
         {
             var query = from u in context.Users
-                        select u;
+                        join uni in context.Universities on u.UniversityId equals uni.Id
+                        join d in context.Departments on u.DepartmentId equals d.Id
+                        select new { u, uni, d };
 
-            if (request.UniversityId.HasValue) query = query.Where(u => u.UniversityId.Equals(request.UniversityId));
+            if (request.UniversityId.HasValue) query = query.Where(selector => selector.u.UniversityId.Equals(request.UniversityId));
 
-            //if (request.MajorId.HasValue) query = query.Where(u => u.MajorId.Equals(request.MajorId));
+            if (request.DepartmentId.HasValue) query = query.Where(selector => selector.u.DepartmentId.Equals(request.DepartmentId));
 
-            if (!string.IsNullOrEmpty(request.Fullname)) query = query.Where(u => u.Fullname.Equals(request.Fullname));
+            if (!string.IsNullOrEmpty(request.Fullname)) query = query.Where(selector => selector.u.Fullname.Equals(request.Fullname));
 
-            if (request.Status.HasValue) query = query.Where(u => u.Status.Equals(request.Status));
+            if (request.Status.HasValue) query = query.Where(selector => selector.u.Status.Equals(request.Status));
 
             List<ViewUser> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                          .Select(u => new ViewUser()
+                                          .Select(selector => new ViewUser()
                                           {
-                                              Id = u.Id,
-                                              RoleId = u.RoleId,
-                                              //SponsorId = (u.SponsorId.HasValue) ? u.SponsorId.Value : 0,
-                                              UniversityId = (u.UniversityId.HasValue) ? u.UniversityId.Value : 0,
-                                              DepartmentId = (u.DepartmentId.HasValue) ? u.DepartmentId.Value : 0,
-                                              Fullname = u.Fullname,
-                                              StudentCode = u.StudentCode,
-                                              Email = u.Email,
-                                              PhoneNumber = (!string.IsNullOrEmpty(u.PhoneNumber)) ? u.PhoneNumber : "",
-                                              Gender = u.Gender,
-                                              Dob = u.Dob,
-                                              Description = (!string.IsNullOrEmpty(u.Description)) ? u.Description : "",
-                                              Avatar = (!string.IsNullOrEmpty(u.Avatar)) ? u.Avatar : "",
-                                              Status = u.Status,
-                                              IsOnline = u.IsOnline
+                                              Id = selector.u.Id,
+                                              RoleId = selector.u.RoleId,
+                                              UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                                              UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
+                                              DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
+                                              departmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                                              Fullname = selector.u.Fullname,
+                                              StudentCode = selector.u.StudentCode,
+                                              Email = selector.u.Email,
+                                              PhoneNumber = (!string.IsNullOrEmpty(selector.u.PhoneNumber)) ? selector.u.PhoneNumber : "",
+                                              Gender = selector.u.Gender,
+                                              Dob = selector.u.Dob,
+                                              Description = (!string.IsNullOrEmpty(selector.u.Description)) ? selector.u.Description : "",
+                                              Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
+                                              Status = selector.u.Status,
+                                              IsOnline = selector.u.IsOnline
                                           }
                                           ).ToListAsync();
 
@@ -221,7 +220,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                       where u.UniversityId.Equals(universityId)
                                       select u).ToListAsync();
 
-            if(users.Count > 0)
+            if (users.Count > 0)
             {
                 foreach (User user in users)
                 {

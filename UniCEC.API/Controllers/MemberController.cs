@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.MemberSvc;
-using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Member;
@@ -72,6 +71,30 @@ namespace UniCEC.API.Controllers
             catch (NullReferenceException)
             {
                 return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        [HttpGet("info")]
+        [SwaggerOperation(Summary = "Get detail member info by club - user")]
+        public async Task<IActionResult> GetMemberInfoByClub(int? clubId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewDetailMember> members = await _memberService.GetMemberInfoByClub(token, clubId);
+                return Ok(members);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {

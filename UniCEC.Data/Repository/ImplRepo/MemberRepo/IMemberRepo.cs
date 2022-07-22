@@ -13,6 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
     {
         public Task<PagingResult<ViewMember>> GetMembersByClub(int clubId, MemberStatus status, PagingRequest request);
         public Task<List<Member>> GetMembersByClub(int clubId);
+        public Task<List<ViewDetailMember>> GetMemberInfoByClub(int userId, int? clubId);
         public Task<PagingResult<ViewMember>> GetByConditions(MemberRequestModel request);
         public Task<ViewDetailMember> GetDetailById(int memberId, MemberStatus? status);
         public Task<ViewMember> GetById(int memberId);

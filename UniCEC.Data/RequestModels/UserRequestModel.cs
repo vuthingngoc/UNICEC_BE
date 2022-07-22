@@ -7,7 +7,7 @@ namespace UniCEC.Data.RequestModels
     {
         [FromQuery(Name = "universityId")] 
         public int? UniversityId { get; set; }
-        [FromQuery(Name = "majorId")]
+        [FromQuery(Name = "departmentId")]
         public int? DepartmentId { get; set; }
         [FromQuery(Name = "fullName")]
         public string Fullname { get; set; }

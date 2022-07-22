@@ -10,11 +10,15 @@ namespace UniCEC.Data.ViewModels.Entities.User
         public int RoleId { get; set; }
         [JsonPropertyName("university_id")]
         public int? UniversityId { get; set; }
+        [JsonPropertyName("university_name")]
+        public string UniversityName { get; set; }
         public string Fullname { get; set; }
         public string Avatar { get; set; }
         public string Gender { get; set; }
         [JsonPropertyName("department_id")]
         public int? DepartmentId { get; set; }
+        [JsonPropertyName("department_name")]
+        public string departmentName { get; set; }
         [JsonPropertyName("student_code")]
         public string StudentCode { get; set; }
         public string Email { get; set; }
