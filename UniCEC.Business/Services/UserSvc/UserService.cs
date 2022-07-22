@@ -69,8 +69,17 @@ namespace UniCEC.Business.Services.UserSvc
             return isExisted;
         }
 
-        public async Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request)
+        public async Task<PagingResult<ViewUser>> GetUserCondition(string token, UserRequestModel request)
         {
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            if(roleId == 1)
+            {
+                int universityId = _decodeToken.Decode(token, "UniversityId");
+                if (request.UniversityId.HasValue && !request.UniversityId.Equals(universityId)) 
+                    throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                request.UniversityId = universityId;
+            }
+
             PagingResult<ViewUser> users = await _userRepo.GetByCondition(request);
             if (users.Items == null) throw new NullReferenceException("Not found any users");
             return users;

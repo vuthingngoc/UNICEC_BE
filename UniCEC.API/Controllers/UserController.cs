@@ -70,17 +70,22 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search user")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "University Admin, System Admin")]
         public async Task<IActionResult> GetUserByCondition([FromQuery] UserRequestModel request)
         {
             try
             {
-                PagingResult<ViewUser> users = await _userService.GetUserCondition(request);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                PagingResult<ViewUser> users = await _userService.GetUserCondition(token, request);
                 return Ok(users);
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (NullReferenceException)
             {
-                return Ok(new object());
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {

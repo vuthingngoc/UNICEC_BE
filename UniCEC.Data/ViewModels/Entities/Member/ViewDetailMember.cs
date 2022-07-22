@@ -10,6 +10,10 @@ namespace UniCEC.Data.ViewModels.Entities.Member
         public string Name { get; set; }
         [JsonPropertyName("student_code")]
         public string StudentCode { get; set; }
+        [JsonPropertyName("club_id")]
+        public int ClubId { get; set; }
+        [JsonPropertyName("club_name")]
+        public string ClubName { get; set; }
         [JsonPropertyName("club_role_id")]
         public int ClubRoleId { get; set; }
         [JsonPropertyName("club_role_name")]

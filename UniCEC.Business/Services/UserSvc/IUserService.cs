@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.UserSvc
         public int DecodeToken(string token, string nameClaim);
         public Task<ViewUser> GetById(string token, int id);
         public Task<PagingResult<ViewUser>> GetByUniversity(int universityId, UserStatus status, PagingRequest request);
-        public Task<PagingResult<ViewUser>> GetUserCondition(UserRequestModel request);
+        public Task<PagingResult<ViewUser>> GetUserCondition(string token, UserRequestModel request);
         public Task<bool> Insert(string token, UserAccountInsertModel user);
         public Task<bool> Delete(string token, int id);
         public Task<bool> CheckUserEmailExsit(string email);

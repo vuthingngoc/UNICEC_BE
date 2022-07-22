@@ -10,6 +10,7 @@ namespace UniCEC.Business.Services.MemberSvc
     public interface IMemberService
     {
         public Task<PagingResult<ViewMember>> GetByClub(string token, int clubId, MemberStatus? status, PagingRequest request);
+        public Task<List<ViewDetailMember>> GetMemberInfoByClub(string token, int? clubId);
         public Task<PagingResult<ViewMember>> GetByConditions(string token, MemberRequestModel request);
         public Task<ViewDetailMember> GetByMemberId(string token, int id);
         public Task<List<ViewIntroClubMember>> GetLeadersByClub(string token, int clubId);

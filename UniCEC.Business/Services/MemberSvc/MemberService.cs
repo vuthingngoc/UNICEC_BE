@@ -238,6 +238,14 @@ namespace UniCEC.Business.Services.MemberSvc
             await _clubRepo.Update();
         }
 
+        public async Task<List<ViewDetailMember>> GetMemberInfoByClub(string token, int? clubId)
+        {
+            int userId = _decodeToken.Decode(token, "Id");
+            List<ViewDetailMember> members = await _memberRepo.GetMemberInfoByClub(userId, clubId);
+            if (members == null) throw new NullReferenceException("Not found any members info");
+            return members;
+        }
+
         // Tien Anh
         //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
         //{

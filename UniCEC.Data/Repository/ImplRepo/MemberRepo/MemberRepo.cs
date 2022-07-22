@@ -80,9 +80,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         join u in context.Users on m.UserId equals u.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         where m.Id.Equals(memberId)
-                        select new { m, u, cr };
+                        select new { m, u, c, cr };
 
             if (status.HasValue) query = query.Where(selector => selector.m.Status.Equals(status.Value));
 
@@ -92,6 +93,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                 Name = selector.u.Fullname,
                 StudentCode = selector.u.StudentCode,
                 Avatar = selector.u.Avatar,
+                ClubId = selector.m.ClubId,
+                ClubName = selector.c.Name,
                 ClubRoleId = selector.cr.Id,
                 ClubRoleName = selector.cr.Name,
                 Email = selector.u.Email,
@@ -388,6 +391,38 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             query = query.Where(member => member.Status.Equals(MemberStatus.Active) && member.ClubRoleId.Equals(1)); // club role leader
 
             return (query.Any()) ? 1 : 0;
+        }
+
+        public async Task<List<ViewDetailMember>> GetMemberInfoByClub(int userId, int? clubId)
+        {
+            var query = from m in context.Members
+                        join u in context.Users on m.UserId equals u.Id
+                        join c in context.Clubs on m.ClubId equals c.Id
+                        join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
+                        where (m.Status.Equals(MemberStatus.Active) || m.Status.Equals(MemberStatus.Pending))
+                                && m.UserId.Equals(userId)
+                        select new { m, u, c, cr };
+
+            if (clubId.HasValue) query = query.Where(selector => selector.m.ClubId.Equals(clubId.Value));
+
+            List<ViewDetailMember> members = await query.Select(selector => new ViewDetailMember()
+            {
+                Id = selector.m.Id,
+                Name = selector.u.Fullname,
+                StudentCode = selector.u.StudentCode,
+                Avatar = selector.u.Avatar,
+                ClubId = selector.m.ClubId,
+                ClubName = selector.c.Name,
+                ClubRoleId = selector.cr.Id,
+                ClubRoleName = selector.cr.Name,
+                Email = selector.u.Email,
+                JoinDate = selector.m.StartTime,
+                PhoneNumber = selector.u.PhoneNumber,
+                Status = selector.m.Status,
+                IsOnline = selector.u.IsOnline
+            }).ToListAsync();
+
+            return (members.Count() > 0) ? members : null;
         }
     }
 }
