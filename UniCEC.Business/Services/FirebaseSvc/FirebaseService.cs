@@ -107,11 +107,13 @@ namespace UniCEC.Business.Services.FirebaseSvc
             else
             {
                 //Check Role
-                UserTokenModel user = await _userService.GetUserByEmail(email);
-                if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
+                UserTokenModel user = await _userService.GetUserByEmail(email);              
 
                 if (user != null)
                 {
+                    if (user.Status.Equals(UserStatus.InActive)) 
+                        throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
+
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
                     user.Avatar = userInfo.PhotoUrl;
                     await _userService.UpdateStatusOnline(user.Id, true);
