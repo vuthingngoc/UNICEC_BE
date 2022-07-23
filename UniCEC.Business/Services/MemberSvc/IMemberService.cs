@@ -15,7 +15,7 @@ namespace UniCEC.Business.Services.MemberSvc
         public Task<ViewDetailMember> GetByMemberId(string token, int id);
         public Task<List<ViewIntroClubMember>> GetLeadersByClub(string token, int clubId);
         public Task<int> GetQuantityNewMembersByClub(string token, int clubId);
-        public Task<ViewMember> Insert(string token, MemberInsertModel member);
+        public Task<ViewMember> Insert(string token, int clubId);
         public Task ConfirmMember(string token, ConfirmMemberModel model);
         public Task Update(string token, MemberUpdateModel member);
         public Task Delete(string token, int id);

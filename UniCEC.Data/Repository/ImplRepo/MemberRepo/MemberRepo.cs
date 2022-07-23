@@ -144,7 +144,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         {
             var query = from m in context.Members
                         where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
-                                && m.Status == MemberStatus.Active
+                                && !m.Status.Equals(MemberStatus.Inactive)
                         select m.Id;
 
             int memberId = await query.FirstOrDefaultAsync();

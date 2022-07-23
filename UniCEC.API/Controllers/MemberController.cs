@@ -151,14 +151,14 @@ namespace UniCEC.API.Controllers
         }
 
         // Student apply to club
-        [HttpPost("apply")]
+        [HttpPost("apply/club/{id}")]
         [SwaggerOperation(Summary = "Student apply to a club - student")]
-        public async Task<IActionResult> ApplyToBecomeMember([FromBody] MemberInsertModel model)
+        public async Task<IActionResult> ApplyToBecomeMember(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewMember result = await _memberService.Insert(token, model);
+                ViewMember result = await _memberService.Insert(token, id);
                 return Ok(result);
             }
             catch (NullReferenceException ex)
