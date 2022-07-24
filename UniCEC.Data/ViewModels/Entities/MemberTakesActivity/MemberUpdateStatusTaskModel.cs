@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,11 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
 {
     public class MemberUpdateStatusTaskModel
     {
-        [JsonPropertyName("competition_activity_id")]
+        [JsonPropertyName("competition_activity_id"), BindRequired]
         public int CompetitionActivityId { get; set; }       
         public CompetitionActivityStatus Status { get; set; }
         //---------Author to check user is Leader of Club 
-        [JsonPropertyName("club_id")]
+        [JsonPropertyName("club_id"), BindRequired]
         public int ClubId { get; set; }
     }
 }

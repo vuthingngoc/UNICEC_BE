@@ -16,6 +16,7 @@ namespace UniCEC.Data.ViewModels.Entities.University
         public string Email { get; set; }
         public string Description { get; set; }
         public string Phone { get; set; }
+        public string? ImgURL { get; set; }
         public DateTime Founding { get; set; }
         public string Opening { get; set; }
         public string Closing { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
@@ -26,7 +27,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 
         //---------Author to check user is Leader of Club
 
-        [JsonPropertyName("club_id")]
+        [JsonPropertyName("club_id"), BindRequired]
         public int ClubId { get; set; }
 
 

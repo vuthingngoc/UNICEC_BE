@@ -82,6 +82,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 viewUniversity.Closing = u.Closing;
                 viewUniversity.Status = u.Status;
                 viewUniversity.CityName = u.City.Name;
+                viewUniversity.ImgURL = u.ImageUrl;
                 //
                 viewUniversities.Add(viewUniversity);
             });
@@ -139,6 +140,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                     viewUniversity.Closing = u.Closing;
                     viewUniversity.Status = u.Status;
                     viewUniversity.CityName = u.City.Name;
+                    viewUniversity.ImgURL = u.ImageUrl;
                     //
                     viewUniversities.Add(viewUniversity);
                 });

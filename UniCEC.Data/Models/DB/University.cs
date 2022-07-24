@@ -22,6 +22,7 @@ namespace UniCEC.Data.Models.DB
         public string Email { get; set; }
         public string Description { get; set; }
         public string Phone { get; set; }
+        public string ImageUrl { get; set; }
         public DateTime Founding { get; set; }
         public string Openning { get; set; }
         public string Closing { get; set; }
