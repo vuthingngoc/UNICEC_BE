@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,10 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
 {
     public class RemoveMemberTakeActivityModel
     {
-        [JsonPropertyName("member_takes_activity_id")]
+        [JsonPropertyName("member_takes_activity_id"), BindRequired]
         public int MemberTakesActivityId { get; set; }
 
-        [JsonPropertyName("club_id")]
+        [JsonPropertyName("club_id"), BindRequired]
         public int ClubId { get; set; }
     }
 }
