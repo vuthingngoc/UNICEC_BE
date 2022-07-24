@@ -189,16 +189,23 @@ namespace UniCEC.Business.Services.MemberSvc
         public async Task Delete(string token, int memberId)
         {
             Member member = await _memberRepo.Get(memberId);
-            if (member == null) throw new NullReferenceException("Not found this member");
+            if (member == null 
+                || member.Status.Equals(MemberStatus.Inactive) 
+                || member.Status.Equals(MemberStatus.Pending)) 
+                    throw new NullReferenceException("Not found this member");
 
             // if user is not leader or vice president
             int userId = _decodeToken.Decode(token, "Id");
-            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
-            if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            if (!member.UserId.Equals(userId))
+            {
+                int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
+                if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (member.Status.Equals(MemberStatus.Inactive)) return;
+                if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+                if (member.Status.Equals(MemberStatus.Inactive)) return;
+            }
 
             member.Status = MemberStatus.Inactive;
             member.EndTime = new LocalTime().GetLocalTime().DateTime;
