@@ -24,6 +24,7 @@ using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
+using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -59,6 +60,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private readonly IConfiguration _configuration;
         private IEntityTypeRepo _entityTypeRepo;
         private ISeedsWalletService _seedsWalletService;
+        private IUniversityRepo _universityRepo;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -78,6 +80,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionRoleRepo competitionRoleRepo,
                                   IEntityTypeRepo entityTypeRepo,
                                   ISeedsWalletService seedsWalletService,
+                                  IUniversityRepo universityRepo,
                                   IFileService fileService)
         {
             _competitionRepo = competitionRepo;
@@ -100,6 +103,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionHistoryRepo = competitionHistoryRepo;
             _entityTypeRepo = entityTypeRepo;
             _seedsWalletService = seedsWalletService;
+            _universityRepo = universityRepo;    
         }
 
 
@@ -202,9 +206,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get EVENT or COMPETITION by conditions
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, string token)
         {
-            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request);
+            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token,"UniversityId"));
 
             List<ViewCompetition> resultList = result.Items.ToList();
 
@@ -1695,10 +1699,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
             CompetitionType competitionType = await _competitionTypeRepo.Get(competition.CompetitionTypeId);
             string competitionTypeName = competitionType.TypeName;
 
+            //University name
+            University university = await _universityRepo.Get(competition.UniversityId);
+            string universityName = university.Name;
+
             return new ViewDetailCompetition()
             {
                 Id = competition.Id,
                 UniversityId = competition.UniversityId,
+                UniversityName = universityName,
                 Name = competition.Name,
                 CompetitionTypeId = competition.CompetitionTypeId,
                 CompetitionTypeName = competitionTypeName,

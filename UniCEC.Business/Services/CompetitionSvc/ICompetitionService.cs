@@ -54,7 +54,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //-----------------------------------------------------Get       
         //Get EVENT or COMPETITION by conditions
-        public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
+        public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, string token);
 
         //Get top 3 EVENT or COMPETITION by Status
         public Task<List<ViewCompetition>> GetTopCompOrEve(int clubId, bool? Event/*, CompetitionStatus? status*/, CompetitionScopeStatus? scope, int top);
