@@ -13,7 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
     {
         public Task<bool> CheckExistCode(string code);
         //Get EVENT or COMPETITION by conditions
-        public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request);
+        public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, int universityId);
         //Get top EVENT or COMPETITION by Status
         public Task<List<ViewCompetition>> GetTopCompOrEve(int clubId, bool? Event/*, CompetitionStatus? status*/, CompetitionScopeStatus? scope, int Top);
         //Get Comp by Admin Uni

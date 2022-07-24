@@ -22,5 +22,8 @@ namespace UniCEC.Data.RequestModels
         //Status
         [FromQuery(Name = "statuses")]
         public List<CompetitionStatus>? Statuses { get; set; }
+        //ViewMost
+        [FromQuery(Name = "viewMost")]
+        public bool? ViewMost { get; set; }
     }
 }

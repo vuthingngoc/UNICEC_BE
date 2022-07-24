@@ -36,48 +36,53 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         }
 
         //Get EVENT or COMPETITION by conditions
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request)
+        //Data return sort by Creatime
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, int universityId)
         {
             //
             IQueryable<Competition> query;
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
+            //search có clubId
             if (request.ClubId.HasValue)
             {
-                query = from cic in context.CompetitionInClubs
-                        where cic.ClubId == request.ClubId
+                query = from c in context.Clubs
+                        where c.Id == request.ClubId
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == c.Id
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id
+                        where cic.CompetitionId == comp.Id && comp.UniversityId == universityId
+                        orderby comp.CreateTime descending
                         select comp;
             }
-            //Không có club chỉ status publish
-            // cái này đang dư cần chỉnh lại
+            //search kh club thì sẽ ra competition trong trường
             else
             {
                 query = from comp in context.Competitions
-                        where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel && comp.Status == CompetitionStatus.Publish
-                        orderby comp.StartTime
+                        where comp.UniversityId == universityId 
+                        orderby comp.CreateTime descending
                         select comp;
             }
 
-            //có club thì mới có nhiều status
-            if (request.ClubId.HasValue)
-            {
-                //status     
-                if (request.Statuses.Count > 0) query = query.Where(comp => request.Statuses.Count == 0 || request.Statuses.Contains((CompetitionStatus)comp.Status));
-            }
+            //status     
+            if (request.Statuses.Count > 0) query = query.Where(comp => request.Statuses.Count == 0 || request.Statuses.Contains((CompetitionStatus)comp.Status));
 
-            //Public
+            //Scope
             if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope);
+
+            //Name
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+
             //Serach Event
             if (request.Event.HasValue)
             {
                 if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
             }
 
-            //Name
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+            //View Most
+            if (request.ViewMost.HasValue) query = query.OrderByDescending(comp => comp.View);
+
 
             int totalCount = query.Count();
             //
@@ -152,7 +157,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
-
+                    UniversityId = compe.UniversityId,
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -280,15 +285,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
-
+                    UniversityId = compe.UniversityId,
                 };
                 competitions.Add(vc);
             }//end each competition
 
             return (competitions.Count > 0) ? competitions : null;
         }
-
-
 
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveByAdminUni(AdminUniGetCompetitionRequestModel request, int universityId)
         {
@@ -302,7 +305,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             List<ViewCompetition> competitions = new List<ViewCompetition>();
 
-            list_Competition =  list_Competition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
+            list_Competition = list_Competition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             foreach (Competition compe in list_Competition)
             {
@@ -381,7 +384,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
-
+                    UniversityId = compe.UniversityId,
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -402,45 +405,39 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             List<Competition> listCompetition = new List<Competition>();
 
             //lấy cả 2 
+            //có vấn đề 
             if (request.MostView.HasValue && request.NearlyDate.HasValue)
             {
                 listCompetition = await (from c in context.Competitions
-                                          where c.Status != CompetitionStatus.Cancel
-                                             && c.Scope == CompetitionScopeStatus.InterUniversity
-                                             //&& c.StartTimeRegister >= new LocalTime().GetLocalTime().DateTime
-                                          orderby c.View descending
-                                          select c).ToListAsync();
-
-                listCompetition = listCompetition.OrderByDescending(c => c.CreateTime).ToList();
+                                         where c.Scope == CompetitionScopeStatus.InterUniversity
+                                         orderby c.View descending, c.CreateTime descending
+                                         select c).ToListAsync();
             }
 
             //lấy thời gian đăng ký gần hiện tại
             if (!request.MostView.HasValue && request.NearlyDate.HasValue)
             {
                 listCompetition = await (from c in context.Competitions
-                                          where c.Status != CompetitionStatus.Cancel
-                                             && c.Scope == CompetitionScopeStatus.InterUniversity
-                                             //&& c.StartTimeRegister >= new LocalTime().GetLocalTime().DateTime
-                                          orderby c.CreateTime descending
-                                          select c).ToListAsync();
+                                         where c.Scope == CompetitionScopeStatus.InterUniversity
+                                         orderby c.CreateTime descending
+                                         select c).ToListAsync();
             }
 
             //lấy số lượng view nhiều 
             if (request.MostView.HasValue && !request.NearlyDate.HasValue)
             {
                 listCompetition = await (from c in context.Competitions
-                                          where c.Status != CompetitionStatus.Cancel
-                                             && c.Scope == CompetitionScopeStatus.InterUniversity
-                                          orderby c.View descending
-                                          select c).ToListAsync();
+                                         where c.Scope == CompetitionScopeStatus.InterUniversity
+                                         orderby c.View descending
+                                         select c).ToListAsync();
             }
 
             //Không sort theo cái nào cả
             if (!request.MostView.HasValue && !request.NearlyDate.HasValue)
             {
                 listCompetition = await (from c in context.Competitions
-                                          where c.Status != CompetitionStatus.Cancel && c.Scope == CompetitionScopeStatus.InterUniversity
-                                          select c).ToListAsync();
+                                         where c.Scope == CompetitionScopeStatus.InterUniversity
+                                         select c).ToListAsync();
             }
 
             //
@@ -536,7 +533,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     IsSponsor = compe.IsSponsor,
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
-
+                    UniversityId = compe.UniversityId,
                 };
                 competitions.Add(vc);
             }//end each competition

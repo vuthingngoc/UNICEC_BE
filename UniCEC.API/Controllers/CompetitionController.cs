@@ -67,7 +67,11 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request);
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request,token);
                 return Ok(result);
             }
             catch (NullReferenceException)
