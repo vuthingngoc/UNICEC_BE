@@ -1697,20 +1697,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             //Competition type name
             CompetitionType competitionType = await _competitionTypeRepo.Get(competition.CompetitionTypeId);
-            string competitionTypeName = competitionType.TypeName;
-
+            
             //University name
             University university = await _universityRepo.Get(competition.UniversityId);
-            string universityName = university.Name;
-
+    
             return new ViewDetailCompetition()
             {
                 Id = competition.Id,
                 UniversityId = competition.UniversityId,
-                UniversityName = universityName,
+                UniversityName = university.Name,
+                UniversityImage = university.ImageUrl,
                 Name = competition.Name,
                 CompetitionTypeId = competition.CompetitionTypeId,
-                CompetitionTypeName = competitionTypeName,
+                CompetitionTypeName = competitionType.TypeName,
                 Address = competition.Address,
                 NumberOfParticipation = competition.NumberOfParticipation,
                 NumberOfTeam = (int)competition.NumberOfTeam,
@@ -2464,7 +2463,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return null;
         }
-
 
     }
 }
