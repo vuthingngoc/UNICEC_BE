@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.FileSvc;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
@@ -13,12 +14,14 @@ namespace UniCEC.Business.Services.UniversitySvc
     public class UniversityService : IUniversityService
     {
         private IUniversityRepo _universityRepo;
-        private ICityRepo _cityRepo; 
+        private ICityRepo _cityRepo;
+        private IFileService _fileService;
 
-        public UniversityService(IUniversityRepo universityRepo, ICityRepo cityRepo)
+        public UniversityService(IUniversityRepo universityRepo, ICityRepo cityRepo, IFileService fileService)
         {
             _universityRepo = universityRepo;
             _cityRepo = cityRepo;
+            _fileService = fileService; 
         }
 
         //
@@ -83,6 +86,12 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uni.Name = universityModel.Name;
                 uni.Description = universityModel.Description;
                 uni.Phone = universityModel.Phone;
+                //
+                if (!string.IsNullOrEmpty(universityModel.Base64StringImg))
+                {
+                    string url = await _fileService.UploadFile(universityModel.Base64StringImg);
+                    
+                }
                 uni.Email = universityModel.Email;
                 uni.Openning = universityModel.Openning;
                 uni.Closing = universityModel.Closing;
@@ -107,6 +116,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                     viewUniversity.Name = u.Name;
                     viewUniversity.Description = u.Description;
                     viewUniversity.Phone = u.Phone;
+                    viewUniversity.ImgURL = u.ImageUrl; 
                     viewUniversity.Email = u.Email;
                     viewUniversity.Opening = u.Openning;
                     viewUniversity.Closing = u.Closing;
@@ -138,11 +148,16 @@ namespace UniCEC.Business.Services.UniversitySvc
                     uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
                     uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
                     uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
+                    if (!string.IsNullOrEmpty(university.ImgURL)) {
+                        uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
+                    }                 
                     uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
                     uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
                     uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
                     uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;
                     uni.Status = university.Status;
+                    //img url
+
                     await _universityRepo.Update();
                     return true;
                 }
