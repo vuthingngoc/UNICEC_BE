@@ -27,5 +27,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 
         //
         public Task<bool> CheckExistedTeam(int teamId);
+
+        public Task<int> getNumberOfMemberInTeam(int teamId);
     }
 }

@@ -21,8 +21,13 @@ namespace UniCEC.Data.ViewModels.Entities.Team
         public string InvitedCode { get; set; }
         public TeamStatus Status { get; set; }
 
+        //
+        [JsonPropertyName("number_of_member_in_team")]
+        public int NumberOfMemberInTeam { get; set; }
+
         [JsonPropertyName("list_participant")]
         public List<ViewParticipant> ListParticipant { get; set; } 
+
 
     }
 }
