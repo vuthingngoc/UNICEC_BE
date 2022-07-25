@@ -854,11 +854,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
                 if (Check)
                 {
-                    //------------- CHECK Status Competition
+                    ////------------- CHECK Status Competition
 
                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
-                        throw new ArgumentException("Competition State is not suitable to do this action");
+                    //if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                    //    throw new ArgumentException("Competition State is not suitable to do this action");
 
 
                     //------------ CHECK Scope
@@ -947,8 +947,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //
                 Competition comp = await _competitionRepo.Get(competitionInMajor.CompetitionId);
-                if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
-                    throw new ArgumentException("Competition State is not suitable to do this action");
+                //if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                //    throw new ArgumentException("Competition State is not suitable to do this action");
 
                 //
                 bool Check = await CheckMemberInCompetition(token, comp.Id, model.ClubId, true);
