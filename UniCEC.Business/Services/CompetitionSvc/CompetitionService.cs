@@ -612,11 +612,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     //Update Everything Except: Content, Scope
                     bool checkScope = (model.Scope != comp.Scope) ? true : false;
-
+                    bool checkContent = string.Equals(model.Content, comp.Content);
 
                     //Update Content Scope
                     //Change to Pending Review
-                    if (checkScope || string.Equals(model.Content, comp.Content) == true)
+                    if (checkScope || checkContent == false)
                     {
 
                         bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
@@ -1994,7 +1994,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //ET Update = ET
                 if (DateTime.Compare(model.EndTime.Value, comp.EndTime) != 0) // data mới
                 {
-                    ST = true;
+                    ET = true;
                 }
 
                 // STR - ETR - ST - ET
