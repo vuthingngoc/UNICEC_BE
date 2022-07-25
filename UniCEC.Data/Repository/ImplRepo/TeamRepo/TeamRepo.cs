@@ -107,6 +107,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                     Name = team.Name,
                     InvitedCode = team.InvitedCode,
                     Status = team.Status,
+                    NumberOfMemberInTeam = await getNumberOfMemberInTeam(team.Id)
                 };
 
                 list_viewTeam.Add(vt);
@@ -172,7 +173,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 InvitedCode = team.InvitedCode,
                 Name = team.Name,
                 ListParticipant = viewParticipants,
-                Status = team.Status
+                Status = team.Status,
+                NumberOfMemberInTeam = await getNumberOfMemberInTeam(team.Id)
             } : null;
 
         }
@@ -208,6 +210,14 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                         where t.Status == Enum.TeamStatus.IsLocked && t.CompetitionId == competitionId
                         select t;
             return (await query.CountAsync() > 0) ? await query.CountAsync() : -1;
+        }
+
+        public async Task<int> getNumberOfMemberInTeam(int teamId)
+        {
+            List<ParticipantInTeam> participants = await (from pit in context.ParticipantInTeams
+                                                          where pit.TeamId == teamId
+                                                          select pit).ToListAsync();
+            return participants.Count;
         }
     }
 }

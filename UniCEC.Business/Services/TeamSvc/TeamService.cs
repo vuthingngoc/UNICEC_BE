@@ -173,6 +173,10 @@ namespace UniCEC.Business.Services.TeamSvc
                 //Check Participant
                 if (await _participantRepo.ParticipantInCompetition(UserId, model.CompetitionId) == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
+                //Check participant already in team
+                ParticipantInTeam participantInAnotherTeam = await _participantInTeamRepo.CheckParticipantInAnotherTeam(model.CompetitionId, UserId);
+                if (participantInAnotherTeam != null) throw new ArgumentException("You are already in Team, Please out team previous to create new Team");
+
                 //-----------------Add Team
                 Team team = new Team()
                 {
@@ -206,7 +210,7 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 if (result <= 0) throw new ArgumentException("Add Team Leader Failed");
 
-                return TransformViewTeam(getTeam);
+                return await TransformViewTeam(getTeam);
 
             }
             catch (Exception)
@@ -492,7 +496,7 @@ namespace UniCEC.Business.Services.TeamSvc
             };
         }
 
-        public ViewTeam TransformViewTeam(Team team)
+        public async Task<ViewTeam> TransformViewTeam(Team team)
         {
             return new ViewTeam()
             {
@@ -501,6 +505,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 CompetitionId = team.CompetitionId,
                 Description = team.Description,
                 InvitedCode = team.InvitedCode,
+                Status = team.Status,
+                NumberOfMemberInTeam = await _teamRepo.getNumberOfMemberInTeam(team.Id),
             };
         }
 
