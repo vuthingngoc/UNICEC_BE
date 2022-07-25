@@ -125,7 +125,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-
         public async Task<PagingResult<ViewCompetition>> GetCompetitionByAdminUni(AdminUniGetCompetitionRequestModel request, string token)
         {
             try
@@ -966,7 +965,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw;
             }
         }
-
 
         //---------------------------------------------------------------------------------- STATE chỉnh bằng tay
         //State Pending Review - done
@@ -2118,160 +2116,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return checkDate;
         }
 
-        //Special for update State Approve
-        private bool CheckDateInsertCasesStateApprove(Competition comp, DateTime localTime, LeaderUpdateCompOrEventModel model)
-        {
-            bool checkDate = false;
-            if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
-            {
-                bool STR = false;
-                bool ETR = false;
-                bool ST = false;
-                bool ET = false;
-                //STR Update = STR 
-                if (DateTime.Compare(model.StartTimeRegister.Value, comp.StartTimeRegister) != 0) // data mới
-                {
-                    STR = true;
-                }
-                //ETR Update = ETR 
-                if (DateTime.Compare(model.EndTimeRegister.Value, comp.EndTimeRegister) != 0) // data mới
-                {
-                    ETR = true;
-                }
-                //ST Update = ST
-                if (DateTime.Compare(model.StartTime.Value, comp.StartTime) != 0) // data mới
-                {
-                    ST = true;
-                }
-                //ET Update = ET
-                if (DateTime.Compare(model.EndTime.Value, comp.EndTime) != 0) // data mới
-                {
-                    ST = true;
-                }
-
-                // STR - ETR - ST - ET
-                //  1  -  1  - 1  - 1   all true
-                //  1  -  1  - 1  - 2
-                //  1  -  1  - 2  - 1
-                //  1  -  1  - 2  - 2
-                //  1  -  2  - 1  - 1
-                //  1  -  2  - 1  - 2
-                //  1  -  2  - 2  - 1
-                //  1  -  2  - 2  - 2
-                //  2  -  1  - 1  - 1
-                //  2  -  1  - 1  - 2
-                //  2  -  1  - 2  - 1
-                //  2  -  1  - 2  - 2  
-                //  2  -  2  - 1  - 1
-                //  2  -  2  - 1  - 2
-                //  2  -  2  - 2  - 1
-                //  2  -  2  - 2  - 2   all false
-
-                //All true
-                if (STR && ETR && ST && ET)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
-                }
-
-                //  1  -  1  - 1  - 2
-                if (STR && ETR && ST && ET == false)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
-                }
-
-                //  1  -  1  - 2  - 1
-                if (STR && ETR && ST == false && ET)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, false);
-                }
-
-                //  1  -  1  - 2  - 2
-                if (STR && ETR && ST == false && ET == false)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, false);
-                }
-
-                //  1  -  2  - 1  - 1
-                if (STR && ETR == false && ST && ET)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, false);
-                }
-
-                //  1  -  2  - 1  - 2
-                if (STR && ETR == false && ST && ET == false)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, false);
-                }
-
-                //  1  -  2  - 2  - 1
-                if (STR && ETR == false && ST && ET == false)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, false);
-                }
-
-                //  1  -  2  - 2  - 2
-                if (STR && ETR == false && ST == false && ET == false)
-                {
-                    checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
-                }
-
-                //  2  -  1  - 1  - 1
-                if (STR == false && ETR && ST && ET)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
-                }
-
-                //  2  -  1  - 1  - 2
-                if (STR == false && ETR && ST && ET == false)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
-                }
-
-                //  2  -  1  - 2  - 1
-                if (STR == false && ETR && ST == false && ET)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, false);
-                }
-
-                //  2  -  1  - 2  - 2  
-                if (STR == false && ETR && ST == false && ET == false)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, false);
-                }
-
-                //  2  -  2  - 1  - 1
-                if (STR == false && ETR == false && ST && ET)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, false);
-                }
-
-                //  2  -  2  - 1  - 2
-                if (STR == false && ETR == false && ST && ET == false)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, false);
-                }
-
-                //  2  -  2  - 2  - 1
-                if (STR == false && ETR == false && ST == false && ET)
-                {
-                    checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, false);
-                }
-
-                //All false
-                if (STR == false && ETR == false && ST == false && ET == false)
-                {
-                    checkDate = true;
-                }
-
-            }
-            else
-            {
-                throw new ArgumentException("Missing Field Date");
-            }
-
-            return checkDate;
-        }
-
         private bool CheckNumMinMaxCases(Competition comp, LeaderUpdateCompOrEventModel model)
         {
             //------------- CHECK Max,Min,NumberOfParticipant Update                          
@@ -2475,7 +2319,159 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return null;
         }
 
+        //Special for update State Approve
+        //private bool CheckDateInsertCasesStateApprove(Competition comp, DateTime localTime, LeaderUpdateCompOrEventModel model)
+        //{
+        //    bool checkDate = false;
+        //    if (model.StartTimeRegister.HasValue && model.EndTimeRegister.HasValue && model.StartTime.HasValue && model.EndTime.HasValue)
+        //    {
+        //        bool STR = false;
+        //        bool ETR = false;
+        //        bool ST = false;
+        //        bool ET = false;
+        //        //STR Update = STR 
+        //        if (DateTime.Compare(model.StartTimeRegister.Value, comp.StartTimeRegister) != 0) // data mới
+        //        {
+        //            STR = true;
+        //        }
+        //        //ETR Update = ETR 
+        //        if (DateTime.Compare(model.EndTimeRegister.Value, comp.EndTimeRegister) != 0) // data mới
+        //        {
+        //            ETR = true;
+        //        }
+        //        //ST Update = ST
+        //        if (DateTime.Compare(model.StartTime.Value, comp.StartTime) != 0) // data mới
+        //        {
+        //            ST = true;
+        //        }
+        //        //ET Update = ET
+        //        if (DateTime.Compare(model.EndTime.Value, comp.EndTime) != 0) // data mới
+        //        {
+        //            ST = true;
+        //        }
 
+        //        // STR - ETR - ST - ET
+        //        //  1  -  1  - 1  - 1   all true
+        //        //  1  -  1  - 1  - 2
+        //        //  1  -  1  - 2  - 1
+        //        //  1  -  1  - 2  - 2
+        //        //  1  -  2  - 1  - 1
+        //        //  1  -  2  - 1  - 2
+        //        //  1  -  2  - 2  - 1
+        //        //  1  -  2  - 2  - 2
+        //        //  2  -  1  - 1  - 1
+        //        //  2  -  1  - 1  - 2
+        //        //  2  -  1  - 2  - 1
+        //        //  2  -  1  - 2  - 2  
+        //        //  2  -  2  - 1  - 1
+        //        //  2  -  2  - 1  - 2
+        //        //  2  -  2  - 2  - 1
+        //        //  2  -  2  - 2  - 2   all false
+
+        //        //All true
+        //        if (STR && ETR && ST && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
+        //        }
+
+        //        //  1  -  1  - 1  - 2
+        //        if (STR && ETR && ST && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+        //        }
+
+        //        //  1  -  1  - 2  - 1
+        //        if (STR && ETR && ST == false && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, false);
+        //        }
+
+        //        //  1  -  1  - 2  - 2
+        //        if (STR && ETR && ST == false && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, false);
+        //        }
+
+        //        //  1  -  2  - 1  - 1
+        //        if (STR && ETR == false && ST && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, false);
+        //        }
+
+        //        //  1  -  2  - 1  - 2
+        //        if (STR && ETR == false && ST && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, false);
+        //        }
+
+        //        //  1  -  2  - 2  - 1
+        //        if (STR && ETR == false && ST && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, false);
+        //        }
+
+        //        //  1  -  2  - 2  - 2
+        //        if (STR && ETR == false && ST == false && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, model.StartTimeRegister.Value, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
+        //        }
+
+        //        //  2  -  1  - 1  - 1
+        //        if (STR == false && ETR && ST && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
+        //        }
+
+        //        //  2  -  1  - 1  - 2
+        //        if (STR == false && ETR && ST && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+        //        }
+
+        //        //  2  -  1  - 2  - 1
+        //        if (STR == false && ETR && ST == false && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, model.EndTime.Value, false);
+        //        }
+
+        //        //  2  -  1  - 2  - 2  
+        //        if (STR == false && ETR && ST == false && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, model.EndTimeRegister.Value, comp.StartTime, comp.EndTime, false);
+        //        }
+
+        //        //  2  -  2  - 1  - 1
+        //        if (STR == false && ETR == false && ST && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, model.EndTime.Value, false);
+        //        }
+
+        //        //  2  -  2  - 1  - 2
+        //        if (STR == false && ETR == false && ST && ET == false)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, model.StartTime.Value, comp.EndTime, false);
+        //        }
+
+        //        //  2  -  2  - 2  - 1
+        //        if (STR == false && ETR == false && ST == false && ET)
+        //        {
+        //            checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, false);
+        //        }
+
+        //        //All false
+        //        if (STR == false && ETR == false && ST == false && ET == false)
+        //        {
+        //            checkDate = true;
+        //        }
+
+        //    }
+        //    else
+        //    {
+        //        throw new ArgumentException("Missing Field Date");
+        //    }
+
+        //    return checkDate;
+        //}
 
 
     }

@@ -56,6 +56,8 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                   || model.ClubId == 0)
                     throw new ArgumentNullException("|| Competition Acitvity Id Null || ClubId Null");
 
+                if (model.ListActivitiesEntities.Count < 0) return null;
+
                 foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
                 {
                     if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image is NULL");
@@ -75,13 +77,27 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                 foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
                 {
                     //------------ Insert Activities-Entities-----------
-                    string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                    ActivitiesEntity ActivitiesEntity = new ActivitiesEntity()
+                    ActivitiesEntity ActivitiesEntity = new ActivitiesEntity();
+                    if (modelItem.Base64StringImg.Contains("https"))
                     {
-                        CompetitionActivityId = model.CompetitionActivityId,
-                        Name = modelItem.Name,
-                        ImageUrl = Url
-                    };
+                        ActivitiesEntity.CompetitionActivityId = model.CompetitionActivityId;
+                        ActivitiesEntity.Name = modelItem.Name;
+                        ActivitiesEntity.ImageUrl = modelItem.Base64StringImg;
+                    }
+                    else
+                    {
+                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                        ActivitiesEntity.CompetitionActivityId = model.CompetitionActivityId;
+                        ActivitiesEntity.Name = modelItem.Name;
+                        ActivitiesEntity.ImageUrl = Url;
+                    }
+
+                    //ActivitiesEntity ActivitiesEntity = new ActivitiesEntity()
+                    //{
+                    //    CompetitionActivityId = model.CompetitionActivityId,
+                    //    Name = modelItem.Name,
+                    //    ImageUrl = Url
+                    //};
 
                     int id = await _activitiesEntityRepo.Insert(ActivitiesEntity);
                     ActivitiesEntity entity = await _activitiesEntityRepo.Get(id);
@@ -90,7 +106,14 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                     string imgUrl;
                     try
                     {
-                        imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
+                        if (entity.ImageUrl.Contains("http"))
+                        {
+                            imgUrl = entity.ImageUrl;
+                        }
+                        else
+                        {
+                            imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
+                        }
                     }
                     catch (Exception ex)
                     {
