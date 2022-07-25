@@ -613,56 +613,56 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //Update Everything Except: Content, Scope
                     bool checkScope = (model.Scope != comp.Scope) ? true : false;
 
-                   
-                        //Update Content Scope
-                        //Change to Pending Review
-                        if (checkScope || string.Equals(model.Content, comp.Content) == true)
+
+                    //Update Content Scope
+                    //Change to Pending Review
+                    if (checkScope || string.Equals(model.Content, comp.Content) == true)
+                    {
+
+                        bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
+                        if (dateInsertCases == false) throw new ArgumentException("Date not suitable");
+
+                        bool numMinMaxCases = CheckNumMinMaxCases(comp, model);
+                        if (numMinMaxCases == false) throw new ArgumentException("0 < min < max Or Number of participant > 0");
+
+                        comp = await UpdateFieldCompetition(comp, model, token);
+
+                        comp.Status = CompetitionStatus.PendingReview;
+
+                        await _competitionRepo.Update();
+
+                        //----------- InsertCompetition History
+                        CompetitionHistory chim = new CompetitionHistory()
                         {
+                            CompetitionId = comp.Id,
+                            ChangerId = mem.Id,
+                            ChangeDate = new LocalTime().GetLocalTime().DateTime,
+                            Description = mem.User.Fullname + " Change Rule Or Condition Of Competition",
+                            Status = CompetitionStatus.PendingReview,
+                        };
+                        int result = await _competitionHistoryRepo.Insert(chim);
 
-                            bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
-                            if (dateInsertCases == false) throw new ArgumentException("Date not suitable");
+                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                        return true;
+                    }
+                    //Not Change to Pending Review
+                    else
+                    {
+                        bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);//CheckDateInsertCasesStateApprove(comp, localTime, model);
+                        if (dateInsertCases == false) throw new ArgumentException("Date not suitable must be Present < STR < ETR < ST < ET");
 
-                            bool numMinMaxCases = CheckNumMinMaxCases(comp, model);
-                            if (numMinMaxCases == false) throw new ArgumentException("0 < min < max Or Number of participant > 0");
+                        bool numMinMaxCases = CheckNumMinMaxCases(comp, model);
+                        if (numMinMaxCases == false) throw new ArgumentException("0 < min < max Or Number of participant > 0");
 
-                            comp = await UpdateFieldCompetition(comp, model, token);
+                        comp = await UpdateFieldCompetition(comp, model, token);
 
-                            comp.Status = CompetitionStatus.PendingReview;
-
-                            await _competitionRepo.Update();
-
-                            //----------- InsertCompetition History
-                            CompetitionHistory chim = new CompetitionHistory()
-                            {
-                                CompetitionId = comp.Id,
-                                ChangerId = mem.Id,
-                                ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                                Description = mem.User.Fullname + " Change Rule Or Condition Of Competition",
-                                Status = CompetitionStatus.PendingReview,
-                            };
-                            int result = await _competitionHistoryRepo.Insert(chim);
-
-                            if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                            return true;
-                        }
-                        //Not Change to Pending Review
-                        else
-                        {
-                            bool dateInsertCases = CheckDateInsertCasesStateApprove(comp, localTime, model);
-                            if (dateInsertCases == false) throw new ArgumentException("Date not suitable must be Present < STR < ETR < ST < ET");
-
-                            bool numMinMaxCases = CheckNumMinMaxCases(comp, model);
-                            if (numMinMaxCases == false) throw new ArgumentException("0 < min < max Or Number of participant > 0");
-
-                            comp = await UpdateFieldCompetition(comp, model, token);
-
-                            await _competitionRepo.Update();
-                            return true;
-                        }
-
+                        await _competitionRepo.Update();
+                        return true;
                     }
 
-                
+                }
+
+
 
                 //-------------------------------------------------------State Publish
                 //Update Date, location, Number Of Participant, max ,min
