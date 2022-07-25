@@ -15,13 +15,16 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
         {
         }
 
-        public async Task DeleteActivitiesEntity(int activitiesEntityId)
+        public async Task DeleteActivitiesEntity(int competitionActivityId)
         {
-            ActivitiesEntity activitiesEntity = await (from ae in context.ActivitiesEntities
-                                                       where ae.Id == activitiesEntityId
-                                                       select ae).FirstOrDefaultAsync();
-
-            context.ActivitiesEntities.Remove(activitiesEntity);
+            List<ActivitiesEntity> activitiesEntities = await (from ae in context.ActivitiesEntities
+                                                       where ae.CompetitionActivityId == competitionActivityId
+                                                       select ae).ToListAsync();
+            foreach (ActivitiesEntity ae in activitiesEntities)
+            {
+                context.ActivitiesEntities.Remove(ae);
+            }
+            
             await Update();
         }
 

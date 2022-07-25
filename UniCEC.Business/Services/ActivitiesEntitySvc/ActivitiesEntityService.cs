@@ -115,26 +115,23 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
             }
         }
 
-        public async Task<bool> DeleteActivitiesEntity(ActivitiesEntityDeleteModel model, string token)
+        public async Task<bool> DeleteActivitiesEntity(int CompetitionActivityId, int ClubId, string token)
         {
             try
             {
-                if (model.ClubId == 0 || model.ActivitiesEntityId == 0)
-                    throw new ArgumentNullException("ClubId NULL || Acitivities Entity Id is NULL");
 
-                //Check Existed
-                ActivitiesEntity ae = await _activitiesEntityRepo.Get(model.ActivitiesEntityId);
-                if (ae == null) throw new ArgumentException("Activities not found");
 
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(CompetitionActivityId);
+                //Check CompetitionActivity
+                if (competitionActivity == null) throw new ArgumentException("Not Found Competition Activity");
                 //Check Status
-                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(ae.CompetitionActivityId);
                 if (competitionActivity.Status == CompetitionActivityStatus.Cancelling) throw new ArgumentException("Competition Activity is Canceling");
 
                 //Check Condition
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
+                await CheckMemberInCompetition(token, competition.Id, ClubId, false);
 
-                await _activitiesEntityRepo.DeleteActivitiesEntity(model.ActivitiesEntityId);
+                await _activitiesEntityRepo.DeleteActivitiesEntity(CompetitionActivityId);
 
                 return true;
             }

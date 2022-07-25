@@ -11,6 +11,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
     {
         public Task<List<ViewActivitiesEntity>> AddActivitiesEntity(ActivitiesEntityInsertModel model, string token);
 
-        public Task<bool> DeleteActivitiesEntity(ActivitiesEntityDeleteModel model, string token);
+        public Task<bool> DeleteActivitiesEntity(int activitiesEntityId, int clubId, string token);
     }
 }

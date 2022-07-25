@@ -37,7 +37,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //--------------------------------------------------Club Collaborate
         public Task<ViewCompetitionInClub> AddClubCollaborate(CompetitionInClubInsertModel model, string token);
 
-        public Task<bool> DeleteClubCollaborate(CompetitionInClubDeleteModel model, string token);
+        public Task<bool> DeleteClubCollaborate(int competitionInClubId, int clubId, string token);
 
         //--------------------------------------------------Competition In Major  
         public Task<List<ViewCompetitionInMajor>> AddCompetitionInMajor(CompetitionInMajorInsertModel model, string token);

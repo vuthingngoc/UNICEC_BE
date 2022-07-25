@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -78,14 +79,14 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete competition entity")]
-        public async Task<IActionResult> DeleteCompetitionEntity([FromBody] CompetitionEntityDeleteModel model)
+        public async Task<IActionResult> DeleteCompetitionEntity([FromQuery(Name = "competitionId"), BindRequired] int competitionId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                bool result = await _competitionEntityService.DeleteCompetitionEntity(model, token);
+                bool result = await _competitionEntityService.DeleteCompetitionEntity(competitionId, clubId, token);
 
                 if (result)
                 {

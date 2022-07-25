@@ -18,12 +18,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Member In Competition duyệt bài
         public Task<bool> Update(CompetitionActivityUpdateModel clubActivity, string token);
-        public Task<bool> Delete(CompetitionActivityDeleteModel model, string token);
+        public Task<bool> Delete(int competitionActivityId, int clubId, string token);
 
         //Get List ClubActivity By Conditions 
         //-> sửa lại cho list Status
         public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token);
-        
+
         //------------------------------------Member Take Activity
         public Task<ViewDetailMemberTakesActivity> AssignTaskForMember(MemberTakesActivityInsertModel model, string token);
 
@@ -31,7 +31,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         public Task<bool> MemberUpdateStatusTask(MemberUpdateStatusTaskModel model, string token);
 
         //Remove member take task 
-        public Task<bool> RemoveMemberTakeTask(RemoveMemberTakeActivityModel model, string token);
+        public Task<bool> RemoveMemberTakeTask(int memberTakesActivityId, int clubId, string token);
 
 
     }

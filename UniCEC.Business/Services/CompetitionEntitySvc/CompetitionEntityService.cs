@@ -239,14 +239,13 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             }
         }
 
-        public async Task<bool> DeleteCompetitionEntity(CompetitionEntityDeleteModel model, string token)
+        public async Task<bool> DeleteCompetitionEntity(int competitionId, int clubId, string token)
         {
             try
             {
-                if (model.ClubId == 0 || model.CompetitionId == 0)
-                    throw new ArgumentNullException("ClubId NULL || Competition Id is NULL");
+                
 
-                Competition competition = await _competitionRepo.Get(model.CompetitionId);
+                Competition competition = await _competitionRepo.Get(competitionId);
                 if (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve)
                 {
 
@@ -254,7 +253,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                     //    && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
                     //    throw new ArgumentException("Can't Remove Sponsor or Influencer");
 
-                    bool Check = await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
+                    bool Check = await CheckMemberInCompetition(token, competition.Id, clubId, false);
                     if (Check == false) return false;
 
                     List<CompetitionEntity> competitionEntities = competition.CompetitionEntities.ToList();

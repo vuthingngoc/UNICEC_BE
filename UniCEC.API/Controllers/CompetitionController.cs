@@ -71,7 +71,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request,token);
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEve(request, token);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -529,7 +529,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete("club")]
         [SwaggerOperation(Summary = "Delete another club collaborate in competition")]
-        public async Task<IActionResult> DeleteClubCollaborate([FromBody] CompetitionInClubDeleteModel model)
+        public async Task<IActionResult> DeleteClubCollaborate([FromQuery(Name = "competitionInClubId"), BindRequired] int CompetitionInClubId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
@@ -537,7 +537,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                bool result = await _competitionService.DeleteClubCollaborate(model, token);
+                bool result = await _competitionService.DeleteClubCollaborate(CompetitionInClubId, clubId, token);
 
                 return Ok(result);
 

@@ -816,15 +816,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<bool> DeleteClubCollaborate(CompetitionInClubDeleteModel model, string token)
+        public async Task<bool> DeleteClubCollaborate(int CompetitionInClubId, int ClubId, string token)
         {
             try
-            {   //
-                if (model.CompetitionInClubId == 0 || model.ClubId == 0)
-                    throw new ArgumentNullException("Competition In Club Id NULL || Club Id NULL");
+            {
 
                 //
-                CompetitionInClub competitionInClub = await _competitionInClubRepo.Get(model.CompetitionInClubId);
+                CompetitionInClub competitionInClub = await _competitionInClubRepo.Get(CompetitionInClubId);
                 if (competitionInClub == null) throw new ArgumentException("Competition In Club Id Not Found");
 
                 //
@@ -832,9 +830,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
                 {
                     //
-                    bool Check = await CheckMemberInCompetition(token, comp.Id, model.ClubId, true);
+                    bool Check = await CheckMemberInCompetition(token, comp.Id, ClubId, true);
                     if (Check == false) throw new ArgumentException("Delete Failed");
-                    await _competitionInClubRepo.DeleteCompetitionInClub(model.CompetitionInClubId);
+                    await _competitionInClubRepo.DeleteCompetitionInClub(CompetitionInClubId);
                     return true;
                 }
                 else
