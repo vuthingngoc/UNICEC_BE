@@ -15,6 +15,6 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
         public Task<List<ViewCompetitionEntity>> AddInfluencer (InfluencerInsertModel model, string token); 
 
-        public Task<bool> DeleteCompetitionEntity(CompetitionEntityDeleteModel model, string token);
+        public Task<bool> DeleteCompetitionEntity(int competitionId, int clubId, string token);
     }
 }

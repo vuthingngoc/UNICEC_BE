@@ -208,8 +208,8 @@ namespace UniCEC.API.Controllers
         // DELETE api/<CompetitionActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete]
-        [SwaggerOperation(Summary = "Delete Competition Activity by Id  ")]
-        public async Task<IActionResult> DeleteCompetitionAcitvityById([FromBody] CompetitionActivityDeleteModel model)
+        [SwaggerOperation(Summary = "Delete Competition Activity by Id")]
+        public async Task<IActionResult> DeleteCompetitionAcitvityById([FromQuery(Name = "competitionActivityId"), BindRequired] int competitionActivityId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
@@ -218,7 +218,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 bool result = false;
-                result = await _competitionActivityService.Delete(model, token);
+                result = await _competitionActivityService.Delete(competitionActivityId, clubId, token);
                 if (result)
                 {
                     return Ok();
@@ -341,7 +341,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete("remove-member-task")]
         [SwaggerOperation(Summary = "Remove member out of task - Student")]
-        public async Task<IActionResult> RemoveMemberTakeTask([FromBody] RemoveMemberTakeActivityModel model)
+        public async Task<IActionResult> RemoveMemberTakeTask([FromQuery(Name = "memberTakesActivityId"), BindRequired] int memberTakesActivityId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
@@ -351,7 +351,7 @@ namespace UniCEC.API.Controllers
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
                 Boolean check = false;
-                check = await _competitionActivityService.RemoveMemberTakeTask(model, token);
+                check = await _competitionActivityService.RemoveMemberTakeTask(memberTakesActivityId, clubId, token);
                 if (check)
                 {
                     return Ok();

@@ -12,6 +12,6 @@ namespace UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo
     {
         public Task<List<ActivitiesEntity>> GetListActivitesEntityByCompetition(int competitionActivityId);
 
-        public Task DeleteActivitiesEntity(int activitiesEntityId);
+        public Task DeleteActivitiesEntity(int competitionActivityId);
     }
 }
