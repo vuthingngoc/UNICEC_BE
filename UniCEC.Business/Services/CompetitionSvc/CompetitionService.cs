@@ -103,7 +103,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _competitionHistoryRepo = competitionHistoryRepo;
             _entityTypeRepo = entityTypeRepo;
             _seedsWalletService = seedsWalletService;
-            _universityRepo = universityRepo;    
+            _universityRepo = universityRepo;
         }
 
 
@@ -208,7 +208,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get EVENT or COMPETITION by conditions
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, string token)
         {
-            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token,"UniversityId"));
+            PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token, "UniversityId"));
 
             List<ViewCompetition> resultList = result.Items.ToList();
 
@@ -729,71 +729,75 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     //Chỉ Cho những Trạng Thái này update những trạng thái trước khi publish
                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
-                    if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
-                        throw new ArgumentException("Competition State is not suitable to do this action");
-
-                    //add 2 parameter to check
-                    int UniversityId = _decodeToken.Decode(token, "UniversityId");
-                    Competition competition = await _competitionRepo.Get(model.CompetitionId);
-
-                    //------------ CHECK 2 club are the same 
-                    if (model.ClubIdCollaborate == model.ClubId) throw new ArgumentException("Club is the same");
-
-                    //---------------CHECK Club-Id-Collaborate
-                    //CHECK club Id Collaborate has in system
-                    Club clubCollaborate = await _clubRepo.Get(model.ClubIdCollaborate);
-                    if (clubCollaborate == null) throw new ArgumentException("Club collaborate not found in system");
-
-                    //------------- CHECK club Id Collaborate has in Competition
-                    ViewCompetitionInClub vcic = await _competitionInClubRepo.GetCompetitionInClub(clubCollaborate.Id, model.CompetitionId);
-                    if (vcic != null) throw new ArgumentException("Club has join in Competition");
-
-
-                    //Scope != inter => Check ClubCollaborate University
-                    bool checkClubIn_Out = false;
-                    if (competition.Scope != CompetitionScopeStatus.InterUniversity)
+                    if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
                     {
-                        if (clubCollaborate.UniversityId == UniversityId)
+                        //add 2 parameter to check
+                        int UniversityId = _decodeToken.Decode(token, "UniversityId");
+                        Competition competition = await _competitionRepo.Get(model.CompetitionId);
 
+                        //------------ CHECK 2 club are the same 
+                        if (model.ClubIdCollaborate == model.ClubId) throw new ArgumentException("Club is the same");
+
+                        //---------------CHECK Club-Id-Collaborate
+                        //CHECK club Id Collaborate has in system
+                        Club clubCollaborate = await _clubRepo.Get(model.ClubIdCollaborate);
+                        if (clubCollaborate == null) throw new ArgumentException("Club collaborate not found in system");
+
+                        //------------- CHECK club Id Collaborate has in Competition
+                        ViewCompetitionInClub vcic = await _competitionInClubRepo.GetCompetitionInClub(clubCollaborate.Id, model.CompetitionId);
+                        if (vcic != null) throw new ArgumentException("Club has join in Competition");
+
+
+                        //Scope != inter => Check ClubCollaborate University
+                        bool checkClubIn_Out = false;
+                        if (competition.Scope != CompetitionScopeStatus.InterUniversity)
+                        {
+                            if (clubCollaborate.UniversityId == UniversityId)
+
+                            {
+                                checkClubIn_Out = true;
+                            }
+                            else
+                            {
+                                checkClubIn_Out = false;
+                            }
+                        }
+                        //Scope  == Inter => all join
+                        else
                         {
                             checkClubIn_Out = true;
                         }
-                        else
+                        if (checkClubIn_Out == false) throw new ArgumentException("Club collaborate not in University");
+
+                        CompetitionInClub competitionInClub = new CompetitionInClub();
+                        competitionInClub.ClubId = model.ClubIdCollaborate;
+                        competitionInClub.CompetitionId = model.CompetitionId;
+                        competitionInClub.IsOwner = false;
+                        int result = await _competitionInClubRepo.Insert(competitionInClub);
+
+                        //------------- CHECK add 
+                        if (result <= 0) throw new ArgumentException("Add Competition Or Event Failed");
+
+                        CompetitionInClub cic = await _competitionInClubRepo.Get(result);
+                        //Add Club Manager Of Club Collaborate in Competition Manager
+                        Member clubLeaderCollaborate = await _memberRepo.GetLeaderByClub(model.ClubIdCollaborate);
+
+                        //------------ Insert Member In Competition
+                        MemberInCompetition mic = new MemberInCompetition()
                         {
-                            checkClubIn_Out = false;
-                        }
+                            CompetitionId = model.CompetitionId,
+                            MemberId = clubLeaderCollaborate.Id,
+                            CompetitionRoleId = 1,
+                            Status = true,
+                        };
+                        await _memberInCompetitionRepo.Insert(mic);
+
+                        return TransferViewCompetitionInClub(cic);
                     }
-                    //Scope  == Inter => all join
                     else
                     {
-                        checkClubIn_Out = true;
+                        throw new ArgumentException("Competition State is not suitable to do this action");
                     }
-                    if (checkClubIn_Out == false) throw new ArgumentException("Club collaborate not in University");
-
-                    CompetitionInClub competitionInClub = new CompetitionInClub();
-                    competitionInClub.ClubId = model.ClubIdCollaborate;
-                    competitionInClub.CompetitionId = model.CompetitionId;
-                    competitionInClub.IsOwner = false;
-                    int result = await _competitionInClubRepo.Insert(competitionInClub);
-
-                    //------------- CHECK add 
-                    if (result <= 0) throw new ArgumentException("Add Competition Or Event Failed");
-
-                    CompetitionInClub cic = await _competitionInClubRepo.Get(result);
-                    //Add Club Manager Of Club Collaborate in Competition Manager
-                    Member clubLeaderCollaborate = await _memberRepo.GetLeaderByClub(model.ClubIdCollaborate);
-
-                    //------------ Insert Member In Competition
-                    MemberInCompetition mic = new MemberInCompetition()
-                    {
-                        CompetitionId = model.CompetitionId,
-                        MemberId = clubLeaderCollaborate.Id,
-                        CompetitionRoleId = 1,
-                        Status = true,
-                    };
-                    await _memberInCompetitionRepo.Insert(mic);
-
-                    return TransferViewCompetitionInClub(cic);
 
                 }//end if check
                 else
@@ -820,14 +824,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //
                 Competition comp = await _competitionRepo.Get(competitionInClub.CompetitionId);
-                if (comp.Status != CompetitionStatus.Draft || comp.Status != CompetitionStatus.Approve)
+                if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
+                {
+                    //
+                    bool Check = await CheckMemberInCompetition(token, comp.Id, model.ClubId, true);
+                    if (Check == false) throw new ArgumentException("Delete Failed");
+                    await _competitionInClubRepo.DeleteCompetitionInClub(model.CompetitionInClubId);
+                    return true;
+                }
+                else
+                {
                     throw new ArgumentException("Competition State is not suitable to do this action");
-
-                //
-                bool Check = await CheckMemberInCompetition(token, comp.Id, model.ClubId, true);
-                if (Check == false) throw new ArgumentException("Delete Failed");
-                await _competitionInClubRepo.DeleteCompetitionInClub(model.CompetitionInClubId);
-                return true;
+                }
             }
             catch (Exception)
             {
@@ -1697,10 +1705,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
             //Competition type name
             CompetitionType competitionType = await _competitionTypeRepo.Get(competition.CompetitionTypeId);
-            
+
             //University name
             University university = await _universityRepo.Get(competition.UniversityId);
-    
+
             return new ViewDetailCompetition()
             {
                 Id = competition.Id,
@@ -2429,7 +2437,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 };
                 await AddCompetitionInMajor(requestAdd, token);
-            }            
+            }
             comp.CompetitionTypeId = (model.CompetitionTypeId.HasValue) ? model.CompetitionTypeId.Value : comp.CompetitionTypeId;
             comp.SeedsPoint = (double)((model.SeedsPoint.HasValue) ? model.SeedsPoint : comp.SeedsPoint);
             //comp.SeedsDeposited = (double)((model.SeedsDeposited.HasValue) ? model.SeedsDeposited : comp.SeedsDeposited);
