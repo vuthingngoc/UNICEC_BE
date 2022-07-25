@@ -48,7 +48,7 @@ namespace UniCEC.API.Controllers
                 }
                 else
                 {
-                    return BadRequest();
+                    return Ok(result);
                 }
             }
             catch (ArgumentNullException ex)
