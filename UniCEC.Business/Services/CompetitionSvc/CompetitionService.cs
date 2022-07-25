@@ -613,8 +613,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //Update Everything Except: Content, Scope
                     bool checkScope = (model.Scope != comp.Scope) ? true : false;
 
-                    if (string.IsNullOrEmpty(model.Content) && !model.Scope.HasValue)
-                    {
+                   
                         //Update Content Scope
                         //Change to Pending Review
                         if (checkScope || string.Equals(model.Content, comp.Content) == true)
@@ -663,7 +662,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                     }
 
-                }
+                
 
                 //-------------------------------------------------------State Publish
                 //Update Date, location, Number Of Participant, max ,min
