@@ -444,7 +444,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (listCompetitionStatus.Count > 0) listCompetition = listCompetition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
 
             //
-            if (request.Sponsor.HasValue) listCompetition = listCompetition.Where(comp => comp.IsSponsor == true).ToList();
+            if (request.Sponsor.HasValue) listCompetition = listCompetition.Where(comp => comp.IsSponsor == request.Sponsor.Value).ToList();
 
             //
             if (!string.IsNullOrEmpty(request.Name)) listCompetition = listCompetition.Where(comp => comp.Name.Contains(request.Name)).ToList();
@@ -534,6 +534,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
+                    
                 };
                 competitions.Add(vc);
             }//end each competition

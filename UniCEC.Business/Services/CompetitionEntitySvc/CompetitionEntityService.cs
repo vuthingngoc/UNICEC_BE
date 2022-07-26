@@ -295,6 +295,9 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                             {
                                 CompetitionEntity entity = await _competitionEntityRepo.Get(id);
 
+                                comp.IsSponsor = true;
+                                await _competitionRepo.Update();
+
                                 ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
                             }
 
@@ -325,7 +328,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
 
                 Competition competition = await _competitionRepo.Get(competitionId);
-                if (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve)
+                if (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve || competition.Status == CompetitionStatus.PendingReview)
                 {
 
                     //if ((entity.EntityTypeId == 2 || entity.EntityTypeId == 3) == true
