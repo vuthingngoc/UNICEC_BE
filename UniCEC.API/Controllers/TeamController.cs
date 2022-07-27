@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -73,7 +74,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("detail")]
         [SwaggerOperation(Summary = "Get detail a team in competition")]
-        public async Task<IActionResult> GetDetailTeamInCompetition([FromQuery(Name = "teamId")] int teamId, [FromQuery(Name = "competitionId")] int competititonId)
+        public async Task<IActionResult> GetDetailTeamInCompetition([FromQuery(Name = "teamId"), BindRequired] int teamId, [FromQuery(Name = "competitionId"), BindRequired] int competititonId)
         {
             try
             {

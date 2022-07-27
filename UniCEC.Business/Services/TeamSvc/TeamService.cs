@@ -78,6 +78,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
+                if(result == null) throw new NullReferenceException();
                 return result;
 
 
@@ -171,7 +172,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (competition.NumberOfTeam == 0) throw new ArgumentException("Event can't not create team !");
 
                 //Check Participant
-                if (await _participantRepo.ParticipantInCompetition(UserId, model.CompetitionId) == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+                Participant participant = await _participantRepo.ParticipantInCompetition(UserId, model.CompetitionId);
+                if (participant == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 //Check participant already in team
                 ParticipantInTeam participantInAnotherTeam = await _participantInTeamRepo.CheckParticipantInAnotherTeam(model.CompetitionId, UserId);
@@ -198,7 +200,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 //-----------------Add ParticiPant in Team with Role Leader
                 ParticipantInTeam pit = new ParticipantInTeam()
                 {
-                    ParticipantId = model.CompetitionId,
+                    ParticipantId = participant.Id,
                     //Team Id
                     TeamId = getTeam.Id,
                     //auto leader 
