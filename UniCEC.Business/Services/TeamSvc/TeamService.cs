@@ -78,6 +78,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
+                if(result == null) throw new NullReferenceException();
                 return result;
 
 

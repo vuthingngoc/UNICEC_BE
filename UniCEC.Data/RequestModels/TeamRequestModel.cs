@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace UniCEC.Data.RequestModels
     public class TeamRequestModel : PagingRequest
     {
         //Competition Id
-        [FromQuery(Name = "competitionId")]
+        [FromQuery(Name = "competitionId"), BindRequired]
         public int CompetitionId { get; set; }      
      
     }
