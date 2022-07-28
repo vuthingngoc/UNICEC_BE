@@ -115,6 +115,59 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 listCompetitionStatus.Add(CompetitionStatus.Register); // register
                 listCompetitionStatus.Add(CompetitionStatus.Publish); // publish
                 PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveUnAuthorize(request, listCompetitionStatus);
+
+                foreach (ViewCompetition item in result.Items)
+                {
+
+                    //List Competition Entity
+                    List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+                    List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.Id);
+
+                    if (CompetitionEntities != null)
+                    {
+                        foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                        {
+                            //get IMG from Firebase                        
+                            string imgUrl_CompetitionEntity;
+                            try
+                            {
+                                if (competitionEntity.ImageUrl.Contains("https"))
+                                {
+                                    imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                                }
+                                else
+                                {
+                                    imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                                }
+
+                            }
+                            catch (Exception)
+                            {
+                                imgUrl_CompetitionEntity = "";
+                            }
+
+                            ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                            {
+                                Id = competitionEntity.Id,
+                                CompetitionId = competitionEntity.CompetitionId,
+                                Name = competitionEntity.Name,
+                                Description = competitionEntity.Description,
+                                Email = competitionEntity.Email,
+                                EntityTypeId = competitionEntity.EntityTypeId,
+                                EntityTypeName = competitionEntity.EntityType.Name,
+                                Website = competitionEntity.Website,
+                                ImageUrl = imgUrl_CompetitionEntity,
+                            };
+                            //
+                            ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                        }
+                    }
+
+                    item.CompetitionEntities = ListView_CompetitionEntities;
+                }
+
+
                 if (result == null) throw new NullReferenceException();
                 return result;
 
@@ -130,6 +183,59 @@ namespace UniCEC.Business.Services.CompetitionSvc
             try
             {
                 PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveByAdminUni(request, _decodeToken.Decode(token, "UniversityId"));
+
+                foreach (ViewCompetition item in result.Items)
+                {
+
+                    //List Competition Entity
+                    List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+                    List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.Id);
+
+                    if (CompetitionEntities != null)
+                    {
+                        foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                        {
+                            //get IMG from Firebase                        
+                            string imgUrl_CompetitionEntity;
+                            try
+                            {
+                                if (competitionEntity.ImageUrl.Contains("https"))
+                                {
+                                    imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                                }
+                                else
+                                {
+                                    imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                                }
+
+                            }
+                            catch (Exception)
+                            {
+                                imgUrl_CompetitionEntity = "";
+                            }
+
+                            ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                            {
+                                Id = competitionEntity.Id,
+                                CompetitionId = competitionEntity.CompetitionId,
+                                Name = competitionEntity.Name,
+                                Description = competitionEntity.Description,
+                                Email = competitionEntity.Email,
+                                EntityTypeId = competitionEntity.EntityTypeId,
+                                EntityTypeName = competitionEntity.EntityType.Name,
+                                Website = competitionEntity.Website,
+                                ImageUrl = imgUrl_CompetitionEntity,
+                            };
+                            //
+                            ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                        }
+                    }
+
+                    item.CompetitionEntities = ListView_CompetitionEntities;
+                }
+
+
                 if (result == null) throw new NullReferenceException();
                 return result;
             }
@@ -179,7 +285,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         string imgUrl_CompetitionEntity;
                         try
                         {
-                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                            if (competitionEntity.ImageUrl.Contains("https"))
+                            {
+                                imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                            }
+                            else
+                            {
+                                imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                            }
+
                         }
                         catch (Exception)
                         {
@@ -191,7 +305,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Id = competitionEntity.Id,
                             CompetitionId = competitionEntity.CompetitionId,
                             Name = competitionEntity.Name,
-                            ImageUrl = imgUrl_CompetitionEntity,
+                            Description = competitionEntity.Description,
+                            Email = competitionEntity.Email,
+                            EntityTypeId = competitionEntity.EntityTypeId,
+                            EntityTypeName = competitionEntity.EntityType.Name,
+                            Website = competitionEntity.Website,
+                            ImageUrl = imgUrl_CompetitionEntity,                            
                         };
                         //
                         ListView_CompetitionEntities.Add(viewCompetitionEntity);
@@ -226,7 +345,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         string imgUrl_CompetitionEntity;
                         try
                         {
-                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                            if (competitionEntity.ImageUrl.Contains("https"))
+                            {
+                                imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                            }
+                            else
+                            {
+                                imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                            }
+
                         }
                         catch (Exception)
                         {
@@ -238,6 +365,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             Id = competitionEntity.Id,
                             CompetitionId = competitionEntity.CompetitionId,
                             Name = competitionEntity.Name,
+                            Description = competitionEntity.Description,
+                            Email = competitionEntity.Email,
+                            EntityTypeId = competitionEntity.EntityTypeId,
+                            EntityTypeName = competitionEntity.EntityType.Name,
+                            Website = competitionEntity.Website,
                             ImageUrl = imgUrl_CompetitionEntity,
                         };
                         //
@@ -1673,9 +1805,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     //get IMG from Firebase                        
                     string imgUrl_CompetitionEntity;
+                    
                     try
                     {
-                        imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                        if (competitionEntity.ImageUrl.Contains("https"))
+                        {
+                            imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                        }
+                        else{
+                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                        }   
                     }
                     catch (Exception)
                     {
