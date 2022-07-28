@@ -115,7 +115,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -234,7 +234,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -333,7 +333,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -482,7 +482,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -543,8 +543,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
-
-
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, int userId)
         {
             List<Competition> listCompetitionStudentJoin = await (from p in context.Participants
@@ -585,7 +583,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -694,7 +692,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
