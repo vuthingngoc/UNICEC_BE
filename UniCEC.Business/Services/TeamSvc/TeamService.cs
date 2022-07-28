@@ -430,7 +430,7 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 int UserId = _decodeToken.Decode(token, "Id");
 
-                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+                //if (TeamId == 0) throw new ArgumentNullException("Team Id Null");
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
                 if (team == null) throw new ArgumentException("Not found this team");
@@ -464,7 +464,7 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 int UserId = _decodeToken.Decode(token, "Id");
 
-                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+                //if (TeamId == 0) throw new ArgumentNullException("Team Id Null");
 
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
