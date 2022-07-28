@@ -1091,6 +1091,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 CompetitionInClub competitionInClub = await _competitionInClubRepo.Get(CompetitionInClubId);
                 if (competitionInClub == null) throw new ArgumentException("Competition In Club Id Not Found");
 
+                //không cho xóa club is owner == true
+                if (competitionInClub.IsOwner == true) throw new ArgumentException("Can't delete Club Owner Competition");
+
                 //
                 Competition comp = await _competitionRepo.Get(competitionInClub.CompetitionId);
                 if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve)
