@@ -320,9 +320,9 @@ namespace UniCEC.API.Controllers
 
 
         [Authorize(Roles = "Student")]
-        [HttpDelete("team/{id}")]
+        [HttpDelete("team")]
         [SwaggerOperation(Summary = "Delete team by leader")]
-        public async Task<IActionResult> DeleteByLeader(int id)
+        public async Task<IActionResult> DeleteByLeader([FromQuery(Name = "teamId"), BindRequired] int teamId)
         {
             try
             {
@@ -330,7 +330,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _teamService.DeleteByLeader(id, token);
+                check = await _teamService.DeleteByLeader(teamId, token);
                 if (check)
                 {
                     return Ok();
@@ -360,9 +360,9 @@ namespace UniCEC.API.Controllers
 
 
         [Authorize(Roles = "Student")]
-        [HttpDelete("member-out-team/{id}")]
+        [HttpDelete("member-out-team")]
         [SwaggerOperation(Summary = "Delete team by leader")]
-        public async Task<IActionResult> OutTeam(int id)
+        public async Task<IActionResult> OutTeam([FromQuery(Name = "teamId"), BindRequired] int teamId)
         {
             try
             {
@@ -370,7 +370,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _teamService.OutTeam(id, token);
+                check = await _teamService.OutTeam(teamId, token);
                 if (check)
                 {
                     return Ok();

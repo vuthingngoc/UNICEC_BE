@@ -479,12 +479,19 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //Delete Participant In Team
                 await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                //------------------Update number of member in Team
+               
                 Team t = await _teamRepo.Get(team.Id);
                 t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
-                await _teamRepo.Update();
+                //------------
+                if(t.NumberOfStudentInTeam == 0)
+                {
+                    await _teamRepo.DeleteTeam(team.Id);
+                }
+                else
+                {
+                    await _teamRepo.Update();
+                }         
                 return true;
-
             }
             catch (Exception)
             {
