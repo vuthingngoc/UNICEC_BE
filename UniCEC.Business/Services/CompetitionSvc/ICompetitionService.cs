@@ -62,6 +62,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get
         public Task<ViewDetailCompetition> GetById(int CompetitionId);
 
+        //Get Competition that Student join
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, string token);
+
+        //Get Competition that Student is Assign Task
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, string token);
+       
 
         ////-----------------------------------------State Draft
         //public Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel competition, string token);

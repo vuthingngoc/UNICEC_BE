@@ -91,6 +91,66 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<CompetitionController>
         [Authorize(Roles = "Student")]
+        [HttpGet("student-join")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION that Student Join")]
+        public async Task<IActionResult> GetCompOrEveStudentJoin([FromQuery] PagingRequest request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentJoin(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // GET: api/<CompetitionController>
+        [Authorize(Roles = "Student")]
+        [HttpGet("student-is-assigned")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION that Student is assigned in Task (Status != Canceling)")]
+        public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentIsAssignedTask(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        // GET: api/<CompetitionController>
+        [Authorize(Roles = "Student")]
         [HttpGet("top")]
         [SwaggerOperation(Summary = "Get top X EVENT or COMPETITION by club, status")]
         public async Task<IActionResult> GetTopCompOrEve([FromQuery(Name = "clubId"), BindRequired] int ClubId, [FromQuery(Name = "event")] bool? Event/*, [FromQuery(Name = "status")] CompetitionStatus? Status*/, [FromQuery(Name = "scope")] CompetitionScopeStatus? Scope, [FromQuery, BindRequired] int top)

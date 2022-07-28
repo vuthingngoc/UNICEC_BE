@@ -14,6 +14,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         public Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token);
 
         public Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token);
+
+
         public Task<ViewDetailCompetitionActivity> Insert(CompetitionActivityInsertModel clubActivity, string token);
 
         //Member In Competition duyệt bài
@@ -23,6 +25,10 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         //Get List ClubActivity By Conditions 
         //-> sửa lại cho list Status
         public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token);
+
+        //lấy tất cả task cho thành viên được assign
+        public Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string token);
+
 
         //------------------------------------Member Take Activity
         public Task<ViewDetailMemberTakesActivity> AssignTaskForMember(MemberTakesActivityInsertModel model, string token);

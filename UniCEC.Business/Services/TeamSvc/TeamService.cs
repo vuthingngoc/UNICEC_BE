@@ -430,7 +430,7 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 int UserId = _decodeToken.Decode(token, "Id");
 
-                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+                //if (TeamId == 0) throw new ArgumentNullException("Team Id Null");
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
                 if (team == null) throw new ArgumentException("Not found this team");
@@ -464,7 +464,7 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 int UserId = _decodeToken.Decode(token, "Id");
 
-                if (TeamId != 0) throw new ArgumentNullException("Team Id Null");
+                //if (TeamId == 0) throw new ArgumentNullException("Team Id Null");
 
                 //1.check team
                 Team team = await _teamRepo.Get(TeamId);
@@ -479,12 +479,19 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //Delete Participant In Team
                 await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
-                //------------------Update number of member in Team
+               
                 Team t = await _teamRepo.Get(team.Id);
                 t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
-                await _teamRepo.Update();
+                //------------
+                if(t.NumberOfStudentInTeam == 0)
+                {
+                    await _teamRepo.DeleteTeam(team.Id);
+                }
+                else
+                {
+                    await _teamRepo.Update();
+                }         
                 return true;
-
             }
             catch (Exception)
             {
