@@ -65,7 +65,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         }
 
 
-        //Get Process
+        //Get Process cần code lại
         public async Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token)
         {
             try
@@ -114,7 +114,14 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 string imgUrl_ActivitiesEntity;
                                 try
                                 {
-                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                    if (ActivitiesEntity.ImageUrl.Contains("https"))
+                                    {
+                                        imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
+                                    }
+                                    else
+                                    {
+                                        imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -130,6 +137,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 };
                                 //
                                 ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+
                             }
                         }
                         else
@@ -161,6 +169,74 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 throw;
             }
         }
+
+
+
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string token)
+        {
+            try
+            {
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, _decodeToken.Decode(token, "Id"));
+                //
+                if (result == null) throw new NullReferenceException();
+
+                List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+
+                foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                {
+                    //List Activities Entity
+                    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+
+                    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+
+                    if (ActivitiesEntities != null)
+                    {
+                        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                        {
+                            //get IMG from Firebase                        
+                            string imgUrl_ActivitiesEntity;
+                            try
+                            {
+                                if (ActivitiesEntity.ImageUrl.Contains("https"))
+                                {
+                                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
+                                }
+                                else
+                                {
+                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                imgUrl_ActivitiesEntity = "";
+                            }
+
+                            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                            {
+                                Id = ActivitiesEntity.Id,
+                                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                                ImageUrl = imgUrl_ActivitiesEntity,
+                                Name = ActivitiesEntity.Name,
+                            };
+                            //
+                            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+
+                        }
+                    }
+                    else
+                    {
+                        viewDetailCompetitionActivity.ActivitiesEntities = null;
+                    }
+                }
+                return result;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         //Get ClubActivity-By-Id
         public async Task<ViewDetailCompetitionActivity> GetCompetitionActivityById(int id, int clubId, string token)
@@ -356,9 +432,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         {
             try
             {
-
-
-
                 //
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(CompetitionActivityId);
                 if (competitionActivity == null) throw new ArgumentException("Club Activity not found");
@@ -546,9 +619,16 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     string imgUrl_ActivitiesEntity;
                     try
                     {
-                        imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                        if (ActivitiesEntity.ImageUrl.Contains("https"))
+                        {
+                            imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
+                        }
+                        else
+                        {
+                            imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                        }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         imgUrl_ActivitiesEntity = "";
                     }

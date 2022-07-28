@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CompetitionActivitySvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
@@ -89,11 +90,47 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("student-is-assigned")]
+        [SwaggerOperation(Summary = "Get Competition Activity is assigned for Student")]
+        public async Task<IActionResult> GetListCompetitionActivitiesIsAssigned([FromQuery] PagingRequest request,
+            [FromQuery(Name = "competitionId"), BindRequired] int competitionId,
+            [FromQuery(Name = "priorityStatus")] PriorityStatus? priorityStatus,
+            [FromQuery(Name = "statuses")] List<CompetitionActivityStatus>? statuses
+            )
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, token);
+
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+
         // GET api/<CompetitionActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get Competition Activity by Id")]
-        public async Task<IActionResult> GetCompetitionActivityById(int id, [FromQuery(Name = "clubId")] int clubId)
+        public async Task<IActionResult> GetCompetitionActivityById(int id, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
