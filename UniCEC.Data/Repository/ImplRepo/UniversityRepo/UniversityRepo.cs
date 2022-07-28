@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                                                    where u.CityId.Equals(cityId)
                                                    select u).ToListAsync();
 
-            if(universities.Count > 0)
+            if (universities.Count > 0)
             {
                 foreach (var university in universities)
                 {
@@ -104,101 +105,45 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
             List<ViewUniversity> viewUniversities = new List<ViewUniversity>();
             PagingResult<ViewUniversity> result = null;
             int count = 0;
-            //Check Conditions
-            //--------Status
-            if (request.Status.HasValue)
+
+            var query = from University u in context.Universities
+                        select u;
+
+            //Status
+            if (request.Status.HasValue) query = query.Where(u => u.Status == request.Status.Value);
+
+            //City Id
+            if (request.CityId.HasValue) query = query.Where(u => u.CityId == request.CityId.Value);
+
+            //Name
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(u => u.Name.Contains(request.Name));
+
+            //Paging
+            count = query.Count();
+
+            List<University> listUni = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+
+            //return view
+            listUni.ForEach(u =>
             {
-                //Constains Name
-                var queryStatus = from University u in context.Universities
-                                  where u.Status == request.Status && u.Name.Contains(request.Name)
-                                  select u;
-
-                //City Id
-                if (request.CityId.HasValue)
-                {
-                    queryStatus = from University u in queryStatus
-                                  where u.CityId == request.CityId
-                                  select u;
-                }
-                //Paging
-                count = queryStatus.Count();
-                List<University> listUni = await queryStatus.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
-
-                //return view
-                listUni.ForEach(u =>
-                {
-                    ViewUniversity viewUniversity = new ViewUniversity();
-                    viewUniversity.Id = u.Id;
-                    viewUniversity.CityId = u.CityId;
-                    viewUniversity.UniCode = u.UniCode;
-                    viewUniversity.Name = u.Name;
-                    viewUniversity.Description = u.Description;
-                    viewUniversity.Phone = u.Phone;
-                    viewUniversity.Email = u.Email;
-                    viewUniversity.Founding = u.Founding;
-                    viewUniversity.Opening = u.Openning;
-                    viewUniversity.Closing = u.Closing;
-                    viewUniversity.Status = u.Status;
-                    viewUniversity.CityName = u.City.Name;
-                    viewUniversity.ImgURL = u.ImageUrl;
-                    //
-                    viewUniversities.Add(viewUniversity);
-                });
-                result = new PagingResult<ViewUniversity>(viewUniversities, count, request.CurrentPage, request.PageSize);
-                return result;
-
-            }
-            //NoStatus
-            else
-            {
-
-                var queryAll = from University u in context.Universities
-                               select u;
-
-
-                //Constains Name
-                if (request.Name != null)
-                {
-                    queryAll = from University u in context.Universities
-                               where u.Name.Contains(request.Name)
-                               select u;
-                }
-
-                //City Id
-                if (request.CityId.HasValue)
-                {
-                    queryAll = from University u in queryAll
-                               where u.CityId == request.CityId
-                               select u;
-                }
-
-                //Paging
-                count = queryAll.Count();
-                List<University> listUni = await queryAll.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
-
-                //return view
-                listUni.ForEach(u =>
-                {
-                    ViewUniversity viewUniversity = new ViewUniversity();
-                    viewUniversity.Id = u.Id;
-                    viewUniversity.CityId = u.CityId;
-                    viewUniversity.UniCode = u.UniCode;
-                    viewUniversity.Name = u.Name;
-                    viewUniversity.Description = u.Description;
-                    viewUniversity.Phone = u.Phone;
-                    viewUniversity.Email = u.Email;
-                    viewUniversity.Founding = u.Founding;
-                    viewUniversity.Opening = u.Openning;
-                    viewUniversity.Closing = u.Closing;
-                    viewUniversity.Status = u.Status;
-                    viewUniversity.CityName = u.City.Name;
-                    //
-                    viewUniversities.Add(viewUniversity);
-                });
-                result = new PagingResult<ViewUniversity>(viewUniversities, count, request.CurrentPage, request.PageSize);
-                return result;
-            }
-
+                ViewUniversity viewUniversity = new ViewUniversity();
+                viewUniversity.Id = u.Id;
+                viewUniversity.CityId = u.CityId;
+                viewUniversity.UniCode = u.UniCode;
+                viewUniversity.Name = u.Name;
+                viewUniversity.Description = u.Description;
+                viewUniversity.Phone = u.Phone;
+                viewUniversity.Email = u.Email;
+                viewUniversity.Founding = u.Founding;
+                viewUniversity.Opening = u.Openning;
+                viewUniversity.Closing = u.Closing;
+                viewUniversity.Status = u.Status;
+                viewUniversity.CityName = u.City.Name;
+                viewUniversity.ImgURL = u.ImageUrl;
+                viewUniversities.Add(viewUniversity);           
+            });               
+            result = new PagingResult<ViewUniversity>(viewUniversities, count, request.CurrentPage, request.PageSize);
+            return result;
         }
     }
 }

@@ -67,7 +67,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 
                     ViewClubInComp vcip = new ViewClubInComp()
                     {
-                        Id = club.Id,
+                        Id = competitionInClub.Id,
                         Name = club.Name,
                         Image = club.Image,
                         Fanpage = club.ClubFanpage,

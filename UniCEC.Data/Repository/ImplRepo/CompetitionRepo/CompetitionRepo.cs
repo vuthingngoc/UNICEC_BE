@@ -115,7 +115,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -234,7 +234,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -333,7 +333,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -482,7 +482,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -542,8 +542,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
 
         }
-
-
 
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, int userId)
         {
@@ -585,7 +583,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -646,8 +644,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
-
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int userId)
+        //có thêm club id để sàng lọc ra cuộc thi được tổ chức bởi CLB -> lấy được task của CLB
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId,int userId)
         {
             List<Competition> listCompetitionStudentIsAssignedTask = await (from m in context.Members
                                                                             where m.UserId == userId
@@ -658,6 +656,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                                                   && ca.Status != CompetitionActivityStatus.Cancelling
                                                                             from c in context.Competitions
                                                                             where ca.CompetitionId == c.Id
+                                                                            from cic in context.CompetitionInClubs
+                                                                            where cic.ClubId == clubId && c.Id == cic.CompetitionId
                                                                             select c).Distinct().ToListAsync();
             int totalCount = listCompetitionStudentIsAssignedTask.Count();
 
@@ -692,7 +692,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
-                            Id = club.Id,
+                            Id = competitionInClub.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,

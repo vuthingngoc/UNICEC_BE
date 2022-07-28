@@ -123,7 +123,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("student-is-assigned")]
         [SwaggerOperation(Summary = "Get EVENT or COMPETITION that Student is assigned in Task (Status != Canceling)")]
-        public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request)
+        public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
             {
@@ -131,7 +131,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentIsAssignedTask(request, token);
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentIsAssignedTask(request, clubId, token);
                 return Ok(result);
             }
             catch (NullReferenceException)

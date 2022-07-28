@@ -21,7 +21,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             _universityRepo = universityRepo;
             _cityRepo = cityRepo;
-            _fileService = fileService; 
+            _fileService = fileService;
         }
 
         //
@@ -38,6 +38,22 @@ namespace UniCEC.Business.Services.UniversitySvc
             //
             if (uni != null)
             {
+
+                string imageUrlUni;
+                if (uni.ImageUrl != null)
+                {
+                    if (uni.ImageUrl.Contains("https"))
+                    {
+                        //nếu chưa cái đường link thì thôi
+                        //còn kh thì chạy vòng else
+                    }
+                    else
+                    {
+                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(uni.ImageUrl);
+                        uniView.ImgURL = imageUrlUni;
+                    }
+                }
+
                 //gán vào các trường view
                 uniView.Name = uni.Name;
                 uniView.Description = uni.Description;
@@ -90,7 +106,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (!string.IsNullOrEmpty(universityModel.Base64StringImg))
                 {
                     string url = await _fileService.UploadFile(universityModel.Base64StringImg);
-                    
+
                 }
                 uni.Email = universityModel.Email;
                 uni.Openning = universityModel.Openning;
@@ -116,7 +132,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                     viewUniversity.Name = u.Name;
                     viewUniversity.Description = u.Description;
                     viewUniversity.Phone = u.Phone;
-                    viewUniversity.ImgURL = u.ImageUrl; 
+                    viewUniversity.ImgURL = u.ImageUrl;
                     viewUniversity.Email = u.Email;
                     viewUniversity.Opening = u.Openning;
                     viewUniversity.Closing = u.Closing;
@@ -141,31 +157,36 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (university.Id == 0) throw new ArgumentNullException("University Id Null");
                 //get Uni
                 University uni = await _universityRepo.Get(university.Id);
-                bool check = false;
-                if (uni != null)
-                {
-                    //update name-des-phone-opening-closing-founding-cityId-unicode
-                    uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
-                    uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
-                    uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
-                    if (!string.IsNullOrEmpty(university.ImgURL)) {
-                        uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
-                    }                 
-                    uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
-                    uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
-                    uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
-                    uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;
-                    uni.Status = university.Status;
-                    //img url
 
-                    await _universityRepo.Update();
-                    return true;
-                }
-                else
+                if (uni == null) throw new ArgumentException("University not found to update");
+
+                //update name-des-phone-opening-closing-founding-cityId-unicode
+                uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
+                uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
+                uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
+                if (!string.IsNullOrEmpty(university.ImgURL))
                 {
-                    throw new ArgumentException("University not found to update");
+                    if (university.ImgURL.Contains("https"))
+                    {
+                        //nếu chưa cái đường link thì lưu đường link                         
+                        uni.ImageUrl = university.ImgURL;
+                    }
+                    else
+                    {
+                        //nếu là truyền base 64 thì lưu bth
+                        uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
+                    }
                 }
-                return check;
+                uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
+                uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
+                uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
+                uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;
+                uni.Status = university.Status;
+                //img url
+
+                await _universityRepo.Update();
+                return true;
+
             }
             catch (Exception)
             {
@@ -183,9 +204,9 @@ namespace UniCEC.Business.Services.UniversitySvc
                 University university = await _universityRepo.Get(id);
                 if (university != null)
                 {
-                    
+
                     await _universityRepo.DeleteUniversity(id);
-                    return true;    
+                    return true;
                 }
                 else
                 {
@@ -201,6 +222,27 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             //
             PagingResult<ViewUniversity> result = await _universityRepo.GetUniversitiesByConditions(request);
+
+            if (result == null) throw new NullReferenceException();
+
+            foreach (ViewUniversity vu in result.Items)
+            {
+                string imageUrlUni;
+                //check null
+                if (vu.ImgURL != null)
+                {
+                    if (vu.ImgURL.Contains("https"))
+                    {
+                        //nếu chưa cái đường link thì thôi
+                        //còn kh thì chạy vòng else
+                    }
+                    else
+                    {
+                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
+                        vu.ImgURL = imageUrlUni;
+                    }
+                }
+            }
             //
             return result;
         }
@@ -220,6 +262,25 @@ namespace UniCEC.Business.Services.UniversitySvc
         {
             List<ViewUniversity> result = await _universityRepo.GetListUniversityByEmail(email);
             if (result == null) throw new NullReferenceException();
+            foreach (ViewUniversity vu in result)
+            {
+                string imageUrlUni;
+                //check null
+                if (vu.ImgURL != null)
+                {
+                    if (vu.ImgURL.Contains("https"))
+                    {
+                        //nếu chưa cái đường link thì thôi
+                        //còn kh thì chạy vòng else
+                    }
+                    else
+                    {
+                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
+                        vu.ImgURL = imageUrlUni;
+                    }
+                }
+            }
+
             return result;
         }
     }
