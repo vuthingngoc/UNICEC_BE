@@ -74,10 +74,11 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (competition == null) throw new ArgumentException("Competition is not found");
 
                 //----- Check Participant 
-                Participant p = await _participantRepo.ParticipantInCompetition(UserId, request.CompetitionId);
-                if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+                //Participant p = await _participantRepo.ParticipantInCompetition(UserId, request.CompetitionId);
+                //if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
+                if (result == null) throw new NullReferenceException();
                 return result;
 
 
@@ -112,6 +113,9 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 ViewDetailTeam vdt = await _teamRepo.GetDetailTeamInCompetition(teamId, competitionId);
+
+                if (vdt == null) throw new NullReferenceException();
+
                 return vdt;
 
             }

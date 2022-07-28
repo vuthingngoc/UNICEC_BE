@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -73,7 +74,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("detail")]
         [SwaggerOperation(Summary = "Get detail a team in competition")]
-        public async Task<IActionResult> GetDetailTeamInCompetition([FromQuery(Name = "teamId")] int teamId, [FromQuery(Name = "competitionId")] int competititonId)
+        public async Task<IActionResult> GetDetailTeamInCompetition([FromQuery(Name = "teamId"), BindRequired] int teamId, [FromQuery(Name = "competitionId"), BindRequired] int competititonId)
         {
             try
             {
@@ -321,7 +322,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete("team/{id}")]
         [SwaggerOperation(Summary = "Delete team by leader")]
-        public async Task<IActionResult> DeleteByLeader(int TeamId)
+        public async Task<IActionResult> DeleteByLeader(int id)
         {
             try
             {
@@ -329,7 +330,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _teamService.DeleteByLeader(TeamId, token);
+                check = await _teamService.DeleteByLeader(id, token);
                 if (check)
                 {
                     return Ok();
@@ -361,7 +362,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpDelete("member-out-team/{id}")]
         [SwaggerOperation(Summary = "Delete team by leader")]
-        public async Task<IActionResult> OutTeam(int TeamId)
+        public async Task<IActionResult> OutTeam(int id)
         {
             try
             {
@@ -369,7 +370,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 Boolean check = false;
-                check = await _teamService.OutTeam(TeamId, token);
+                check = await _teamService.OutTeam(id, token);
                 if (check)
                 {
                     return Ok();
