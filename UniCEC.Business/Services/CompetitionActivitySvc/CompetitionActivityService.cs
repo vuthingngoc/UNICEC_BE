@@ -249,10 +249,20 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
                 if (competitionActivity == null) throw new NullReferenceException();
 
+
+                //------------- CHECK Club in system
+                Club club = await _clubRepo.Get(clubId);
+                if (club == null) throw new ArgumentException("Club in not found");
+
+                //------------- CHECK Is Member in Club
+                int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), club.Id);
+                Member member = await _memberRepo.Get(memberId);
+                if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
                 //Check Condititon
                 // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
                 // khi check đến MemberInCompetition thì sẽ thấy được là User đó kh thuộc trong Competition
-                await CheckMemberInCompetition(token, competitionActivity.CompetitionId, clubId, false);
+                //await CheckMemberInCompetition(token, competitionActivity.CompetitionId, clubId, false);
 
                 return await TransformViewDetailCompetitionActivity(competitionActivity);
 
@@ -472,7 +482,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 if (competitionActivity == null) throw new ArgumentException("Competition Activity not found");
 
                 //Check là người add có quyền trong ban tổ chức hay không?
-                await CheckMemberInCompetition(token, competitionActivity.Id, model.ClubId, false);
+                await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Competition Activity Status Canceling or Completed
                 if (competitionActivity.Status == CompetitionActivityStatus.Cancelling || competitionActivity.Status == CompetitionActivityStatus.Completed)
@@ -485,7 +495,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Member Id có status true
                 Member member = await _memberRepo.Get(model.MemberId);
-                if (member == null && member.Status == MemberStatus.Active) throw new ArgumentException("Member not found");
+                if (member == null || member.Status == MemberStatus.Inactive) throw new ArgumentException("Member not found");
 
                 //Check member is belong to club
                 //chỉ có người trong club mình add người trong club mình
