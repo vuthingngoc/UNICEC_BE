@@ -66,7 +66,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
 
             //status     
-            if (request.Statuses.Count > 0) query = query.Where(comp => request.Statuses.Count == 0 || request.Statuses.Contains((CompetitionStatus)comp.Status));
+            if (request.Statuses != null) query = query.Where(comp => request.Statuses.Count == 0 || request.Statuses.Contains((CompetitionStatus)comp.Status));
 
             //Scope
             if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope);
@@ -441,7 +441,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
 
             //
-            if (listCompetitionStatus.Count > 0) listCompetition = listCompetition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
+            if (listCompetitionStatus != null) listCompetition = listCompetition.Where(comp => listCompetitionStatus.Contains((CompetitionStatus)comp.Status)).ToList();
 
             //
             if (request.Sponsor.HasValue) listCompetition = listCompetition.Where(comp => comp.IsSponsor == request.Sponsor.Value).ToList();

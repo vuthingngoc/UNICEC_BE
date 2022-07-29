@@ -94,7 +94,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
             //Statuses
-            if (conditions.Statuses.Count > 0) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
+            if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
 
             List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
 
@@ -135,7 +135,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
             //Statuses
-            if (conditions.Statuses.Count > 0) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
+            if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
 
 
             int totalCount = query.Count();
@@ -173,7 +173,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (priorityStatus.HasValue) query = query.Where(ca => ca.Priority == priorityStatus.Value);
 
             //Statuses
-            if (statuses.Count > 0) query = query.Where(ca => statuses.Contains((CompetitionActivityStatus)ca.Status));
+            if (statuses != null) query = query.Where(ca => statuses.Contains((CompetitionActivityStatus)ca.Status));
 
 
             int totalCount = await query.CountAsync();
