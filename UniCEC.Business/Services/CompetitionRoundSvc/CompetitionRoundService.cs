@@ -78,9 +78,9 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 // check in list
                 if (model.CompetitionId.Equals(0) || string.IsNullOrEmpty(model.Title)
                     || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
-                    || string.IsNullOrEmpty(model.Description) || model.SeedsPoint.Equals(0))
+                    || string.IsNullOrEmpty(model.Description) || model.SeedsPoint < 0)
                     throw new ArgumentNullException("CompetitionId Null || Title Null || Description Null || StartTime Null " +
-                        "|| EndTime Null || SeedsPoint Null");
+                        "|| EndTime Null || SeedsPoint can not be negative number");
 
                 if (!model.CompetitionId.Equals(competitionId))
                     throw new ArgumentException("You do not have permission to insert rounds for more than 1 competitions in the same time");
@@ -197,7 +197,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (model.SeedsPoint.HasValue)
             {
-                if(model.SeedsPoint.Value <= 0) throw new ArgumentException("SeedsPoint must greater than 0");
+                if(model.SeedsPoint.Value < 0) throw new ArgumentException("SeedsPoint must greater than 0");
                 competitionRound.SeedsPoint = model.SeedsPoint.Value;
             }
 
