@@ -21,7 +21,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         }
 
 
-        //use with method top 3 Competition
+        //use with method top  Competition
         public async Task<List<ViewProcessCompetitionActivity>> GetTopCompetitionActivity(int clubId, int topCompetition, int topCompetitionActivity)
         {
             //
@@ -70,81 +70,107 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             }
 
 
-            //cứ mỗi list compe sẽ có top 3 task
+            //cứ mỗi list compe sẽ có  thống kê task
             foreach (Competition comp in listCompe)
-            {
-                var query = from ca in context.CompetitionActivities
-                            where ca.CompetitionId == comp.Id 
-                            //orderby ca.CreateTime
-                            select ca;
+            {                          
+                   //Open Task
+                    var queryOpen = from ca in context.CompetitionActivities
+                                    where ca.CompetitionId == comp.Id
+                                     && ca.Status == CompetitionActivityStatus.Open
+                                    select ca;
+                    int numOpen = await queryOpen.CountAsync();
 
-                List<CompetitionActivity> list_CompetitionActivity = await query.Take(topCompetitionActivity).ToListAsync();
+                    //Pending Task
+                    var queryPending = from ca in context.CompetitionActivities
+                                    where ca.CompetitionId == comp.Id
+                                     && ca.Status == CompetitionActivityStatus.Pending
+                                    select ca;
+                    int numPending = await queryPending.CountAsync();
 
-                //mỗi task sẽ có người tham gia
-                foreach (CompetitionActivity activity in list_CompetitionActivity)
-                {
+                    //Finished Task
+                    var queryFinished = from ca in context.CompetitionActivities
+                                    where ca.CompetitionId == comp.Id
+                                     && ca.Status == CompetitionActivityStatus.Finished
+                                    select ca;
+                    int numFinished = await queryFinished.CountAsync();
+
+                    //Completed Task
+                    var queryCompleted = from ca in context.CompetitionActivities
+                                    where ca.CompetitionId == comp.Id
+                                     && ca.Status == CompetitionActivityStatus.Completed
+                                    select ca;
+                    int numCompleted = await queryCompleted.CountAsync();
+
+                    //Cancelling Task
+                    var queryCancelling = from ca in context.CompetitionActivities
+                                    where ca.CompetitionId == comp.Id
+                                     && ca.Status == CompetitionActivityStatus.Cancelling
+                                    select ca;
+                    int numCancelling = await queryCancelling.CountAsync();
 
 
                     ViewProcessCompetitionActivity vcpa = new ViewProcessCompetitionActivity()
-                    {
-                        Id = activity.Id,
+                    {                      
                         CompetitionId = comp.Id,
                         CompetitionName = comp.Name,                        
-                        Status = activity.Status
-
+                        numberOfOpen = numOpen,
+                        numberOfPending = numPending,
+                        numberOfFinished = numFinished,
+                        numberOfCompleted = numCompleted,
+                        numberOfCancelling = numCancelling,                       
                     };
 
-                    listVPCA.Add(vcpa);
-                }//end task
-
+                listVPCA.Add(vcpa);
+                
             }//end competition
 
             return (listVPCA.Count > 0) ? listVPCA : null;
         }
 
-        //dùng để thống kê
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListProcessActivitiesByConditions(CompetitionActivityRequestModel conditions)
-        {
+       
+        //// cái này không có truyền competition Id thì trả ra cái gì ???
+        //public async Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions2(CompetitionActivityRequestModel conditions)
+        //{
 
-            List<ViewCompetitionActivity> listVCA = new List<ViewCompetitionActivity>();
+        //    List<ViewCompetitionActivity> listVCA = new List<ViewCompetitionActivity>();
 
-            //LocalTime
-            //DateTimeOffset localTime = new LocalTime().GetLocalTime();
+        //    //LocalTime
+        //    //DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-            var query = from cic in context.CompetitionInClubs
-                        where cic.ClubId == conditions.ClubId
-                        from c in context.Competitions
-                        where c.Id == cic.CompetitionId
-                        from ca in context.CompetitionActivities
-                        where ca.CompetitionId == c.Id
-                        select ca;
+        //    var query = from cic in context.CompetitionInClubs
+        //                where cic.ClubId == conditions.ClubId
+        //                from c in context.Competitions
+        //                where c.Id == cic.CompetitionId
+        //                from ca in context.CompetitionActivities
+        //                where ca.CompetitionId == c.Id
+        //                select ca;
 
-            //PriorityStatus
-            if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
+        //    //PriorityStatus
+        //    if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
-            //Statuses
-            if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
+        //    //Statuses
+        //    if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
 
-            List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
+        //    List<CompetitionActivity> list_CompetitionActivity = await query.ToListAsync();
 
-            int totalCount = query.Count();
+        //    int totalCount = query.Count();
 
-            foreach (CompetitionActivity activity in list_CompetitionActivity)
-            {
+        //    foreach (CompetitionActivity activity in list_CompetitionActivity)
+        //    {
 
-                ViewCompetitionActivity vca = new ViewCompetitionActivity()
-                {
-                    Id = activity.Id,
-                    CompetitionId = activity.Competition.Id,
-                    Status = activity.Status
-                };
+        //        ViewCompetitionActivity vca = new ViewCompetitionActivity()
+        //        {
+        //            Id = activity.Id,
+        //            CompetitionId = activity.Competition.Id,
+        //            Status = activity.Status
+        //        };
 
-                listVCA.Add(vca);
-            }//end task
+        //        listVCA.Add(vca);
+        //    }//end task
 
-            return (listVCA.Count > 0) ? new PagingResult<ViewCompetitionActivity>(listVCA, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
+        //    return (listVCA.Count > 0) ? new PagingResult<ViewCompetitionActivity>(listVCA, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
 
-        }
+        //}
 
 
         //Get List ClubActivity By Conditions
@@ -156,8 +182,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             var query = from c in context.Competitions
                         where c.Id == conditions.CompetitionId
                         from ca in context.CompetitionActivities
-                        where ca.CompetitionId == c.Id && ca.CreateTime >= localTime
-                        orderby ca.CreateTime
+                        where ca.CompetitionId == c.Id 
                         select ca;
 
             //PriorityStatus
@@ -179,7 +204,19 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
                                                         Ending = ca.Ending,
                                                         Priority = ca.Priority,
                                                         Status = ca.Status,
+                                                        CreatorId = ca.CreatorId,                                                    
                                                     }).ToListAsync();
+
+           
+            //thêm Creator Name
+            foreach (ViewCompetitionActivity vca in Activities)
+            {
+                User creator = await (from u in context.Users
+                                      where u.Id == vca.CreatorId
+                                      select u).FirstOrDefaultAsync();
+
+                vca.CreatorName = creator.Fullname;
+            }
 
             return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, conditions.CurrentPage, conditions.PageSize) : null;
 
@@ -189,15 +226,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //lấy task cho thằng đó trong competition
         public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, int userId)
         {
-            //var query = from m in context.Members
-            //            where m.UserId == userId
-            //            from mta in context.MemberTakesActivities
-            //            where mta.MemberId == m.Id
-            //            from ca in context.CompetitionActivities
-            //            where ca.Id == mta.CompetitionActivityId
-            //                  && ca.CompetitionId == competitionId
-            //            select ca;
-
+            
             var query = from m in context.Members
                         join mta in context.MemberTakesActivities on m.Id equals mta.MemberId
                         join ca in context.CompetitionActivities on mta.CompetitionActivityId equals ca.Id
@@ -209,7 +238,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
             //Statuses
             if (statuses.Count > 0) query = query.Where(x => statuses.Contains((CompetitionActivityStatus)x.ca.Status));
-
 
             int totalCount = await query.CountAsync();
 
@@ -224,13 +252,23 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
                                                        Ending = x.ca.Ending,
                                                        Priority = x.ca.Priority,
                                                        Status = x.ca.Status,
+                                                       CreatorId = x.ca.CreatorId,                                                    
                                                    }).ToListAsync();
+
+
+            //thêm Creator Name
+            foreach (ViewCompetitionActivity vca in Activities)
+            {
+                User creator = await (from u in context.Users
+                                            where u.Id == vca.CreatorId
+                                            select u).FirstOrDefaultAsync();
+
+                vca.CreatorName = creator.Fullname;
+            }
 
             return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, request.CurrentPage, request.PageSize) : null;
 
         }
-
-
 
 
         // Nhat

@@ -10,7 +10,7 @@ namespace UniCEC.Data.RequestModels
     {
 
         //Competition Id
-        [FromQuery(Name = "competitionId")]
+        [FromQuery(Name = "competitionId"),BindRequired]
         public int? CompetitionId { get; set; }
 
         [FromQuery(Name = "priorityStatus")]

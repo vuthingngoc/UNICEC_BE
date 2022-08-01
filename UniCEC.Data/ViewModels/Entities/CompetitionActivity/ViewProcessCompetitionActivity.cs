@@ -10,38 +10,27 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 {
     public class ViewProcessCompetitionActivity 
     {
-        
-        public int Id { get; set; }
-
+               
         [JsonPropertyName("competition_id")]
         public int CompetitionId { get; set; }
 
         [JsonPropertyName("competition_name")]
         public string CompetitionName { get; set; }
 
-        public CompetitionActivityStatus Status { get; set; }
+        [JsonPropertyName("number_activity_finished")]     
+        public int numberOfFinished { get; set; }
 
-        //[JsonPropertyName("create_time")]
-        //public DateTime CreateTime { get; set; }
-        //public DateTime Ending { get; set; }
-        //public string Name { get; set; }
-        //public PriorityStatus Priority { get; set; }
+        [JsonPropertyName("number_activity_open")]
+        public int numberOfOpen { get; set; }
 
-        //Extra infomation to view process
-        //[JsonPropertyName("num_of_member_join")]
-        //public int NumOfMemberJoin { get; set; }
+        [JsonPropertyName("number_activity_pending")]
+        public int numberOfPending { get; set; }
 
-        //[JsonPropertyName("num_member_doing_task")]
-        //public int NumMemberDoingTask { get; set; }
+        [JsonPropertyName("number_activity_completed")]
+        public int numberOfCompleted{ get; set; }
 
-        //[JsonPropertyName("num_member_done_task")]
-        //public int NumMemberDoneTask { get; set; }
-
-        //[JsonPropertyName("num_member_done_late_task")]
-        //public int NumMemberDoneLateTask { get; set; }
-
-        //[JsonPropertyName("num_member_late_task")]
-        //public int NumMemberLateTask { get; set; }
+        [JsonPropertyName("number_activity_cancelling")]
+        public int numberOfCancelling { get; set; }
 
     }
 }
