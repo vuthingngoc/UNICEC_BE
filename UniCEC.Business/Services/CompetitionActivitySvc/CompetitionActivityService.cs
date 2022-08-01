@@ -176,7 +176,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         {
             try
             {
-                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, _decodeToken.Decode(token, "Id"));
+                int userId = _decodeToken.Decode(token, "Id");
+
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, userId);
                 //
                 if (result == null) throw new NullReferenceException();
 
