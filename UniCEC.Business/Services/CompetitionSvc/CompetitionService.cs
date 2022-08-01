@@ -398,62 +398,62 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
         //Get top 3 EVENT or COMPETITION by Status
-        public async Task<List<ViewCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
+        public async Task<List<ViewTopCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
         {
 
-            List<ViewCompetition> result = await _competitionRepo.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, Top);
+            List<ViewTopCompetition> result = await _competitionRepo.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, Top);
 
 
-            foreach (ViewCompetition item in result)
-            {
+            //foreach (ViewCompetition item in result)
+            //{
 
-                //List Competition Entity
-                List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+            //    //List Competition Entity
+            //    List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
 
-                List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.Id);
+            //    List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(item.Id);
 
-                if (CompetitionEntities != null)
-                {
-                    foreach (CompetitionEntity competitionEntity in CompetitionEntities)
-                    {
-                        //get IMG from Firebase                        
-                        string imgUrl_CompetitionEntity;
-                        try
-                        {
-                            if (competitionEntity.ImageUrl.Contains("https"))
-                            {
-                                imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
-                            }
-                            else
-                            {
-                                imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
-                            }
+            //    if (CompetitionEntities != null)
+            //    {
+            //        foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+            //        {
+            //            //get IMG from Firebase                        
+            //            string imgUrl_CompetitionEntity;
+            //            try
+            //            {
+            //                if (competitionEntity.ImageUrl.Contains("https"))
+            //                {
+            //                    imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+            //                }
+            //                else
+            //                {
+            //                    imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+            //                }
 
-                        }
-                        catch (Exception)
-                        {
-                            imgUrl_CompetitionEntity = "";
-                        }
+            //            }
+            //            catch (Exception)
+            //            {
+            //                imgUrl_CompetitionEntity = "";
+            //            }
 
-                        ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
-                        {
-                            Id = competitionEntity.Id,
-                            CompetitionId = competitionEntity.CompetitionId,
-                            Name = competitionEntity.Name,
-                            Description = competitionEntity.Description,
-                            Email = competitionEntity.Email,
-                            EntityTypeId = competitionEntity.EntityTypeId,
-                            EntityTypeName = competitionEntity.EntityType.Name,
-                            Website = competitionEntity.Website,
-                            ImageUrl = imgUrl_CompetitionEntity,
-                        };
-                        //
-                        ListView_CompetitionEntities.Add(viewCompetitionEntity);
-                    }
-                }
+            //            ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+            //            {
+            //                Id = competitionEntity.Id,
+            //                CompetitionId = competitionEntity.CompetitionId,
+            //                Name = competitionEntity.Name,
+            //                Description = competitionEntity.Description,
+            //                Email = competitionEntity.Email,
+            //                EntityTypeId = competitionEntity.EntityTypeId,
+            //                EntityTypeName = competitionEntity.EntityType.Name,
+            //                Website = competitionEntity.Website,
+            //                ImageUrl = imgUrl_CompetitionEntity,
+            //            };
+            //            //
+            //            ListView_CompetitionEntities.Add(viewCompetitionEntity);
+            //        }
+            //    }
 
-                item.CompetitionEntities = ListView_CompetitionEntities;
-            }
+            //    item.CompetitionEntities = ListView_CompetitionEntities;
+            //}
             if (result == null) throw new NullReferenceException();
             return result;
         }

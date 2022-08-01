@@ -166,9 +166,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         }
 
         //Get top EVENT or COMPETITION by Status       
-        public async Task<List<ViewCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
+        public async Task<List<ViewTopCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
         {
-            List<ViewCompetition> competitions = new List<ViewCompetition>();
+            List<ViewTopCompetition> competitions = new List<ViewTopCompetition>();
 
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
@@ -293,7 +293,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 }
 
                 //cb tạo View
-                ViewCompetition vc = new ViewCompetition()
+                ViewTopCompetition vc = new ViewTopCompetition()
                 {
                     Id = compe.Id,
                     Name = compe.Name,

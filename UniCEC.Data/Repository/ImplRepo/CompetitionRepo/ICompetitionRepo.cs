@@ -17,7 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, int universityId);
         
         //Get top EVENT or COMPETITION by Status
-        public Task<List<ViewCompetition>> GetTopCompOrEve(int clubId, bool? Event/*, CompetitionStatus? status*/, CompetitionScopeStatus? scope, int Top);
+        public Task<List<ViewTopCompetition>> GetTopCompOrEve(int clubId, bool? Event/*, CompetitionStatus? status*/, CompetitionScopeStatus? scope, int Top);
         
         //Get Comp by Admin Uni
         public Task<PagingResult<ViewCompetition>> GetCompOrEveByAdminUni(AdminUniGetCompetitionRequestModel request, int universityId);

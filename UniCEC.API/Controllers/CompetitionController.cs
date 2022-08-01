@@ -157,7 +157,7 @@ namespace UniCEC.API.Controllers
         {
             try
             {
-                List<ViewCompetition> result = await _competitionService.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, top);
+                List<ViewTopCompetition> result = await _competitionService.GetTopCompOrEve(ClubId, Event/*, Status*/, Scope, top);
                 return Ok(result);
             }
             catch (NullReferenceException)
