@@ -160,34 +160,41 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         //lấy task cho thằng đó trong competition
         public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, int userId)
         {
+            //var query = from m in context.Members
+            //            where m.UserId == userId
+            //            from mta in context.MemberTakesActivities
+            //            where mta.MemberId == m.Id
+            //            from ca in context.CompetitionActivities
+            //            where ca.Id == mta.CompetitionActivityId
+            //                  && ca.CompetitionId == competitionId
+            //            select ca;
+
             var query = from m in context.Members
-                        where m.UserId == userId
-                        from mta in context.MemberTakesActivities
-                        where mta.MemberId == m.Id
-                        from ca in context.CompetitionActivities
-                        where ca.Id == mta.CompetitionActivityId
-                              && ca.CompetitionId == competitionId
-                              && ca.Status != CompetitionActivityStatus.Cancelling
-                        select ca;
+                        join mta in context.MemberTakesActivities on m.Id equals mta.MemberId
+                        join ca in context.CompetitionActivities on mta.CompetitionActivityId equals ca.Id
+                        where m.UserId == userId && ca.CompetitionId == competitionId
+                        select new { ca, mta, m};
+
             //PriorityStatus
-            if (priorityStatus.HasValue) query = query.Where(ca => ca.Priority == priorityStatus.Value);
+            if (priorityStatus.HasValue) query = query.Where(x => x.ca.Priority == priorityStatus.Value);
 
             //Statuses
-            if (statuses != null) query = query.Where(ca => statuses.Contains((CompetitionActivityStatus)ca.Status));
+            if (statuses.Count > 0) query = query.Where(x => statuses.Contains((CompetitionActivityStatus)x.ca.Status));
 
 
             int totalCount = await query.CountAsync();
 
+
             List<ViewCompetitionActivity> Activities = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                                                   .Select(ca => new ViewCompetitionActivity
+                                                   .Select(x => new ViewCompetitionActivity
                                                    {
-                                                       Id = ca.Id,
-                                                       CompetitionId = ca.CompetitionId,
-                                                       Name = ca.Name,
-                                                       CreateTime = ca.CreateTime,
-                                                       Ending = ca.Ending,
-                                                       Priority = ca.Priority,
-                                                       Status = ca.Status,
+                                                       Id = x.ca.Id,
+                                                       CompetitionId = x.ca.CompetitionId,
+                                                       Name = x.ca.Name,
+                                                       CreateTime = x.ca.CreateTime,
+                                                       Ending = x.ca.Ending,
+                                                       Priority = x.ca.Priority,
+                                                       Status = x.ca.Status,
                                                    }).ToListAsync();
 
             return (Activities.Count > 0) ? new PagingResult<ViewCompetitionActivity>(Activities, totalCount, request.CurrentPage, request.PageSize) : null;
