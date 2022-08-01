@@ -19,12 +19,14 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         public DateTime CreateTime { get; set; }
         public DateTime Ending { get; set; }
         public string Name { get; set; }
-
         public PriorityStatus Priority { get; set; }
 
         [JsonPropertyName("competition_activity_status")]
         public CompetitionActivityStatus Status { get; set; }
-    
+
+        [JsonPropertyName("creator_id")]
+        public int CreatorId { get; set; }
+
         [JsonPropertyName("creator_name")]
         public string CreatorName { get; set; }
 

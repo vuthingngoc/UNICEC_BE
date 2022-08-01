@@ -86,11 +86,11 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         {
             try
             {
-                if (conditions.ClubId == 0) throw new ArgumentException("Club Id Null");
+                //if (conditions.ClubId == 0) throw new ArgumentException("Club Id Null");
 
-                //có Competition Id
-                if (conditions.CompetitionId.HasValue)
-                {
+                ////có Competition Id
+                //if (conditions.CompetitionId.HasValue)
+                //{
                     await CheckMemberInCompetition(token, conditions.CompetitionId.Value, conditions.ClubId, true);
                     //
                     PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
@@ -146,23 +146,23 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         }
                     }
                     return result;
-                }
-                //kh có Competition Id
-                else
-                {
-                    //thì thằng này phải là club leader 
-                    Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
-                    if (clubLeader.UserId == _decodeToken.Decode(token, "Id"))
-                    {
-                        PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListProcessActivitiesByConditions(conditions);
-                        if (result == null) throw new NullReferenceException();
-                        return result;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("You don't have permission to do this action");
-                    }
-                }
+                //}
+                ////kh có Competition Id
+                //else
+                //{
+                //    //thì thằng này phải là club leader 
+                //    Member clubLeader = await _memberRepo.GetLeaderByClub(conditions.ClubId);
+                //    if (clubLeader.UserId == _decodeToken.Decode(token, "Id"))
+                //    {
+                //        PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions2(conditions);
+                //        if (result == null) throw new NullReferenceException();
+                //        return result;
+                //    }
+                //    else
+                //    {
+                //        throw new ArgumentException("You don't have permission to do this action");
+                //    }
+                //}
             }
             catch (Exception)
             {
