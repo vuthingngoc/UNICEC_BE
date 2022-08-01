@@ -24,7 +24,10 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 
         [JsonPropertyName("competition_activity_status")]
         public CompetitionActivityStatus Status { get; set; }
-       
+    
+        [JsonPropertyName("creator_name")]
+        public string CreatorName { get; set; }
+
         //------------- ADD Field Activities Entities -> Object Array  
         [JsonPropertyName("activities_entities")]
         public List<ViewActivitiesEntity>? ActivitiesEntities { get; set; }

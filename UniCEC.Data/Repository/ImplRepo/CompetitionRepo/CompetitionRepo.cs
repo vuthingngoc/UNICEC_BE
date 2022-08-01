@@ -165,34 +165,27 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        //Get top EVENT or COMPETITION by Status
-        //gần ngày hiện tại
-        //Thuộc Club
-        //lấy theo publish
+        //Get top EVENT or COMPETITION by Status       
         public async Task<List<ViewCompetition>> GetTopCompOrEve(int ClubId, bool? Event/*, CompetitionStatus? Status*/, CompetitionScopeStatus? Scope, int Top)
         {
+            List<ViewCompetition> competitions = new List<ViewCompetition>();
+
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
             //
             IQueryable<Competition> query;
 
-
-            //if (ClubId.HasValue)
-            //{
             query = from cic in context.CompetitionInClubs
-                    where cic.ClubId == ClubId
                     join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                    where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel && comp.Status == CompetitionStatus.Publish
+                    where comp.StartTime > localTime.DateTime
+                     && cic.ClubId == ClubId
+                     && comp.Status != CompetitionStatus.Cancel
+                     && comp.Status != CompetitionStatus.Draft
+                     && comp.Status != CompetitionStatus.Pending
+                     && comp.Status != CompetitionStatus.PendingReview
+                     && comp.Status != CompetitionStatus.Approve
                     orderby comp.StartTime
                     select comp;
-            //}
-            //else
-            //{
-            //    query = from comp in context.Competitions
-            //            where comp.StartTime >= localTime.DateTime
-            //            orderby comp.StartTime
-            //            select comp;
-            //}
 
             //Serach Event
             if (Event.HasValue)
@@ -201,12 +194,41 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
             //Scope
             if (Scope.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Scope == Scope);
-            //Status
-            //if (Status.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Status == Status);
 
-            List<ViewCompetition> competitions = new List<ViewCompetition>();
+
 
             List<Competition> list_Competition = await query.Take(Top).ToListAsync();
+
+            //vẫn thiếu chưa đủ theo Top thì sẽ chạy lấy bù
+            if (list_Competition.Count < Top)
+            {
+                var subQuery = from cic in context.CompetitionInClubs
+                               join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                               where comp.StartTime < localTime.DateTime
+                                && cic.ClubId == ClubId
+                                && comp.Status != CompetitionStatus.Cancel
+                                && comp.Status != CompetitionStatus.Draft
+                                && comp.Status != CompetitionStatus.Pending
+                                && comp.Status != CompetitionStatus.PendingReview
+                                && comp.Status != CompetitionStatus.Approve
+                               orderby comp.StartTime
+                               select comp;
+
+                //Serach Event
+                if (Event.HasValue)
+                {
+                    if (Event.Value == true) subQuery = (IOrderedQueryable<Competition>)subQuery.Where(comp => comp.NumberOfTeam == 0);
+                }
+                //Scope
+                if (Scope.HasValue) subQuery = (IOrderedQueryable<Competition>)subQuery.Where(comp => comp.Scope == Scope);
+
+                List<Competition> list_SubQuery = await subQuery.Take(Top - list_Competition.Count).ToListAsync();
+
+                foreach (Competition comp in list_SubQuery)
+                {
+                    list_Competition.Add(comp);
+                }
+            }
 
             foreach (Competition compe in list_Competition)
             {
@@ -645,7 +667,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         }
 
         //có thêm club id để sàng lọc ra cuộc thi được tổ chức bởi CLB -> lấy được task của CLB
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId,int userId)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, int userId)
         {
             List<Competition> listCompetitionStudentIsAssignedTask = await (from m in context.Members
                                                                             where m.UserId == userId

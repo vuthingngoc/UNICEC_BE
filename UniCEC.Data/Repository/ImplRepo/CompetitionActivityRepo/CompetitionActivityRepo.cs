@@ -31,20 +31,51 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
             List<Competition> listCompe = await (from cic in context.CompetitionInClubs
-                                                 where cic.ClubId == clubId
                                                  join comp in context.Competitions on cic.CompetitionId equals comp.Id
-                                                 where comp.StartTime >= localTime.DateTime && comp.Status != CompetitionStatus.Cancel && comp.Status == CompetitionStatus.Publish
+                                                 where comp.StartTime > localTime.DateTime 
+                                                  && cic.ClubId == clubId
+                                                  && comp.Status != CompetitionStatus.Cancel
+                                                  && comp.Status != CompetitionStatus.Draft
+                                                  && comp.Status != CompetitionStatus.Pending
+                                                  && comp.Status != CompetitionStatus.PendingReview
+                                                  && comp.Status != CompetitionStatus.Approve
                                                  orderby comp.StartTime
                                                  select comp).ToListAsync();
             //top x compe
             listCompe = listCompe.Take(topCompetition).ToList();
 
+
+            //vẫn thiếu chưa đủ theo Top thì sẽ chạy lấy bù
+            if (listCompe.Count < topCompetition)
+            {
+                var subQuery = from cic in context.CompetitionInClubs
+                               join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                               where comp.StartTime < localTime.DateTime
+                                && cic.ClubId == clubId
+                                && comp.Status != CompetitionStatus.Cancel
+                                && comp.Status != CompetitionStatus.Draft
+                                && comp.Status != CompetitionStatus.Pending
+                                && comp.Status != CompetitionStatus.PendingReview
+                                && comp.Status != CompetitionStatus.Approve
+                               orderby comp.StartTime
+                               select comp;
+
+
+                List<Competition> list_SubQuery = await subQuery.Take(topCompetition - listCompe.Count).ToListAsync();
+
+                foreach (Competition comp in list_SubQuery)
+                {
+                    listCompe.Add(comp);
+                }
+            }
+
+
             //cứ mỗi list compe sẽ có top 3 task
             foreach (Competition comp in listCompe)
             {
                 var query = from ca in context.CompetitionActivities
-                            where ca.CompetitionId == comp.Id && ca.CreateTime >= localTime
-                            orderby ca.CreateTime
+                            where ca.CompetitionId == comp.Id 
+                            //orderby ca.CreateTime
                             select ca;
 
                 List<CompetitionActivity> list_CompetitionActivity = await query.Take(topCompetitionActivity).ToListAsync();
@@ -58,15 +89,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
                     {
                         Id = activity.Id,
                         CompetitionId = comp.Id,
-                        CompetitionName = comp.Name,
-                        //ProcessStatus = activity.Process,
+                        CompetitionName = comp.Name,                        
                         Status = activity.Status
 
                     };
 
                     listVPCA.Add(vcpa);
                 }//end task
-
 
             }//end competition
 
@@ -173,7 +202,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
                         join mta in context.MemberTakesActivities on m.Id equals mta.MemberId
                         join ca in context.CompetitionActivities on mta.CompetitionActivityId equals ca.Id
                         where m.UserId == userId && ca.CompetitionId == competitionId
-                        select new { ca, mta, m};
+                        select new { ca, mta, m };
 
             //PriorityStatus
             if (priorityStatus.HasValue) query = query.Where(x => x.ca.Priority == priorityStatus.Value);
