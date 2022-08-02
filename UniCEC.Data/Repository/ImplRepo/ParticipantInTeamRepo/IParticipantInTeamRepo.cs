@@ -14,6 +14,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
 
         public Task<int> GetNumberOfMemberInTeam (int teamId, int competitionId);
 
-        public Task DeleteParticipantInTeam(int teamId);
+        public Task DeleteParticipantInTeam(int participantInTeamId);
+
+        public Task DeleteAllParticipantInTeam(int teamId);
     }
 }

@@ -110,9 +110,9 @@ namespace UniCEC.Business.Services.TeamSvc
                 //----- Check Team id is belong to this competition
                 if (competition.Id != team.CompetitionId) throw new ArgumentException("Team is not belong to this competition");
 
-                //----- Check Participant  
-                Participant p = await _participantRepo.ParticipantInCompetition(UserId, competitionId);
-                if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
+                ////----- Check Participant  
+                //Participant p = await _participantRepo.ParticipantInCompetition(UserId, competitionId);
+                //if (p == null) throw new UnauthorizedAccessException("You aren't participant in Competition");
 
                 ViewDetailTeam vdt = await _teamRepo.GetDetailTeamInCompetition(teamId, competitionId);
 
@@ -444,7 +444,7 @@ namespace UniCEC.Business.Services.TeamSvc
                     throw new UnauthorizedAccessException("You don't have permission to update team role");
 
                 //Delete Participant In Team
-                await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                await _participantInTeamRepo.DeleteAllParticipantInTeam(TeamId);
                 //Delete Team
                 await _teamRepo.DeleteTeam(TeamId);
                 //
@@ -478,7 +478,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (Participant_In_Team == null) throw new ArgumentException("You aren't participant in that team");
 
                 //Delete Participant In Team
-                await _participantInTeamRepo.DeleteParticipantInTeam(TeamId);
+                await _participantInTeamRepo.DeleteParticipantInTeam(Participant_In_Team.Id);
                
                 Team t = await _teamRepo.Get(team.Id);
                 t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
@@ -499,7 +499,58 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
-        public ViewParticipantInTeam TransformViewParticipantInTeam(ParticipantInTeam participantInTeam, int CompetitionId)
+        //Member is deleted by leader 
+        public async Task<bool> DeleteMemberByLeader(int teamId, int participantId, string token)
+        {
+            try
+            {
+                int UserId = _decodeToken.Decode(token, "Id");
+
+                //1.check team
+                Team team = await _teamRepo.Get(teamId);
+                if (team == null) throw new ArgumentException("Not found this team");
+
+                //2.check user in same Team in Competition
+                ParticipantInTeam leaderInTeam = await _participantInTeamRepo.CheckParticipantInTeam(teamId, UserId);
+                if (leaderInTeam == null) throw new ArgumentException("You aren't participant in that team");
+
+                //3.check teamRole of user is Leader 
+                if (leaderInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader"))
+                    throw new UnauthorizedAccessException("You don't have permission to update team role");
+
+                //4. Check Participant Id
+                Participant p = await _participantRepo.Get(participantId);
+                if (p == null) throw new ArgumentException("Participant not found");
+                
+                //5. Check xem participant này có trong team kh 
+                ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(teamId, p.StudentId);
+                if (participantInTeam == null) throw new ArgumentException("member aren't participant in that team");
+
+                //Delete Participant In Team
+                await _participantInTeamRepo.DeleteParticipantInTeam(participantInTeam.Id);
+
+                Team t = await _teamRepo.Get(team.Id);
+                t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
+                //------------
+                if (t.NumberOfStudentInTeam == 0)
+                {
+                    await _teamRepo.DeleteTeam(team.Id);
+                }
+                else
+                {
+                    await _teamRepo.Update();
+                }
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+            public ViewParticipantInTeam TransformViewParticipantInTeam(ParticipantInTeam participantInTeam, int CompetitionId)
         {
             return new ViewParticipantInTeam()
             {
@@ -610,5 +661,6 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
+        
     }
 }

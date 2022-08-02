@@ -174,7 +174,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, string token)
         {
             try

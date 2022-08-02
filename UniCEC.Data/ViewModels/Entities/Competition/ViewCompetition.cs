@@ -24,6 +24,9 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         [JsonPropertyName("is_sponsor")]
         public bool IsSponsor { get; set; }
+
+        [JsonPropertyName("is_event")]
+        public bool IsEvent { get; set; }
         public CompetitionScopeStatus Scope { get; set; }
         public CompetitionStatus Status { get; set; }
         public int View { get; set; }
