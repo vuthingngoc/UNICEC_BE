@@ -18,7 +18,10 @@ namespace UniCEC.Data.ViewModels.Entities.MemberTakesActivity
 
         [JsonPropertyName("member_name")]
         public string MemberName { get; set; }
-       
+
+        [JsonPropertyName("member_img")]
+        public string MemberImg { get; set; }
+
         [JsonPropertyName("booker_id")]
         public int BookerId { get; set; }
 
