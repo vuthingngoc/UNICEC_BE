@@ -429,7 +429,42 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         throw new ArgumentException("Status Cancelling and Completed and Open can Update");
                     }
                 }
+                // update hình ảnh
+                if (model.ListActivitiesEntities.Count > 0)
+                {
+                    //check
+                    foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
+                    {
+                        if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image is NULL");
+                    }
 
+                    //xóa hết tất cả entity trong competition Activity
+                    await _activitiesEntityRepo.DeleteActivitiesEntity(model.Id);
+
+                    //------------ Insert Competition-Entities-----------
+                    foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
+                    {
+                        ActivitiesEntity ae = new ActivitiesEntity();
+                        //1.Check TH đưa link cũ
+                        if (modelItem.Base64StringImg.Contains("https"))
+                        {
+
+                            ae.CompetitionActivityId = model.Id;
+                            ae.Name = modelItem.Name;
+                            ae.ImageUrl = modelItem.Base64StringImg;
+                                                     
+                        }
+                        else
+                        {
+                            //2.Check Th tạo mới
+                            string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
+                            ae.CompetitionActivityId = model.Id;
+                            ae.Name = modelItem.Name;
+                            ae.ImageUrl = Url;                          
+                        }
+                         await _activitiesEntityRepo.Insert(ae);
+                    }
+                }
                 await _competitionActivityRepo.Update();
                 return true;
             }
