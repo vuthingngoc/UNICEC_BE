@@ -640,7 +640,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         imgUrl_ActivitiesEntity = "";
                     }
@@ -681,6 +681,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         BookerName = booker.Fullname,
                         MemberId = memberTakesActivity.MemberId,
                         MemberName = mem.User.Fullname,
+                        MemberImg = mem.User.Avatar
                     };
                     listViewMTA.Add(MTA);
                 }
