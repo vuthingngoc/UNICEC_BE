@@ -360,8 +360,48 @@ namespace UniCEC.API.Controllers
 
 
         [Authorize(Roles = "Student")]
+        [HttpDelete("team/member")]
+        [SwaggerOperation(Summary = "Delete member in team by leader")]
+        public async Task<IActionResult> DeleteMemberByLeader([FromQuery(Name = "teamId"), BindRequired] int teamId, [FromQuery(Name = "participantId"), BindRequired] int participantId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                Boolean check = false;
+                check = await _teamService.DeleteMemberByLeader(teamId, participantId, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+        [Authorize(Roles = "Student")]
         [HttpDelete("member-out-team")]
-        [SwaggerOperation(Summary = "Delete team by leader")]
+        [SwaggerOperation(Summary = "member out team")]
         public async Task<IActionResult> OutTeam([FromQuery(Name = "teamId"), BindRequired] int teamId)
         {
             try

@@ -116,6 +116,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -158,6 +159,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
                     UniversityId = compe.UniversityId,
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -257,6 +259,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -308,6 +311,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -356,6 +360,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -407,6 +412,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -505,6 +511,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -556,7 +563,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
-
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -606,6 +613,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -657,6 +665,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
 
                 };
                 competitions.Add(vc);
@@ -715,6 +724,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         ViewClubInComp vcip = new ViewClubInComp()
                         {
                             Id = competitionInClub.Id,
+                            ClubId = club.Id,
                             Name = club.Name,
                             Image = club.Image,
                             Fanpage = club.ClubFanpage,
@@ -766,7 +776,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = listVcip,
                     UniversityId = compe.UniversityId,
-
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
                 };
                 competitions.Add(vc);
             }//end each competition
@@ -777,7 +787,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
         }
-
 
 
         // Nhat

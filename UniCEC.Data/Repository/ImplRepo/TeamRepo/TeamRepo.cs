@@ -127,7 +127,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 
             List<Participant> participants = new List<Participant>();
 
-            List<ViewParticipant> viewParticipants = new List<ViewParticipant>();
+            List<ViewDetailParticipant> viewParticipants = new List<ViewDetailParticipant>();
             //
             foreach (ParticipantInTeam pit in participantInTeams)
             {
@@ -150,15 +150,23 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                                        where p.StudentId == u.Id
                                        select u).FirstOrDefaultAsync();
 
+                    ParticipantInTeam participantInTeam = await (from pit in context.ParticipantInTeams
+                                                                 where pit.ParticipantId == participant.Id && pit.TeamId == teamId
+                                                                 select pit).FirstOrDefaultAsync();
 
-                    ViewParticipant vp = new ViewParticipant()
+                    ViewDetailParticipant vp = new ViewDetailParticipant()
                     {
-                        Id = participant.Id,
+                        ParticipantId = participant.Id,
                         CompetitionId = participant.CompetitionId,
-                        //MemberId = participant.MemberId,
                         RegisterTime = participant.RegisterTime,
                         StudentId = participant.StudentId,
                         Avatar = user.Avatar,
+                        StudentCode = user.StudentCode,
+                        UniversityName = user.University.Name,
+                        ParticipantInTeamId = participantInTeam.Id,
+                        TeamRoleId = participantInTeam.TeamRoleId,
+                        TeamRoleName = participantInTeam.TeamRole.Name,
+                        Status = participantInTeam.Status             
                     };
 
                     viewParticipants.Add(vp);

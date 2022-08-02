@@ -22,6 +22,9 @@ namespace UniCEC.Business.Services.TeamSvc
         public Task<bool> CompetitionManagerLockTeam(LockTeamModel model, string token);
 
         //-------------------------------------DELETE
+
+        public Task<bool> DeleteMemberByLeader(int teamId, int participantId, string token);
+
         public Task<bool> DeleteByLeader(int teamId, string token);
 
         public Task<bool> OutTeam(int teamId, string token);

@@ -26,7 +26,7 @@ namespace UniCEC.Data.ViewModels.Entities.Team
         public int NumberOfMemberInTeam { get; set; }
 
         [JsonPropertyName("list_participant")]
-        public List<ViewParticipant> ListParticipant { get; set; } 
+        public List<ViewDetailParticipant> ListParticipant { get; set; } 
 
 
     }

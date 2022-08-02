@@ -67,10 +67,10 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
             }
         }
 
-        public async Task DeleteParticipantInTeam(int TeamId)
+        public async Task DeleteAllParticipantInTeam(int teamId)
         {
             var queryPIT = from pit in context.ParticipantInTeams
-                           where pit.TeamId == TeamId
+                           where pit.TeamId == teamId
                            select pit;
 
             List<ParticipantInTeam> participantInTeams = await queryPIT.ToListAsync();
@@ -80,6 +80,20 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
                 context.ParticipantInTeams.Remove(participant);
                 await Update();
             }
+        }
+
+        public async Task DeleteParticipantInTeam(int participantInTeamId)
+        {
+            var queryPIT = from pit in context.ParticipantInTeams
+                           where pit.Id == participantInTeamId
+                           select pit;
+
+            ParticipantInTeam participantInTeam = await queryPIT.FirstOrDefaultAsync();
+
+
+            context.ParticipantInTeams.Remove(participantInTeam);
+            await Update();
+
 
         }
 
