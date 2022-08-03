@@ -1337,22 +1337,26 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //State Conditition : Pending Review
                     if (model.Status == CompetitionStatus.Draft)
                     {
-                        if (comp.Status != CompetitionStatus.PendingReview) throw new ArgumentException("Competition can't change to Draft Status");
-                        comp.Status = CompetitionStatus.Draft;
-                        await _competitionRepo.Update();
-
-                        //----------- InsertCompetition History
-                        CompetitionHistory chim = new CompetitionHistory()
+                        if (comp.Status == CompetitionStatus.PendingReview || comp.Status == CompetitionStatus.Cancel)
                         {
-                            CompetitionId = comp.Id,
-                            ChangerId = member.Id,
-                            ChangeDate = localTime,
-                            Description = member.User.Fullname + "Update Status Draft",
-                            Status = CompetitionStatus.Draft,
-                        };
-                        int result = await _competitionHistoryRepo.Insert(chim);
-                        if (result == 0) throw new ArgumentException(" Add Competition History Failed");
-                        return true;
+                            comp.Status = CompetitionStatus.Draft;
+                            await _competitionRepo.Update();
+
+                            //----------- InsertCompetition History
+                            CompetitionHistory chim = new CompetitionHistory()
+                            {
+                                CompetitionId = comp.Id,
+                                ChangerId = member.Id,
+                                ChangeDate = localTime,
+                                Description = member.User.Fullname + "Update Status Draft",
+                                Status = CompetitionStatus.Draft,
+                            };
+                            int result = await _competitionHistoryRepo.Insert(chim);
+                            if (result == 0) throw new ArgumentException(" Add Competition History Failed");
+                            return true;
+                        }
+                        else { throw new ArgumentException("Competition can't change to Draft Status"); }
+
                     }
 
                     //-----------------------------------------------------------------Pending Review
