@@ -107,7 +107,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                     Name = team.Name,
                     InvitedCode = team.InvitedCode,
                     Status = team.Status,
-                    NumberOfMemberInTeam = await getNumberOfMemberInTeam(team.Id)
+                    NumberOfMemberInTeam = team.NumberOfStudentInTeam
+                    //await getNumberOfMemberInTeam(team.Id)
                 };
 
                 list_viewTeam.Add(vt);
@@ -182,7 +183,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 Name = team.Name,
                 ListParticipant = viewParticipants,
                 Status = team.Status,
-                NumberOfMemberInTeam = await getNumberOfMemberInTeam(team.Id)
+                NumberOfMemberInTeam = team.NumberOfStudentInTeam
+                //await getNumberOfMemberInTeam(team.Id)
             } : null;
 
         }
