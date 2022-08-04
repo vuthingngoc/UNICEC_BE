@@ -18,6 +18,9 @@ namespace UniCEC.Data.ViewModels.Entities.Participant
         [JsonPropertyName("student_id")]
         public int StudentId { get; set; }
 
+        [JsonPropertyName("student_name")]
+        public string Name { get; set; }
+
         [JsonPropertyName("student_avatar")]
         public string Avatar { get; set; }
 
