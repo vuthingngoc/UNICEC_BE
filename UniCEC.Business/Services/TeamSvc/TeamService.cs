@@ -275,7 +275,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 //------------------Update Number of member in Team
                 Team t = await _teamRepo.Get(team.Id);
 
-                t.NumberOfStudentInTeam = t.NumberOfStudentInTeam++;
+                t.NumberOfStudentInTeam = t.NumberOfStudentInTeam + 1;
 
                 await _teamRepo.Update();
 
@@ -571,7 +571,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 Description = team.Description,
                 InvitedCode = team.InvitedCode,
                 Status = team.Status,
-                NumberOfMemberInTeam = await _teamRepo.getNumberOfMemberInTeam(team.Id),
+                NumberOfMemberInTeam = team.NumberOfStudentInTeam,
+                //await _teamRepo.getNumberOfMemberInTeam(team.Id),
             };
         }
 

@@ -348,6 +348,10 @@ namespace UniCEC.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal server exception");
