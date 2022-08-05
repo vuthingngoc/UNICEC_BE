@@ -41,7 +41,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
             foreach (int teamId in listTeamId)
             {
                 ParticipantInTeam p = await CheckParticipantInTeam(teamId, UserId);
-                return p;
+                if(p != null) return p;
             }
             return null;
         }
