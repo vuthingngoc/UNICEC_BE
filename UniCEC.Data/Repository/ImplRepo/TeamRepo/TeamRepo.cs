@@ -146,29 +146,42 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                 foreach (Participant participant in participants)
                 {
                     //get avatar
-                    User user = await (from u in context.Users
-                                       from p in context.Participants
-                                       where p.StudentId == u.Id
-                                       select u).FirstOrDefaultAsync();
+                    //User user = await (from u in context.Users
+                    //                   from p in context.Participants
+                    //                   where p.StudentId == u.Id
+                    //                   select u).FirstOrDefaultAsync();
 
-                    ParticipantInTeam participantInTeam = await (from pit in context.ParticipantInTeams
-                                                                 where pit.ParticipantId == participant.Id && pit.TeamId == teamId
-                                                                 select pit).FirstOrDefaultAsync();
+                    //ParticipantInTeam participantInTeam = await (from pit in context.ParticipantInTeams
+                    //                                             where pit.ParticipantId == participant.Id && pit.TeamId == teamId
+                    //                                             select pit).FirstOrDefaultAsync();
 
-                    ViewDetailParticipant vp = new ViewDetailParticipant()
+                    var query = from u in context.Users
+                                join p in context.Participants on u.Id equals p.StudentId
+                                join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+                                join trole in context.TeamRoles on pit.TeamRoleId equals trole.Id
+                                where participant.Id == p.Id && teamId == pit.TeamId
+                                select new { u, p, pit, trole };
+
+
+
+
+                    ViewDetailParticipant vp = await query.Select(x => new ViewDetailParticipant
                     {
-                        ParticipantId = participant.Id,
-                        CompetitionId = participant.CompetitionId,
-                        RegisterTime = participant.RegisterTime,
-                        StudentId = participant.StudentId,
-                        Avatar = user.Avatar,
-                        StudentCode = user.StudentCode,
-                        UniversityName = user.University.Name,
-                        ParticipantInTeamId = participantInTeam.Id,
-                        TeamRoleId = participantInTeam.TeamRoleId,
-                        TeamRoleName = participantInTeam.TeamRole.Name,
-                        Status = participantInTeam.Status             
-                    };
+                        ParticipantId = x.p.Id,
+                        CompetitionId = x.p.CompetitionId,
+                        RegisterTime = x.p.RegisterTime,
+                        StudentId = x.p.StudentId,
+                        Name = x.u.Fullname,
+                        Avatar = x.u.Avatar,
+                        StudentCode = x.u.StudentCode,
+                        UniversityName = x.u.University.Name,
+                        ParticipantInTeamId = x.pit.Id,
+                        TeamRoleId = x.pit.TeamRoleId,
+                        TeamRoleName = x.pit.TeamRole.Name,
+                        Status = x.pit.Status
+                    }
+                    ).FirstOrDefaultAsync();
+                   
 
                     viewParticipants.Add(vp);
                 }

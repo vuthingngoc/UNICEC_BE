@@ -48,12 +48,14 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo
 
         public async Task<ParticipantInTeam> CheckParticipantInTeam(int TeamId, int UserId)
         {
-            var query = from us in context.Users
-                        where us.Id == UserId
-                        from p in context.Participants
-                        where us.Id == p.StudentId
-                        from pit in context.ParticipantInTeams
-                        where pit.ParticipantId == p.Id && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
+            //var query = from p in context.Participants
+            //            where UserId == p.StudentId
+            //            from pit in context.ParticipantInTeams
+            //            where pit.ParticipantId == p.Id && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
+            //            select pit;
+            var query = from p in context.Participants
+                        join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+                        where p.StudentId == UserId && pit.TeamId == TeamId && pit.Status == ParticipantInTeamStatus.InTeam
                         select pit;
 
             ParticipantInTeam participant_in_team = await query.FirstOrDefaultAsync();
