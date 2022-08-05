@@ -352,7 +352,7 @@ namespace UniCEC.Business.Services.TeamSvc
             try
             {
                 int UserId = _decodeToken.Decode(token, "Id");
-                if (model.ParticipantInTeamId != 0) throw new ArgumentNullException("Participant In Team Id Null");
+                if (model.ParticipantInTeamId == 0) throw new ArgumentNullException("Participant In Team Id Null");
                 //----- Check participant
                 ParticipantInTeam member_PIT = await _participantInTeamRepo.Get(model.ParticipantInTeamId);
                 if (member_PIT == null) throw new ArgumentException("Not found this participant in team");
