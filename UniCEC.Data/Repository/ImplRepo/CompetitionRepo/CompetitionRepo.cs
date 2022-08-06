@@ -118,7 +118,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };
@@ -261,7 +261,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };
@@ -362,7 +362,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };
@@ -513,7 +513,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };
@@ -615,7 +615,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };
@@ -726,7 +726,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                             Id = competitionInClub.Id,
                             ClubId = club.Id,
                             Name = club.Name,
-                            //Image = club.Image,
+                            Image = club.Image,
                             Fanpage = club.ClubFanpage,
                             IsOwner = competitionInClub.IsOwner
                         };

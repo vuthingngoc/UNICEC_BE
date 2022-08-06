@@ -69,7 +69,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
                     {
                         Id = competitionInClub.Id,
                         Name = club.Name,
-                        //Image = club.Image,
+                        Image = club.Image,
                         Fanpage = club.ClubFanpage,
                         IsOwner = competitionInClub.IsOwner,
                         ClubId = club.Id,
