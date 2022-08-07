@@ -379,7 +379,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling) throw new ArgumentException("Competition Activity is Cancel");
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Competition Activity is Cancel Or Compeleted");
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
