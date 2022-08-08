@@ -68,11 +68,11 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return await query.Select(selector => new Member()
             {
                 Id = selector.m.Id,
-                ClubId = selector.m.ClubId,
+                ClubId = selector.m.ClubId,              
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 UserId = selector.m.UserId,
-                ClubRoleId = selector.m.Id,
+                ClubRoleId = selector.m.ClubRoleId,
             }).ToListAsync();
         }
 

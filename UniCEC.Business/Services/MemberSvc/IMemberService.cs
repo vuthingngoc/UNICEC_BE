@@ -19,5 +19,8 @@ namespace UniCEC.Business.Services.MemberSvc
         public Task ConfirmMember(string token, ConfirmMemberModel model);
         public Task Update(string token, MemberUpdateModel member);
         public Task Delete(string token, int id);
+        //TA
+        public Task<List<ViewMember>> GetMembersByClub(string token, int clubId);
+
     }
 }
