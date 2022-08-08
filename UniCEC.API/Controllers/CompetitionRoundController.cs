@@ -54,12 +54,12 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Get competition round by conditions - Authenticated user")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRoundByConditions([FromQuery] CompetitionRoundRequestModel request)
         {
             try
             {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                PagingResult<ViewCompetitionRound> competitionRounds = await _competitionRoundService.GetByConditions(token, request);
+                PagingResult<ViewCompetitionRound> competitionRounds = await _competitionRoundService.GetByConditions(request);
                 return Ok(competitionRounds);
             }
             catch (UnauthorizedAccessException ex)
