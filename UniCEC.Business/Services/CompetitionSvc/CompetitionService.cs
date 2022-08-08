@@ -201,9 +201,9 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<ViewCompetition> GetCompsOrEvesStudentIsAssignedTask(int competitionId, int clubId, string token)
+        public async Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, string token)
         {
-            ViewCompetition result = await _competitionRepo.GetCompsOrEvesStudentIsAssignedTask(competitionId, clubId, _decodeToken.Decode(token, "Id"));
+            ViewCompetition result = await _competitionRepo.GetCompOrEveStudentJoin(competitionId, _decodeToken.Decode(token, "Id"));
 
             foreach (ViewClubInComp viewClub in result.ClubInCompetition)
             {
@@ -278,11 +278,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, string token)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string token)
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveStudentJoin(request, _decodeToken.Decode(token, "Id"));
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"));
                 foreach (ViewCompetition item in result.Items)
                 {
 
