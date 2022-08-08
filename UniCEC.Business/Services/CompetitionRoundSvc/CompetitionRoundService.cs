@@ -39,7 +39,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (!isValidUser) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
-        public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(string token, CompetitionRoundRequestModel request)
+        public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request)
         {
             PagingResult<ViewCompetitionRound> competitionRounds = await _competitionRoundRepo.GetByConditions(request);
             if (competitionRounds == null) throw new NullReferenceException();
