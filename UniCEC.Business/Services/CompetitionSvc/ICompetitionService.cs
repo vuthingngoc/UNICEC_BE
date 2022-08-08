@@ -63,11 +63,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public Task<ViewDetailCompetition> GetById(int CompetitionId);
 
         //Get Competition that Student join
-        public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, string token);
+        public Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string token);
+        public Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, string token);
 
         //Get Competition that Student is Assign Task
         public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string token);
+
        
+
 
         ////-----------------------------------------State Draft
         //public Task<bool> UpdateCompetitionOrEvent(LeaderUpdateCompOrEventModel competition, string token);

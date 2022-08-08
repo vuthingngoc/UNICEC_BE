@@ -200,15 +200,93 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentJoin(PagingRequest request, string token)
+
+        public async Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, string token)
+        {
+            ViewCompetition result = await _competitionRepo.GetCompOrEveStudentJoin(competitionId, _decodeToken.Decode(token, "Id"));
+
+            foreach (ViewClubInComp viewClub in result.ClubInCompetition)
+            {
+                //get IMG from Firebase                        
+                string imgClub;
+
+                try
+                {
+                    if (viewClub.Image.Contains("https"))
+                    {
+                        imgClub = viewClub.Image;
+                    }
+                    else
+                    {
+                        imgClub = await _fileService.GetUrlFromFilenameAsync(viewClub.Image);
+                    }
+                }
+                catch (Exception)
+                {
+                    imgClub = "";
+                }
+
+                viewClub.Image = imgClub;
+            }
+
+
+            //List Competition Entity
+            List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
+
+            List<CompetitionEntity> CompetitionEntities = await _competitionEntityRepo.GetListCompetitionEntity(result.Id);
+
+            if (CompetitionEntities != null)
+            {
+                foreach (CompetitionEntity competitionEntity in CompetitionEntities)
+                {
+                    //get IMG from Firebase                        
+                    string imgUrl_CompetitionEntity;
+                    try
+                    {
+                        if (competitionEntity.ImageUrl.Contains("https"))
+                        {
+                            imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
+                        }
+                        else
+                        {
+                            imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
+                        }
+
+                    }
+                    catch (Exception)
+                    {
+                        imgUrl_CompetitionEntity = "";
+                    }
+
+                    ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
+                    {
+                        Id = competitionEntity.Id,
+                        CompetitionId = competitionEntity.CompetitionId,
+                        Name = competitionEntity.Name,
+                        Description = competitionEntity.Description,
+                        Email = competitionEntity.Email,
+                        EntityTypeId = competitionEntity.EntityTypeId,
+                        EntityTypeName = competitionEntity.EntityType.Name,
+                        Website = competitionEntity.Website,
+                        ImageUrl = imgUrl_CompetitionEntity,
+                    };
+                    //
+                    ListView_CompetitionEntities.Add(viewCompetitionEntity);
+                }
+            }
+            result.CompetitionEntities = ListView_CompetitionEntities;
+            return result;
+        }
+
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string token)
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveStudentJoin(request, _decodeToken.Decode(token, "Id"));
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"));
                 foreach (ViewCompetition item in result.Items)
                 {
 
-                   
+
                     //Add image club
                     foreach (ViewClubInComp viewClub in item.ClubInCompetition)
                     {
@@ -2090,7 +2168,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             List<ViewClubInComp> viewClubsInCompetition = await _competitionInClubRepo.GetListClubInCompetition(competition.Id);
 
             //Add image club
-            foreach(ViewClubInComp viewClub in viewClubsInCompetition)
+            foreach (ViewClubInComp viewClub in viewClubsInCompetition)
             {
                 //get IMG from Firebase                        
                 string imgClub;
@@ -2113,7 +2191,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 viewClub.Image = imgClub;
             }
-            
+
             //List Majors in Competition
             List<ViewMajorInComp> viewMajorsInCompetition = await _competitionInMajorRepo.GetListMajorInCompetition(competition.Id);
 
@@ -2781,6 +2859,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return null;
         }
+
+
 
         //Special for update State Approve
         //private bool CheckDateInsertCasesStateApprove(Competition comp, DateTime localTime, LeaderUpdateCompOrEventModel model)
