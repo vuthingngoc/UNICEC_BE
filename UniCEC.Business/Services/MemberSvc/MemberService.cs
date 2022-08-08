@@ -225,6 +225,44 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         // Tien Anh
+        public async Task<List<ViewMember>> GetMembersByClub(string token, int clubId)
+        {
+            int userId = _decodeToken.Decode(token, "Id");
+            bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+           
+            List<Member> members = await _memberRepo.GetMembersByClub(clubId);
+
+            if (members == null) throw new NullReferenceException("Not found any member in this club");
+
+            List<ViewMember> viewMembers = new List<ViewMember>();
+
+            foreach (Member member in members)
+            {
+                User user = await _userRepo.Get(member.UserId);
+                ClubRole cr = await _clubRoleRepo.Get(member.ClubRoleId);
+
+                ViewMember vm = new ViewMember()
+                {
+                    Id = member.Id,
+                    Name = user.Fullname,
+                    StudentCode = user.StudentCode,
+                    Avatar = user.Avatar,
+                    ClubRoleId = member.ClubRoleId,
+                    ClubRoleName = cr.Name,
+                    IsOnline = user.IsOnline,
+                    StartTime = member.StartTime,
+                    EndTime = member.EndTime,
+                    Status = member.Status
+                };
+
+                viewMembers.Add(vm);
+            }
+
+            return (viewMembers.Count > 0) ? viewMembers : null;
+        }
+
+        
         //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
         //{
         //    //ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);

@@ -277,5 +277,33 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
+        [HttpGet("by-club")]
+        [SwaggerOperation(Summary = "Get members by clubId - club member")]
+        public async Task<IActionResult> GetMembersByClubId([FromQuery(Name = "clubId"), BindRequired] int clubId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewMember> members = await _memberService.GetMembersByClub(token, clubId);
+                if(members == null)
+                {
+                    Ok(new List<Object>());
+                }
+                return Ok(members);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
     }
 }
