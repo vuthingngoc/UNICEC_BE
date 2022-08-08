@@ -783,9 +783,107 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             return (competitions.Count != 0) ? new PagingResult<ViewCompetition>(competitions, totalCount, request.CurrentPage, request.PageSize) : null;
 
+        }
 
+        public async Task<ViewCompetition> GetCompsOrEvesStudentIsAssignedTask(int competitionId, int clubId, int userId)
+        {
+            Competition CompetitionStudentIsAssignedTask = await (from m in context.Members
+                                                                  where m.UserId == userId
+                                                                  from mta in context.MemberTakesActivities
+                                                                  where mta.MemberId == m.Id
+                                                                  from ca in context.CompetitionActivities
+                                                                  where ca.Id == mta.CompetitionActivityId
+                                                                        && ca.Status != CompetitionActivityStatus.Cancelling
+                                                                  from c in context.Competitions
+                                                                  where ca.CompetitionId == c.Id && c.Id == competitionId // điều kiện
+                                                                  from cic in context.CompetitionInClubs
+                                                                  where cic.ClubId == clubId && c.Id == cic.CompetitionId
+                                                                  select c).FirstOrDefaultAsync();
+            if (CompetitionStudentIsAssignedTask != null)
+            {
+                //lấy major ID
+                List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
 
+                var queryListCompetitionInMajor = CompetitionStudentIsAssignedTask.CompetitionInMajors;
+                List<CompetitionInMajor> listCompetitionInMajor = queryListCompetitionInMajor.ToList();
 
+                //lấy Club Owner
+                List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
+                                                          where CompetitionStudentIsAssignedTask.Id == cic.CompetitionId
+                                                          select cic).ToListAsync();
+
+                List<ViewClubInComp> listVcip = new List<ViewClubInComp>();
+
+                if (clubList.Count > 0)
+                {
+                    foreach (var competitionInClub in clubList)
+                    {
+                        Club club = await (from c in context.Clubs
+                                           where c.Id == competitionInClub.ClubId
+                                           select c).FirstOrDefaultAsync();
+
+                        ViewClubInComp vcip = new ViewClubInComp()
+                        {
+                            Id = competitionInClub.Id,
+                            ClubId = club.Id,
+                            Name = club.Name,
+                            Image = club.Image,
+                            Fanpage = club.ClubFanpage,
+                            IsOwner = competitionInClub.IsOwner
+                        };
+                    }
+                }
+
+                //lấy competition type name
+                CompetitionType competitionType = await (from c in context.Competitions
+                                                         where c.Id == CompetitionStudentIsAssignedTask.Id
+                                                         from ct in context.CompetitionTypes
+                                                         where ct.Id == c.CompetitionTypeId
+                                                         select ct).FirstOrDefaultAsync();
+
+                string competitionTypeName = competitionType.TypeName;
+
+                foreach (CompetitionInMajor competitionInMajor in listCompetitionInMajor)
+                {
+                    Major major = await (from m in context.Majors
+                                         where m.Id == competitionInMajor.MajorId
+                                         select m).FirstOrDefaultAsync();
+                    if (major != null)
+                    {
+                        ViewMajorInComp vdic = new ViewMajorInComp()
+                        {
+                            Id = major.Id,
+                            Name = major.Name,
+                        };
+                        listViewMajorInComp.Add(vdic);
+                    }
+                }
+
+                //cb tạo View
+                ViewCompetition vc = new ViewCompetition()
+                {
+                    Id = CompetitionStudentIsAssignedTask.Id,
+                    Name = CompetitionStudentIsAssignedTask.Name,
+                    CompetitionTypeId = CompetitionStudentIsAssignedTask.CompetitionTypeId,
+                    CompetitionTypeName = competitionTypeName,
+                    Scope = CompetitionStudentIsAssignedTask.Scope,
+                    Status = CompetitionStudentIsAssignedTask.Status,
+                    View = CompetitionStudentIsAssignedTask.View,
+                    CreateTime = CompetitionStudentIsAssignedTask.CreateTime,
+                    StartTime = CompetitionStudentIsAssignedTask.StartTime,
+                    IsSponsor = CompetitionStudentIsAssignedTask.IsSponsor,
+                    MajorInCompetition = listViewMajorInComp,
+                    ClubInCompetition = listVcip,
+                    UniversityId = CompetitionStudentIsAssignedTask.UniversityId,
+                    IsEvent = (CompetitionStudentIsAssignedTask.NumberOfTeam == 0) ? true : false
+                };
+
+                return vc;
+            }
+            else
+            {
+                return null;
+            }
         }
 
 

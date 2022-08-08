@@ -121,8 +121,8 @@ namespace UniCEC.API.Controllers
 
         // GET: api/<CompetitionController>
         [Authorize(Roles = "Student")]
-        [HttpGet("student-is-assigned")]
-        [SwaggerOperation(Summary = "Get EVENT or COMPETITION that Student is assigned in Task (Status != Canceling)")]
+        [HttpGet("student-is-assigned-competitions")]
+        [SwaggerOperation(Summary = "Get EVENTS or COMPETITIONS that Student is assigned in Task (Status != Canceling)")]
         public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request, [FromQuery(Name = "clubId"), BindRequired] int clubId)
         {
             try
@@ -147,6 +147,37 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal server exception");
             }
         }
+
+        // GET: api/<CompetitionController>
+        [Authorize(Roles = "Student")]
+        [HttpGet("student-is-assigned-competition")]
+        [SwaggerOperation(Summary = "Get EVENT or COMPETITION that Student is assigned in Task (Status != Canceling)")]
+        public async Task<IActionResult> GetCompsOrEvesStudentIsAssignedTask([FromQuery(Name = "clubId"), BindRequired] int clubId, [FromQuery(Name = "competitionId"), BindRequired] int competitionId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewCompetition result = await _competitionService.GetCompsOrEvesStudentIsAssignedTask(competitionId, clubId, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
 
 
         // GET: api/<CompetitionController>

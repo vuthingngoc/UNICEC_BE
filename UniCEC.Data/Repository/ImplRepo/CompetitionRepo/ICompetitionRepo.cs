@@ -33,7 +33,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         //
         public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, int userId);
-        
+
+        //
+        public Task<ViewCompetition> GetCompsOrEvesStudentIsAssignedTask(int competitionId, int clubId, int userId);
+
         // Nhat
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
         public Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId);
