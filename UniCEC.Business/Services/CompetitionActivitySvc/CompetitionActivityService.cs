@@ -430,7 +430,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     }
                 }
                 // update hình ảnh
-                if (model.ListActivitiesEntities.Count > 0)
+                if (model.ListActivitiesEntities != null)
                 {
                     //check
                     foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)

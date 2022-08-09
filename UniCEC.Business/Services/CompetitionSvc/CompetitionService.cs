@@ -321,7 +321,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string name, CompetitionScopeStatus scope, string token)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string? name, CompetitionScopeStatus? scope, string token)
         {
             try
             {
