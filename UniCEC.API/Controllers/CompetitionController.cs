@@ -93,9 +93,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("student-join-competitions")]
         [SwaggerOperation(Summary = "Get EVENTS or COMPETITIONS that Student Join")]
-        public async Task<IActionResult> GetCompsOrEvesStudentJoin([FromQuery] PagingRequest request,
-                                                                   [FromQuery] string? name,
-                                                                   [FromQuery(Name = "scope")] CompetitionScopeStatus? scope)
+        public async Task<IActionResult> GetCompsOrEvesStudentJoin([FromQuery] GetStudentJoinCompOrEve request )
         {
             try
             {
@@ -103,7 +101,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompsOrEvesStudentJoin(request, name, scope, token);
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompsOrEvesStudentJoin(request, token);
                 return Ok(result);
             }
             catch (NullReferenceException)

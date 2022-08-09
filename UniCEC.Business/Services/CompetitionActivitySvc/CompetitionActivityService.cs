@@ -625,8 +625,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Activity Status Canceling or Completed
                 CompetitionActivity ca = await _competitionActivityRepo.Get(mta.CompetitionActivityId);
-                if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
-                    throw new ArgumentException("Competition Activity is Cancelling or Completed");
+                //if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
+                //    throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(ca.CompetitionId);

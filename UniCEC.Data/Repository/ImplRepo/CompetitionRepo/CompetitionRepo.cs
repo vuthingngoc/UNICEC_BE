@@ -78,6 +78,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (request.Event.HasValue)
             {
                 if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
+
+                if (request.Event.Value == false) query = query.Where(comp => comp.NumberOfTeam != 0);
             }
 
             //View Most
@@ -193,6 +195,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (Event.HasValue)
             {
                 if (Event.Value == true) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.NumberOfTeam == 0);
+                if (Event.Value == false) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.NumberOfTeam != 0);
+
             }
             //Scope
             if (Scope.HasValue) query = (IOrderedQueryable<Competition>)query.Where(comp => comp.Scope == Scope);
@@ -220,6 +224,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 if (Event.HasValue)
                 {
                     if (Event.Value == true) subQuery = (IOrderedQueryable<Competition>)subQuery.Where(comp => comp.NumberOfTeam == 0);
+                    if (Event.Value == false) subQuery = (IOrderedQueryable<Competition>)subQuery.Where(comp => comp.NumberOfTeam != 0);
                 }
                 //Scope
                 if (Scope.HasValue) subQuery = (IOrderedQueryable<Competition>)subQuery.Where(comp => comp.Scope == Scope);
@@ -572,7 +577,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, int userId, string? name, CompetitionScopeStatus? scope)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(GetStudentJoinCompOrEve request, int userId)
         {
             var query = from p in context.Participants
                         where p.StudentId == userId
@@ -580,10 +585,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         where c.Id == p.CompetitionId
                         select c;
             //Scope
-            if (scope.HasValue) query = query.Where(comp => comp.Scope == scope);
+            if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope.Value);
 
             //Name
-            if (!string.IsNullOrEmpty(name)) query = query.Where(comp => comp.Name.Contains(name));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+
+            //Event
+            if (request.Event.HasValue)
+            {
+                if (request.Event.Value == true) query = query.Where(comp => comp.NumberOfTeam == 0);
+                if (request.Event.Value == false) query = query.Where(comp => comp.NumberOfTeam != 0);
+            }
 
 
             List<Competition> listCompetitionStudentJoin = await query.ToListAsync();

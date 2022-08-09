@@ -321,11 +321,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string? name, CompetitionScopeStatus? scope, string token)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(GetStudentJoinCompOrEve request, string token)
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"), name, scope);
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"));
                 foreach (ViewCompetition item in result.Items)
                 {
 
