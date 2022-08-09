@@ -572,13 +572,21 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, int userId)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, int userId, string? name, CompetitionScopeStatus? scope)
         {
-            List<Competition> listCompetitionStudentJoin = await (from p in context.Participants
-                                                                  where p.StudentId == userId
-                                                                  from c in context.Competitions
-                                                                  where c.Id == p.CompetitionId
-                                                                  select c).ToListAsync();
+            var query = from p in context.Participants
+                        where p.StudentId == userId
+                        from c in context.Competitions
+                        where c.Id == p.CompetitionId
+                        select c;
+            //Scope
+            if (scope.HasValue) query = query.Where(comp => comp.Scope == scope);
+
+            //Name
+            if (!string.IsNullOrEmpty(name)) query = query.Where(comp => comp.Name.Contains(name));
+
+
+            List<Competition> listCompetitionStudentJoin = await query.ToListAsync();
             int totalCount = listCompetitionStudentJoin.Count();
 
             //
@@ -795,7 +803,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                 && c.NumberOfTeam != 0 // điều kiện competition
                                                 select c).ToListAsync();
             }
-           
+
             return listCompetitionOrEvent.Count;
         }
 
@@ -910,7 +918,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
-       
+
 
         // Nhat
         public async Task<CompetitionScopeStatus> GetScopeCompetition(int id)
@@ -935,6 +943,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-       
+
     }
 }

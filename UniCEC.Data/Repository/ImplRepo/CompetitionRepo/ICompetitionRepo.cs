@@ -29,7 +29,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<PagingResult<ViewCompetition>> GetCompOrEveUnAuthorize(CompetitionUnAuthorizeRequestModel request,List<CompetitionStatus> listCompetitionStatus);
 
         //
-        public Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, int userId);
+        public Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, int userId, string? name, CompetitionScopeStatus? scope);
         //
         public Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, int userId);
         //
