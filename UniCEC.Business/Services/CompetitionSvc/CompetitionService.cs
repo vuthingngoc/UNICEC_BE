@@ -148,7 +148,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             catch (Exception)
             {
                 throw;
-            }          
+            }
         }
 
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string token)
@@ -321,11 +321,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return result;
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string token)
+        public async Task<PagingResult<ViewCompetition>> GetCompsOrEvesStudentJoin(PagingRequest request, string name, CompetitionScopeStatus scope, string token)
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"));
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompsOrEvesStudentJoin(request, _decodeToken.Decode(token, "Id"), name, scope);
                 foreach (ViewCompetition item in result.Items)
                 {
 
@@ -2903,7 +2903,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return null;
         }
 
-       
+
 
 
 
