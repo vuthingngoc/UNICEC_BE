@@ -94,8 +94,8 @@ namespace UniCEC.API.Controllers
         [HttpGet("student-join-competitions")]
         [SwaggerOperation(Summary = "Get EVENTS or COMPETITIONS that Student Join")]
         public async Task<IActionResult> GetCompsOrEvesStudentJoin([FromQuery] PagingRequest request,
-                                                                   [FromQuery] string name,
-                                                                   [FromQuery(Name = "scope")] CompetitionScopeStatus scope)
+                                                                   [FromQuery] string? name,
+                                                                   [FromQuery(Name = "scope")] CompetitionScopeStatus? scope)
         {
             try
             {

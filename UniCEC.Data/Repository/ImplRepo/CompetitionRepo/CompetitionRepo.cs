@@ -587,6 +587,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
             List<Competition> listCompetitionStudentJoin = await query.ToListAsync();
+
             int totalCount = listCompetitionStudentJoin.Count();
 
             //
