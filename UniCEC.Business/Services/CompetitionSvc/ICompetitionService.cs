@@ -69,7 +69,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get Competition that Student is Assign Task
         public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string token);
 
-       
+        public Task<ViewProcessCompetitionOrEventOfClub> GetNumberOfCompetitionOrEventInClubWithStatus(int clubId, string token);
 
 
         ////-----------------------------------------State Draft

@@ -769,7 +769,35 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
         }
 
+        public async Task<int> GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus status, int clubId, bool isEvent)
+        {
+            List<Competition> listCompetitionOrEvent;
+            if (isEvent)
+            {
+                //event
+                listCompetitionOrEvent = await (from cic in context.CompetitionInClubs
+                                                join c in context.Competitions on cic.CompetitionId equals c.Id
+                                                where cic.IsOwner == true
+                                                && cic.ClubId == clubId
+                                                && c.Status == status
+                                                && c.NumberOfTeam == 0 // điều kiện event
+                                                select c).ToListAsync();
 
+            }
+            else
+            {
+                //competition
+                listCompetitionOrEvent = await (from cic in context.CompetitionInClubs
+                                                join c in context.Competitions on cic.CompetitionId equals c.Id
+                                                where cic.IsOwner == true
+                                                && cic.ClubId == clubId
+                                                && c.Status == status
+                                                && c.NumberOfTeam != 0 // điều kiện competition
+                                                select c).ToListAsync();
+            }
+           
+            return listCompetitionOrEvent.Count;
+        }
 
 
         //có thêm club id để sàng lọc ra cuộc thi được tổ chức bởi CLB -> lấy được task của CLB
@@ -907,6 +935,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-
+       
     }
 }

@@ -107,6 +107,50 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
+        public async Task<ViewProcessCompetitionOrEventOfClub> GetNumberOfCompetitionOrEventInClubWithStatus(int clubId, string token)
+        {
+            try
+            {
+                //------------- CHECK Club in system
+                Club club = await _clubRepo.Get(clubId);
+                if (club == null) throw new ArgumentException("Club in not found");
+
+                //------------- CHECK Is Member in Club
+                int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), club.Id);
+                Member member = await _memberRepo.Get(memberId);
+                if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+                //competition
+                int numberOfCompetitionRegistering = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Register, clubId, false);
+                int numberOfCompetitionUpComing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.UpComing, clubId, false);
+                int numberOfCompetitionOnGoing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.OnGoing, clubId, false);
+                int numberOfCompetitionCompleted = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Complete, clubId, false);
+                //event
+                int numberOfEventRegistering = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Register, clubId, true);
+                int numberOfEventUpComing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.UpComing, clubId, true);
+                int numberOfEventOnGoing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.OnGoing, clubId, true);
+                int numberOfEventCompleted = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Complete, clubId, true);
+
+                ViewProcessCompetitionOrEventOfClub view = new ViewProcessCompetitionOrEventOfClub()
+                {
+                    ClubId = clubId,
+                    numberCompetitionOfRegistering = numberOfCompetitionRegistering,
+                    numberCompetitionOfUpComing = numberOfCompetitionUpComing,
+                    numberCompetitionOfOnGoing = numberOfCompetitionOnGoing,
+                    numberCompetitionOfCompleted = numberOfCompetitionCompleted,
+                    numberEventOfRegistering = numberOfEventRegistering,
+                    numberEventOfUpComing = numberOfEventUpComing,
+                    numberEventOfOnGoing = numberOfEventOnGoing,
+                    numberEventOfCompleted = numberOfEventCompleted,
+                };
+                return view;
+            }
+            catch (Exception)
+            {
+                throw;
+            }          
+        }
+
         public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string token)
         {
             try
@@ -199,7 +243,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 throw;
             }
         }
-
 
         public async Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, string token)
         {
@@ -2859,6 +2902,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             return null;
         }
+
+       
 
 
 

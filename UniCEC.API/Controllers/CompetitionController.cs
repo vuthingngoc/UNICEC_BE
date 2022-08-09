@@ -226,6 +226,37 @@ namespace UniCEC.API.Controllers
             }
         }
 
+
+
+        // GET api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]       
+        [HttpGet("process-by-club")]
+        [SwaggerOperation(Summary = "Get Process of EVENT or COMPETITON by club id")]
+        public async Task<IActionResult> GetProcessByClub([FromQuery(Name = "clubId"), BindRequired] int ClubId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewProcessCompetitionOrEventOfClub result = await _competitionService.GetNumberOfCompetitionOrEventInClubWithStatus(ClubId, token);
+
+                return Ok(result);
+
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+
         //ClubLeader
         // POST api/<CompetitionController>
         [Authorize(Roles = "Student")]
