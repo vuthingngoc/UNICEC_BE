@@ -158,8 +158,10 @@ namespace UniCEC.Business.Services.MemberSvc
                 member.Status = model.Status;
                 await _memberRepo.Update();
             }
-
-            throw new ArgumentException("This user is a member already");
+            else
+            {
+                throw new ArgumentException("This user is a member already");
+            }
         }
 
         //Update-Member
