@@ -64,7 +64,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
                     UniversityId = d.UniversityId,
                     MajorId = d.MajorId,
                     Description = d.Description,
-                    DepartmentCode = d.DepartmentCode,                    
+                    DepartmentCode = d.DepartmentCode,
                     Name = d.Name,
                     Status = d.Status
                 }).ToListAsync();
@@ -140,6 +140,31 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
             return await (from d in context.Departments
                           where d.UniversityId.Equals(universityId) && d.Name.ToLower().Equals(name.ToLower())
                           select d.Id).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<ViewDepartment>> GetAllByUniversity(int universityId)
+        {
+            List<Department> departments = await (from d in context.Departments
+                                                  where d.UniversityId == universityId
+                                                  select d).ToListAsync();
+
+            List<ViewDepartment> result = new List<ViewDepartment>();
+
+            foreach (Department m in departments)
+            {
+                ViewDepartment vd = new ViewDepartment()
+                {
+                    UniversityId = m.UniversityId,
+                    MajorId = m.MajorId,
+                    Description = m.Description,
+                    Id = m.Id,
+                    DepartmentCode = m.DepartmentCode,
+                    Name = m.Name,
+                    Status = m.Status
+                };
+                result.Add(vd);
+            }
+            return (result.Count > 0) ? result : null;
         }
     }
 }

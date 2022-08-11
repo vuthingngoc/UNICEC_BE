@@ -283,5 +283,31 @@ namespace UniCEC.Business.Services.UniversitySvc
 
             return result;
         }
+
+        public async Task<List<ViewUniversity>> GetUniversities()
+        {
+            List<ViewUniversity> result = await _universityRepo.GetUniversities();
+            if (result == null) throw new NullReferenceException();
+            foreach (ViewUniversity vu in result)
+            {
+                string imageUrlUni;
+                //check null
+                if (vu.ImgURL != null)
+                {
+                    if (vu.ImgURL.Contains("https"))
+                    {
+                        //nếu chưa cái đường link thì thôi
+                        //còn kh thì chạy vòng else
+                    }
+                    else
+                    {
+                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
+                        vu.ImgURL = imageUrlUni;
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

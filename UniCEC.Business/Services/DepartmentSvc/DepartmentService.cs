@@ -37,7 +37,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 DepartmentCode = department.DepartmentCode,
                 Name = department.Name,
                 Status = department.Status,
-                UniversityId = department.UniversityId                
+                UniversityId = department.UniversityId
             };
         }
 
@@ -72,8 +72,8 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public async Task<PagingResult<ViewDepartment>> GetByConditions(string token, DepartmentRequestModel request)
         {
             int roleId = _decodeToken.Decode(token, "RoleId");
-            
-            if (!roleId.Equals(1) && !roleId.Equals(4)) request.Status = true;            
+
+            if (!roleId.Equals(1) && !roleId.Equals(4)) request.Status = true;
             //if(!roleId.Equals(4) && !roleId.Equals(2))
             //{
             //    //int universityId = _decodeToken.Decode(token, "UniversityId");
@@ -81,7 +81,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             //}
 
             PagingResult<ViewDepartment> departments = await _departmentRepo.GetByConditions(request);
-            if(departments == null) throw new NullReferenceException();
+            if (departments == null) throw new NullReferenceException();
             return departments;
         }
 
@@ -90,7 +90,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             int universityId = _decodeToken.Decode(token, "UniversityId");
 
-            if (!roleId.Equals(1) || !uniId.Equals(universityId)) 
+            if (!roleId.Equals(1) || !uniId.Equals(universityId))
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
@@ -120,7 +120,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 Description = model.Description,
                 DepartmentCode = model.DepartmentCode,
                 Name = model.Name,
-                Status = status                
+                Status = status
             };
             int id = await _departmentRepo.Insert(department);
             department.Id = id;
@@ -141,14 +141,14 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (major == null) throw new ArgumentException("Can not find this major");
 
             if (model.MajorId != 0) department.MajorId = model.MajorId;
-            
+
             if (!string.IsNullOrEmpty(model.Description)) department.Description = model.Description;
 
             if (!string.IsNullOrEmpty(model.DepartmentCode)) department.DepartmentCode = model.DepartmentCode;
 
             if (!string.IsNullOrEmpty(model.Name)) department.Name = model.Name;
-            
-            if(model.Status.Equals(true)) department.Status = model.Status;
+
+            if (model.Status.Equals(true)) department.Status = model.Status;
 
             await _majorRepo.Update();
         }
@@ -163,6 +163,22 @@ namespace UniCEC.Business.Services.DepartmentSvc
             if (department.Status.Equals(false)) return;
             department.Status = false;
             await _departmentRepo.Update();
+        }
+
+        //TA
+        public async Task<List<ViewDepartment>> GetAllByUniversity(int universityId,string token)
+        {
+            try
+            {
+                //int uni = _decodeToken.Decode(token, "UniversityId");
+                List<ViewDepartment> result = await _departmentRepo.GetAllByUniversity(universityId);
+                if (result == null) throw new NullReferenceException();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

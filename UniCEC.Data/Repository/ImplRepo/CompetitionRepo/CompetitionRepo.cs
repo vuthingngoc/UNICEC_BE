@@ -46,22 +46,22 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
             //search có clubId 
-            if (request.ClubId.HasValue) // có club là lấy trường mình
+            if (request.ClubId.HasValue) 
             {
                 query = from c in context.Clubs
                         where c.Id == request.ClubId
                         from cic in context.CompetitionInClubs
                         where cic.ClubId == c.Id
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id && comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId)
+                        where cic.CompetitionId == comp.Id //&& comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId)
                         orderby comp.CreateTime descending
                         select comp;
             }
-            //search kh club thì sẽ ra competition trong trường mình hoặc trường khác 
+            
             else
             {
                 query = from comp in context.Competitions
-                        where comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId) // nếu truyền vào id Uni thì ra còn kh thì thôi lấy trường mình
+                            // where comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId) // nếu truyền vào id Uni thì ra còn kh thì thôi lấy trường mình
                         orderby comp.CreateTime descending
                         select comp;
             }
@@ -70,8 +70,40 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (request.Statuses != null) query = query.Where(comp => request.Statuses.Contains((CompetitionStatus)comp.Status));
 
             //Scope
-            if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope);
+            if (request.Scope.HasValue)
+            {
+                //Liên Trường
+                if(request.Scope == CompetitionScopeStatus.InterUniversity)
+                {
+                    query = query.Where(comp => comp.Scope == request.Scope);
+                    if(request.UniversityId.HasValue)
+                    {
+                        query = query.Where(comp => comp.UniversityId == request.UniversityId.Value);
+                    }
+                }
+                //Trong Trường 
+                if (request.Scope == CompetitionScopeStatus.University)
+                {
+                    query = query.Where(comp => comp.Scope == request.Scope);
 
+                    if (request.UniversityId.HasValue)
+                    {
+                        query = query.Where(comp => comp.UniversityId == request.UniversityId.Value);
+                    }
+
+                }
+                //trong Câu Lạc Bộ
+                if (request.Scope == CompetitionScopeStatus.Club)
+                {
+                    query = query.Where(comp => comp.Scope == request.Scope);
+
+                    if (request.UniversityId.HasValue)
+                    {
+                        query = query.Where(comp => comp.UniversityId == request.UniversityId.Value);
+                    }
+                }
+            }
+            
             //Name
             if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
 
@@ -937,7 +969,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             Club query = await (from c in context.Clubs
                                 where c.UniversityId == universityId && c.Id == clubId
                                 select c).FirstOrDefaultAsync();
-            if(query == null)
+            if (query == null)
             {
                 return false;
             }
@@ -972,6 +1004,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-       
+
     }
 }

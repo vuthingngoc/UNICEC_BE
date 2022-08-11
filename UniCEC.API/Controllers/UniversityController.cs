@@ -52,6 +52,26 @@ namespace UniCEC.API.Controllers
 
         }
 
+        [HttpGet("all")]
+        [SwaggerOperation(Summary = "Get all universities - All roles")]
+        public async Task<IActionResult> GetUniversity()
+        {
+            try
+            {
+                List<ViewUniversity> result = await _universityService.GetUniversities();
+                return Ok(result);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+
+        }
+
         //Get 1 university by ID
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get university by id - All roles")]
