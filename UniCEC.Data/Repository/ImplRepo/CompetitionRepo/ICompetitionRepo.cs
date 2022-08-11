@@ -12,6 +12,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
     public interface ICompetitionRepo : IRepository<Competition>
     {
         public Task<bool> CheckExistCode(string code);
+
+        //
+        public Task<bool> CheckClubBelongToUniversity(int clubId, int universityId);
         
         //Get EVENT or COMPETITION by conditions
         public Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, int universityId);

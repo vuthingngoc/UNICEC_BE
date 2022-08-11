@@ -7,6 +7,9 @@ namespace UniCEC.Data.RequestModels
 {
     public class CompetitionRequestModel : PagingRequest
     {
+        //University
+        [FromQuery(Name = "universityId")]
+        public int? UniversityId { get; set; }
         //Club Id
         [FromQuery(Name = "clubId")]
         public int? ClubId { get; set; }

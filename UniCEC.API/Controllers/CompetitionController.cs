@@ -82,6 +82,10 @@ namespace UniCEC.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal server exception");
