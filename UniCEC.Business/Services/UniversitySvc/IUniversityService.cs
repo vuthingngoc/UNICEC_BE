@@ -8,6 +8,7 @@ namespace UniCEC.Business.Services.UniversitySvc
 {
     public interface IUniversityService
     {
+        public Task<List<ViewUniversity>> GetUniversities();
         public Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request );
         public Task<ViewUniversity> GetUniversityById(int id);
         public Task<ViewUniversity> Insert(UniversityInsertModel university);

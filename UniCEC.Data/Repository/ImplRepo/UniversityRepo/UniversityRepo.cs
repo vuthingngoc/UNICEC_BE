@@ -140,10 +140,43 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 viewUniversity.Status = u.Status;
                 viewUniversity.CityName = u.City.Name;
                 viewUniversity.ImgURL = u.ImageUrl;
-                viewUniversities.Add(viewUniversity);           
-            });               
+                viewUniversities.Add(viewUniversity);
+            });
             result = new PagingResult<ViewUniversity>(viewUniversities, count, request.CurrentPage, request.PageSize);
             return result;
+        }
+
+        public async Task<List<ViewUniversity>> GetUniversities()
+        {
+            
+            var query = from University u in context.Universities
+
+                        select u;
+
+            List<University> universities = await query.ToListAsync();
+            List<ViewUniversity> viewUniversities = new List<ViewUniversity>();
+            //return view
+            universities.ForEach(u =>
+            {
+                ViewUniversity viewUniversity = new ViewUniversity();
+                viewUniversity.Id = u.Id;
+                viewUniversity.CityId = u.CityId;
+                viewUniversity.UniCode = u.UniCode;
+                viewUniversity.Name = u.Name;
+                viewUniversity.Description = u.Description;
+                viewUniversity.Phone = u.Phone;
+                viewUniversity.Email = u.Email;
+                viewUniversity.Founding = u.Founding;
+                viewUniversity.Opening = u.Openning;
+                viewUniversity.Closing = u.Closing;
+                viewUniversity.Status = u.Status;
+                viewUniversity.CityName = u.City.Name;
+                viewUniversity.ImgURL = u.ImageUrl;
+                //
+                viewUniversities.Add(viewUniversity);
+            });
+
+            return viewUniversities;
         }
     }
 }
