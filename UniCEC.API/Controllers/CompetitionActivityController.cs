@@ -242,6 +242,48 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpPut("status")]
+        [SwaggerOperation(Summary = "Update Competition Activity Status by Id ")]
+        public async Task<IActionResult> UpdateCompetitionActivityStatus([FromBody] CompetitionActivityUpdateStatusModel model)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                Boolean check = false;
+                check = await _competitionActivityService.UpdateStatus(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+
+
         // DELETE api/<CompetitionActivityController>/5
         [Authorize(Roles = "Student")]
         [HttpDelete]

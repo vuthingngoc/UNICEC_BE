@@ -16,7 +16,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
         public double? SeedsPoint { get; set; }       
         public DateTime? Ending { get; set; }
         public PriorityStatus? Priority { get; set; }
-        public CompetitionActivityStatus? Status { get; set; }
+        //public CompetitionActivityStatus? Status { get; set; }
 
         [JsonPropertyName("list_activities_entities")]
         public List<AddActivitiesEntity> ListActivitiesEntities { get; set; }

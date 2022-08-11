@@ -91,61 +91,61 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 ////có Competition Id
                 //if (conditions.CompetitionId.HasValue)
                 //{
-                    await CheckMemberInCompetition(token, conditions.CompetitionId.Value, conditions.ClubId, true);
-                    //
-                    PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
-                    //
-                    if (result == null) throw new NullReferenceException();
+                await CheckMemberInCompetition(token, conditions.CompetitionId.Value, conditions.ClubId, true);
+                //
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
+                //
+                if (result == null) throw new NullReferenceException();
 
-                    List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+                List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
-                    foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                {
+                    //List Activities Entity
+                    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+
+                    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+
+                    if (ActivitiesEntities != null)
                     {
-                        //List Activities Entity
-                        List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
-
-                        List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
-
-                        if (ActivitiesEntities != null)
+                        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
                         {
-                            foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                            //get IMG from Firebase                        
+                            string imgUrl_ActivitiesEntity;
+                            try
                             {
-                                //get IMG from Firebase                        
-                                string imgUrl_ActivitiesEntity;
-                                try
+                                if (ActivitiesEntity.ImageUrl.Contains("https"))
                                 {
-                                    if (ActivitiesEntity.ImageUrl.Contains("https"))
-                                    {
-                                        imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                                    }
-                                    else
-                                    {
-                                        imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-                                    }
+                                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    imgUrl_ActivitiesEntity = "";
+                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
                                 }
-
-                                ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
-                                {
-                                    Id = ActivitiesEntity.Id,
-                                    CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                                    ImageUrl = imgUrl_ActivitiesEntity,
-                                    Name = ActivitiesEntity.Name,
-                                };
-                                //
-                                ListView_ActivitiesEntity.Add(viewActivitiesEntity);
-
                             }
-                        }
-                        else
-                        {
-                            viewDetailCompetitionActivity.ActivitiesEntities = null;
+                            catch (Exception ex)
+                            {
+                                imgUrl_ActivitiesEntity = "";
+                            }
+
+                            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                            {
+                                Id = ActivitiesEntity.Id,
+                                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                                ImageUrl = imgUrl_ActivitiesEntity,
+                                Name = ActivitiesEntity.Name,
+                            };
+                            //
+                            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+
                         }
                     }
-                    return result;
+                    else
+                    {
+                        viewDetailCompetitionActivity.ActivitiesEntities = null;
+                    }
+                }
+                return result;
                 //}
                 ////kh có Competition Id
                 //else
@@ -409,26 +409,26 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 competitionActivity.SeedsPoint = (model.SeedsPoint.HasValue) ? model.SeedsPoint.Value : competitionActivity.SeedsPoint;
                 competitionActivity.Ending = (model.Ending.HasValue) ? model.Ending.Value : competitionActivity.Ending;
                 competitionActivity.Priority = (model.Priority.HasValue) ? model.Priority.Value : competitionActivity.Priority;
-                if (model.Status.HasValue)
-                {
-                    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling || model.Status.Value == CompetitionActivityStatus.Open)
-                    {
-                        competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
-                        //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
-                        if ((model.Status.Value == CompetitionActivityStatus.Completed))
-                        {
-                            List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
-                            foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
-                            {
-                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Status Cancelling and Completed and Open can Update");
-                    }
-                }
+                //if (model.Status.HasValue)
+                //{
+                //    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling || model.Status.Value == CompetitionActivityStatus.Open)
+                //    {
+                //        competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
+                //        //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
+                //        if ((model.Status.Value == CompetitionActivityStatus.Completed))
+                //        {
+                //            List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
+                //            foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
+                //            {
+                //                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
+                //            }
+                //        }
+                //    }
+                //    else
+                //    {
+                //        throw new ArgumentException("Status Cancelling and Completed and Open can Update");
+                //    }
+                //}
                 // update hình ảnh
                 if (model.ListActivitiesEntities != null)
                 {
@@ -452,7 +452,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             ae.CompetitionActivityId = model.Id;
                             ae.Name = modelItem.Name;
                             ae.ImageUrl = modelItem.Base64StringImg;
-                                                     
+
                         }
                         else
                         {
@@ -460,9 +460,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                             string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
                             ae.CompetitionActivityId = model.Id;
                             ae.Name = modelItem.Name;
-                            ae.ImageUrl = Url;                          
+                            ae.ImageUrl = Url;
                         }
-                         await _activitiesEntityRepo.Insert(ae);
+                        await _activitiesEntityRepo.Insert(ae);
                     }
                 }
                 await _competitionActivityRepo.Update();
@@ -473,6 +473,65 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 throw;
             }
         }
+
+        public async Task<bool> UpdateStatus(CompetitionActivityUpdateStatusModel model, string token)
+        {
+            try
+            {
+                if (model.ClubId == 0) throw new ArgumentException("Club Id Null");
+
+                //Check competition Activity Existed
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(model.Id);
+                if (competitionActivity == null) throw new ArgumentException("Competition Activity not found in system");
+
+                await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
+
+                //Check Task Status
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Competition Activity is Cancel Or Compeleted");
+
+                //Check Competition Status
+                Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
+                if (competition.Status == CompetitionStatus.Cancel
+                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+
+                if (model.Status.HasValue)
+                {
+                    if (model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Cancelling || model.Status.Value == CompetitionActivityStatus.Open)
+                    {
+                        //competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
+                        //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
+                        if ((model.Status.Value == CompetitionActivityStatus.Completed) && (competitionActivity.Status == CompetitionActivityStatus.Finished))
+                        {
+                            List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
+                            foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
+                            {
+                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Hoạt động phải đang ở Status Finished");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Status Cancelling and Completed and Open can Update");
+                    }
+                    competitionActivity.Status = model.Status.Value;
+                    await _competitionActivityRepo.Update();
+                    return true;
+                }      
+                else
+                {
+                    throw new ArgumentException("Status is Null");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         //Delete
         public async Task<bool> Delete(int CompetitionActivityId, int ClubId, string token)
