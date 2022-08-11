@@ -224,6 +224,32 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
             return await query.AnyAsync();
         }
+
+        public async Task<List<ViewClub>> GetByUni(int universityId)
+        {
+            var query = from c in context.Clubs
+                        join u in context.Universities on c.UniversityId equals u.Id
+                        where c.UniversityId.Equals(universityId)
+                        select new { c, u };
+
+            int totalCount = query.Count();
+            List<ViewClub> clubs = await query.Select(x => new ViewClub()
+            {
+                Id = x.c.Id,
+                Description = x.c.Description,
+                Founding = x.c.Founding,
+                Name = x.c.Name,
+                TotalMember = x.c.TotalMember,
+                UniversityId = x.c.UniversityId,
+                UniversityName = x.u.Name,
+                Image = x.c.Image,
+                ClubContact = x.c.ClubContact,
+                ClubFanpage = x.c.ClubFanpage,
+                Status = x.c.Status,
+            }).ToListAsync();
+
+            return (clubs.Count > 0) ? clubs : null;
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -76,6 +77,26 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 PagingResult<ViewDepartment> departments = await _departmentService.GetByConditions(token, request);
+                return Ok(departments);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
+        [HttpGet("all-by-uni")]
+        [SwaggerOperation(Summary = "Get all department in University - authenticated user")]
+        public async Task<IActionResult> GetAllDepartments([FromQuery(Name ="universityId"), BindRequired] int universityId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewDepartment> departments = await _departmentService.GetAllByUniversity(universityId,token);
                 return Ok(departments);
             }
             catch (NullReferenceException)

@@ -8,6 +8,7 @@ namespace UniCEC.Business.Services.ClubSvc
 {
     public interface IClubService
     {
+        public Task<List<ViewClub>> GetClubByUni(string token); 
         public Task<ViewClub> GetById(string token, int id);  
         public Task<PagingResult<ViewClub>> GetByConditions(string token, ClubRequestModel request);
         public Task<PagingResult<ViewClub>> GetByCompetition(string token, int competitionId, PagingRequest request);

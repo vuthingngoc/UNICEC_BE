@@ -340,5 +340,35 @@ namespace UniCEC.Business.Services.ClubSvc
 
             await _memberRepo.UpdateStatusDeletedClub(id);
         }
+
+        //TA
+        public async Task<List<ViewClub>> GetClubByUni(string token)
+        {
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            List<ViewClub> clubs = await _clubRepo.GetByUni(universityId);
+            if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
+
+            // add more info
+            foreach (ViewClub element in clubs)
+            {
+                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
+                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
+                element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
+                if (!string.IsNullOrEmpty(element.Image))
+                {
+                    try
+                    {
+                        element.Image = await _fileService.GetUrlFromFilenameAsync(element.Image);
+                    }
+                    catch (Exception)
+                    {
+                        element.Image = "";
+                    }
+                }
+            }
+
+            return clubs;
+
+        }
     }
 }
