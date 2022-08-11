@@ -280,12 +280,13 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("by-club")]
         [SwaggerOperation(Summary = "Get members by clubId - club member")]
-        public async Task<IActionResult> GetMembersByClubId([FromQuery(Name = "clubId"), BindRequired] int clubId)
+        public async Task<IActionResult> GetMembersByClubId([FromQuery(Name = "clubId"), BindRequired] int clubId, [FromQuery(Name = "searchName")] string? searchName,
+            [FromQuery(Name = "roleId")] int? roleId)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewMember> members = await _memberService.GetMembersByClub(token, clubId);
+                List<ViewMember> members = await _memberService.GetMembersByClub(token, clubId, searchName,roleId);
                 if(members == null)
                 {
                     Ok(new List<Object>());
