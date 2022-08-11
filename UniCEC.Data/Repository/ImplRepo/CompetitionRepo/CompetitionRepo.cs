@@ -44,23 +44,24 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             //LocalTime
             DateTimeOffset localTime = new LocalTime().GetLocalTime();
 
-            //search có clubId
-            if (request.ClubId.HasValue)
+
+            //search có clubId 
+            if (request.ClubId.HasValue) // có club là lấy trường mình
             {
                 query = from c in context.Clubs
                         where c.Id == request.ClubId
                         from cic in context.CompetitionInClubs
                         where cic.ClubId == c.Id
                         from comp in context.Competitions
-                        where cic.CompetitionId == comp.Id && comp.UniversityId == universityId
+                        where cic.CompetitionId == comp.Id && comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId)
                         orderby comp.CreateTime descending
                         select comp;
             }
-            //search kh club thì sẽ ra competition trong trường
+            //search kh club thì sẽ ra competition trong trường mình hoặc trường khác 
             else
             {
                 query = from comp in context.Competitions
-                        where comp.UniversityId == universityId
+                        where comp.UniversityId == ((request.UniversityId.HasValue) ? request.UniversityId : universityId) // nếu truyền vào id Uni thì ra còn kh thì thôi lấy trường mình
                         orderby comp.CreateTime descending
                         select comp;
             }
@@ -931,6 +932,21 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
         }
 
+        public async Task<bool> CheckClubBelongToUniversity(int clubId, int universityId)
+        {
+            Club query = await (from c in context.Clubs
+                                where c.UniversityId == universityId && c.Id == clubId
+                                select c).FirstOrDefaultAsync();
+            if(query == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
 
 
         // Nhat
@@ -956,6 +972,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-
+       
     }
 }

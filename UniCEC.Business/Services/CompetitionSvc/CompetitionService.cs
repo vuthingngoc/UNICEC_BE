@@ -710,6 +710,22 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Get EVENT or COMPETITION by conditions
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, string token)
         {
+            //check trường hợp nếu có University và Club thì check xem trong trường đó có Club đó kh 
+            if(request.UniversityId.HasValue && request.ClubId.HasValue)
+            {
+                //
+                University uni = await _universityRepo.Get(request.UniversityId.Value);
+                if (uni == null) throw new ArgumentException("University not in system");
+                //
+                Club clu = await _clubRepo.Get(request.ClubId.Value);
+                if (clu == null) throw new ArgumentException("Club not in system");
+                //
+                bool check = await _competitionRepo.CheckClubBelongToUniversity(request.ClubId.Value, request.UniversityId.Value);
+
+                if (check == false) throw new ArgumentException("Club not belong to university");
+
+            }
+
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token, "UniversityId"));
 
             List<ViewCompetition> resultList = result.Items.ToList();
