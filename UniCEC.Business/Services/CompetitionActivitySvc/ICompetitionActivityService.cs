@@ -20,6 +20,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Member In Competition duyệt bài
         public Task<bool> Update(CompetitionActivityUpdateModel clubActivity, string token);
+
+        public Task<bool> UpdateStatus(CompetitionActivityUpdateStatusModel model, string token);
+
         public Task<bool> Delete(int competitionActivityId, int clubId, string token);
 
         //Get List ClubActivity By Conditions 
