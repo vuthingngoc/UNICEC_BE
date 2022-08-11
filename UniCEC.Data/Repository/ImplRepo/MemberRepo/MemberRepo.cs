@@ -57,23 +57,36 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<List<Member>> GetMembersByClub(int clubId)
+        public async Task<List<Member>> GetMembersByClub(int clubId, string? searchName, int? roleId)
         {
             var query = from m in context.Members
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id
                         join u in context.Users on m.UserId equals u.Id
-                        where m.ClubId.Equals(clubId) && m.Status.Equals(MemberStatus.Active)
+                        where m.ClubId.Equals(clubId)
+                        && m.Status.Equals(MemberStatus.Active)
                         select new { cr, m, u };
 
-            return await query.Select(selector => new Member()
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                query = query.Where(x => x.u.Fullname.Contains(searchName));
+            }
+
+            if (roleId.HasValue)
+            {
+                query = query.Where(x => x.m.ClubRoleId == roleId);
+            }
+
+            List<Member> members = await query.Select(selector => new Member()
             {
                 Id = selector.m.Id,
-                ClubId = selector.m.ClubId,              
+                ClubId = selector.m.ClubId,
                 StartTime = selector.m.StartTime,
                 EndTime = selector.m.EndTime,
                 UserId = selector.m.UserId,
                 ClubRoleId = selector.m.ClubRoleId,
             }).ToListAsync();
+
+            return (members.Count > 0) ? members : null;
         }
 
         public async Task<ViewDetailMember> GetDetailById(int memberId, MemberStatus? status)

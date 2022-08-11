@@ -191,10 +191,10 @@ namespace UniCEC.Business.Services.MemberSvc
         public async Task Delete(string token, int memberId)
         {
             Member member = await _memberRepo.Get(memberId);
-            if (member == null 
-                || member.Status.Equals(MemberStatus.Inactive) 
-                || member.Status.Equals(MemberStatus.Pending)) 
-                    throw new NullReferenceException("Not found this member");
+            if (member == null
+                || member.Status.Equals(MemberStatus.Inactive)
+                || member.Status.Equals(MemberStatus.Pending))
+                throw new NullReferenceException("Not found this member");
 
             // if user is not leader or vice president
             int userId = _decodeToken.Decode(token, "Id");
@@ -227,13 +227,13 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         // Tien Anh
-        public async Task<List<ViewMember>> GetMembersByClub(string token, int clubId)
+        public async Task<List<ViewMember>> GetMembersByClub(string token, int clubId, string? searchName, int? roleId)
         {
             int userId = _decodeToken.Decode(token, "Id");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (!isMember) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-           
-            List<Member> members = await _memberRepo.GetMembersByClub(clubId);
+
+            List<Member> members = await _memberRepo.GetMembersByClub(clubId, searchName, roleId);
 
             if (members == null) throw new NullReferenceException("Not found any member in this club");
 
@@ -264,7 +264,7 @@ namespace UniCEC.Business.Services.MemberSvc
             return (viewMembers.Count > 0) ? viewMembers : null;
         }
 
-        
+
         //public async Task<ViewClubMember> GetMemberInCLub(GetMemberInClubModel model)
         //{
         //    //ViewClubMember result = await _clubHistoryRepo.GetMemberInCLub(model);
