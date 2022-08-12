@@ -247,6 +247,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 ViewMember vm = new ViewMember()
                 {
                     Id = member.Id,
+                    StudentId = user.Id,
                     Name = user.Fullname,
                     StudentCode = user.StudentCode,
                     Avatar = user.Avatar,

@@ -43,6 +43,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                     .Select(selector => new ViewMember()
                                                     {
                                                         Id = selector.m.Id,
+                                                        StudentId = selector.u.Id, //add
                                                         Name = selector.u.Fullname,
                                                         StudentCode = selector.u.StudentCode,
                                                         Avatar = selector.u.Avatar,
@@ -132,6 +133,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             ViewMember member = await query.Select(selector => new ViewMember()
             {
                 Id = memberId,
+                StudentId = selector.u.Id, //add
                 Name = selector.u.Fullname,
                 StudentCode = selector.u.StudentCode,
                 Avatar = selector.u.Avatar,
@@ -275,6 +277,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                      .Select(x => new ViewMember()
                                                      {
                                                          Id = x.m.Id,
+                                                         StudentId = x.u.Id, //add
                                                          Name = x.u.Fullname,
                                                          StudentCode = x.u.StudentCode,
                                                          ClubRoleId = x.m.ClubRoleId,
