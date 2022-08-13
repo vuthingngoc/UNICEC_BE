@@ -224,7 +224,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
 
         //lấy task cho thằng đó trong competition
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, int userId)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses,  string? name, int userId)
         {
             
             var query = from m in context.Members
@@ -238,6 +238,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
             //Statuses
             if (statuses.Count > 0) query = query.Where(x => statuses.Contains((CompetitionActivityStatus)x.ca.Status));
+
+            //name
+            if(!string.IsNullOrEmpty(name)) query = query.Where(x => x.ca.Name.Contains(name));
 
             int totalCount = await query.CountAsync();
 

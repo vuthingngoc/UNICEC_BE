@@ -97,7 +97,8 @@ namespace UniCEC.API.Controllers
         public async Task<IActionResult> GetListCompetitionActivitiesIsAssigned([FromQuery] PagingRequest request,
             [FromQuery(Name = "competitionId"), BindRequired] int competitionId,
             [FromQuery(Name = "priorityStatus")] PriorityStatus? priorityStatus,
-            [FromQuery(Name = "statuses")] List<CompetitionActivityStatus>? statuses
+            [FromQuery(Name = "statuses")] List<CompetitionActivityStatus>? statuses,
+            [FromQuery(Name = "name")] string? name
             )
         {
             try
@@ -106,7 +107,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, token);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityService.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, name,token);
 
                 return Ok(result);
             }

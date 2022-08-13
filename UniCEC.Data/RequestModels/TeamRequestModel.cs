@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
@@ -13,7 +14,13 @@ namespace UniCEC.Data.RequestModels
     {
         //Competition Id
         [FromQuery(Name = "competitionId"), BindRequired]
-        public int CompetitionId { get; set; }      
-     
+        public int CompetitionId { get; set; }
+
+        [FromQuery(Name = "teamName")]
+        public string? TeamName { get; set; }
+
+        [FromQuery(Name = "status")]
+        public TeamStatus? status { get; set; }
+
     }
 }
