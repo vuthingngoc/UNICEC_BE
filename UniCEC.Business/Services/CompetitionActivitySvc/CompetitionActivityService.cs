@@ -172,13 +172,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
 
 
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string token)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string? name, string token)
         {
             try
             {
                 int userId = _decodeToken.Decode(token, "Id");
 
-                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, userId);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, name,userId);
                 //
                 if (result == null) throw new NullReferenceException();
 
@@ -684,8 +684,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Activity Status Canceling or Completed
                 CompetitionActivity ca = await _competitionActivityRepo.Get(mta.CompetitionActivityId);
-                //if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
-                //    throw new ArgumentException("Competition Activity is Cancelling or Completed");
+                if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
+                    throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(ca.CompetitionId);

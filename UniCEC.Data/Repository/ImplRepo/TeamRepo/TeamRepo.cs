@@ -92,6 +92,12 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             var query = from t in context.Teams
                         where t.CompetitionId == request.CompetitionId
                         select t;
+            //status trong requestModel sẽ khác null còn ở controller sẽ khác 0
+            if(request.status != null) query = query.Where(t => t.Status == request.status.Value);
+
+            //teamName
+            if (!string.IsNullOrEmpty(request.TeamName)) query = query.Where(t => t.Name.Contains(request.TeamName));
+
 
             int totalCount = await query.CountAsync();
 
