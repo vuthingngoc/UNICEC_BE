@@ -151,11 +151,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
         }
 
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName,string token)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, bool? isEvent, string token)
         {
             try
             {
-                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveStudentIsAssignedTask(request, clubId, searchName ,_decodeToken.Decode(token, "Id"));
+                PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveStudentIsAssignedTask(request, clubId, searchName, isEvent, _decodeToken.Decode(token, "Id"));
                 foreach (ViewCompetition item in result.Items)
                 {
 
@@ -711,7 +711,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         public async Task<PagingResult<ViewCompetition>> GetCompOrEve(CompetitionRequestModel request, string token)
         {
             //check trường hợp nếu có University và Club thì check xem trong trường đó có Club đó kh 
-            if(request.UniversityId.HasValue && request.ClubId.HasValue)
+            if (request.UniversityId.HasValue && request.ClubId.HasValue)
             {
                 //
                 University uni = await _universityRepo.Get(request.UniversityId.Value);

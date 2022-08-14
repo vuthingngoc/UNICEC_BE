@@ -855,7 +855,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
         //có thêm club id để sàng lọc ra cuộc thi được tổ chức bởi CLB -> lấy được task của CLB
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, int userId)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, bool? isEvent ,int userId)
         {
             var query = from m in context.Members
                         where m.UserId == userId
@@ -872,6 +872,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
             //search name
             if (!string.IsNullOrEmpty(searchName)) query = query.Where(c => c.Name.Contains(searchName));
+
+            //isEvent
+            if (isEvent.HasValue) { 
+                if(isEvent.Value == false)
+                {
+                    query = query.Where(c => c.NumberOfTeam != 0);
+                }
+                if (isEvent.Value)
+                {
+                    query = query.Where(c => c.NumberOfTeam == 0);
+                }
+            }
 
             List<Competition> listCompetitionStudentIsAssignedTask = await query.Distinct().ToListAsync();
 
