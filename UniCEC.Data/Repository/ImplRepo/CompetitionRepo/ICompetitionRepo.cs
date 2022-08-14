@@ -36,7 +36,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         //
         public Task<ViewCompetition> GetCompOrEveStudentJoin(int competitionId, int userId);
         //
-        public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, int userId);
+        public Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, bool? isEvent ,int userId);
 
         //
         public Task<int> GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus status, int clubId, bool isEvent);
