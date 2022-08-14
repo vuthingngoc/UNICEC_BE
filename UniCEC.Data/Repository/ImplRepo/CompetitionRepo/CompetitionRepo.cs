@@ -46,7 +46,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
             //search có clubId 
-            if (request.ClubId.HasValue) 
+            if (request.ClubId.HasValue)
             {
                 query = from c in context.Clubs
                         where c.Id == request.ClubId
@@ -57,7 +57,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         orderby comp.CreateTime descending
                         select comp;
             }
-            
+
             else
             {
                 query = from comp in context.Competitions
@@ -73,10 +73,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (request.Scope.HasValue)
             {
                 //Liên Trường
-                if(request.Scope == CompetitionScopeStatus.InterUniversity)
+                if (request.Scope == CompetitionScopeStatus.InterUniversity)
                 {
                     query = query.Where(comp => comp.Scope == request.Scope);
-                    if(request.UniversityId.HasValue)
+                    if (request.UniversityId.HasValue)
                     {
                         query = query.Where(comp => comp.UniversityId == request.UniversityId.Value);
                     }
@@ -103,7 +103,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     }
                 }
             }
-            
+
             //Name
             if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
 
@@ -855,20 +855,26 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
 
 
         //có thêm club id để sàng lọc ra cuộc thi được tổ chức bởi CLB -> lấy được task của CLB
-        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, int userId)
+        public async Task<PagingResult<ViewCompetition>> GetCompOrEveStudentIsAssignedTask(PagingRequest request, int clubId, string? searchName, int userId)
         {
-            List<Competition> listCompetitionStudentIsAssignedTask = await (from m in context.Members
-                                                                            where m.UserId == userId
-                                                                            from mta in context.MemberTakesActivities
-                                                                            where mta.MemberId == m.Id
-                                                                            from ca in context.CompetitionActivities
-                                                                            where ca.Id == mta.CompetitionActivityId
-                                                                                  && ca.Status != CompetitionActivityStatus.Cancelling
-                                                                            from c in context.Competitions
-                                                                            where ca.CompetitionId == c.Id
-                                                                            from cic in context.CompetitionInClubs
-                                                                            where cic.ClubId == clubId && c.Id == cic.CompetitionId
-                                                                            select c).Distinct().ToListAsync();
+            var query = from m in context.Members
+                        where m.UserId == userId
+                        from mta in context.MemberTakesActivities
+                        where mta.MemberId == m.Id
+                        from ca in context.CompetitionActivities
+                        where ca.Id == mta.CompetitionActivityId
+                              && ca.Status != CompetitionActivityStatus.Cancelling
+                        from c in context.Competitions
+                        where ca.CompetitionId == c.Id
+                        from cic in context.CompetitionInClubs
+                        where cic.ClubId == clubId && c.Id == cic.CompetitionId 
+                        select c;
+
+            //search name
+            if (!string.IsNullOrEmpty(searchName)) query = query.Where(c => c.Name.Contains(searchName));
+
+            List<Competition> listCompetitionStudentIsAssignedTask = await query.Distinct().ToListAsync();
+
             int totalCount = listCompetitionStudentIsAssignedTask.Count();
 
             //
