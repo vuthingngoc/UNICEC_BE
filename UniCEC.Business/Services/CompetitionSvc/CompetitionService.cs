@@ -123,12 +123,29 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //competition
                 int numberOfCompetitionRegistering = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Register, clubId, false);
                 int numberOfCompetitionUpComing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.UpComing, clubId, false);
+
+                //field diễn ra (Start + Ongoing + End + Finish)  
                 int numberOfCompetitionOnGoing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.OnGoing, clubId, false);
+                int numberOfCompetitionStart = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Start, clubId, false);
+                int numberOfCompetitionEnd = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.End, clubId, false);
+                int numberOfCompetitionFinish = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Finish, clubId, false);
+
+                int numberOfCompetitionResult = numberOfCompetitionStart + numberOfCompetitionOnGoing + numberOfCompetitionEnd + numberOfCompetitionFinish;
+
                 int numberOfCompetitionCompleted = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Complete, clubId, false);
+
                 //event
                 int numberOfEventRegistering = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Register, clubId, true);
                 int numberOfEventUpComing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.UpComing, clubId, true);
+
+                //field diễn ra (Start + Ongoing + End + Finish)  
                 int numberOfEventOnGoing = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.OnGoing, clubId, true);
+                int numberOfEventStart = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Start, clubId, true);
+                int numberOfEventEnd = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.End, clubId, true);
+                int numberOfEventFinish = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Finish, clubId, true);
+
+                int numberOfEventResult = numberOfEventOnGoing + numberOfEventStart + numberOfEventEnd + numberOfEventFinish;
+
                 int numberOfEventCompleted = await _competitionRepo.GetNumberOfCompetitionOrEventInClubWithStatus(CompetitionStatus.Complete, clubId, true);
 
                 ViewProcessCompetitionOrEventOfClub view = new ViewProcessCompetitionOrEventOfClub()
@@ -136,11 +153,11 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     ClubId = clubId,
                     numberCompetitionOfRegistering = numberOfCompetitionRegistering,
                     numberCompetitionOfUpComing = numberOfCompetitionUpComing,
-                    numberCompetitionOfOnGoing = numberOfCompetitionOnGoing,
+                    numberCompetitionOfOnGoing = numberOfCompetitionResult,
                     numberCompetitionOfCompleted = numberOfCompetitionCompleted,
                     numberEventOfRegistering = numberOfEventRegistering,
                     numberEventOfUpComing = numberOfEventUpComing,
-                    numberEventOfOnGoing = numberOfEventOnGoing,
+                    numberEventOfOnGoing = numberOfEventResult,
                     numberEventOfCompleted = numberOfEventCompleted,
                 };
                 return view;
@@ -1000,7 +1017,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 competition.CreateTime = localTime;
                 competition.StartTimeRegister = localTime;
                 competition.EndTimeRegister = model.EndTimeRegister;
-                competition.CeremonyTime = model.StartTime.AddMinutes(30); // auto add 30 minutes để state là Start
+                competition.CeremonyTime = model.StartTime.AddMinutes(-30); // auto  30 minutes để state là Start
                 competition.StartTime = model.StartTime;
                 competition.EndTime = model.EndTime;
                 competition.Content = model.Content;
@@ -1236,7 +1253,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //update những field cho phép
                     comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
                     comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
+                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
                     comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
                     comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
                     comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
@@ -1261,7 +1278,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //update những field cho phép
                     comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
                     comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
+                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
                     comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
                     comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
 
@@ -2893,7 +2910,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             comp.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : comp.Name;
             comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
             comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-            comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(30) : comp.StartTime);
+            comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
             comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
             comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
             comp.Content = (!string.IsNullOrEmpty(model.Content)) ? model.Content : comp.Content;
