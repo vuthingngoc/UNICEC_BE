@@ -50,18 +50,18 @@ namespace UniCEC.Business.Services.UserSvc
             return users;
         }
 
-        private async Task<bool> CheckDuplicatedEmailAndStudentCode(int? universityId, string email, string studentCode)
+        private async Task<bool> CheckDuplicatedEmailAndStudentCode(int? universityId, string email, string studentCode, int userId)
         {
-            bool isExisted = await _userRepo.CheckExistedEmail(email);
+            bool isExisted = await _userRepo.CheckExistedEmail(email, userId);
             if (isExisted) throw new ArgumentException("Duplicated Email");
 
             if (universityId != null)
             {
-                isExisted = await _userRepo.CheckExistedUser(universityId.Value, studentCode);
+                isExisted = await _userRepo.CheckExistedUser(universityId.Value, studentCode, userId);
             }
             else
             {
-                isExisted = await _userRepo.CheckExistedUser(studentCode);
+                isExisted = await _userRepo.CheckExistedUser(studentCode, userId);
             }
 
             if (isExisted) throw new ArgumentException("Duplicated UserCode");
@@ -93,7 +93,7 @@ namespace UniCEC.Business.Services.UserSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            bool isExisted = await _userRepo.CheckExistedEmail(account.Email);
+            bool isExisted = await _userRepo.CheckExistedEmail(account.Email, null);
             if (isExisted) throw new ArgumentException("The email is already existed");
 
             try
@@ -165,7 +165,7 @@ namespace UniCEC.Business.Services.UserSvc
             if (!universityId.Equals(user.UniversityId))
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            bool isInvalid = await CheckDuplicatedEmailAndStudentCode(user.UniversityId, user.Email, user.StudentCode);
+            bool isInvalid = await CheckDuplicatedEmailAndStudentCode(user.UniversityId, user.Email, user.StudentCode, user.Id);
             if (isInvalid) return isInvalid;
 
             if (!string.IsNullOrEmpty(model.Description)) user.Description = model.Description;
@@ -174,7 +174,6 @@ namespace UniCEC.Business.Services.UserSvc
             if (!string.IsNullOrEmpty(model.Fullname)) user.Fullname = model.Fullname;
             if (!string.IsNullOrEmpty(model.Gender)) user.Gender = model.Gender;
             if (!string.IsNullOrEmpty(model.StudentCode)) user.StudentCode = model.StudentCode;
-            if (!string.IsNullOrEmpty(model.Avatar)) user.Avatar = model.Avatar;
             if (model.DepartmentId.HasValue) user.DepartmentId = model.DepartmentId;
 
             // for admin

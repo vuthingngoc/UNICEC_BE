@@ -13,9 +13,9 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public Task<ViewUser> GetById(int id, bool isFullInfo);
         public Task<PagingResult<ViewUser>> GetUserByUniversity(int universityId, UserStatus status, PagingRequest request);
         public Task<PagingResult<ViewUser>> GetByCondition(UserRequestModel request);
-        public Task<bool> CheckExistedEmail(string email);
-        public Task<bool> CheckExistedUser(int universityId, string studentCode);
-        public Task<bool> CheckExistedUser(string studentCode);
+        public Task<bool> CheckExistedEmail(string email, int? userId);
+        public Task<bool> CheckExistedUser(int universityId, string studentCode, int userId);
+        public Task<bool> CheckExistedUser(string studentCode, int userId);
         public Task<bool> CheckExistedUser(int universityId, int userId);
         public Task UpdateStatusByUniversityId(int universityId, UserStatus status);
         // firebase
