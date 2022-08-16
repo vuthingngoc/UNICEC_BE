@@ -539,13 +539,16 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(CompetitionActivityId);
                 if (competitionActivity == null) throw new ArgumentException("Club Activity not found");
 
-                //
-                await CheckMemberInCompetition(token, competitionActivity.CompetitionId, ClubId, false);
+                if(competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Hoạt động đã Hoàn Thành không thể hủy");
 
                 //
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc Thi Sự Kiện đã bị hủy");
 
+                //
+                await CheckMemberInCompetition(token, competitionActivity.CompetitionId, ClubId, false);
+
+               
                 competitionActivity.Status = CompetitionActivityStatus.Cancelling;
                 await _competitionActivityRepo.Update();
                 return true;

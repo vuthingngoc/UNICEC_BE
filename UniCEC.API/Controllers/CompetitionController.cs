@@ -97,7 +97,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("student-join-competitions")]
         [SwaggerOperation(Summary = "Get EVENTS or COMPETITIONS that Student Join")]
-        public async Task<IActionResult> GetCompsOrEvesStudentJoin([FromQuery] GetStudentJoinCompOrEve request )
+        public async Task<IActionResult> GetCompsOrEvesStudentJoin([FromQuery] GetStudentJoinCompOrEve request)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
 
-                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentIsAssignedTask(request, clubId, searchName,isEvent,token);
+                PagingResult<ViewCompetition> result = await _competitionService.GetCompOrEveStudentIsAssignedTask(request, clubId, searchName, isEvent, token);
                 return Ok(result);
             }
             catch (NullReferenceException)
@@ -439,6 +439,49 @@ namespace UniCEC.API.Controllers
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 bool check = await _competitionService.CompetitionStatusUpdate(model, token);
+                if (check)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+        }
+
+        // PUT api/<CompetitionController>/5
+        [Authorize(Roles = "Student")]
+        [HttpPut("pending")]
+        [SwaggerOperation(Summary = "Change Competition Status from Pending to Another")]
+        public async Task<IActionResult> CompetitionUpdateStatusAfterPending([FromQuery(Name = "competitionId"), BindRequired] int competitionId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+                bool check = await _competitionService.CompetitionUpdateStatusAfterPending(competitionId, clubId, token);
                 if (check)
                 {
                     return Ok();
