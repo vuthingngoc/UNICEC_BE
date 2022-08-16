@@ -293,8 +293,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Status Competition
                 Competition compe = await _competitionRepo.Get(model.CompetitionId);
-                if (compe.Status == CompetitionStatus.Cancel
-                  || compe.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (compe.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Ending date
                 bool checkDate = CheckDate(model.Ending);
@@ -383,8 +382,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel
-                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //------------ Check date update
                 bool checkDateUpdate = false;
@@ -491,8 +489,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel
-                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 if (model.Status.HasValue)
                 {
@@ -547,8 +544,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel
-                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 competitionActivity.Status = CompetitionActivityStatus.Cancelling;
                 await _competitionActivityRepo.Update();
@@ -586,8 +582,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Cancel
-                 || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Member Id có status true
                 Member member = await _memberRepo.Get(model.MemberId);
@@ -646,8 +641,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.Id);
-                if (competition.Status == CompetitionStatus.Cancel
-                 || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
 
                 //Check User is Member of club
@@ -689,8 +683,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(ca.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel
-                  || competition.Status == CompetitionStatus.Complete) throw new ArgumentException("Competition is End");
+                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Condition
                 await CheckMemberInCompetition(token, competition.Id, ClubId, false);

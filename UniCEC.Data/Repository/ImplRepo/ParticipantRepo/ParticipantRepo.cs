@@ -117,7 +117,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
         {
             List<Participant> participants = await (from p in context.Participants
                                                     join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
-                                                    where p.CompetitionId == CompetitionId && p.Attendance == true && pit.Status == ParticipantInTeamStatus.InTeam
+                                                    where p.CompetitionId == CompetitionId && p.Attendance == true
                                                     select p).ToListAsync();
 
             return (participants.Count > 0) ? participants : null;
