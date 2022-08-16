@@ -33,7 +33,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
                 UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
                 DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
-                departmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                DepartmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
                 Fullname = selector.u.Fullname,
                 StudentCode = selector.u.StudentCode,
                 Email = selector.u.Email,
@@ -50,9 +50,14 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                     Id = selector.u.Id,
                     RoleId = selector.u.RoleId,
                     UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
+                    UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
+                    DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
+                    DepartmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                    Email = selector.u.Email,
                     Fullname = selector.u.Fullname,
                     Gender = selector.u.Gender,
                     Avatar = (!string.IsNullOrEmpty(selector.u.Avatar)) ? selector.u.Avatar : "",
+                    Description = (!string.IsNullOrEmpty(selector.u.Description)) ? selector.u.Description : "",
                 }).FirstOrDefaultAsync();
         }
 
@@ -173,7 +178,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                               UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
                                               UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
                                               DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
-                                              departmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                                              DepartmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
                                               Fullname = selector.u.Fullname,
                                               StudentCode = selector.u.StudentCode,
                                               Email = selector.u.Email,
