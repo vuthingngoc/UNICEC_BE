@@ -161,6 +161,10 @@ namespace UniCEC.API.Controllers
                 ViewMember result = await _memberService.Insert(token, id);
                 return Ok(result);
             }
+            catch(UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (NullReferenceException ex)
             {
                 return BadRequest(ex.Message);

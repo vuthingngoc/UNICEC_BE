@@ -190,27 +190,27 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             return (items.Count() > 0) ? new PagingResult<ViewUser>(items, context.Users.Count(), request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<bool> CheckExistedEmail(string email)
+        public async Task<bool> CheckExistedEmail(string email, int? userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email) && userId != null && !u.Id.Equals(userId));
             return (user != null) ? true : false;
         }
 
-        public async Task<bool> CheckExistedUser(int universityId, string studentCode)
+        public async Task<bool> CheckExistedUser(int universityId, string studentCode, int userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && u.StudentCode.Equals(studentCode) && u.Status.Equals(UserStatus.Active));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId.Equals(universityId) && !u.Id.Equals(userId) && u.StudentCode.Equals(studentCode) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 
-        public async Task<bool> CheckExistedUser(string studentCode)
+        public async Task<bool> CheckExistedUser(string studentCode, int userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UniversityId == null && u.StudentCode.Equals(studentCode) && u.Status.Equals(UserStatus.Active));
+            User user = await context.Users.FirstOrDefaultAsync(u => u.StudentCode.Equals(studentCode) && !u.Id.Equals(userId) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 
         public async Task<bool> CheckExistedUser(int universityId, int userId)
         {
-            User user = await context.Users.FirstOrDefaultAsync(u => u.Id.Equals(userId) && u.UniversityId.Equals(universityId) && u.Status.Equals(UserStatus.Active));
+            User user = await context.Users.FirstOrDefaultAsync(u => !u.Id.Equals(userId) && u.UniversityId.Equals(universityId) && u.Status.Equals(UserStatus.Active));
             return (user != null) ? true : false;
         }
 
