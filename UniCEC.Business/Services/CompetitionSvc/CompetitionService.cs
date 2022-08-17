@@ -1935,7 +1935,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<bool> CompetitionUpdateStatusAfterPending(int competitionId, int clubId, CompetitionStatus status,string token)
+        public async Task<bool> CompetitionUpdateStatusAfterPending(int competitionId, int clubId, string token)
         {
             try
             {
@@ -1954,13 +1954,13 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 if (comp.Status != CompetitionStatus.Pending) throw new ArgumentException("API only Support Competition Or Event has State Pending");
 
                 //lấy nearest State of Competition before Pending
-                //CompetitionHistory compeHis = await _competitionHistoryRepo.GetNearestStateAfterPending(comp.Id);
-                //if (compeHis == null) throw new ArgumentException("Competition History Lost Data");
+                CompetitionHistory compeHis = await _competitionHistoryRepo.GetNearestStateAfterPending(comp.Id);
+                if (compeHis == null) throw new ArgumentException("Competition History Lost Data");
 
-                if (status == CompetitionStatus.Publish || status == CompetitionStatus.Register || status == CompetitionStatus.UpComing)
-                {
+                //if (status == CompetitionStatus.Publish || status == CompetitionStatus.Register || status == CompetitionStatus.UpComing)
+                //{
                     //-----------------------------------------------------------------Puplish
-                    if (status == CompetitionStatus.Publish)
+                    if (compeHis.Status == CompetitionStatus.Publish)
                     {
                         bool checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
                         if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR");
@@ -1984,7 +1984,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     }
 
                     //-----------------------------------------------------------------Register
-                    if (status == CompetitionStatus.Register)
+                    if (compeHis.Status == CompetitionStatus.Register)
                     {
                         bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
                         if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister");
@@ -2009,7 +2009,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     //throw new ArgumentException("The Nearest Status Of Competition is " + CompetitionStatusToString(compeHis.Status) + ", you must update from this Status");
 
                     //-----------------------------------------------------------------Up - Comming
-                    if (status == CompetitionStatus.UpComing)
+                    if (compeHis.Status == CompetitionStatus.UpComing)
                     {
                         bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
                         if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime");
@@ -2030,8 +2030,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (result == 0) throw new ArgumentException("Add Competition History Failed");
                         return true;
                     }
-                }
-                throw new ArgumentException("Only Status Puplish, Register, UpComing can Update");
+                //}
+                throw new ArgumentException("Only Previous Status Puplish, Register, UpComing can Update Check Competition History");
             }
             catch (Exception)
             {
