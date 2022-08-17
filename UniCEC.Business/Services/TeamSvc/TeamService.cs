@@ -171,6 +171,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //Check Competition can create Team StartTimeRegister < local time < StartTime
                 //nên chỉnh sang status
+                if(competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể tạo team khi đã qua thời gian tạo !");
 
                 //check competition is Event or not -> if event can't create team
@@ -260,6 +262,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (await _participantInTeamRepo.CheckNumberParticipantInTeam(team.Id, (int)competition.MaxNumber) == false) throw new ArgumentException("Team is full");
 
                 //6.Check Time Status
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 Competition c = await _competitionRepo.Get(team.CompetitionId);
                 if (CheckDate(c.StartTimeRegister, c.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
@@ -312,6 +316,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //6.Check Time Status
                 Competition c = await _competitionRepo.Get(team.CompetitionId);
+                if (c.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(c.StartTimeRegister, c.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 team.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : team.Name;
@@ -382,7 +388,9 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (userInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader"))
                     throw new UnauthorizedAccessException("You don't have permission to update team role");
 
-                //6.Check Time Status              
+                //6.Check Time Status
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 //---UPDATE PIT ROLE
@@ -456,6 +464,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //6.Check Time Status
                 Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 //Delete Participant In Team
@@ -494,6 +504,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //6.Check Time Status
                 Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 //Delete Participant In Team
@@ -547,6 +559,8 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //6.Check Time Status
                 Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 //Delete Participant In Team
