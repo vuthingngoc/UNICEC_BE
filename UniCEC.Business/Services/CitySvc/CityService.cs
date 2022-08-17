@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -14,24 +15,36 @@ namespace UniCEC.Business.Services.CitySvc
 {
     public class CityService : ICityService
     {
+        private INotificationService _notificationService;
         private ICityRepo _cityRepo;
         private IUniversityRepo _universityRepo;
         private DecodeToken _decodeToken;
 
-        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)//, IConfiguration configuration)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo, INotificationService notificationService)//, IConfiguration configuration)
         {
+            _notificationService = notificationService;
             _cityRepo = cityRepo;
             _universityRepo = universityRepo;
             _decodeToken = new DecodeToken();
         }
 
         // Search cities
-        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request)
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request, string deviceId, string isAndroid) // test notification
         {
             int roleId = _decodeToken.Decode(token, "RoleId");
+            int userId = _decodeToken.Decode(token, "Id");
             if (!roleId.Equals(4)) request.Status = true;
 
             PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(request);
+            Notification notification = new Notification()
+            {
+                DeviceId = deviceId,
+                IsAndroidDevice = bool.Parse(isAndroid),
+                UserId = userId,
+            };
+            string title = "abc";
+            string body = "xyz";
+            await _notificationService.SendNotification(notification, title, body);
 
             if (result == null) throw new NullReferenceException();
             return result;

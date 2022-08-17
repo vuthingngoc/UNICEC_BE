@@ -1,3 +1,5 @@
+using CorePush.Apple;
+using CorePush.Google;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +32,7 @@ using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Business.Services.MemberTakesActivitySvc;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Services.ParticipantInTeamSvc;
 using UniCEC.Business.Services.ParticipantSvc;
 using UniCEC.Business.Services.RoleSvc;
@@ -39,6 +42,7 @@ using UniCEC.Business.Services.TeamSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Models.Notification;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -59,6 +63,7 @@ using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
+using UniCEC.Data.Repository.ImplRepo.NotificationRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.RoleRepo;
@@ -97,6 +102,12 @@ namespace UniCEC.API
                 config.ApiVersionReader = new HeaderApiVersionReader();
             });
 
+            // config for notification
+            var appSettingsSection = Configuration.GetSection("FcmNotification");
+            services.Configure<FcmNotificationSettings>(appSettingsSection);
+            services.AddHttpClient<FcmSender>();
+            services.AddHttpClient<ApnSender>();
+
             // DI - Dependency Injection
             // Add DbContext
             services.AddDbContext<UniCECContext>();
@@ -128,6 +139,7 @@ namespace UniCEC.API
             services.AddScoped<IUniversityService, UniversityService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -160,6 +172,7 @@ namespace UniCEC.API
             services.AddTransient<IUniversityRepo, UniversityRepo>();
             services.AddTransient<IUserRepo, UserRepo>();
             services.AddTransient<IMemberInCompetitionRepo, MemberInCompetitionRepo>();
+            services.AddTransient<INotificationRepo, NotificationRepo>();
 
             //----------------------------------------------FIREBASE-------------------------
             string path = Path.Combine(Directory.GetCurrentDirectory(), Configuration["Jwt:Firebase:FileConfig"]);
@@ -195,7 +208,7 @@ namespace UniCEC.API
                         .AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithExposedHeaders(new string[] { "Authorization", "authorization" });
+                        .WithExposedHeaders(new string[] { "Authorization", "authorization", "X-Device-Token", "Is-Android" });
                     });
             });
 
