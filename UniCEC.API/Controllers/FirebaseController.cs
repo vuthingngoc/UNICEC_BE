@@ -30,10 +30,12 @@ namespace UniCEC.API.Controllers
             {
                 //Get The IDToken From FE
                 var header = Request.Headers;
-                if (!header.ContainsKey("Authorization")) return BadRequest();               
+                if (!header.ContainsKey("Authorization")) return BadRequest();                
 
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                ViewUserInfo userInfo = await _firebaseService.Authentication(token);
+                string deviceId = (Request.Headers)["X-Device-Token"].ToString();
+                string isAndroid = (Request.Headers)["Is-Android"].ToString();
+                ViewUserInfo userInfo = await _firebaseService.Authentication(token, deviceId, isAndroid);
                 return (userInfo != null) ? Ok(userInfo) : BadRequest("Please login with your university email");                
             }
             catch(UnauthorizedAccessException ex)

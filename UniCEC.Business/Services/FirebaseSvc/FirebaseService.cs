@@ -2,12 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Enum;
 using UniCEC.Data.JWT;
+using UniCEC.Data.ViewModels.Entities.Notification;
 using UniCEC.Data.ViewModels.Entities.Role;
 using UniCEC.Data.ViewModels.Entities.University;
 using UniCEC.Data.ViewModels.Entities.User;
@@ -21,17 +23,20 @@ namespace UniCEC.Business.Services.FirebaseSvc
         private IUniversityService _universityService;
         private IRoleService _roleService;
         private ISeedsWalletService _seedsWalletService;
+        private INotificationService _notificationService;
 
         public FirebaseService(IUserService userService, IUniversityService universityService
-                                , IRoleService roleService, ISeedsWalletService seedsWalletService)
+                                , IRoleService roleService, ISeedsWalletService seedsWalletService
+                                , INotificationService notificationService)
         {
             _userService = userService;
             _universityService = universityService;
             _roleService = roleService;
             _seedsWalletService = seedsWalletService;
+            _notificationService = notificationService;
         }
 
-        public async Task<ViewUserInfo> Authentication(string token)
+        public async Task<ViewUserInfo> Authentication(string token, string deviceId, string isAndroid)
         {
             // decoded IDToken
             FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
@@ -70,6 +75,14 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     string userToken = JWTUserToken.GenerateJWTTokenUser(userModel);
                     // Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
+                    // save token device user
+                    NotificationInsertModel model = new NotificationInsertModel()
+                    {
+                        DeviceId = deviceId,
+                        UserId = userModel.Id,
+                        IsAndroidDevice = bool.Parse(isAndroid ?? "true")
+                    };
+                    await _notificationService.InsertDeviceUser(model);
                     return new ViewUserInfo()
                     {
                         Token = userToken,
@@ -96,14 +109,22 @@ namespace UniCEC.Business.Services.FirebaseSvc
                             ListUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni)
                         };
                     }
+                    // save token device user
+                    NotificationInsertModel model = new NotificationInsertModel()
+                    {
+                        DeviceId = deviceId,
+                        UserId = user.Id,
+                        IsAndroidDevice = bool.Parse(isAndroid ?? "true")
+                    };
+                    await _notificationService.InsertDeviceUser(model);
 
                     return new ViewUserInfo()
                     {
                         Token = userToken
                     };
-                }
+                }                
             }
-            //Not In University => Sponsor or Admin
+            //Not In University => Admin
             else
             {
                 //Check Role

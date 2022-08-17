@@ -11,6 +11,7 @@ namespace UniCEC.Data.Models.DB
         public User()
         {
             Members = new HashSet<Member>();
+            Notifications = new HashSet<Notification>();
             Participants = new HashSet<Participant>();
             SeedsWallets = new HashSet<SeedsWallet>();
         }
@@ -34,6 +35,7 @@ namespace UniCEC.Data.Models.DB
         public virtual Role Role { get; set; }
         public virtual University University { get; set; }
         public virtual ICollection<Member> Members { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<SeedsWallet> SeedsWallets { get; set; }
     }
