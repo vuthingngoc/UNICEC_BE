@@ -473,15 +473,15 @@ namespace UniCEC.API.Controllers
         // PUT api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
         [HttpPut("pending")]
-        [SwaggerOperation(Summary = "Change Competition Status from Pending to Another")]
-        public async Task<IActionResult> CompetitionUpdateStatusAfterPending([FromQuery(Name = "competitionId"), BindRequired] int competitionId, [FromQuery(Name = "clubId"), BindRequired] int clubId)
+        [SwaggerOperation(Summary = "Change Competition Status from Pending to Another Status = 0,5,1 can Update")]
+        public async Task<IActionResult> CompetitionUpdateStatusAfterPending([FromQuery(Name = "competitionId"), BindRequired] int competitionId, [FromQuery(Name = "clubId"), BindRequired] int clubId, [FromQuery(Name = "status"), BindRequired] CompetitionStatus status )
         {
             try
             {
                 var header = Request.Headers;
                 if (!header.ContainsKey("Authorization")) return Unauthorized();
                 string token = header["Authorization"].ToString().Split(" ")[1];
-                bool check = await _competitionService.CompetitionUpdateStatusAfterPending(competitionId, clubId, token);
+                bool check = await _competitionService.CompetitionUpdateStatusAfterPending(competitionId, clubId, status,token);
                 if (check)
                 {
                     return Ok();
