@@ -76,13 +76,13 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     // Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
                     // save token device user
-                    NotificationInsertModel model = new NotificationInsertModel()
-                    {
-                        DeviceId = deviceId,
-                        UserId = userModel.Id,
-                        IsAndroidDevice = bool.Parse(isAndroid ?? "true")
-                    };
-                    await _notificationService.InsertDeviceUser(model);
+                    //NotificationInsertModel model = new NotificationInsertModel()
+                    //{
+                    //    DeviceId = deviceId,
+                    //    UserId = userModel.Id,
+                    //    IsAndroidDevice = bool.Parse(isAndroid ?? "true")
+                    //};
+                    //await _notificationService.InsertDeviceUser(model);
                     return new ViewUserInfo()
                     {
                         Token = userToken,
@@ -110,13 +110,13 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         };
                     }
                     // save token device user
-                    NotificationInsertModel model = new NotificationInsertModel()
-                    {
-                        DeviceId = deviceId,
-                        UserId = user.Id,
-                        IsAndroidDevice = bool.Parse(isAndroid ?? "true")
-                    };
-                    await _notificationService.InsertDeviceUser(model);
+                    //NotificationInsertModel model = new NotificationInsertModel()
+                    //{
+                    //    DeviceId = deviceId,
+                    //    UserId = user.Id,
+                    //    IsAndroidDevice = bool.Parse(isAndroid ?? "true")
+                    //};
+                    //await _notificationService.InsertDeviceUser(model);
 
                     return new ViewUserInfo()
                     {
