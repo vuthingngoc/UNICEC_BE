@@ -6,9 +6,11 @@ namespace UniCEC.Data.ViewModels.Entities.Notification
     {
         [JsonPropertyName("user_id")]
         public int UserId { get; set; }
-        [JsonPropertyName("device_id")]
-        public string DeviceId { get; set; }
-        [JsonPropertyName("is_android_device")]
-        public bool IsAndroidDevice { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("body")]
+        public string Body { get; set; }
+        [JsonPropertyName("redirect_url")]
+        public string RedirectUrl { get; set; }
     }
 }

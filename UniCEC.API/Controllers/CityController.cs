@@ -8,9 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.CitySvc;
-using UniCEC.Business.Services.NotificationSvc;
-using UniCEC.Data.Models.DB;
-using UniCEC.Data.Models.Notification;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
@@ -41,9 +38,7 @@ namespace UniCEC.API.Controllers
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                string deviceId = (Request.Headers)["X-Device-Token"].ToString();
-                string isAndroid = (Request.Headers)["Is-Android"].ToString();
-                PagingResult<ViewCity> result = await _cityService.SearchCitiesByName(token, request, deviceId, isAndroid);                
+                PagingResult<ViewCity> result = await _cityService.SearchCitiesByName(token, request);                
                 return Ok(result);
             }
             catch (NullReferenceException)

@@ -11,7 +11,6 @@ using UniCEC.Business.Services.DepartmentSvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Department;
-using UniCEC.Data.ViewModels.Entities.Major;
 
 namespace UniCEC.API.Controllers
 {
@@ -24,9 +23,9 @@ namespace UniCEC.API.Controllers
     {
         private IDepartmentService _departmentService;
 
-        public DepartmentController(IDepartmentService majorService)
+        public DepartmentController(IDepartmentService departmentService)
         {
-            _departmentService = majorService;
+            _departmentService = departmentService;
         }
 
         [HttpGet("{id}")]
@@ -70,7 +69,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Get majors by conditions - authenticated user")]
+        [SwaggerOperation(Summary = "Get departments by conditions - authenticated user")]
         public async Task<IActionResult> GetDepartmentsByConditions([FromQuery] DepartmentRequestModel request)
         {
             try
@@ -138,8 +137,8 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        [SwaggerOperation(Summary = "Update a major - University admin")]
-        public async Task<IActionResult> UpdateDepartment([FromBody] ViewDepartment department)
+        [SwaggerOperation(Summary = "Update a department - University admin")]
+        public async Task<IActionResult> UpdateDepartment([FromBody] DepartmentUpdateModel department)
         {
             try
             {
@@ -170,7 +169,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete major by id - University admin")]
+        [SwaggerOperation(Summary = "Delete department by id - University admin")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             try

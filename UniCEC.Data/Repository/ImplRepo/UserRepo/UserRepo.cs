@@ -234,5 +234,11 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 await Update();
             }
         }
+
+        public async Task<string> GetDeviceTokenByUser(int userId)
+        {
+            User user = await context.Users.FirstOrDefaultAsync(user => user.Id.Equals(userId));
+            return (user != null) ? user.DeviceToken : null;
+        }
     }
 }

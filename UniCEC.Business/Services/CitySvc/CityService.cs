@@ -29,22 +29,22 @@ namespace UniCEC.Business.Services.CitySvc
         }
 
         // Search cities
-        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request, string deviceId, string isAndroid) // test notification
+        public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request)
         {
             int roleId = _decodeToken.Decode(token, "RoleId");
             int userId = _decodeToken.Decode(token, "Id");
             if (!roleId.Equals(4)) request.Status = true;
 
             PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(request);
-            Notification notification = new Notification()
-            {
-                DeviceId = deviceId,
-                IsAndroidDevice = bool.Parse(isAndroid),
-                UserId = userId,
-            };
-            string title = "abc";
-            string body = "xyz";
-            await _notificationService.SendNotification(notification, title, body);
+
+            // test notification
+            //Notification notification = await _notificationService.GetNotiesByUser(userId);
+            //if (notification != null)
+            //{
+            //    string title = "abc";
+            //    string body = "xyz";
+            //    _notificationService.SendNotification(notification, title, body);
+            //}
 
             if (result == null) throw new NullReferenceException();
             return result;
@@ -76,7 +76,7 @@ namespace UniCEC.Business.Services.CitySvc
             if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Description))
                 throw new ArgumentNullException(" Name Null || Description Null ");
 
-            CheckValidAuthorized(token);          
+            CheckValidAuthorized(token);
 
             City city = new City()
             {
@@ -117,7 +117,7 @@ namespace UniCEC.Business.Services.CitySvc
                     city.Status = model.Status.Value;
                     await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);
                 }
-                    
+
 
                 await _cityRepo.Update();
                 return true;

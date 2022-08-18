@@ -21,5 +21,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         // firebase
         public Task<UserTokenModel> GetByEmail(string email);
         public Task<UserTokenModel> GetUserTokenById(int id);
+        // notification
+        public Task<string> GetDeviceTokenByUser(int userId);
     }
 }
