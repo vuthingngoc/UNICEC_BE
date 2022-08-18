@@ -18,5 +18,11 @@ namespace UniCEC.Business.Utilities
             var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
             return Int32.Parse(claim.Value);
         }
+
+        public string DecodeText(string token, string nameClaim)
+        {
+            var claim = _tokenHandler.ReadJwtToken(token).Claims.FirstOrDefault(selector => selector.Type.ToString().Equals(nameClaim));
+            return claim.Value;
+        }
     }
 }

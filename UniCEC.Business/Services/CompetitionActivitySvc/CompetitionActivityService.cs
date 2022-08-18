@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
@@ -21,6 +22,7 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
 using UniCEC.Data.ViewModels.Entities.Member;
+using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
 using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
 namespace UniCEC.Business.Services.CompetitionActivitySvc
@@ -38,6 +40,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private IUserRepo _userRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ISeedsWalletService _seedsWalletService;
+        private INotificationService _notificationService;
         private DecodeToken _decodeToken;
 
         public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo,
@@ -49,7 +52,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           IUserRepo userRepo,
                                           IMemberInCompetitionRepo memberInCompetitionRepo,
                                           ISeedsWalletService seedsWalletService,
-                                          IFileService fileService)
+                                          IFileService fileService,
+                                          INotificationService notificationService)
         {
             _competitionActivityRepo = clubActivityRepo;
             _memberTakesActivityRepo = memberTakesActivityRepo;
@@ -61,6 +65,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _fileService = fileService;
             _seedsWalletService = seedsWalletService;
             _memberInCompetitionRepo = memberInCompetitionRepo;
+            _notificationService = notificationService;
             _decodeToken = new DecodeToken();
         }
 
@@ -178,7 +183,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             {
                 int userId = _decodeToken.Decode(token, "Id");
 
-                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, name,userId);
+                PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, name, userId);
                 //
                 if (result == null) throw new NullReferenceException();
 
@@ -517,7 +522,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     competitionActivity.Status = model.Status.Value;
                     await _competitionActivityRepo.Update();
                     return true;
-                }      
+                }
                 else
                 {
                     throw new ArgumentException("Status is Null");
@@ -539,7 +544,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(CompetitionActivityId);
                 if (competitionActivity == null) throw new ArgumentException("Club Activity not found");
 
-                if(competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Hoạt động đã Hoàn Thành không thể hủy");
+                if (competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Hoạt động đã Hoàn Thành không thể hủy");
 
                 //
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
@@ -548,7 +553,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, ClubId, false);
 
-               
+
                 competitionActivity.Status = CompetitionActivityStatus.Cancelling;
                 await _competitionActivityRepo.Update();
                 return true;
@@ -619,7 +624,16 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await _competitionActivityRepo.Update();
 
                 // send notification
-
+                string fullname = _decodeToken.DecodeText(token, "Fullname");
+                string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                Notification notification = new Notification()
+                {
+                    Title = "Thông báo",
+                    Body = $"{fullname} vừa phân công cho bạn 1 công việc mới!",
+                    RedirectUrl = "/viewCompetitionMemberTask",
+                    UserId = member.UserId,
+                };
+                await _notificationService.SendNotification(notification, deviceToken);
 
                 return await TransferViewDetailMTA(mtaInsert);
             }
@@ -653,15 +667,51 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //Check User is Member of club
                 int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
                 Member member = await _memberRepo.Get(memberId);
-                if (member == null && member.Status == MemberStatus.Active) throw new ArgumentException("Member not found");
+                if (member == null && member.Status == MemberStatus.Inactive) throw new ArgumentException("Member not found");
 
                 //Check Member belong to this task
                 bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, memberId);
-                if (mtaCheck == false) throw new ArgumentException("This member is not inthis task");
+                if (mtaCheck == false) throw new ArgumentException("This member is not in this task");
 
                 //
                 if (model.Status == CompetitionActivityStatus.Cancelling || model.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("You don't have permission to update this Status");
+
+                // send notification
+                string fullname = _decodeToken.DecodeText(token, "Fullname");
+
+                MemberInCompetitionRequestModel request = new MemberInCompetitionRequestModel()
+                {
+                    ClubId = model.ClubId,
+                    CompetitionId = competition.Id,
+                };
+                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request);
+                foreach (var manager in managers.Items)
+                {
+                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
+                };
+
+                List<MemberTakesActivity> members = await _memberTakesActivityRepo.ListMemberTakesActivity(model.CompetitionActivityId);
+                foreach (var element in members)
+                {
+                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
+                }
 
                 competitionActivity.Status = model.Status;
                 await _competitionActivityRepo.Update();
