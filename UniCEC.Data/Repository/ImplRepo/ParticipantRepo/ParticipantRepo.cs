@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.Participant;
+using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.RequestModels;
 
 namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 {
@@ -145,6 +147,76 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                 RegisterTime = participant.RegisterTime,
                 Attendance  = participant.Attendance,
             } : null;
+
+        }
+
+        public async Task<PagingResult<ViewParticipant>> GetByConditions(ParticipantRequestModel request)
+        {
+            IQueryable<Participant> query;
+
+            if (!request.HasTeam.HasValue)
+            {
+                query = from p in context.Participants
+                        where p.CompetitionId == request.CompetitionId
+                        select p;
+
+                int totalCount = query.Count();
+
+                List<ViewParticipant> vp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                  .Select(x => new ViewParticipant
+                                                  {
+                                                     Id = x.Id,
+                                                     StudentId = x.StudentId,
+                                                     CompetitionId=x.CompetitionId,
+                                                     RegisterTime=x.RegisterTime,
+                                                     Attendance=x.Attendance,
+                                                     Avatar = x.Student.Avatar
+                                                  }).ToListAsync();
+                return vp.Count > 0 ? new PagingResult<ViewParticipant>(vp, totalCount, request.CurrentPage, request.PageSize) : null;
+
+            }
+            else
+            {
+                if(request.HasTeam.Value == true)
+                {
+                    query = from p in context.Participants
+                            join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+                            where p.CompetitionId == request.CompetitionId
+                                  && pit.Status == ParticipantInTeamStatus.InTeam
+                            select p;
+
+                    int totalCount = query.Count();
+
+                }
+                else
+                {
+                    List<Participant> AllParticipant = await (from p in context.Participants
+                                                       where p.CompetitionId == request.CompetitionId
+                                                       select p).ToListAsync();
+
+                    List<Participant> ParticipantHasTeam = await (from p in context.Participants
+                                                                  join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+                                                                  where p.CompetitionId == request.CompetitionId
+                                                                        && pit.Status == ParticipantInTeamStatus.InTeam
+                                                                  select p).ToListAsync();
+                   
+                    foreach(Participant p in ParticipantHasTeam)
+                    {
+                        foreach (Participant ap in AllParticipant)
+                        {
+                           if(p.Id == ap.Id)
+                            {
+                                AllParticipant.Remove(ap); 
+                            }
+                     }
+                    }
+                    //==> sau tất cả thì AllParticipant sẽ chứa list Participant chưa có team
+
+                    listCompetition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
+
+                }
+            }
+            return null;
 
         }
     }

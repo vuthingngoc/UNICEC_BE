@@ -12,6 +12,7 @@ using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
+using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Participant;
 
@@ -58,6 +59,19 @@ namespace UniCEC.Business.Services.ParticipantSvc
             try {
                 int userId =  _decodeToken.Decode(token, "Id");
                 ViewParticipant result = await _participantRepo.GetByCompetitionId(competitionId, userId);
+                if (result == null) throw new NullReferenceException();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagingResult<ViewParticipant>> GetByConditions(ParticipantRequestModel request, string token)
+        {
+            try {
+                PagingResult<ViewParticipant> result = await _participantRepo.GetByConditions(request);
                 if (result == null) throw new NullReferenceException();
                 return result;
             }
@@ -280,7 +294,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             };
         }
 
-
+        
     }
 }
 
