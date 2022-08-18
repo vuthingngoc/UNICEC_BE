@@ -49,7 +49,6 @@ namespace UniCEC.Business.Services.FirebaseSvc
             bool isStudent = await _universityService.CheckEmailUniversity(emailUni);
             if (isStudent)
             {
-                if (string.IsNullOrEmpty(isAndroid)) isAndroid = "true"; // default device for student
                 //-------Check student
                 bool isExistedStudent = await _userService.CheckUserEmailExsit(email);
                 //1.If student not in system
@@ -77,13 +76,17 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     // Get List University Belong To Email
                     List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
                     // save token device user
-                    NotificationInsertModel model = new NotificationInsertModel()
+                    if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(isAndroid))
                     {
-                        DeviceId = deviceId,
-                        UserId = userModel.Id,
-                        IsAndroidDevice = bool.Parse(isAndroid)
-                    };
-                    await _notificationService.InsertDeviceUser(model);
+                        NotificationInsertModel model = new NotificationInsertModel()
+                        {
+                            DeviceId = deviceId,
+                            UserId = userModel.Id,
+                            IsAndroidDevice = bool.Parse(isAndroid)
+                        };
+                        await _notificationService.InsertDeviceUser(model);
+                    }
+
                     return new ViewUserInfo()
                     {
                         Token = userToken,
@@ -111,29 +114,32 @@ namespace UniCEC.Business.Services.FirebaseSvc
                         };
                     }
                     // save token device user
-                    NotificationInsertModel model = new NotificationInsertModel()
+                    if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(isAndroid))
                     {
-                        DeviceId = deviceId,
-                        UserId = user.Id,
-                        IsAndroidDevice = bool.Parse(isAndroid)
-                    };
-                    await _notificationService.InsertDeviceUser(model);
+                        NotificationInsertModel model = new NotificationInsertModel()
+                        {
+                            DeviceId = deviceId,
+                            UserId = user.Id,
+                            IsAndroidDevice = bool.Parse(isAndroid)
+                        };
+                        await _notificationService.InsertDeviceUser(model);
+                    }
 
                     return new ViewUserInfo()
                     {
                         Token = userToken
                     };
-                }                
+                }
             }
             //Not In University => Admin
             else
             {
                 //Check Role
-                UserTokenModel user = await _userService.GetUserByEmail(email);              
+                UserTokenModel user = await _userService.GetUserByEmail(email);
 
                 if (user != null)
                 {
-                    if (user.Status.Equals(UserStatus.InActive)) 
+                    if (user.Status.Equals(UserStatus.InActive))
                         throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
 
                     await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
