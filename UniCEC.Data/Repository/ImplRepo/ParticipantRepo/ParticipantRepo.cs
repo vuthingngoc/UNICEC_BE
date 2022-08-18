@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Entities.Participant;
 
 namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 {
@@ -121,6 +122,30 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                                                     select p).ToListAsync();
 
             return (participants.Count > 0) ? participants : null;
+        }
+
+        public async Task<ViewParticipant> GetByCompetitionId(int competitionId, int userId)
+        {
+            Participant participant = await (from p in context.Participants
+                                             join c in context.Competitions on p.CompetitionId equals c.Id
+                                             where competitionId == c.Id && p.StudentId == userId
+                                             select p).FirstOrDefaultAsync();
+            User user = null;
+            if (participant != null)
+            {
+                 user = await (from u in context.Users
+                                   where u.Id == userId
+                                   select u).FirstOrDefaultAsync();
+            }
+            return participant != null ? new ViewParticipant { 
+                Id = participant.Id,
+                CompetitionId = participant.CompetitionId,
+                StudentId = participant.StudentId,
+                Avatar = (user != null) ? user.Avatar : null,
+                RegisterTime = participant.RegisterTime,
+                Attendance  = participant.Attendance,
+            } : null;
+
         }
     }
 }
