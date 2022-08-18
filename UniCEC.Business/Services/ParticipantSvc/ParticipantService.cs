@@ -8,6 +8,7 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo;
@@ -27,12 +28,14 @@ namespace UniCEC.Business.Services.ParticipantSvc
         private IUserRepo _userRepo;
         private ISeedsWalletRepo _seedsWalletRepo;
         private DecodeToken _decodeToken;
+        private IMemberInCompetitionRepo _memberInCompetitionRepo;
 
         public ParticipantService(IParticipantRepo participantRepo,
                                   ICompetitionRepo competitionRepo,
                                   IClubRepo clubRepo,
                                   IMemberRepo memberRepo,
                                   ISeedsWalletRepo seedsWalletRepo,
+                                  IMemberInCompetitionRepo memberInCompetitionRepo,
                                   IUserRepo userRepo)
         {
             _participantRepo = participantRepo;
@@ -41,6 +44,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
             _memberRepo = memberRepo;
             _userRepo = userRepo;
             _seedsWalletRepo = seedsWalletRepo;
+            _memberInCompetitionRepo = memberInCompetitionRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -71,9 +75,13 @@ namespace UniCEC.Business.Services.ParticipantSvc
         public async Task<PagingResult<ViewParticipant>> GetByConditions(ParticipantRequestModel request, string token)
         {
             try {
-                PagingResult<ViewParticipant> result = await _participantRepo.GetByConditions(request);
-                if (result == null) throw new NullReferenceException();
-                return result;
+                bool check = await CheckMemberInCompetition(token, request.CompetitionId, request.ClubId, true);
+                if (check == false) throw new ArgumentException("You dont have permission to do this action");
+                
+                    PagingResult<ViewParticipant> result = await _participantRepo.GetByConditions(request);
+                    if (result == null) throw new NullReferenceException();
+                    return result;
+                     
             }
             catch (Exception)
             {
@@ -294,9 +302,42 @@ namespace UniCEC.Business.Services.ParticipantSvc
             };
         }
 
-        
+        private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
+        {
+            //------------- CHECK Competition in system
+            Competition competition = await _competitionRepo.Get(CompetitionId);
+            if (competition == null) throw new ArgumentException("Competition or Event not found ");
+
+            //------------- CHECK Club in system
+            Club club = await _clubRepo.Get(ClubId);
+            if (club == null) throw new ArgumentException("Club in not found");
+
+            //------------- CHECK Is Member in Club
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
+            Member member = await _memberRepo.Get(memberId);
+            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+
+            //------------- CHECK User is in CompetitionManger table                
+            MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
+            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+
+            if (isOrganization)
+            {
+                //1,2 accept
+                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
+                return true;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
     }
 }
+
+
 
 
 //-------------------------------------------------------Sponsor Create Competition Or Event
