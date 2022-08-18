@@ -135,17 +135,18 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
             User user = null;
             if (participant != null)
             {
-                 user = await (from u in context.Users
-                                   where u.Id == userId
-                                   select u).FirstOrDefaultAsync();
+                user = await (from u in context.Users
+                              where u.Id == userId
+                              select u).FirstOrDefaultAsync();
             }
-            return participant != null ? new ViewParticipant { 
+            return participant != null ? new ViewParticipant
+            {
                 Id = participant.Id,
                 CompetitionId = participant.CompetitionId,
                 StudentId = participant.StudentId,
                 Avatar = (user != null) ? user.Avatar : null,
                 RegisterTime = participant.RegisterTime,
-                Attendance  = participant.Attendance,
+                Attendance = participant.Attendance,
             } : null;
 
         }
@@ -162,22 +163,22 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 
                 int totalCount = query.Count();
 
-                List<ViewParticipant> vp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                List<ViewParticipant> listvp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                                   .Select(x => new ViewParticipant
                                                   {
-                                                     Id = x.Id,
-                                                     StudentId = x.StudentId,
-                                                     CompetitionId=x.CompetitionId,
-                                                     RegisterTime=x.RegisterTime,
-                                                     Attendance=x.Attendance,
-                                                     Avatar = x.Student.Avatar
+                                                      Id = x.Id,
+                                                      StudentId = x.StudentId,
+                                                      CompetitionId = x.CompetitionId,
+                                                      RegisterTime = x.RegisterTime,
+                                                      Attendance = x.Attendance,
+                                                      Avatar = x.Student.Avatar
                                                   }).ToListAsync();
-                return vp.Count > 0 ? new PagingResult<ViewParticipant>(vp, totalCount, request.CurrentPage, request.PageSize) : null;
+                return listvp.Count > 0 ? new PagingResult<ViewParticipant>(listvp, totalCount, request.CurrentPage, request.PageSize) : null;
 
             }
             else
             {
-                if(request.HasTeam.Value == true)
+                if (request.HasTeam.Value == true)
                 {
                     query = from p in context.Participants
                             join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
@@ -186,38 +187,68 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                             select p;
 
                     int totalCount = query.Count();
+                    List<ViewParticipant> listvp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
+                                                  .Select(x => new ViewParticipant
+                                                  {
+                                                      Id = x.Id,
+                                                      StudentId = x.StudentId,
+                                                      CompetitionId = x.CompetitionId,
+                                                      RegisterTime = x.RegisterTime,
+                                                      Attendance = x.Attendance,
+                                                      Avatar = x.Student.Avatar
+                                                  }).ToListAsync();
+                    return listvp.Count > 0 ? new PagingResult<ViewParticipant>(listvp, totalCount, request.CurrentPage, request.PageSize) : null;
 
                 }
                 else
                 {
                     List<Participant> AllParticipant = await (from p in context.Participants
-                                                       where p.CompetitionId == request.CompetitionId
-                                                       select p).ToListAsync();
+                                                              where p.CompetitionId == request.CompetitionId
+                                                              select p).ToListAsync();
 
                     List<Participant> ParticipantHasTeam = await (from p in context.Participants
                                                                   join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
                                                                   where p.CompetitionId == request.CompetitionId
                                                                         && pit.Status == ParticipantInTeamStatus.InTeam
                                                                   select p).ToListAsync();
-                   
-                    foreach(Participant p in ParticipantHasTeam)
+
+                    foreach (Participant p in ParticipantHasTeam)
                     {
                         foreach (Participant ap in AllParticipant)
                         {
-                           if(p.Id == ap.Id)
+                            if (p.Id == ap.Id)
                             {
-                                AllParticipant.Remove(ap); 
+                                AllParticipant.Remove(ap);
                             }
-                     }
+                        }
                     }
                     //==> sau tất cả thì AllParticipant sẽ chứa list Participant chưa có team
+                    int totalCount = AllParticipant.Count;
 
-                    listCompetition.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
+                    AllParticipant = AllParticipant.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize).ToList();
+
+                    //
+                    List<ViewParticipant> listvp = new List<ViewParticipant>();
+                    //
+                    foreach (Participant ap in AllParticipant)
+                    {
+                       ViewParticipant vp = new ViewParticipant
+                       {
+                           Id = ap.Id,
+                           StudentId = ap.StudentId,
+                           CompetitionId = ap.CompetitionId,
+                           RegisterTime = ap.RegisterTime,
+                           Attendance  = ap.Attendance,
+                           Avatar = ap.Student.Avatar,
+                       };
+                        listvp.Add(vp);
+                    }
+
+                    return listvp.Count > 0 ? new PagingResult<ViewParticipant>(listvp, totalCount, request.CurrentPage, request.PageSize) : null;
 
                 }
             }
-            return null;
-
+            
         }
     }
 }

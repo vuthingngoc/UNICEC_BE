@@ -5,8 +5,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.ParticipantSvc;
+using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Participant;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -110,7 +113,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<ParticipantController>
         [Authorize(Roles = "Student")]
         [HttpGet]
-        [SwaggerOperation(Summary = "Get Status Paritcipant in Competition Or Event")]
+        [SwaggerOperation(Summary = "Get Status a Paritcipant in Competition Or Event")]
         public async Task<IActionResult> Get([FromQuery(Name = "competitionId"), BindRequired] int competitionId)
         {
             try
@@ -144,6 +147,41 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpGet("list-participant")]
+        [SwaggerOperation(Summary = "Get Status a Paritcipant in Competition Or Event")]
+        public async Task<IActionResult> GetByConditions([FromQuery] ParticipantRequestModel request)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                PagingResult<ViewParticipant> result = await _participantService.GetByConditions(request, token);
+                return Ok(result);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(new List<object>());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
 
     }
 }
