@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.NotificationSvc;
+using UniCEC.Business.Services.UserSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -15,14 +16,12 @@ namespace UniCEC.Business.Services.CitySvc
 {
     public class CityService : ICityService
     {
-        private INotificationService _notificationService;
         private ICityRepo _cityRepo;
         private IUniversityRepo _universityRepo;
         private DecodeToken _decodeToken;
 
-        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo, INotificationService notificationService)//, IConfiguration configuration)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)
         {
-            _notificationService = notificationService;
             _cityRepo = cityRepo;
             _universityRepo = universityRepo;
             _decodeToken = new DecodeToken();
@@ -32,19 +31,9 @@ namespace UniCEC.Business.Services.CitySvc
         public async Task<PagingResult<ViewCity>> SearchCitiesByName(string token, CityRequestModel request)
         {
             int roleId = _decodeToken.Decode(token, "RoleId");
-            int userId = _decodeToken.Decode(token, "Id");
             if (!roleId.Equals(4)) request.Status = true;
 
             PagingResult<ViewCity> result = await _cityRepo.SearchCitiesByName(request);
-
-            // test notification
-            //Notification notification = await _notificationService.GetNotiesByUser(userId);
-            //if (notification != null)
-            //{
-            //    string title = "abc";
-            //    string body = "xyz";
-            //    _notificationService.SendNotification(notification, title, body);
-            //}
 
             if (result == null) throw new NullReferenceException();
             return result;

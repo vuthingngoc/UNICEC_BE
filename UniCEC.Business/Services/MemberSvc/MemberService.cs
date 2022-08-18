@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
 using UniCEC.Data.Enum;
@@ -22,15 +23,17 @@ namespace UniCEC.Business.Services.MemberSvc
         private IClubRepo _clubRepo;
         private IUserRepo _userRepo;
         private IClubRoleRepo _clubRoleRepo;
+        private INotificationService _notificationService;
 
         private DecodeToken _decodeToken;
 
-        public MemberService(IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo)
+        public MemberService(INotificationService notificationService, IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo)
         {
+            _notificationService = notificationService;
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
             _userRepo = userRepo;
-            _clubRoleRepo = clubRoleRepo;
+            _clubRoleRepo = clubRoleRepo;            
             _decodeToken = new DecodeToken();
         }
 
@@ -157,10 +160,24 @@ namespace UniCEC.Business.Services.MemberSvc
             {
                 member.Status = model.Status;
                 await _memberRepo.Update();
+                // send notification
+                Club club = await _clubRepo.Get(model.ClubId);                
+                string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                string body = (model.Status.Equals(MemberStatus.Active)) 
+                    ? $"Chúc mừng bạn đã trở thành thành viên câu lạc bộ {club.Name}" 
+                    : $"Câu lạc bộ {club.Name} đã từ chối bạn";
+                Notification notification = new Notification()
+                {
+                    Title = "Thông báo",
+                    Body = body,
+                    RedirectUrl = "/notification",
+                    UserId = member.UserId,
+                };
+                await _notificationService.SendNotification(notification, deviceToken);
             }
             else
             {
-                throw new ArgumentException("This user is a member already");
+                throw new ArgumentException("This user does not apply to the club!");
             }
         }
 

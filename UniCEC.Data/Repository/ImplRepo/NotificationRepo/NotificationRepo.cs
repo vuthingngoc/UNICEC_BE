@@ -21,6 +21,24 @@ namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
             return (notification != null) ? notification.Id : 0;
         }
 
+        public async Task<ViewNotification> GetNotiById(int id)
+        {
+            var query = from noti in context.Notifications
+                        where noti.Id.Equals(id)
+                        select noti;
+
+            return (query.Any()) ? await query.Select(noti => new ViewNotification()
+            {
+                Id = noti.Id,
+                Body = noti.Body,
+                UserId = noti.UserId,
+                Title = noti.Title,
+                CreateTime = noti.CreateTime,
+                RedirectUrl = noti.RedirectUrl
+            }).FirstOrDefaultAsync()
+            : null;
+        }
+
         public async Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request)
         {
             var query = from noties in context.Notifications
@@ -37,6 +55,7 @@ namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
                                                                 Title = noti.Title,
                                                                 Body = noti.Body,
                                                                 RedirectUrl = noti.RedirectUrl,
+                                                                CreateTime = noti.CreateTime
                                                             }).ToListAsync();
 
             return (notifications.Count() > 0) ? new PagingResult<ViewNotification>(notifications, totalCount, request.CurrentPage, request.PageSize) : null;

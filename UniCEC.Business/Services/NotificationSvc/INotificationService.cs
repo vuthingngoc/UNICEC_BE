@@ -7,7 +7,8 @@ namespace UniCEC.Business.Services.NotificationSvc
 {
     public interface INotificationService
     {
-        public void SendNotification(Notification notification, string deviceToken);
-        public Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request);
+        public Task SendNotification(Notification notification, string deviceToken);
+        public Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, string token, PagingRequest request);
+        public Task<ViewNotification> GetNotiById(int id, string token);
     }
 }

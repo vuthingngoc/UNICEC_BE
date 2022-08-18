@@ -9,6 +9,8 @@ using System.Text;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.Common;
+using UniCEC.Business.Utilities;
 
 namespace UniCEC.Business.Services.NotificationSvc
 {
@@ -16,42 +18,37 @@ namespace UniCEC.Business.Services.NotificationSvc
     {
         private INotificationRepo _notificationRepo;
         private IConfiguration _configuration;
+        private DecodeToken _decodeToken;
 
         public NotificationService(INotificationRepo notificationRepo, IConfiguration configuration)
         {
             _notificationRepo = notificationRepo;
             _configuration = configuration;
+            _decodeToken = new DecodeToken();
         }
 
-        public async Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request)
+        public async Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, string token, PagingRequest request)
         {
-            return await _notificationRepo.GetNotiesByUser(userId, request);            
+            int id = _decodeToken.Decode(token, "Id");
+            if (!userId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            PagingResult<ViewNotification> notifications = await _notificationRepo.GetNotiesByUser(userId, request);
+            if (notifications == null) throw new NullReferenceException();
+
+            return notifications;
         }
 
-        private async Task SaveNotification(NotificationInsertModel notification)
+        public async Task<ViewNotification> GetNotiById(int id, string token)
         {
+            int userId = _decodeToken.Decode(token, "Id");
+            ViewNotification notification =  await _notificationRepo.GetNotiById(id);
+            if(notification == null) throw new NullReferenceException();
 
-            //if (deviceInfo.UserId.Equals(0) || string.IsNullOrEmpty(deviceInfo.DeviceId)) throw new Exception();
-
-            //int checkExistedId = await _notificationRepo.CheckExistedToken(deviceInfo.UserId);
-            //if (checkExistedId != 0)
-            //{
-            //    Notification row = await _notificationRepo.Get(checkExistedId);
-            //    row.DeviceId = deviceInfo.DeviceId;
-            //    await _notificationRepo.Update();
-            //    return;
-            //}
-
-            //Notification notification = new Notification()
-            //{
-            //    UserId = deviceInfo.UserId,
-
-            //};
-
-            //await _notificationRepo.Insert(notification);
+            if (!notification.UserId.Equals(userId)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+            return notification;
         }
 
-        public void SendNotification(Notification notification, string deviceToken)
+        public async Task SendNotification(Notification notification, string deviceToken)
         {
             var appSettingsSection = _configuration.GetSection("FcmNotification");
             try
@@ -121,7 +118,8 @@ namespace UniCEC.Business.Services.NotificationSvc
                 }
 
                 // Save notification
-
+                notification.CreateTime = new LocalTime().GetLocalTime().DateTime;
+                await _notificationRepo.Insert(notification);
             }
 
             catch (Exception ex)

@@ -9,6 +9,7 @@ namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
     public interface INotificationRepo : IRepository<Notification>
     {
         public Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request);
+        public Task<ViewNotification> GetNotiById(int id);
         public Task<int> CheckExistedToken(int userId);
     }
 }
