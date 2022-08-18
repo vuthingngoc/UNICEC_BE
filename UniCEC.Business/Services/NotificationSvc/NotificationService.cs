@@ -33,6 +33,7 @@ namespace UniCEC.Business.Services.NotificationSvc
                 Notification row = await _notificationRepo.Get(checkExistedId);
                 row.DeviceId = deviceInfo.DeviceId;
                 await _notificationRepo.Update();
+                return;
             }
 
             Notification notification = new Notification()
