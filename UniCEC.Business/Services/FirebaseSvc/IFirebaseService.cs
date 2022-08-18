@@ -5,6 +5,6 @@ namespace UniCEC.Business.Services.FirebaseSvc
 {
     public interface IFirebaseService
     {
-        public Task<ViewUserInfo> Authentication(string token, string deviceId, string isAndroid);
+        public Task<ViewUserInfo> Authentication(string token, string deviceId);
     }
 }

@@ -34,8 +34,7 @@ namespace UniCEC.API.Controllers
 
                 string token = header["Authorization"].ToString().Split(" ")[1];
                 string deviceId = (Request.Headers)["X-Device-Token"].ToString();
-                string isAndroid = (Request.Headers)["Is-Android"].ToString();
-                ViewUserInfo userInfo = await _firebaseService.Authentication(token, deviceId, isAndroid);
+                ViewUserInfo userInfo = await _firebaseService.Authentication(token, deviceId);
                 return (userInfo != null) ? Ok(userInfo) : BadRequest("Please login with your university email");                
             }
             catch(UnauthorizedAccessException ex)

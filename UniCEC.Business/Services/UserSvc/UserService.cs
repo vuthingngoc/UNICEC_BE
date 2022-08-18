@@ -229,7 +229,7 @@ namespace UniCEC.Business.Services.UserSvc
         }
 
         // firebase 
-        public async Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber)
+        public async Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber, string deviceToken)
         {
             try
             {
@@ -241,6 +241,7 @@ namespace UniCEC.Business.Services.UserSvc
                     Avatar = userModel.Avatar,
                     Fullname = userModel.Fullname,
                     PhoneNumber = phoneNumber,
+                    DeviceToken = deviceToken,
                     //auto
                     Dob = "",
                     Gender = "",
@@ -292,6 +293,22 @@ namespace UniCEC.Business.Services.UserSvc
             int userId = _decodeToken.Decode(token, "Id");
             if (!userId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
             return await _userRepo.GetUserTokenById(id);
+        }
+
+        public async Task UpdateInfoUserLogin(int userId, string srcAvatar, bool status, string deviceToken)
+        {
+            Data.Models.DB.User user = await _userRepo.Get(userId);
+            if (user == null) throw new NullReferenceException("Not found this user");
+
+            user.Avatar = srcAvatar;
+            user.IsOnline = status;
+            user.DeviceToken = deviceToken;
+            await _userRepo.Update();
+        }
+
+        public async Task<string> GetDeviceTokenByUser(int userId)
+        {
+            return await _userRepo.GetDeviceTokenByUser(userId);
         }
     }
 }

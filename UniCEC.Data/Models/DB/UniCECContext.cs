@@ -541,11 +541,13 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.DeviceId)
-                    .IsRequired()
-                    .HasMaxLength(300)
-                    .IsUnicode(false)
-                    .HasColumnName("DeviceID");
+                entity.Property(e => e.Body).HasMaxLength(500);
+
+                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+
+                entity.Property(e => e.RedirectUrl).HasMaxLength(100);
+
+                entity.Property(e => e.Title).HasMaxLength(100);
 
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
@@ -764,6 +766,10 @@ namespace UniCEC.Data.Models.DB
                 entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
 
                 entity.Property(e => e.Description).HasMaxLength(500);
+
+                entity.Property(e => e.DeviceToken)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Dob)
                     .IsRequired()

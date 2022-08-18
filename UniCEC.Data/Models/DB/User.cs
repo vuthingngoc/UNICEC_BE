@@ -30,6 +30,7 @@ namespace UniCEC.Data.Models.DB
         public string Avatar { get; set; }
         public UserStatus Status { get; set; }
         public bool IsOnline { get; set; }
+        public string DeviceToken { get; set; }
 
         public virtual Department Department { get; set; }
         public virtual Role Role { get; set; }

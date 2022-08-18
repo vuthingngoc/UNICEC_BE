@@ -208,7 +208,7 @@ namespace UniCEC.API
                         .AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithExposedHeaders(new string[] { "Authorization", "authorization", "X-Device-Token", "Is-Android" });
+                        .WithExposedHeaders(new string[] { "Authorization", "authorization", "X-Device-Token" });
                     });
             });
 

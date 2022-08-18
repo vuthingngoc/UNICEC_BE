@@ -14,7 +14,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
         public Task<ViewDepartment> GetByCode(string token, string majorCode);
         public Task<PagingResult<ViewDepartment>> GetByConditions(string token, DepartmentRequestModel request);
         public Task<ViewDepartment> Insert(string token, DepartmentInsertModel major);
-        public Task Update(string token, ViewDepartment department);
+        public Task Update(string token, DepartmentUpdateModel department);
         public Task Delete(string token, int id);        
     }
 }

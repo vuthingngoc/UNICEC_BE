@@ -1,12 +1,14 @@
 ﻿using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
+using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Notification;
 
 namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
 {
     public interface INotificationRepo : IRepository<Notification>
     {
-        public Task<string> GetDeviceIdByUser(int userId);
+        public Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request);
         public Task<int> CheckExistedToken(int userId);
     }
 }

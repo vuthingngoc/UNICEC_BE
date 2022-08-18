@@ -127,7 +127,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
             return TransformViewDepartment(department);
         }
 
-        public async Task Update(string token, ViewDepartment model)
+        public async Task Update(string token, DepartmentUpdateModel model)
         {
             checkAuthorizedUser(token, model.UniversityId);
 

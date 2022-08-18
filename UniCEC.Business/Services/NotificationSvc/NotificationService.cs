@@ -1,142 +1,132 @@
-﻿using Microsoft.Extensions.Options;
-using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System;
 using System.Threading.Tasks;
-using UniCEC.Data.Models.Notification;
 using UniCEC.Data.ViewModels.Entities.Notification;
-using CorePush.Google;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.NotificationRepo;
-using CorePush.Apple;
+using System.Net;
+using Newtonsoft.Json;
+using System.Text;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Business.Services.NotificationSvc
 {
     public class NotificationService : INotificationService
     {
-        private readonly FcmNotificationSettings _settings;
         private INotificationRepo _notificationRepo;
+        private IConfiguration _configuration;
 
-        public NotificationService(IOptions<FcmNotificationSettings> settings, INotificationRepo notificationRepo)
+        public NotificationService(INotificationRepo notificationRepo, IConfiguration configuration)
         {
-            _settings = settings.Value;
             _notificationRepo = notificationRepo;
+            _configuration = configuration;
         }
 
-        public async Task InsertDeviceUser(NotificationInsertModel deviceInfo)
+        public async Task<PagingResult<ViewNotification>> GetNotiesByUser(int userId, PagingRequest request)
         {
-            if (deviceInfo.UserId.Equals(0) || string.IsNullOrEmpty(deviceInfo.DeviceId)) throw new Exception();
-
-            int checkExistedId = await _notificationRepo.CheckExistedToken(deviceInfo.UserId);
-            if (checkExistedId != 0)
-            {
-                Notification row = await _notificationRepo.Get(checkExistedId);
-                row.DeviceId = deviceInfo.DeviceId;
-                await _notificationRepo.Update();
-                return;
-            }
-
-            Notification notification = new Notification()
-            {
-                DeviceId = deviceInfo.DeviceId,
-                UserId = deviceInfo.UserId,
-                IsAndroidDevice = deviceInfo.IsAndroidDevice,
-            };
-
-            await _notificationRepo.Insert(notification);
+            return await _notificationRepo.GetNotiesByUser(userId, request);            
         }
 
-        public async Task SendNotification(Notification notification, string title, string body)
+        private async Task SaveNotification(NotificationInsertModel notification)
         {
-            ViewNotification viewNotification = new ViewNotification();
+
+            //if (deviceInfo.UserId.Equals(0) || string.IsNullOrEmpty(deviceInfo.DeviceId)) throw new Exception();
+
+            //int checkExistedId = await _notificationRepo.CheckExistedToken(deviceInfo.UserId);
+            //if (checkExistedId != 0)
+            //{
+            //    Notification row = await _notificationRepo.Get(checkExistedId);
+            //    row.DeviceId = deviceInfo.DeviceId;
+            //    await _notificationRepo.Update();
+            //    return;
+            //}
+
+            //Notification notification = new Notification()
+            //{
+            //    UserId = deviceInfo.UserId,
+
+            //};
+
+            //await _notificationRepo.Insert(notification);
+        }
+
+        public void SendNotification(Notification notification, string deviceToken)
+        {
+            var appSettingsSection = _configuration.GetSection("FcmNotification");
             try
             {
-                if (notification.IsAndroidDevice)
+                var applicationID = appSettingsSection.GetSection("ServerKey").Value; 
+
+                var senderId = appSettingsSection.GetSection("SenderId").Value;
+
+                WebRequest tRequest = WebRequest.Create(_configuration.GetSection("FcmNotification").GetSection("GoogleApi").Value);
+
+                tRequest.Method = "post";
+
+                tRequest.ContentType = "application/json";
+
+                var data = new
+
                 {
-                    FcmSettings fcmSettings = new FcmSettings()
+
+                    to = deviceToken,
+
+                    notification = new
+
                     {
-                        SenderId = _settings.SenderId,
-                        ServerKey = _settings.ServerKey,
-                    };
-                    HttpClient httpClient = new HttpClient();
 
-                    string authorizationKey = string.Format("keyy={0}", fcmSettings.ServerKey);
-                    string deviceToken = notification.DeviceId;
+                        body = notification.Body,
 
-                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authorizationKey);
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        title = notification.Title,
 
-                    DataPayload payload = new DataPayload();
-                    payload.Title = title;
-                    payload.Body = body;
+                        icon = "myicon"
 
-                    GoogleNotification googleNotification = new GoogleNotification();
-                    googleNotification.Data = payload;
-                    googleNotification.Notification = payload;
-
-                    var fcm = new FcmSender(fcmSettings, httpClient);
-                    var fcmSendResponse = await fcm.SendAsync(deviceToken, googleNotification);
-
-                    if (fcmSendResponse.IsSuccess())
-                    {
-                        viewNotification.IsSuccess = true;
-                        viewNotification.Message = "Notification sent successfully";
                     }
-                    else
+                };
+
+                var json = JsonConvert.SerializeObject(data);
+
+                Byte[] byteArray = Encoding.UTF8.GetBytes(json);
+
+                tRequest.Headers.Add(string.Format("Authorization: key={0}", applicationID));
+
+                tRequest.Headers.Add(string.Format("Sender: id={0}", senderId));
+
+                tRequest.ContentLength = byteArray.Length;
+
+
+                using (Stream dataStream = tRequest.GetRequestStream())
+                {
+
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+
+
+                    using (WebResponse tResponse = tRequest.GetResponse())
                     {
-                        viewNotification.IsSuccess = false;
-                        viewNotification.Message = fcmSendResponse.Results[0].Error;
+
+                        using (Stream dataStreamResponse = tResponse.GetResponseStream())
+                        {
+
+                            using (StreamReader tReader = new StreamReader(dataStreamResponse))
+                            {
+
+                                String sResponseFromServer = tReader.ReadToEnd();
+
+                                string str = sResponseFromServer;
+
+                            }
+                        }
                     }
                 }
-                else
-                {
-                    // code here for IOS device => future
-                    // var apn = new ApnSender(apnSettings, httpClient);
-                    // await apn.SendAsync(googleNotification, deviceToken);
 
-                    // below code is not correct yet just copy code in android platform
-                    ApnSettings apnSettings = new ApnSettings()
-                    {
-                        P8PrivateKeyId = _settings.SenderId,
-                        P8PrivateKey = _settings.ServerKey,
-                    };
-                    HttpClient httpClient = new HttpClient();
+                // Save notification
 
-                    string authorizationKey = string.Format("keyy={0}", apnSettings.P8PrivateKey);
-                    string deviceToken = notification.DeviceId;
-
-                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authorizationKey);
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    DataPayload payload = new DataPayload();
-                    payload.Title = title;
-                    payload.Body = body;
-
-                    GoogleNotification googleNotification = new GoogleNotification();
-                    googleNotification.Data = payload;
-                    googleNotification.Notification = payload;
-
-                    // var apn = new ApnSender(apnSettings, httpClient);
-                    // await apn.SendAsync(googleNotification, deviceToken);
-
-                    var apn = new ApnSender(apnSettings, httpClient);
-                    var apnSendResponse = await apn.SendAsync(googleNotification, deviceToken);
-
-                    if (apnSendResponse.IsSuccess)
-                    {
-                        viewNotification.IsSuccess = true;
-                        viewNotification.Message = "Notification sent successfully";
-                    }
-                    else
-                    {
-                        viewNotification.IsSuccess = false;
-                        viewNotification.Message = apnSendResponse.Error.ToString();
-                    }
-                }
             }
-            catch (Exception)
+
+            catch (Exception ex)
             {
-                throw new Exception();
+                throw new Exception(ex.Message);
             }
         }
     }

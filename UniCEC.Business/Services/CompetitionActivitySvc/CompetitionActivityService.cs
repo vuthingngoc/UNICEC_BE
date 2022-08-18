@@ -618,6 +618,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 competitionActivity.NumOfMember = competitionActivity.NumOfMember + 1;
                 await _competitionActivityRepo.Update();
 
+                // send notification
+
+
                 return await TransferViewDetailMTA(mtaInsert);
             }
             catch (Exception)

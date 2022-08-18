@@ -36,7 +36,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
             _notificationService = notificationService;
         }
 
-        public async Task<ViewUserInfo> Authentication(string token, string deviceId, string isAndroid)
+        public async Task<ViewUserInfo> Authentication(string token, string deviceToken)
         {
             // decoded IDToken
             FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
@@ -63,7 +63,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     };
                     //Add In DB [User]
                     string phoneNumber = (string.IsNullOrEmpty(userInfo.PhoneNumber)) ? "" : userInfo.PhoneNumber;
-                    userModel.Id = await _userService.InsertNewUser(userModel, email, phoneNumber);
+                    userModel.Id = await _userService.InsertNewUser(userModel, email, phoneNumber, deviceToken);
                     ViewRole role = await _roleService.GetByRoleId(userModel.RoleId);
                     userModel.RoleName = role.RoleName;
                     userModel.UniversityId = 0;
@@ -74,18 +74,7 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     //----------------Generate JWT Token và kèm theo thông tin này lên FE để User tiếp tục update
                     string userToken = JWTUserToken.GenerateJWTTokenUser(userModel);
                     // Get List University Belong To Email
-                    List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);
-                    // save token device user
-                    if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(isAndroid))
-                    {
-                        NotificationInsertModel model = new NotificationInsertModel()
-                        {
-                            DeviceId = deviceId,
-                            UserId = userModel.Id,
-                            IsAndroidDevice = bool.Parse(isAndroid)
-                        };
-                        await _notificationService.InsertDeviceUser(model);
-                    }
+                    List<ViewUniversity> listUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni);                    
 
                     return new ViewUserInfo()
                     {
@@ -100,9 +89,11 @@ namespace UniCEC.Business.Services.FirebaseSvc
                     // check user is active or inactive
                     if (user.Status.Equals(UserStatus.InActive)) throw new UnauthorizedAccessException("Your account is inactive now! Please contact with admin to be supported.");
 
-                    await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
+                    bool isOnline = true;
+                    await _userService.UpdateInfoUserLogin(user.Id, userInfo.PhotoUrl, isOnline, deviceToken);
                     user.Avatar = userInfo.PhotoUrl;
-                    await _userService.UpdateStatusOnline(user.Id, true);
+                    //await _userService.UpdateAvatar(user.Id, userInfo.PhotoUrl);
+                    //await _userService.UpdateStatusOnline(user.Id, true);
 
                     string userToken = JWTUserToken.GenerateJWTTokenUser(user);
                     if (user.UniversityId == 0)
@@ -112,17 +103,6 @@ namespace UniCEC.Business.Services.FirebaseSvc
                             Token = userToken,
                             ListUniBelongToEmail = await _universityService.GetListUniversityByEmail(emailUni)
                         };
-                    }
-                    // save token device user
-                    if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrEmpty(isAndroid))
-                    {
-                        NotificationInsertModel model = new NotificationInsertModel()
-                        {
-                            DeviceId = deviceId,
-                            UserId = user.Id,
-                            IsAndroidDevice = bool.Parse(isAndroid)
-                        };
-                        await _notificationService.InsertDeviceUser(model);
                     }
 
                     return new ViewUserInfo()
