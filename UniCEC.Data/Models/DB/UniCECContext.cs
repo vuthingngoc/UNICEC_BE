@@ -541,13 +541,17 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.Body).HasMaxLength(500);
+                entity.Property(e => e.Body)
+                    .IsRequired()
+                    .HasMaxLength(500);
 
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
 
                 entity.Property(e => e.RedirectUrl).HasMaxLength(100);
 
-                entity.Property(e => e.Title).HasMaxLength(100);
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
