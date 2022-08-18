@@ -12,7 +12,7 @@ namespace UniCEC.Data.Models.DB
         public string Title { get; set; }
         public string Body { get; set; }
         public string RedirectUrl { get; set; }
-        public DateTime? CreateTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
         public virtual User User { get; set; }
     }
