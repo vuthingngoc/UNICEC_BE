@@ -105,7 +105,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             }
 
             //Name
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.ToLower().Contains(request.Name.ToLower()));
 
             //Serach Event
             if (request.Event.HasValue)
@@ -363,7 +363,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                         where c.UniversityId == universityId && c.Status == CompetitionStatus.PendingReview
                                                         select c).ToListAsync();
             //Name
-            if (!string.IsNullOrEmpty(request.Name)) list_Competition = list_Competition.Where(comp => comp.Name.Contains(request.Name)).ToList();
+            if (!string.IsNullOrEmpty(request.Name)) list_Competition = list_Competition.Where(comp => comp.Name.ToLower().Contains(request.Name.ToLower())).ToList();
 
             int totalCount = list_Competition.Count();
 
@@ -513,7 +513,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (request.Sponsor.HasValue) listCompetition = listCompetition.Where(comp => comp.IsSponsor == request.Sponsor.Value).ToList();
 
             //
-            if (!string.IsNullOrEmpty(request.Name)) listCompetition = listCompetition.Where(comp => comp.Name.Contains(request.Name)).ToList();
+            if (!string.IsNullOrEmpty(request.Name)) listCompetition = listCompetition.Where(comp => comp.Name.ToLower().Contains(request.Name.ToLower())).ToList();
 
             int totalCount = listCompetition.Count();
 
@@ -621,7 +621,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             if (request.Scope.HasValue) query = query.Where(comp => comp.Scope == request.Scope.Value);
 
             //Name
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.Contains(request.Name));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(comp => comp.Name.ToLower().Contains(request.Name.ToLower()));
 
             //Event
             if (request.Event.HasValue)
@@ -871,7 +871,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         select c;
 
             //search name
-            if (!string.IsNullOrEmpty(searchName)) query = query.Where(c => c.Name.Contains(searchName));
+            if (!string.IsNullOrEmpty(searchName)) query = query.Where(c => c.Name.ToLower().Contains(searchName.ToLower()));
 
             //isEvent
             if (isEvent.HasValue) { 

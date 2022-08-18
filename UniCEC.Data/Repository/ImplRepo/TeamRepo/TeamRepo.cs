@@ -96,7 +96,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             if(request.status != null) query = query.Where(t => t.Status == request.status.Value);
 
             //teamName
-            if (!string.IsNullOrEmpty(request.TeamName)) query = query.Where(t => t.Name.Contains(request.TeamName));
+            if (!string.IsNullOrEmpty(request.TeamName)) query = query.Where(t => t.Name.ToLower().Contains(request.TeamName.ToLower()));
 
 
             int totalCount = await query.CountAsync();

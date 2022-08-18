@@ -191,6 +191,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             //Statuses
             if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
 
+            //search name
+            if(!string.IsNullOrEmpty(conditions.name)) query.Where(ca => ca.Name.ToLower().Contains(conditions.name.ToLower()));
 
             int totalCount = query.Count();
 
@@ -240,7 +242,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (statuses.Count > 0) query = query.Where(x => statuses.Contains((CompetitionActivityStatus)x.ca.Status));
 
             //name
-            if(!string.IsNullOrEmpty(name)) query = query.Where(x => x.ca.Name.Contains(name));
+            if(!string.IsNullOrEmpty(name)) query = query.Where(x => x.ca.Name.ToLower().Contains(name.ToLower()));
 
             int totalCount = await query.CountAsync();
 
