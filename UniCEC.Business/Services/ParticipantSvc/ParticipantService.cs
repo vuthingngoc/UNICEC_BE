@@ -53,9 +53,18 @@ namespace UniCEC.Business.Services.ParticipantSvc
             throw new NotImplementedException();
         }
 
-        public Task<ViewParticipant> GetById(int id)
+        public async Task<ViewParticipant> GetByCompetitionId(int competitionId, string token)
         {
-            throw new NotImplementedException();
+            try {
+                int userId =  _decodeToken.Decode(token, "Id");
+                ViewParticipant result = await _participantRepo.GetByCompetitionId(competitionId, userId);
+                if (result == null) throw new NullReferenceException();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public Task<bool> Update(ViewParticipant participant)

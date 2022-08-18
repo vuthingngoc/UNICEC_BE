@@ -22,14 +22,14 @@ namespace UniCEC.API.Controllers
 
         public ParticipantController(IParticipantService participantService)
         {
-            _participantService = participantService;   
+            _participantService = participantService;
         }
 
         // POST api/<ParticipantController>
         [Authorize(Roles = "Student")]
         [HttpPost()]
         [SwaggerOperation(Summary = "Add paritcipant in Competition Or Event")]
-        public async Task<IActionResult> Insert ([FromBody] ParticipantInsertModel model)
+        public async Task<IActionResult> Insert([FromBody] ParticipantInsertModel model)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace UniCEC.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
-            }           
+            }
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Internal Server Exception");
@@ -70,7 +70,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPut("attendance")]
         [SwaggerOperation(Summary = "Update Attendance of paritcipant in Competition Or Event")]
-        public async Task<IActionResult> UpdateAttendance([FromQuery(Name ="seeds_code"), BindRequired] string seedsCode)
+        public async Task<IActionResult> UpdateAttendance([FromQuery(Name = "seeds_code"), BindRequired] string seedsCode)
         {
             try
             {
@@ -106,6 +106,44 @@ namespace UniCEC.API.Controllers
                 return StatusCode(500, "Internal Server Exception");
             }
         }
+
+        // PUT api/<ParticipantController>
+        [Authorize(Roles = "Student")]
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get Status Paritcipant in Competition Or Event")]
+        public async Task<IActionResult> Get([FromQuery(Name = "competitionId"), BindRequired] int competitionId)
+        {
+            try
+            {
+                var header = Request.Headers;
+                if (!header.ContainsKey("Authorization")) return Unauthorized();
+                string token = header["Authorization"].ToString().Split(" ")[1];
+
+                ViewParticipant viewParticipant = await _participantService.GetByCompetitionId(competitionId, token);
+                return Ok(viewParticipant);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(new object());
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
 
     }
 }

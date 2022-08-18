@@ -17,5 +17,7 @@ namespace UniCEC.Data.ViewModels.Entities.Participant
 
         [JsonPropertyName("register_time")]
         public DateTime RegisterTime { get; set; }
+
+        public bool Attendance { get; set; }
     }
 }
