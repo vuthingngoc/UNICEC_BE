@@ -218,7 +218,7 @@ namespace UniCEC.API.Controllers
 
         // PUT api/<MemberController>/5
         [HttpPut]
-        [SwaggerOperation(Summary = "Update member - leader or vice president")]
+        [SwaggerOperation(Summary = "Update member - Admin, leader or vice president")]
         public async Task<IActionResult> UpdateMember([FromBody, BindRequired] MemberUpdateModel model)
         {
             try

@@ -185,23 +185,41 @@ namespace UniCEC.Business.Services.MemberSvc
         public async Task Update(string token, MemberUpdateModel model)
         {
             Member member = await _memberRepo.Get(model.Id);
-            if (member == null) throw new NullReferenceException("Not found this member");
+            if (member == null || member.Status.Equals(MemberStatus.Inactive)) throw new NullReferenceException("Not found this member");
 
             bool isValid = await _clubRoleRepo.CheckExistedClubRole(model.ClubRoleId);
             if (!isValid) throw new ArgumentException("Not found this club role");
 
-            // if user is not leader or vice president
-            int userId = _decodeToken.Decode(token, "Id");
+            // Admin update club manager
+            if (model.ClubRoleId.Equals(1))
+            {
+                int roleId = _decodeToken.Decode(token, "RoleId");
+                if (!roleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to access this resoure");
+                int universityId = _decodeToken.Decode(token, "UniversityId");
+                // check admin and club is the same uni
+                bool isExistedClub = await _clubRepo.CheckExistedClubInUniversity(universityId, member.ClubId);
+                if (!isExistedClub) throw new UnauthorizedAccessException("You do not have permission to access this resoure");
+                // Get current club manager
+                Member clubManager = await _memberRepo.GetLeaderByClub(member.ClubId);
+                clubManager.ClubRoleId = 4; // role member
+                member.ClubRoleId = model.ClubRoleId;
+                await _memberRepo.Update();
+                return;
+            } 
+
+            // if user is leader or vice president
+            // proposer
+            int userId = _decodeToken.Decode(token, "Id");                        
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2))
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (clubRoleId <= member.ClubRoleId)
+            if (clubRoleId >= member.ClubRoleId)
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             if (member.ClubRoleId.Equals(model.ClubRoleId)) return;
 
-            member.ClubRoleId = clubRoleId;
+            member.ClubRoleId = model.ClubRoleId;
             await _memberRepo.Update();
         }
 
@@ -212,11 +230,10 @@ namespace UniCEC.Business.Services.MemberSvc
                 || member.Status.Equals(MemberStatus.Inactive)
                 || member.Status.Equals(MemberStatus.Pending))
                 throw new NullReferenceException("Not found this member");
-
-            // if user is not leader or vice president
+            
             int userId = _decodeToken.Decode(token, "Id");
 
-            if (!member.UserId.Equals(userId))
+            if (!member.UserId.Equals(userId)) // if user is not leader or vice president
             {
                 int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
                 if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");

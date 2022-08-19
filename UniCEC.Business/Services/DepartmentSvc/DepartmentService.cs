@@ -9,7 +9,6 @@ using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Department;
-using UniCEC.Data.ViewModels.Entities.Major;
 
 namespace UniCEC.Business.Services.DepartmentSvc
 {
