@@ -212,16 +212,20 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                                                                         && pit.Status == ParticipantInTeamStatus.InTeam
                                                                   select p).ToListAsync();
 
-                    foreach (Participant p in ParticipantHasTeam)
-                    {
-                        foreach (Participant ap in AllParticipant)
-                        {
-                            if (p.Id == ap.Id)
-                            {
-                                AllParticipant.Remove(ap);
-                            }
-                        }
-                    }
+
+
+                    AllParticipant = AllParticipant.Except(ParticipantHasTeam).ToList();
+
+                    //foreach (Participant p in ParticipantHasTeam)
+                    //{
+                    //    foreach (Participant ap in AllParticipant)
+                    //    {
+                    //        if (p.Id == ap.Id)
+                    //        {
+                    //            AllParticipant.Remove(ap);
+                    //        }
+                    //    }
+                    //}
                     //==> sau tất cả thì AllParticipant sẽ chứa list Participant chưa có team
                     int totalCount = AllParticipant.Count;
 
