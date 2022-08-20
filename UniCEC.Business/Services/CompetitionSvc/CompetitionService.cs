@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Services.SeedsWalletSvc;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
@@ -31,7 +32,6 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
-using UniCEC.Data.ViewModels.Entities.CompetitionHistory;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
 using UniCEC.Data.ViewModels.Entities.CompetitionInMajor;
 using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
@@ -61,6 +61,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IEntityTypeRepo _entityTypeRepo;
         private ISeedsWalletService _seedsWalletService;
         private IUniversityRepo _universityRepo;
+        private INotificationService _notificationService;
 
         public CompetitionService(ICompetitionRepo competitionRepo,
                                   IMemberRepo memberRepo,
@@ -81,7 +82,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   IEntityTypeRepo entityTypeRepo,
                                   ISeedsWalletService seedsWalletService,
                                   IUniversityRepo universityRepo,
-                                  IFileService fileService)
+                                  IFileService fileService,
+                                  INotificationService notificationService)
         {
             _competitionRepo = competitionRepo;
             _memberRepo = memberRepo;
@@ -104,6 +106,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _entityTypeRepo = entityTypeRepo;
             _seedsWalletService = seedsWalletService;
             _universityRepo = universityRepo;
+            _notificationService = notificationService;
         }
 
 
@@ -1587,6 +1590,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    
+                    // send notification
+                    Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
+                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
 
                 }
@@ -1606,6 +1622,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
+
+                    // send notification
+                    Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
+                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
 
                 }

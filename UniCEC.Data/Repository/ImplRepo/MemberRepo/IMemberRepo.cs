@@ -32,7 +32,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model);      
         public Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo);
         public Task<Member> GetLeaderByClub(int clubId);
-
+        public Task<Member> GetLeaderClubOwnerByCompetition(int competitionId);
        
 
 
