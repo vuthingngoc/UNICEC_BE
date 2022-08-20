@@ -207,7 +207,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 if (ActivitiesEntity.ImageUrl.Contains("https"))
                                 {
                                     imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                                }
+                                
                                 else
                                 {
                                     imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
@@ -589,7 +589,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
                 //Competition Status
-                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
                 if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Member Id có status true
@@ -660,7 +660,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
                 //Competition Status
-                Competition competition = await _competitionRepo.Get(competitionActivity.Id);
+                Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
                 if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
 
 
