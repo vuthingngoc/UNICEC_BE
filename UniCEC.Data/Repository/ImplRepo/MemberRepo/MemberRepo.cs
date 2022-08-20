@@ -440,5 +440,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             return (members.Count() > 0) ? members : null;
         }
+
+        public async Task<Member> GetLeaderClubOwnerByCompetition(int competitionId)
+        {
+            var query = from cic in context.CompetitionInClubs
+                        join c in context.Clubs on cic.ClubId equals c.Id
+                        join m in context.Members on c.Id equals m.ClubId
+                        where cic.CompetitionId.Equals(competitionId) && cic.IsOwner.Equals(true)
+                        select m;
+
+            return (query.Any()) ? await query.FirstOrDefaultAsync() : null;
+        }
     }
 }
