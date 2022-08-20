@@ -1717,10 +1717,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
 
                 //-----------------------------------------------------------------Pending
-                //State Condition : Approve, Register, UpComing
+                //State Condition : Puplish, Register, UpComing
                 if (model.Status == CompetitionStatus.Pending)
                 {
-                    if (comp.Status == CompetitionStatus.Approve || comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
+                    if (comp.Status == CompetitionStatus.Approve || comp.Status == CompetitionStatus.Publish || comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
                     {
                         comp.Status = CompetitionStatus.Pending;
                         await _competitionRepo.Update();
@@ -1959,77 +1959,96 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                 //if (status == CompetitionStatus.Publish || status == CompetitionStatus.Register || status == CompetitionStatus.UpComing)
                 //{
-                    //-----------------------------------------------------------------Puplish
-                    if (compeHis.Status == CompetitionStatus.Publish)
+                if (compeHis.Status == CompetitionStatus.Approve)
+                {
+                    comp.Status = CompetitionStatus.Approve;
+                    await _competitionRepo.Update();
+
+                    //----------- InsertCompetition History
+                    CompetitionHistory chim = new CompetitionHistory()
                     {
-                        bool checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
-                        if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR");
+                        CompetitionId = comp.Id,
+                        ChangerId = member.Id,
+                        ChangeDate = localTime,
+                        Description = member.User.Fullname + "Update status Pending to Approve",
+                        Status = CompetitionStatus.Approve,
+                    };
+                    int result = await _competitionHistoryRepo.Insert(chim);
+                    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    return true;
+                }
+
+                //-----------------------------------------------------------------Puplish
+                if (compeHis.Status == CompetitionStatus.Publish)
+                {
+                    bool checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
+                    if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR");
 
 
-                        comp.Status = CompetitionStatus.Publish;
-                        await _competitionRepo.Update();
+                    comp.Status = CompetitionStatus.Publish;
+                    await _competitionRepo.Update();
 
-                        //----------- InsertCompetition History
-                        CompetitionHistory chim = new CompetitionHistory()
-                        {
-                            CompetitionId = comp.Id,
-                            ChangerId = member.Id,
-                            ChangeDate = localTime,
-                            Description = member.User.Fullname + " Update Status Publish",
-                            Status = CompetitionStatus.Publish,
-                        };
-                        int result = await _competitionHistoryRepo.Insert(chim);
-                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                        return true;
-                    }
-
-                    //-----------------------------------------------------------------Register
-                    if (compeHis.Status == CompetitionStatus.Register)
+                    //----------- InsertCompetition History
+                    CompetitionHistory chim = new CompetitionHistory()
                     {
-                        bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
-                        if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister");
+                        CompetitionId = comp.Id,
+                        ChangerId = member.Id,
+                        ChangeDate = localTime,
+                        Description = member.User.Fullname + " Update status Pending to Publish",
+                        Status = CompetitionStatus.Publish,
+                    };
+                    int result = await _competitionHistoryRepo.Insert(chim);
+                    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    return true;
+                }
+
+                //-----------------------------------------------------------------Register
+                if (compeHis.Status == CompetitionStatus.Register)
+                {
+                    bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
+                    if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister");
 
 
-                        comp.Status = CompetitionStatus.Register;
-                        await _competitionRepo.Update();
+                    comp.Status = CompetitionStatus.Register;
+                    await _competitionRepo.Update();
 
-                        //----------- InsertCompetition History
-                        CompetitionHistory chim = new CompetitionHistory()
-                        {
-                            CompetitionId = comp.Id,
-                            ChangerId = member.Id,
-                            ChangeDate = localTime,
-                            Description = member.User.Fullname + " Update Status Register",
-                            Status = CompetitionStatus.Register,
-                        };
-                        int result = await _competitionHistoryRepo.Insert(chim);
-                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                        return true;
-                    }
-                    //throw new ArgumentException("The Nearest Status Of Competition is " + CompetitionStatusToString(compeHis.Status) + ", you must update from this Status");
-
-                    //-----------------------------------------------------------------Up - Comming
-                    if (compeHis.Status == CompetitionStatus.UpComing)
+                    //----------- InsertCompetition History
+                    CompetitionHistory chim = new CompetitionHistory()
                     {
-                        bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
-                        if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime");
+                        CompetitionId = comp.Id,
+                        ChangerId = member.Id,
+                        ChangeDate = localTime,
+                        Description = member.User.Fullname + " Update status Pending to Register",
+                        Status = CompetitionStatus.Register,
+                    };
+                    int result = await _competitionHistoryRepo.Insert(chim);
+                    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    return true;
+                }
+                //throw new ArgumentException("The Nearest Status Of Competition is " + CompetitionStatusToString(compeHis.Status) + ", you must update from this Status");
 
-                        comp.Status = CompetitionStatus.UpComing;
-                        await _competitionRepo.Update();
+                //-----------------------------------------------------------------Up - Comming
+                if (compeHis.Status == CompetitionStatus.UpComing)
+                {
+                    bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
+                    if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime");
 
-                        //-----------InsertCompetition History
-                        CompetitionHistory chim = new CompetitionHistory()
-                        {
-                            CompetitionId = comp.Id,
-                            ChangerId = member.Id,
-                            ChangeDate = localTime,
-                            Description = member.User.Fullname + " Update Status UpComing",
-                            Status = CompetitionStatus.UpComing,
-                        };
-                        int result = await _competitionHistoryRepo.Insert(chim);
-                        if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                        return true;
-                    }
+                    comp.Status = CompetitionStatus.UpComing;
+                    await _competitionRepo.Update();
+
+                    //-----------InsertCompetition History
+                    CompetitionHistory chim = new CompetitionHistory()
+                    {
+                        CompetitionId = comp.Id,
+                        ChangerId = member.Id,
+                        ChangeDate = localTime,
+                        Description = member.User.Fullname + " Update status Pending to UpComing",
+                        Status = CompetitionStatus.UpComing,
+                    };
+                    int result = await _competitionHistoryRepo.Insert(chim);
+                    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                    return true;
+                }
                 //}
                 throw new ArgumentException("Only Previous Status Puplish, Register, UpComing can Update Check Competition History");
             }
