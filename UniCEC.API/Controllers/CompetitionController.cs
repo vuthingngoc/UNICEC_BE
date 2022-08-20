@@ -473,7 +473,7 @@ namespace UniCEC.API.Controllers
         // PUT api/<CompetitionController>/5
         [Authorize(Roles = "Student")]
         [HttpPut("pending")]
-        [SwaggerOperation(Summary = "Change Competition Status from Pending to Another Status = 0,5,1 can Update")]
+        [SwaggerOperation(Summary = "Change Competition Status from Pending to Another Status")]
         public async Task<IActionResult> CompetitionUpdateStatusAfterPending([FromQuery(Name = "competitionId"), BindRequired] int competitionId, [FromQuery(Name = "clubId"), BindRequired] int clubId )
         {
             try
