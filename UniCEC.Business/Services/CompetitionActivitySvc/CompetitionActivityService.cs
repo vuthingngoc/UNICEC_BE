@@ -207,7 +207,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 if (ActivitiesEntity.ImageUrl.Contains("https"))
                                 {
                                     imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                                
+                                }
+
                                 else
                                 {
                                     imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
