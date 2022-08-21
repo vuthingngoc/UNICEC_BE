@@ -21,6 +21,7 @@ namespace UniCEC.Business.Services.UserSvc
         public Task<int> InsertNewUser(UserTokenModel userModel, string email, string phoneNumber, string deviceToken);
         public Task<string> LoginAccount(UserLoginModel model);
         public Task<bool> Update(UserUpdateModel user, string token);
+        public Task UpdateStatusUser(int id, UserStatus status, string token);
         // firebase
         public Task<UserTokenModel> GetUserByEmail(string email);
         public Task<UserTokenModel> GetUserTokenById(int id, string token);

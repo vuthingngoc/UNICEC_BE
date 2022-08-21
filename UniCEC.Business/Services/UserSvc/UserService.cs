@@ -310,5 +310,19 @@ namespace UniCEC.Business.Services.UserSvc
         {
             return await _userRepo.GetDeviceTokenByUser(userId);
         }
+
+        public async Task UpdateStatusUser(int id, UserStatus status, string token)
+        {
+            int roleId = _decodeToken.Decode(token, "RoleId");
+            if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resoure");
+
+            if (status == 0) throw new ArgumentNullException("Status Null");
+
+            Data.Models.DB.User user = await _userRepo.Get(id);
+            if (user == null) throw new NullReferenceException("Not found this user");
+
+            user.Status = status;
+            await _userRepo.Update();
+        }
     }
 }

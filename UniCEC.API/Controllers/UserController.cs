@@ -231,6 +231,39 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpPut("{id}/status")]
+        [Authorize(Roles = "System Admin")]
+        [SwaggerOperation(Summary = "Update status user - System admin")]
+        public async Task<IActionResult> UpdateStatusUser(int id, UserStatus status)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _userService.UpdateStatusUser(id, status, token);
+                return Ok();                
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return Ok(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Delete user")]
         public async Task<IActionResult> DeleteUser(int id)
