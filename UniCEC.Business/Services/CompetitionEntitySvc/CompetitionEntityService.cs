@@ -234,9 +234,10 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                         if (string.IsNullOrEmpty(modelItem.Base64StringImg)
                            || string.IsNullOrEmpty(modelItem.Name)
                            || string.IsNullOrEmpty(modelItem.Email)
-                           || string.IsNullOrEmpty(modelItem.Description)
-                           || string.IsNullOrEmpty(modelItem.Website))
-                            throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL || Description is NULL|| Website is NULL");
+                           //|| string.IsNullOrEmpty(modelItem.Description)
+                           //|| string.IsNullOrEmpty(modelItem.Website)
+                           )
+                            throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL");
                     }
 
                     bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
