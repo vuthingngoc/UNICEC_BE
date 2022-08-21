@@ -42,7 +42,7 @@ namespace UniCEC.Business.Services.CompetitionHistorySvc
             {
                 if (competitionId < 0 || clubId < 0) throw new ArgumentException("Competition Id NULL || Club Id NULL");
 
-                bool Check = await CheckMemberInCompetition(token, competitionId, clubId, true);
+                bool Check = await CheckMemberInCompetition(token, competitionId, clubId, false);
                 if (Check == false) throw new NullReferenceException();
 
                 List<ViewCompetitionHistory> result = await _competitionHistoryRepo.GetAllHistoryOfCompetition(competitionId);
