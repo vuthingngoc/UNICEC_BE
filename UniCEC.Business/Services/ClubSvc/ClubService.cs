@@ -194,7 +194,8 @@ namespace UniCEC.Business.Services.ClubSvc
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByManager(request);
             if (clubs == null) throw new NullReferenceException();
-            return clubs;
+
+            return await AddMoreInfoClub(clubs);
         }
 
         //public async Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request)
