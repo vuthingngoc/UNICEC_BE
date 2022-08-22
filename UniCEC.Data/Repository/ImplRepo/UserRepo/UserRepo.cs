@@ -21,8 +21,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public async Task<ViewUser> GetById(int id, bool isFullInfo)
         {
             var query = from u in context.Users
-                        join uni in context.Universities on u.UniversityId equals uni.Id
-                        join d in context.Departments on u.DepartmentId equals d.Id
+                        join uni in context.Universities on u.UniversityId equals uni.Id into uniJoin from uni in uniJoin.DefaultIfEmpty()
+                        join d in context.Departments on u.DepartmentId equals d.Id into depJoin from d in depJoin.DefaultIfEmpty()
                         where u.Id.Equals(id)
                         select new { u, uni, d };
 
@@ -30,10 +30,10 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             {
                 Id = selector.u.Id,
                 RoleId = selector.u.RoleId,
-                UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
-                DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
-                DepartmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                UniversityId = (selector.uni != null) ? selector.uni.Id : 0,
+                UniversityName = (selector.uni != null) ? selector.uni.Name : "",
+                DepartmentId = (selector.d != null) ? selector.d.Id : 0,
+                DepartmentName = (selector.d != null) ? selector.d.Name : "",
                 Fullname = selector.u.Fullname,
                 StudentCode = selector.u.StudentCode,
                 Email = selector.u.Email,
@@ -49,10 +49,10 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                 {
                     Id = selector.u.Id,
                     RoleId = selector.u.RoleId,
-                    UniversityId = (selector.u.UniversityId.HasValue) ? selector.u.UniversityId.Value : 0,
-                    UniversityName = (selector.u.UniversityId.HasValue) ? selector.uni.Name : "",
-                    DepartmentId = (selector.u.DepartmentId.HasValue) ? selector.u.DepartmentId.Value : 0,
-                    DepartmentName = (selector.u.DepartmentId.HasValue) ? selector.d.Name : "",
+                    UniversityId = (selector.uni != null) ? selector.uni.Id : 0,
+                    UniversityName = (selector.uni != null) ? selector.uni.Name : "",
+                    DepartmentId = (selector.d != null) ? selector.d.Id : 0,
+                    DepartmentName = (selector.d != null) ? selector.d.Name : "",
                     Email = selector.u.Email,
                     Fullname = selector.u.Fullname,
                     Gender = selector.u.Gender,

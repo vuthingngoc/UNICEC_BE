@@ -34,12 +34,30 @@ namespace UniCEC.Business.Services.UserSvc
         {
             int userId = _decodeToken.Decode(token, "Id");
             int roleId = _decodeToken.Decode(token, "RoleId");
-            bool isFullInfo = false;
+            bool isFullInfo = false;            
 
             // if admin or him/her-self call api
-            if (roleId.Equals(1) || userId.Equals(id)) isFullInfo = true;
+            if (!roleId.Equals(3) || userId.Equals(id)) isFullInfo = true;
             ViewUser user = await _userRepo.GetById(id, isFullInfo);
-            return (user == null) ? throw new NullReferenceException() : user;
+            
+            if (user == null  
+                || (roleId.Equals(3) && !user.RoleId.Equals(3)) // student can not view info another role
+                    || (roleId.Equals(1) && user.RoleId.Equals(4))) // uni admin can not view info system admin role
+                        throw new NullReferenceException();
+
+            // check same university
+            if (!roleId.Equals(4))
+            {
+                int universityId = _decodeToken.Decode(token, "UniversityId");
+                if (!universityId.Equals(user.UniversityId))
+                {
+                    user.Email = null;
+                    user.PhoneNumber = null;
+                    user.Dob = null;
+                }
+            }
+
+            return user;
         }
 
         // for admin
