@@ -150,7 +150,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         }
 
         //Update-University
-        public async Task<bool> Update(ViewUniversity university)
+        public async Task<bool> Update(UniversityUpdateModel university)
         {
             try
             {

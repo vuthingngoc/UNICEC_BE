@@ -131,7 +131,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [SwaggerOperation(Summary = "Update university - System Admin")]
-        public async Task<IActionResult> UpdateUniversityById([FromBody] ViewUniversity university)
+        public async Task<IActionResult> UpdateUniversityById([FromBody] UniversityUpdateModel university)
         {
             try
             {
