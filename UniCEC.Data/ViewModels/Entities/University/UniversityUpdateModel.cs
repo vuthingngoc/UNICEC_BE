@@ -7,7 +7,7 @@ namespace UniCEC.Data.ViewModels.Entities.University
     {
         public int Id { get; set; }
         [JsonPropertyName("city_id")]
-        public int CityId { get; set; }
+        public int CityId { get; set; } // for check valid data
         [JsonPropertyName("uni_code")]
         public string UniCode { get; set; }
         public string Name { get; set; }
@@ -15,9 +15,9 @@ namespace UniCEC.Data.ViewModels.Entities.University
         public string Description { get; set; }
         public string Phone { get; set; }
         public string ImgURL { get; set; }
-        public DateTime Founding { get; set; }
+        public DateTime? Founding { get; set; }
         public string Opening { get; set; }
         public string Closing { get; set; }
-        public bool Status { get; set; }
+        public bool? Status { get; set; }
     }
 }

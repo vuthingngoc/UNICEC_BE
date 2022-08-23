@@ -148,7 +148,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
 
         public async Task<List<ViewUniversity>> GetUniversities()
         {
-            
+
             var query = from University u in context.Universities
 
                         select u;
@@ -177,6 +177,21 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
             });
 
             return viewUniversities;
+        }
+
+        public async Task<int> CheckDuplicatedUniversity(string name, int cityId, string uniCode)
+        {
+            return await (from u in context.Universities
+                          where (u.Name.ToLower().Equals(name.ToLower()) && u.CityId.Equals(cityId))
+                                    || u.UniCode.ToLower().Equals(uniCode.ToLower())
+                          select u.Id).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<int>> GetListIdsUniByCity(int cityId)
+        {
+            return await (from u in context.Universities
+                          where u.CityId.Equals(cityId)
+                          select u.Id).ToListAsync();
         }
     }
 }
