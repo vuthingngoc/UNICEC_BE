@@ -48,28 +48,8 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("university/{id}")]
-        [SwaggerOperation(Summary = "Get users by universityId")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetUsersByUniversity(int id, UserStatus status, [FromQuery] PagingRequest request)
-        {
-            try
-            {
-                PagingResult<ViewUser> users = await _userService.GetByUniversity(id, status, request);
-                return Ok(users);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
-
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Search user")]
+        [SwaggerOperation(Summary = "Search user - University admin and system admin")]
         [Authorize(Roles = "University Admin, System Admin")]
         public async Task<IActionResult> GetUserByCondition([FromQuery] UserRequestModel request)
         {
@@ -95,7 +75,7 @@ namespace UniCEC.API.Controllers
 
 
         [HttpPost("grant-account")]
-        [SwaggerOperation(Summary = "Grant account for university admin")]
+        [SwaggerOperation(Summary = "Grant account for university admin - System admin")]
         [Authorize(Roles = "System Admin")]
         public async Task<IActionResult> InsertUser([FromBody] UserAccountInsertModel request)
         {
@@ -124,7 +104,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPost("login")]        
-        [SwaggerOperation(Summary = "Log in account for university admin")]
+        [SwaggerOperation(Summary = "Log in account for university admin - University admin")]
         [AllowAnonymous]
         public async Task<IActionResult> LoginAccount([FromBody] UserLoginModel model)
         {
@@ -148,7 +128,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut("logout")]
-        [SwaggerOperation(Summary = "Log out account")]
+        [SwaggerOperation(Summary = "Log out account - Authenticated user")]
         public async Task<IActionResult> LogoutAccount()
         {
             try
@@ -170,7 +150,7 @@ namespace UniCEC.API.Controllers
         
         [Authorize(Roles = "Student")]
         [HttpPut("token")]
-        [SwaggerOperation(Summary = "Update university of student")]
+        [SwaggerOperation(Summary = "Update university of student - student who haven't choose a university yet")]
         public async Task<IActionResult> UpdateUserWithJWT(UserUpdateWithJWTModel model)
         {
             try
@@ -200,7 +180,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpPut]
-        [SwaggerOperation(Summary = "Update user")]
+        [SwaggerOperation(Summary = "Update user - authenticated user")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateModel request)
         {
             try
@@ -265,7 +245,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete user")]
+        [SwaggerOperation(Summary = "Delete user - System Admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try

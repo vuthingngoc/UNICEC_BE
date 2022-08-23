@@ -12,6 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
     {
         //Get-Universities-By-Conditions
         public Task<PagingResult<ViewUniversity>> GetUniversitiesByConditions(UniversityRequestModel request);
+        public Task<List<int>> GetListIdsUniByCity(int cityId); // for processing in city service
         //Check-Email-University
         public Task<bool> CheckEmailUniversity(string email);
         //Get-List-Universities-By-Email
@@ -24,5 +25,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         //test delete
         public Task DeleteUniversity(int UniversityId);
         public Task UpdateStatusByCityId(int cityId, bool status); // not test yet
+        public Task<int> CheckDuplicatedUniversity(string name, int cityId, string uniCode);
+
     }
 }

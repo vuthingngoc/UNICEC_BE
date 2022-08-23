@@ -112,7 +112,7 @@ namespace UniCEC.API.Controllers
                     return BadRequest();
                 }
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -128,15 +128,16 @@ namespace UniCEC.API.Controllers
         }
 
         // PUT api/<UniversityController>/5
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut]
-        [SwaggerOperation(Summary = "Update university - System Admin")]
+        [SwaggerOperation(Summary = "Update university - The university admin and system Admin")]
         public async Task<IActionResult> UpdateUniversityById([FromBody] UniversityUpdateModel university)
         {
             try
             {
                 Boolean check = false;
-                check = await _universityService.Update(university);
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                check = await _universityService.Update(university, token);
                 if (check)
                 {
                     return Ok();
@@ -145,6 +146,10 @@ namespace UniCEC.API.Controllers
                 {
                     return BadRequest();
                 }
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (ArgumentNullException ex)
             {
