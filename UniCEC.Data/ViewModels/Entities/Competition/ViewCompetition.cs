@@ -40,5 +40,14 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         //------------- ADD Field Competition Entity -> Object Array  
         [JsonPropertyName("competition_entities")]
         public List<ViewCompetitionEntity> CompetitionEntities { get; set; }
+
+        //----------------------------CLUB MANAGER VIEW
+        //-------------Total Activity
+        [JsonPropertyName("total_competition_activity")]
+        public int? totalCompetitionActivity { get; set; }
+
+        //-------------Total Activity Complete
+        [JsonPropertyName("total_competition_activity_completed")]
+        public int? totalCompetitionActivityCompleted { get; set; }
     }
 }
