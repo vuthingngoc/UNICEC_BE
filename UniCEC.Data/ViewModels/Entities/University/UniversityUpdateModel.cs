@@ -3,13 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace UniCEC.Data.ViewModels.Entities.University
 {
-    public class ViewUniversity
+    public class UniversityUpdateModel
     {
         public int Id { get; set; }
         [JsonPropertyName("city_id")]
         public int CityId { get; set; }
-        [JsonPropertyName("city_name")]
-        public string CityName { get; set; }
         [JsonPropertyName("uni_code")]
         public string UniCode { get; set; }
         public string Name { get; set; }
