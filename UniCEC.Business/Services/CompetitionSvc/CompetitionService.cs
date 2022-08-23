@@ -1585,7 +1585,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = adminUni.Id,
                         ChangeDate = localTime,
-                        Description = "Admin University: " + adminUni.Fullname + "Approve",
+                        Description = "Admin University cập nhật Trạng Thái Duyệt",
                         Status = CompetitionStatus.Approve,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1617,7 +1617,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = adminUni.Id,
                         ChangeDate = localTime,
-                        Description = "Admin University: " + adminUni.Fullname + "Rejected",
+                        Description = "Admin University cập nhật Trạng Thái Bản Thảo",
                         Status = CompetitionStatus.Draft,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1685,7 +1685,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
                             ChangeDate = localTime,
-                            Description = member.User.Fullname + "Update Status Draft",
+                            Description = //member.User.Fullname + 
+                            "Trạng thái Bản Thảo",
                             Status = CompetitionStatus.Draft,
                         };
                         int result = await _competitionHistoryRepo.Insert(chim);
@@ -1710,7 +1711,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + " Update Status Pending Review",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Chờ Duyệt",
                         Status = CompetitionStatus.PendingReview,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1736,7 +1738,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + "Update Status Publish",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Công Bố",
                         Status = CompetitionStatus.Publish,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1760,7 +1763,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
                             ChangeDate = localTime,
-                            Description = member.User.Fullname + " Update Status Pending",
+                            Description = //member.User.Fullname + 
+                            "Trạng thái Chờ",
                             Status = CompetitionStatus.Pending,
                         };
                         int result = await _competitionHistoryRepo.Insert(chim);
@@ -1789,7 +1793,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                        Description = member.User.Fullname + " Update Status Finish",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Hoàn Thành",
                         Status = CompetitionStatus.Finish,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1825,7 +1830,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                        Description = member.User.Fullname + " Update Status Complete",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Đóng",
                         Status = CompetitionStatus.Complete,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -1857,7 +1863,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionId = comp.Id,
                             ChangerId = member.Id,
                             ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                            Description = member.User.Fullname + " Update Status Cancel",
+                            Description = //member.User.Fullname + 
+                            "Trạng thái Hủy",
                             Status = CompetitionStatus.Cancel,
                         };
 
@@ -1999,7 +2006,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + "Update status Pending to Approve",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Chờ sang Duyệt",
                         Status = CompetitionStatus.Approve,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -2023,7 +2031,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + " Update status Pending to Publish",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Chờ sang Công Bố",
                         Status = CompetitionStatus.Publish,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -2047,7 +2056,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + " Update status Pending to Register",
+                        Description = member.User.Fullname +
+                        "Trạng thái Chờ sang Mở Đăng Ký",
                         Status = CompetitionStatus.Register,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
@@ -2071,7 +2081,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname + " Update status Pending to UpComing",
+                        Description = //member.User.Fullname + 
+                        "Trạng thái Chờ sang Sắp Diễn Ra",
                         Status = CompetitionStatus.UpComing,
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
