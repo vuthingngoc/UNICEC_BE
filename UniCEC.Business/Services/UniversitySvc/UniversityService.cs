@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
+using UniCEC.Business.Utilities;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.University;
@@ -16,12 +19,16 @@ namespace UniCEC.Business.Services.UniversitySvc
         private IUniversityRepo _universityRepo;
         private ICityRepo _cityRepo;
         private IFileService _fileService;
+        private DecodeToken _decodeToken;
+        private IUserRepo _userRepo;
 
-        public UniversityService(IUniversityRepo universityRepo, ICityRepo cityRepo, IFileService fileService)
+        public UniversityService(IUniversityRepo universityRepo, ICityRepo cityRepo, IFileService fileService, IUserRepo userRepo)
         {
             _universityRepo = universityRepo;
             _cityRepo = cityRepo;
             _fileService = fileService;
+            _decodeToken = new DecodeToken();
+            _userRepo = userRepo;
         }
 
         //
@@ -93,7 +100,9 @@ namespace UniCEC.Business.Services.UniversitySvc
                     throw new ArgumentNullException("CityId Null || UniCode Null || Name Null || Description Null || Phone Null " +
                                                      " Email Null  || Founding Null || Openning Null ||  Closing Null ");
 
-
+                // check duplicated university
+                int existedUniId = await _universityRepo.CheckDuplicatedUniversity(universityModel.Name, universityModel.CityId, universityModel.UniCode);
+                if (existedUniId > 0) throw new ArgumentException("Duplicated university");
 
                 University uni = new University();
 
@@ -104,10 +113,8 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uni.Phone = universityModel.Phone;
                 //
                 if (!string.IsNullOrEmpty(universityModel.Base64StringImg))
-                {
-                    string url = await _fileService.UploadFile(universityModel.Base64StringImg);
+                    uni.ImageUrl = await _fileService.UploadFile(universityModel.Base64StringImg);
 
-                }
                 uni.Email = universityModel.Email;
                 uni.Openning = universityModel.Openning;
                 uni.Closing = universityModel.Closing;
@@ -121,23 +128,23 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (result > 0)
                 {
                     //
-                    University u = await _universityRepo.Get(result);
+                    //University u = await _universityRepo.Get(result);
 
-                    City c = await _cityRepo.Get(result);
+                    City c = await _cityRepo.Get(uni.CityId);
 
-                    viewUniversity.Id = u.Id;
-                    viewUniversity.CityId = u.CityId;
+                    viewUniversity.Id = result;// u.Id;
+                    viewUniversity.CityId = uni.CityId;
                     viewUniversity.CityName = c.Name;
-                    viewUniversity.UniCode = u.UniCode;
-                    viewUniversity.Name = u.Name;
-                    viewUniversity.Description = u.Description;
-                    viewUniversity.Phone = u.Phone;
-                    viewUniversity.ImgURL = u.ImageUrl;
-                    viewUniversity.Email = u.Email;
-                    viewUniversity.Opening = u.Openning;
-                    viewUniversity.Closing = u.Closing;
-                    viewUniversity.Founding = u.Founding;
-                    viewUniversity.Status = u.Status;
+                    viewUniversity.UniCode = uni.UniCode;
+                    viewUniversity.Name = uni.Name;
+                    viewUniversity.Description = uni.Description;
+                    viewUniversity.Phone = uni.Phone;
+                    viewUniversity.ImgURL = await _fileService.GetUrlFromFilenameAsync(uni.ImageUrl);
+                    viewUniversity.Email = uni.Email;
+                    viewUniversity.Opening = uni.Openning;
+                    viewUniversity.Closing = uni.Closing;
+                    viewUniversity.Founding = uni.Founding;
+                    viewUniversity.Status = uni.Status;
                     return viewUniversity;
                 }
                 else
@@ -150,15 +157,31 @@ namespace UniCEC.Business.Services.UniversitySvc
         }
 
         //Update-University
-        public async Task<bool> Update(UniversityUpdateModel university)
+        public async Task<bool> Update(UniversityUpdateModel university, string token)
         {
             try
             {
+                int roleId = _decodeToken.Decode(token, "RoleId");
+                if (roleId.Equals(3)) // student
+                    throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+                if (roleId.Equals(1)) // uni admin
+                {
+                    int uniId = _decodeToken.Decode(token, "UniversityId");
+                    if (!uniId.Equals(university.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                }
+
                 if (university.Id == 0) throw new ArgumentNullException("University Id Null");
                 //get Uni
                 University uni = await _universityRepo.Get(university.Id);
 
                 if (uni == null) throw new ArgumentException("University not found to update");
+
+                // check duplicated university
+                if (!string.IsNullOrEmpty(university.Name) && university.CityId > 0 && !string.IsNullOrEmpty(university.UniCode)){
+                    int existedUniId = await _universityRepo.CheckDuplicatedUniversity(university.Name, university.CityId, university.UniCode);
+                    if (existedUniId != uni.Id) throw new ArgumentException("Duplicated university");
+                }
 
                 //update name-des-phone-opening-closing-founding-cityId-unicode
                 uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
@@ -181,10 +204,19 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
                 uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
                 uni.UniCode = (!string.IsNullOrEmpty(university.Name)) ? university.UniCode : uni.UniCode;
-                uni.Status = university.Status;
-                //img url
+                // update status
+                UserStatus? userStatus = null;
+                if (university.Status.HasValue && roleId.Equals(4)) // if System admin
+                {
+                    uni.Status = university.Status.Value;
+                    userStatus = (uni.Status == true) ? UserStatus.Active : UserStatus.InActive;
+                }
 
                 await _universityRepo.Update();
+
+                // update status relevant user account
+                if (userStatus != null) await _userRepo.UpdateStatusByUniversityId(uni.Id, userStatus.Value);
+
                 return true;
 
             }
@@ -212,7 +244,6 @@ namespace UniCEC.Business.Services.UniversitySvc
                 {
                     throw new ArgumentException("University not found to update");
                 }
-                return false;
             }
             catch (Exception) { throw; }
         }

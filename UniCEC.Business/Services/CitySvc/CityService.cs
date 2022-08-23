@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.NotificationSvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Business.Utilities;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
+using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.City;
@@ -19,12 +22,14 @@ namespace UniCEC.Business.Services.CitySvc
         private ICityRepo _cityRepo;
         private IUniversityRepo _universityRepo;
         private DecodeToken _decodeToken;
+        private IUserRepo _userRepo;
 
-        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo)
+        public CityService(ICityRepo cityRepo, IUniversityRepo universityRepo, IUserRepo userRepo)
         {
             _cityRepo = cityRepo;
             _universityRepo = universityRepo;
             _decodeToken = new DecodeToken();
+            _userRepo = userRepo;
         }
 
         // Search cities
@@ -99,16 +104,24 @@ namespace UniCEC.Business.Services.CitySvc
             //
             if (city != null)
             {
-                city.Name = (!model.Name.Equals("")) ? model.Name : city.Name;
-                city.Description = (!model.Description.Equals("")) ? model.Description : city.Description;
-                if (city.Status == false && model.Status == true)
-                {
-                    city.Status = model.Status.Value;
-                    await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);
-                }
-
+                city.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : city.Name;
+                city.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : city.Description;
+                city.Status = (model.Status.HasValue) ? model.Status.Value : city.Status;              
 
                 await _cityRepo.Update();
+
+                // update relevant university and user account
+                if (model.Status.HasValue)
+                {
+                    await _universityRepo.UpdateStatusByCityId(model.Id, model.Status.Value);
+                    UserStatus userStatus = (model.Status.Value == true) ? UserStatus.Active : UserStatus.InActive;
+                    List<int> idsUniInCity = await _universityRepo.GetListIdsUniByCity(model.Id);
+                    foreach(int idUni in idsUniInCity)
+                    {
+                        await _userRepo.UpdateStatusByUniversityId(idUni, userStatus);
+                    }
+                }                
+
                 return true;
             }
             else
