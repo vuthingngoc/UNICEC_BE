@@ -102,54 +102,54 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //
                 if (result == null) throw new NullReferenceException();
 
-                List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+                //List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
-                foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
-                {
-                    //List Activities Entity
-                    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
 
-                    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+                ////Phần lấy hình ảnh
+                //foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                //{
+                //    //List Activities Entity
+                //    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+                //    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+                //    if (ActivitiesEntities != null)
+                //    {
+                //        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                //        {
+                //            //get IMG from Firebase                        
+                //            string imgUrl_ActivitiesEntity;
+                //            try
+                //            {
+                //                if (ActivitiesEntity.ImageUrl.Contains("https"))
+                //                {
+                //                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
+                //                }
+                //                else
+                //                {
+                //                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                //                }
+                //            }
+                //            catch (Exception ex)
+                //            {
+                //                imgUrl_ActivitiesEntity = "";
+                //            }
 
-                    if (ActivitiesEntities != null)
-                    {
-                        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
-                        {
-                            //get IMG from Firebase                        
-                            string imgUrl_ActivitiesEntity;
-                            try
-                            {
-                                if (ActivitiesEntity.ImageUrl.Contains("https"))
-                                {
-                                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                                }
-                                else
-                                {
-                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                imgUrl_ActivitiesEntity = "";
-                            }
+                //            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                //            {
+                //                Id = ActivitiesEntity.Id,
+                //                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                //                ImageUrl = imgUrl_ActivitiesEntity,
+                //                Name = ActivitiesEntity.Name,
+                //            };
+                //            //
+                //            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
 
-                            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
-                            {
-                                Id = ActivitiesEntity.Id,
-                                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                                ImageUrl = imgUrl_ActivitiesEntity,
-                                Name = ActivitiesEntity.Name,
-                            };
-                            //
-                            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
-
-                        }
-                    }
-                    else
-                    {
-                        viewDetailCompetitionActivity.ActivitiesEntities = null;
-                    }
-                }
+                //        }
+                //    }
+                //    else
+                //    {
+                //        viewDetailCompetitionActivity.ActivitiesEntities = null;
+                //    }
+                //}
                 return result;
                 //}
                 ////kh có Competition Id
@@ -187,55 +187,56 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //
                 if (result == null) throw new NullReferenceException();
 
-                List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
+                //List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
-                foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
-                {
-                    //List Activities Entity
-                    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
+                //foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
+                //{
+                //    //List Activities Entity
+                //    List<ViewActivitiesEntity> ListView_ActivitiesEntity = new List<ViewActivitiesEntity>();
 
-                    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
+                //    List<ActivitiesEntity> ActivitiesEntities = await _activitiesEntityRepo.GetListActivitesEntityByCompetition(viewDetailCompetitionActivity.Id);
 
-                    if (ActivitiesEntities != null)
-                    {
-                        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
-                        {
-                            //get IMG from Firebase                        
-                            string imgUrl_ActivitiesEntity;
-                            try
-                            {
-                                if (ActivitiesEntity.ImageUrl.Contains("https"))
-                                {
-                                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                                }
+                //    if (ActivitiesEntities != null)
+                //    {
+                //        foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
+                //        {
+                //            //get IMG from Firebase                        
+                //            string imgUrl_ActivitiesEntity;
+                //            try
+                //            {
+                //                if (ActivitiesEntity.ImageUrl.Contains("https"))
+                //                {
+                //                    imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
+                //                }
 
-                                else
-                                {
-                                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                imgUrl_ActivitiesEntity = "";
-                            }
+                //                else
+                //                {
+                //                    imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
+                //                }
+                //            }
+                //            catch (Exception ex)
+                //            {
+                //                imgUrl_ActivitiesEntity = "";
+                //            }
 
-                            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
-                            {
-                                Id = ActivitiesEntity.Id,
-                                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                                ImageUrl = imgUrl_ActivitiesEntity,
-                                Name = ActivitiesEntity.Name,
-                            };
-                            //
-                            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
+                //            ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
+                //            {
+                //                Id = ActivitiesEntity.Id,
+                //                CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
+                //                ImageUrl = imgUrl_ActivitiesEntity,
+                //                Name = ActivitiesEntity.Name,
+                //            };
+                //            //
+                //            ListView_ActivitiesEntity.Add(viewActivitiesEntity);
 
-                        }
-                    }
-                    else
-                    {
-                        viewDetailCompetitionActivity.ActivitiesEntities = null;
-                    }
-                }
+                //        }
+                //    }
+                //    else
+                //    {
+                //        viewDetailCompetitionActivity.ActivitiesEntities = null;
+                //    }
+                //}
+                
                 return result;
 
             }
@@ -949,7 +950,5 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 return true;
             }
         }
-
-
     }
 }

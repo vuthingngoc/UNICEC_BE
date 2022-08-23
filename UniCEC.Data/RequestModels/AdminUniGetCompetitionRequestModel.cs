@@ -12,5 +12,9 @@ namespace UniCEC.Data.RequestModels
     {
         [FromQuery(Name = "name")]
         public string Name { get; set; }
+
+        //Get Entities
+        [FromQuery(Name = "getEntities")]
+        public bool? getEntities { get; set; }
     }
 }

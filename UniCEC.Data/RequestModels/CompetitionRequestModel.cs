@@ -28,5 +28,8 @@ namespace UniCEC.Data.RequestModels
         //ViewMost
         [FromQuery(Name = "viewMost")]
         public bool? ViewMost { get; set; }
+        //Get Entities
+        [FromQuery(Name = "getEntities")]
+        public bool? getEntities { get; set; }
     }
 }

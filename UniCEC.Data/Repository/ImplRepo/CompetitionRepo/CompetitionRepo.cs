@@ -178,6 +178,16 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     }
                 }
 
+                //total activity
+                int totalCompetitionActivity = await (from ca in context.CompetitionActivities
+                                                      where ca.CompetitionId == compe.Id
+                                                      select ca).CountAsync();
+
+                //total activity completed
+                int totalCompetitionActivityCompleted = await (from ca in context.CompetitionActivities
+                                                      where ca.CompetitionId == compe.Id && ca.Status == CompetitionActivityStatus.Completed
+                                                      select ca).CountAsync();
+
                 //cb tạo View
                 ViewCompetition vc = new ViewCompetition()
                 {
@@ -194,7 +204,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     MajorInCompetition = listViewMajorInComp,
                     ClubInCompetition = List_vcip,
                     UniversityId = compe.UniversityId,
-                    IsEvent = (compe.NumberOfTeam == 0) ? true : false
+                    IsEvent = (compe.NumberOfTeam == 0) ? true : false,
+                    totalCompetitionActivity = totalCompetitionActivity,
+                    totalCompetitionActivityCompleted = totalCompetitionActivityCompleted
                 };
                 competitions.Add(vc);
             }//end each competition

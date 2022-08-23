@@ -16,6 +16,5 @@ namespace UniCEC.Data.RequestModels
 
         [FromQuery(Name = "mostView")]
         public bool? MostView { get; set; }
-
     }
 }
