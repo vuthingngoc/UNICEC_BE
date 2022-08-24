@@ -50,18 +50,16 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
         {
             try
             {
-                List<ViewActivitiesEntity> ListVae = new List<ViewActivitiesEntity>();
-
                 if (model.CompetitionActivityId == 0
                   || model.ClubId == 0)
-                    throw new ArgumentNullException("|| Competition Acitvity Id Null || ClubId Null");
+                    throw new ArgumentNullException("CompetitionAcitvityId Null || ClubId Null");
 
-                if (model.ListActivitiesEntities.Count < 0) return null;
+                if (model.ListActivitiesEntities.Count.Equals(0)) return null;
 
                 foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
                 {
                     if (string.IsNullOrEmpty(modelItem.Base64StringImg)) throw new ArgumentNullException("Image is NULL");
-                }
+                }                
 
                 //Check Competition Activity Existed
                 CompetitionActivity ca = await _competitionActivityRepo.Get(model.CompetitionActivityId);
@@ -74,23 +72,17 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                 Competition competition = await _competitionRepo.Get(ca.CompetitionId);
                 await CheckMemberInCompetition(token, competition.Id, model.ClubId, false);
 
+                List<ViewActivitiesEntity> ListVae = new List<ViewActivitiesEntity>();
+
                 foreach (AddActivitiesEntity modelItem in model.ListActivitiesEntities)
                 {
                     //------------ Insert Activities-Entities-----------
-                    ActivitiesEntity ActivitiesEntity = new ActivitiesEntity();
-                    if (modelItem.Base64StringImg.Contains("https"))
-                    {
-                        ActivitiesEntity.CompetitionActivityId = model.CompetitionActivityId;
-                        ActivitiesEntity.Name = modelItem.Name;
-                        ActivitiesEntity.ImageUrl = modelItem.Base64StringImg;
-                    }
-                    else
-                    {
-                        string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                        ActivitiesEntity.CompetitionActivityId = model.CompetitionActivityId;
-                        ActivitiesEntity.Name = modelItem.Name;
-                        ActivitiesEntity.ImageUrl = Url;
-                    }
+                    ActivitiesEntity activitiesEntity = new ActivitiesEntity();
+                    activitiesEntity.CompetitionActivityId = model.CompetitionActivityId;
+                    activitiesEntity.Name = modelItem.Name;
+                    activitiesEntity.ImageUrl = (modelItem.Base64StringImg.Contains("https"))
+                        ? modelItem.Base64StringImg
+                        : await _fileService.UploadFile(modelItem.Base64StringImg);                   
 
                     //ActivitiesEntity ActivitiesEntity = new ActivitiesEntity()
                     //{
@@ -99,33 +91,15 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
                     //    ImageUrl = Url
                     //};
 
-                    int id = await _activitiesEntityRepo.Insert(ActivitiesEntity);
-                    ActivitiesEntity entity = await _activitiesEntityRepo.Get(id);
-
-                    //get IMG from Firebase                        
-                    string imgUrl;
-                    try
-                    {
-                        if (entity.ImageUrl.Contains("http"))
-                        {
-                            imgUrl = entity.ImageUrl;
-                        }
-                        else
-                        {
-                            imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        imgUrl = "";
-                    }
+                    int id = await _activitiesEntityRepo.Insert(activitiesEntity);
+                    activitiesEntity.Id = id;              
 
                     ViewActivitiesEntity vae = new ViewActivitiesEntity()
                     {
-                        Id = entity.Id,
-                        Name = entity.Name,
-                        CompetitionActivityId = entity.CompetitionActivityId,
-                        ImageUrl = imgUrl,
+                        Id = activitiesEntity.Id,
+                        Name = activitiesEntity.Name,
+                        CompetitionActivityId = activitiesEntity.CompetitionActivityId,
+                        ImageUrl = activitiesEntity.ImageUrl,
                     };
 
                     ListVae.Add(vae);
@@ -142,8 +116,6 @@ namespace UniCEC.Business.Services.ActivitiesEntitySvc
         {
             try
             {
-
-
                 CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(CompetitionActivityId);
                 //Check CompetitionActivity
                 if (competitionActivity == null) throw new ArgumentException("Not Found Competition Activity");
