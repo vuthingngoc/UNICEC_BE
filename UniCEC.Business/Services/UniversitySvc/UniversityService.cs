@@ -32,6 +32,18 @@ namespace UniCEC.Business.Services.UniversitySvc
         }
 
         //
+        private async Task<string> GetImageUrl(string imageUrl, int universityId)
+        {
+            string fullPathImage = await _fileService.GetUrlFromFilenameAsync(imageUrl) ?? "";
+            if (!string.IsNullOrEmpty(fullPathImage) && !fullPathImage.Equals(imageUrl)) // update db
+            {
+                University university = await _universityRepo.Get(universityId);                
+                university.ImageUrl = fullPathImage;
+                await _universityRepo.Update();
+            }
+
+            return fullPathImage;
+        }
 
 
         //Get-University-By-Id
@@ -45,23 +57,9 @@ namespace UniCEC.Business.Services.UniversitySvc
             //
             if (uni != null)
             {
-
-                string imageUrlUni;
-                if (uni.ImageUrl != null)
-                {
-                    if (uni.ImageUrl.Contains("https"))
-                    {
-                        //nếu chưa cái đường link thì thôi
-                        //còn kh thì chạy vòng else
-                    }
-                    else
-                    {
-                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(uni.ImageUrl);
-                        uniView.ImgURL = imageUrlUni;
-                    }
-                }
-
                 //gán vào các trường view
+                uniView.Id = id;
+                uniView.ImgURL = await GetImageUrl(uni.ImageUrl, uni.Id);
                 uniView.Name = uni.Name;
                 uniView.Description = uni.Description;
                 uniView.Phone = uni.Phone;
@@ -70,8 +68,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uniView.Closing = uni.Closing;
                 uniView.CityId = uni.CityId;
                 uniView.CityName = city.Name;
-                uniView.Status = uni.Status;
-                uniView.Id = id;
+                uniView.Status = uni.Status;                
                 uniView.Founding = uni.Founding;
                 uniView.UniCode = uni.UniCode;
                 //
@@ -95,10 +92,12 @@ namespace UniCEC.Business.Services.UniversitySvc
                     || string.IsNullOrEmpty(universityModel.Email)
                     || universityModel.Founding == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || string.IsNullOrEmpty(universityModel.Openning)
+                    || universityModel.Openning.Length > 5
                     || string.IsNullOrEmpty(universityModel.Closing)
+                    || universityModel.Closing.Length > 5
                     )
                     throw new ArgumentNullException("CityId Null || UniCode Null || Name Null || Description Null || Phone Null " +
-                                                     " Email Null  || Founding Null || Openning Null ||  Closing Null ");
+                                                     " Email Null  || Founding Null || Openning Null or length > 5 ||  Closing Null or length > 5 ");
 
                 // check duplicated university
                 int existedUniId = await _universityRepo.CheckDuplicatedUniversity(universityModel.Name, universityModel.CityId, universityModel.UniCode);
@@ -128,8 +127,6 @@ namespace UniCEC.Business.Services.UniversitySvc
                 if (result > 0)
                 {
                     //
-                    //University u = await _universityRepo.Get(result);
-
                     City c = await _cityRepo.Get(uni.CityId);
 
                     viewUniversity.Id = result;// u.Id;
@@ -139,7 +136,7 @@ namespace UniCEC.Business.Services.UniversitySvc
                     viewUniversity.Name = uni.Name;
                     viewUniversity.Description = uni.Description;
                     viewUniversity.Phone = uni.Phone;
-                    viewUniversity.ImgURL = await _fileService.GetUrlFromFilenameAsync(uni.ImageUrl);
+                    viewUniversity.ImgURL = uni.ImageUrl;
                     viewUniversity.Email = uni.Email;
                     viewUniversity.Opening = uni.Openning;
                     viewUniversity.Closing = uni.Closing;
@@ -183,23 +180,14 @@ namespace UniCEC.Business.Services.UniversitySvc
                     if (existedUniId != uni.Id) throw new ArgumentException("Duplicated university");
                 }
 
+                // upload new image to firebase
+                if(!string.IsNullOrEmpty(university.ImgURL)) 
+                    uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
+
                 //update name-des-phone-opening-closing-founding-cityId-unicode
                 uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
                 uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
                 uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
-                if (!string.IsNullOrEmpty(university.ImgURL))
-                {
-                    if (university.ImgURL.Contains("https"))
-                    {
-                        //nếu chưa cái đường link thì lưu đường link                         
-                        uni.ImageUrl = university.ImgURL;
-                    }
-                    else
-                    {
-                        //nếu là truyền base 64 thì lưu bth
-                        uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
-                    }
-                }
                 uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
                 uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
                 uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;
@@ -228,15 +216,13 @@ namespace UniCEC.Business.Services.UniversitySvc
         }
 
         //Delete-University
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id) // no use anymore
         {
             try
             {
-
                 University university = await _universityRepo.Get(id);
                 if (university != null)
                 {
-
                     await _universityRepo.DeleteUniversity(id);
                     return true;
                 }
@@ -258,21 +244,7 @@ namespace UniCEC.Business.Services.UniversitySvc
 
             foreach (ViewUniversity vu in result.Items)
             {
-                string imageUrlUni;
-                //check null
-                if (vu.ImgURL != null)
-                {
-                    if (vu.ImgURL.Contains("https"))
-                    {
-                        //nếu chưa cái đường link thì thôi
-                        //còn kh thì chạy vòng else
-                    }
-                    else
-                    {
-                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
-                        vu.ImgURL = imageUrlUni;
-                    }
-                }
+                vu.ImgURL = await GetImageUrl(vu.ImgURL, vu.Id);
             }
             //
             return result;
@@ -281,11 +253,7 @@ namespace UniCEC.Business.Services.UniversitySvc
         //Check-Email-University
         public async Task<bool> CheckEmailUniversity(string email)
         {
-            bool check = false;
-
-            check = await _universityRepo.CheckEmailUniversity(email);
-
-            return check;
+            return await _universityRepo.CheckEmailUniversity(email);
         }
 
         //Get-List-Universities-By-Email
@@ -295,21 +263,7 @@ namespace UniCEC.Business.Services.UniversitySvc
             if (result == null) throw new NullReferenceException();
             foreach (ViewUniversity vu in result)
             {
-                string imageUrlUni;
-                //check null
-                if (vu.ImgURL != null)
-                {
-                    if (vu.ImgURL.Contains("https"))
-                    {
-                        //nếu chưa cái đường link thì thôi
-                        //còn kh thì chạy vòng else
-                    }
-                    else
-                    {
-                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
-                        vu.ImgURL = imageUrlUni;
-                    }
-                }
+                vu.ImgURL = await GetImageUrl(vu.ImgURL, vu.Id);               
             }
 
             return result;
@@ -321,21 +275,7 @@ namespace UniCEC.Business.Services.UniversitySvc
             if (result == null) throw new NullReferenceException();
             foreach (ViewUniversity vu in result)
             {
-                string imageUrlUni;
-                //check null
-                if (vu.ImgURL != null)
-                {
-                    if (vu.ImgURL.Contains("https"))
-                    {
-                        //nếu chưa cái đường link thì thôi
-                        //còn kh thì chạy vòng else
-                    }
-                    else
-                    {
-                        imageUrlUni = await _fileService.GetUrlFromFilenameAsync(vu.ImgURL);
-                        vu.ImgURL = imageUrlUni;
-                    }
-                }
+                vu.ImgURL = await GetImageUrl(vu.ImgURL, vu.Id);
             }
 
             return result;
