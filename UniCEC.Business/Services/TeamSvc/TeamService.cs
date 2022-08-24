@@ -334,14 +334,7 @@ namespace UniCEC.Business.Services.TeamSvc
                         {
                             if (numberOfMemberInTeam - competition.MaxNumber <= 0)
                             {
-                                team.Status = model.Status.Value;
-
-                                //Count số team Locked
-                                int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(competition.Id);
-
-                                //update Number of team
-                                competition.NumberOfTeam = numberOfTeamIsLocked;
-                                await _competitionRepo.Update();
+                                team.Status = model.Status.Value;                         
                             }
                             else
                             {
@@ -356,17 +349,15 @@ namespace UniCEC.Business.Services.TeamSvc
                     //Available
                     else
                     {
-                        team.Status = model.Status.Value;
-
-                        //Count số team Locked
-                        int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(competition.Id);
-
-                        //update Number of team
-                        competition.NumberOfTeam = numberOfTeamIsLocked;
-                        await _competitionRepo.Update();
+                        team.Status = model.Status.Value;              
                     }
                 }
                 await _teamRepo.Update();
+                //Count số team Locked
+                int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(competition.Id);
+                //update Number of team
+                competition.NumberOfTeam = numberOfTeamIsLocked;
+                await _competitionRepo.Update();
                 return true;
             }
             catch (Exception)
