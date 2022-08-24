@@ -147,6 +147,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                 Avatar = (user != null) ? user.Avatar : null,
                 RegisterTime = participant.RegisterTime,
                 Attendance = participant.Attendance,
+                StudentCode = user.StudentCode,
+                StudentName = user.Fullname
             } : null;
 
         }
@@ -161,6 +163,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                         where p.CompetitionId == request.CompetitionId
                         select p;
 
+                //attendance
+                if (request.HasAttendance.HasValue) query = query.Where(p => p.Attendance == request.HasAttendance.Value);
+
                 int totalCount = query.Count();
 
                 List<ViewParticipant> listvp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
@@ -171,7 +176,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                                                       CompetitionId = x.CompetitionId,
                                                       RegisterTime = x.RegisterTime,
                                                       Attendance = x.Attendance,
-                                                      Avatar = x.Student.Avatar
+                                                      Avatar = x.Student.Avatar,
+                                                      StudentCode = x.Student.StudentCode,
+                                                      StudentName = x.Student.Fullname
                                                   }).ToListAsync();
                 return listvp.Count > 0 ? new PagingResult<ViewParticipant>(listvp, totalCount, request.CurrentPage, request.PageSize) : null;
 
@@ -186,6 +193,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                                   && pit.Status == ParticipantInTeamStatus.InTeam
                             select p;
 
+                    //attendance
+                    if (request.HasAttendance.HasValue) query = query.Where(p => p.Attendance == request.HasAttendance.Value);
+
                     int totalCount = query.Count();
                     List<ViewParticipant> listvp = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                                   .Select(x => new ViewParticipant
@@ -195,7 +205,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                                                       CompetitionId = x.CompetitionId,
                                                       RegisterTime = x.RegisterTime,
                                                       Attendance = x.Attendance,
-                                                      Avatar = x.Student.Avatar
+                                                      Avatar = x.Student.Avatar,
+                                                      StudentCode = x.Student.StudentCode,
+                                                      StudentName = x.Student.Fullname
                                                   }).ToListAsync();
                     return listvp.Count > 0 ? new PagingResult<ViewParticipant>(listvp, totalCount, request.CurrentPage, request.PageSize) : null;
 
@@ -216,16 +228,9 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 
                     AllParticipant = AllParticipant.Except(ParticipantHasTeam).ToList();
 
-                    //foreach (Participant p in ParticipantHasTeam)
-                    //{
-                    //    foreach (Participant ap in AllParticipant)
-                    //    {
-                    //        if (p.Id == ap.Id)
-                    //        {
-                    //            AllParticipant.Remove(ap);
-                    //        }
-                    //    }
-                    //}
+                   //attendance
+                   if(request.HasAttendance.HasValue) AllParticipant = AllParticipant.Where(ap => ap.Attendance == request.HasAttendance.Value).ToList();
+
                     //==> sau tất cả thì AllParticipant sẽ chứa list Participant chưa có team
                     int totalCount = AllParticipant.Count;
 
@@ -244,6 +249,8 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
                            RegisterTime = ap.RegisterTime,
                            Attendance  = ap.Attendance,
                            Avatar = ap.Student.Avatar,
+                           StudentCode = ap.Student.StudentCode,
+                           StudentName = ap.Student.Fullname
                        };
                         listvp.Add(vp);
                     }

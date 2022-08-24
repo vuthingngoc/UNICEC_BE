@@ -18,6 +18,9 @@ namespace UniCEC.Data.RequestModels
         [FromQuery(Name = "hasTeam")]
         public bool? HasTeam { get; set; }
 
+        [FromQuery(Name = "hasAttendance")]
+        public bool? HasAttendance { get; set; }
+
         //Club Id
         [FromQuery(Name = "clubId"), BindRequired]
         public int ClubId { get; set; }

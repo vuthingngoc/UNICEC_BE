@@ -49,5 +49,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         //-------------Total Activity Complete
         [JsonPropertyName("total_competition_activity_completed")]
         public int? totalCompetitionActivityCompleted { get; set; }
+
+       
     }
 }
