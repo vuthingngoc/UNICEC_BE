@@ -9,6 +9,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.ViewModels.Entities.CompetitionEntity;
@@ -26,6 +27,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private IMemberRepo _memberRepo;
         private DecodeToken _decodeToken;
+        private IEntityTypeRepo _entityTypeRepo;
 
 
         public CompetitionEntityService(ICompetitionEntityRepo competitionEntityRepo,
@@ -33,7 +35,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                                         IFileService fileService,
                                         IClubRepo clubRepo,
                                         IMemberInCompetitionRepo memberInCompetitionRepo,
-                                        IMemberRepo memberRepo)
+                                        IMemberRepo memberRepo,
+                                        IEntityTypeRepo entityTypeRepo)
         {
             _competitionEntityRepo = competitionEntityRepo;
             _competitionRepo = competitionRepo;
@@ -42,6 +45,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
             _memberRepo = memberRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _decodeToken = new DecodeToken();
+            _entityTypeRepo = entityTypeRepo;
         }
 
         //State Draft - Approve for Sponsor, Influncer
@@ -55,12 +59,9 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 List<ViewCompetitionEntity> ViewCompetitionEntities = new List<ViewCompetitionEntity>();
 
                 if (model.CompetitionId == 0 || model.ClubId == 0)
-                    throw new ArgumentNullException("Competition Id NULL || ClubId NULL");
+                    throw new ArgumentNullException("CompetitionId NULL || ClubId NULL");
 
-                if (model.Images.Count < 0)
-                {
-                    return null;
-                }
+                if (model.Images.Count.Equals(0)) return null;                
 
                 foreach (AddImageModel modelItem in model.Images)
                 {
@@ -70,43 +71,22 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 bool Check = await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
                 if (Check)
                 {
-
-                    Competition competition = await _competitionRepo.Get(model.CompetitionId);
-
-
-
                     //------------ Insert Competition-Entities-----------
                     foreach (AddImageModel modelItem in model.Images)
                     {
                         CompetitionEntity competitionEntity = new CompetitionEntity();
-                        //1.Check TH đưa link cũ
-                        if (modelItem.Base64StringImg.Contains("https"))
-                        {
-
-                            competitionEntity.CompetitionId = model.CompetitionId;
-                            competitionEntity.Name = modelItem.Name;
-                            competitionEntity.ImageUrl = modelItem.Base64StringImg;
-                            competitionEntity.EntityTypeId = 1; //1 là hình ảnh
-
-                        }
-                        else
-                        {
-                            //2.Check Th tạo mới
-                            string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                            competitionEntity.CompetitionId = model.CompetitionId;
-                            competitionEntity.Name = modelItem.Name;
-                            competitionEntity.ImageUrl = Url;
-                            competitionEntity.EntityTypeId = 1; //1 là hình ảnh
-
-                        }
-
+                        competitionEntity.CompetitionId = model.CompetitionId;
+                        competitionEntity.EntityTypeId = 1; // image
+                        competitionEntity.Name = modelItem.Name;
+                        competitionEntity.ImageUrl = (modelItem.Base64StringImg.Contains("https"))
+                            ? modelItem.Base64StringImg // send link
+                            : await _fileService.UploadFile(modelItem.Base64StringImg); // send base64 string
                         int id = await _competitionEntityRepo.Insert(competitionEntity);
 
                         if (id > 0)
                         {
-                            CompetitionEntity entity = await _competitionEntityRepo.Get(id);
-
-                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                            competitionEntity.Id = id;
+                            ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(competitionEntity));
                         }
 
                     }
@@ -133,11 +113,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                 if (model.CompetitionId == 0 || model.ClubId == 0)
                     throw new ArgumentNullException("Competition Id NULL || ClubId NULL");
                 //
-                if (model.Influencers.Count < 0)
-                {
-                    return null;
-                }
-
+                if (model.Influencers.Count.Equals(0)) return null;
+                
                 foreach (AddInfluencerModel modelItem in model.Influencers)
                 {
                     if (string.IsNullOrEmpty(modelItem.Base64StringImg) || string.IsNullOrEmpty(modelItem.Name))
@@ -152,33 +129,17 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                     Competition comp = await _competitionRepo.Get(model.CompetitionId);
                     if (comp.Status == CompetitionStatus.Draft || comp.Status == CompetitionStatus.Approve || comp.Status == CompetitionStatus.PendingReview)
                     {
-
                         //------------ Insert Competition-Entities-----------
                         foreach (AddInfluencerModel modelItem in model.Influencers)
                         {
-
-
                             CompetitionEntity competitionEntity = new CompetitionEntity();
-                            //1.Check TH đưa link cũ
-                            if (modelItem.Base64StringImg.Contains("https"))
-                            {
-
-                                competitionEntity.CompetitionId = model.CompetitionId;
-                                competitionEntity.Name = modelItem.Name;
-                                competitionEntity.ImageUrl = modelItem.Base64StringImg;
-                                competitionEntity.EntityTypeId = 2;
-
-                            }
-                            else
-                            {
-                                //2.Check Th tạo mới
-                                string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                                competitionEntity.CompetitionId = model.CompetitionId;
-                                competitionEntity.Name = modelItem.Name;
-                                competitionEntity.ImageUrl = Url;
-                                competitionEntity.EntityTypeId = 2;
-
-                            }
+                            competitionEntity.CompetitionId = model.CompetitionId;
+                            competitionEntity.Name = modelItem.Name;
+                            competitionEntity.EntityTypeId = 2; // influencer
+                            competitionEntity.ImageUrl = (modelItem.Base64StringImg.Contains("https"))
+                                ? modelItem.Base64StringImg // send link
+                                : await _fileService.UploadFile(modelItem.Base64StringImg); // send base64 string
+                                                                                            
                             //string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
 
                             //CompetitionEntity competitionEntity = new CompetitionEntity()
@@ -193,9 +154,8 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                             if (id > 0)
                             {
-                                CompetitionEntity entity = await _competitionEntityRepo.Get(id);
-
-                                ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                                competitionEntity.Id = id;
+                                ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(competitionEntity));
                             }
 
                         }
@@ -252,30 +212,15 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                         {
 
                             CompetitionEntity competitionEntity = new CompetitionEntity();
-                            //1.Check TH đưa link cũ
-                            if (modelItem.Base64StringImg.Contains("https"))
-                            {
-
-                                competitionEntity.CompetitionId = model.CompetitionId;
-                                competitionEntity.Name = modelItem.Name;
-                                competitionEntity.ImageUrl = modelItem.Base64StringImg;
-                                competitionEntity.EntityTypeId = 3;
-                                competitionEntity.Description = modelItem.Description;
-                                competitionEntity.Website = modelItem.Website;
-                                competitionEntity.Email = modelItem.Email;
-                            }
-                            else
-                            {
-                                //2.Check Th tạo mới
-                                string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
-                                competitionEntity.CompetitionId = model.CompetitionId;
-                                competitionEntity.Name = modelItem.Name;
-                                competitionEntity.ImageUrl = Url;
-                                competitionEntity.EntityTypeId = 3;
-                                competitionEntity.Description = modelItem.Description;
-                                competitionEntity.Website = modelItem.Website;
-                                competitionEntity.Email = modelItem.Email;
-                            }
+                            competitionEntity.CompetitionId = model.CompetitionId;
+                            competitionEntity.Name = modelItem.Name;
+                            competitionEntity.EntityTypeId = 3;
+                            competitionEntity.Description = modelItem.Description;
+                            competitionEntity.Website = modelItem.Website;
+                            competitionEntity.Email = modelItem.Email;
+                            competitionEntity.ImageUrl = (modelItem.Base64StringImg.Contains("https"))
+                                ? modelItem.Base64StringImg // send link
+                                : await _fileService.UploadFile(modelItem.Base64StringImg); // send base64 string                            
 
                             //string Url = await _fileService.UploadFile(modelItem.Base64StringImg);
                             //CompetitionEntity competitionEntity = new CompetitionEntity()
@@ -294,12 +239,11 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
                             if (id > 0)
                             {
-                                CompetitionEntity entity = await _competitionEntityRepo.Get(id);
-
+                                competitionEntity.Id = id;
                                 comp.IsSponsor = true;
                                 await _competitionRepo.Update();
 
-                                ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(entity));
+                                ViewCompetitionEntities.Add(await TransferViewCompetitionEntity(competitionEntity));
                             }
 
                         }
@@ -336,8 +280,7 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
                     //    && (competition.Status == CompetitionStatus.Draft || competition.Status == CompetitionStatus.Approve) == true)
                     //    throw new ArgumentException("Can't Remove Sponsor or Influencer");
 
-                    bool Check = await CheckMemberInCompetition(token, competition.Id, clubId, false);
-                    if (Check == false) return false;
+                    await CheckMemberInCompetition(token, competition.Id, clubId, false);
 
                     List<CompetitionEntity> competitionEntities = competition.CompetitionEntities.ToList();
 
@@ -371,31 +314,14 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
 
         private async Task<ViewCompetitionEntity> TransferViewCompetitionEntity(CompetitionEntity entity)
         {
-            //get IMG from Firebase                        
-            string imgUrl;
-            try
-            {
-                if (entity.ImageUrl.Contains("https"))
-                {
-                    imgUrl = entity.ImageUrl;
-                }
-                else
-                {
-                    imgUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl);
-                }
-            }
-            catch (Exception)
-            {
-                imgUrl = "";
-            }
-
             return new ViewCompetitionEntity()
             {
                 Id = entity.Id,
                 Name = entity.Name,
-                CompetitionId = entity.CompetitionId,
-                ImageUrl = imgUrl,
                 EntityTypeId = entity.EntityTypeId,
+                EntityTypeName = (await _entityTypeRepo.Get(entity.EntityTypeId)).Name,                
+                CompetitionId = entity.CompetitionId,
+                ImageUrl = await _fileService.GetUrlFromFilenameAsync(entity.ImageUrl) ?? "",                
                 Website = (entity.Website != null) ? entity.Website : null,
                 Email = (entity.Email != null) ? entity.Email : null,
                 Description = (entity.Description != null) ? entity.Description : null,
@@ -404,35 +330,26 @@ namespace UniCEC.Business.Services.CompetitionEntitySvc
         private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
         {
             //------------- CHECK Competition in system
-            Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition == null) throw new ArgumentException("Competition or Event not found ");
+            bool isExisted = await _competitionRepo.CheckExistedCompetition(CompetitionId);
+            if(!isExisted) throw new ArgumentException("Competition or Event not found ");
 
             //------------- CHECK Club in system
-            Club club = await _clubRepo.Get(ClubId);
-            if (club == null) throw new ArgumentException("Club in not found");
+            isExisted = await _clubRepo.CheckExistedClub(ClubId);
+            if (!isExisted) throw new ArgumentException("Club in not found");            
 
             //------------- CHECK Is Member in Club
-            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
-            Member member = await _memberRepo.Get(memberId);
-            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), ClubId);            
+            if (memberId.Equals(0)) throw new UnauthorizedAccessException("You aren't member in Club");
 
             //------------- CHECK User is in CompetitionManger table                
-            MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
-            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+            MemberInCompetition competitionManager = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
+            if (competitionManager == null) throw new UnauthorizedAccessException("You do not in Competition Managers");
 
-            if (isOrganization)
-            {
-                //1,2 accept
-                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
-                return true;
-            }
-            else
-            {
-                return true;
-            }
+            if (isOrganization && competitionManager.CompetitionRoleId >= 3) // accept competitionRoleId 1,2
+                throw new UnauthorizedAccessException("Only role Manager can do this action");
+
+            return true;
         }
-
-
     }
 }
 

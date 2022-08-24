@@ -250,6 +250,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
             return (clubs.Count > 0) ? clubs : null;
         }
+
+        public async Task<bool> CheckExistedClub(int clubId)
+        {
+            return await context.Clubs.FirstOrDefaultAsync(club => club.Id.Equals(clubId)) != null;
+        }
     }
 }
 
