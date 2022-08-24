@@ -315,10 +315,10 @@ namespace UniCEC.Business.Services.TeamSvc
                 if (participantInTeam.TeamRoleId != await _teamRoleRepo.GetRoleIdByName("Leader")) throw new UnauthorizedAccessException("You don't have permission to update team role");
 
                 //6.Check Time Status
-                Competition c = await _competitionRepo.Get(team.CompetitionId);
-                if (c.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+                Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
 
-                if (CheckDate(c.StartTimeRegister, c.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
+                if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể thực hiện hành động khi đã quá hạn !");
 
                 team.Name = (!string.IsNullOrEmpty(model.Name)) ? model.Name : team.Name;
                 team.Description = (!string.IsNullOrEmpty(model.Description)) ? model.Description : team.Description;
@@ -328,13 +328,20 @@ namespace UniCEC.Business.Services.TeamSvc
                     //IsLocked
                     if (model.Status.Value == TeamStatus.IsLocked)
                     {
-                        Competition competition = await _competitionRepo.Get(team.CompetitionId);
+                        //Competition competition = await _competitionRepo.Get(team.CompetitionId);
                         int numberOfMemberInTeam = await _participantInTeamRepo.GetNumberOfMemberInTeam(model.TeamId, team.CompetitionId);
                         if (numberOfMemberInTeam - competition.MinNumber >= 0)
                         {
                             if (numberOfMemberInTeam - competition.MaxNumber <= 0)
                             {
                                 team.Status = model.Status.Value;
+
+                                //Count số team Locked
+                                int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(competition.Id);
+
+                                //update Number of team
+                                competition.NumberOfTeam = numberOfTeamIsLocked;
+                                await _competitionRepo.Update();
                             }
                             else
                             {
@@ -350,6 +357,13 @@ namespace UniCEC.Business.Services.TeamSvc
                     else
                     {
                         team.Status = model.Status.Value;
+
+                        //Count số team Locked
+                        int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(competition.Id);
+
+                        //update Number of team
+                        competition.NumberOfTeam = numberOfTeamIsLocked;
+                        await _competitionRepo.Update();
                     }
                 }
                 await _teamRepo.Update();
@@ -427,7 +441,6 @@ namespace UniCEC.Business.Services.TeamSvc
                  
                 //Count số team Locked
                 int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(model.CompetitionId);
-                //if (numberOfTeamIsLocked == -1) throw new ArgumentException("There is no team Locked");
                 
                 //update Number of team
                 competition.NumberOfTeam = numberOfTeamIsLocked;
@@ -618,7 +631,7 @@ namespace UniCEC.Business.Services.TeamSvc
         private string GenerateSeedCode()
         {
             string codePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            char[] chars = new char[15];
+            char[] chars = new char[6];
             string code = "";
             var random = new Random();
 
