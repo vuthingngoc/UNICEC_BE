@@ -1,6 +1,5 @@
 ﻿using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -94,8 +93,7 @@ namespace UniCEC.Business.Services.FileSvc
         private async Task<string> Upload(Guid filename, Stream stream)
         {
             var cancellationToken = new CancellationTokenSource().Token;
-            await new FirebaseStorage(_bucket).Child("assets").Child($"{filename}").PutAsync(stream, cancellationToken);
-            return filename.ToString();
+            return await new FirebaseStorage(_bucket).Child("assets").Child($"{filename}").PutAsync(stream, cancellationToken);
         }
 
         public async Task DeleteFile(string filename)
@@ -103,9 +101,11 @@ namespace UniCEC.Business.Services.FileSvc
             await new FirebaseStorage(_bucket).Child("assets").Child(filename).DeleteAsync();
         }
 
-        public async Task<string> GetUrlFromFilenameAsync(string filename)
+        public async Task<string> GetUrlFromFilenameAsync(string imageUrl)
         {
-            return await new FirebaseStorage(_bucket).Child("assets").Child($"{filename}").GetDownloadUrlAsync();
+            return (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Contains("token")) // if imageUrl is just a fileName 
+                ? await new FirebaseStorage(_bucket).Child("assets").Child($"{imageUrl}").GetDownloadUrlAsync()
+                : imageUrl;
         }
     }
 }
