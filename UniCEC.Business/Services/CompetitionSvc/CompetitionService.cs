@@ -1135,7 +1135,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     CompetitionId = comp.Id,
                     ChangerId = member.Id,
                     ChangeDate = localTime,
-                    Description = "Create Competition", // auto des when create Competition
+                    Description = "Tạo" + ((model.IsEvent == true) ? " Sự Kiện": " Cuộc Thi") , // auto des when create Competition
                     Status = CompetitionStatus.Draft,   // when create status draft
                 };
                 int result = await _competitionHistoryRepo.Insert(chim);

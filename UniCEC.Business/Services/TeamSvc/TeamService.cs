@@ -554,6 +554,9 @@ namespace UniCEC.Business.Services.TeamSvc
                 Team team = await _teamRepo.Get(teamId);
                 if (team == null) throw new ArgumentException("Not found this team");
 
+                //if team is locked can't out
+                if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Can't Delete Team because team is locked");
+
                 //2.check user in same Team in Competition
                 ParticipantInTeam leaderInTeam = await _participantInTeamRepo.CheckParticipantInTeam(teamId, UserId);
                 if (leaderInTeam == null) throw new ArgumentException("You aren't participant in that team");
