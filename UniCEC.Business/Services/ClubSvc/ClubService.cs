@@ -50,17 +50,7 @@ namespace UniCEC.Business.Services.ClubSvc
             club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(club.Id);
             club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(club.Id);
             club.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(club.Id);
-            if (!string.IsNullOrEmpty(club.Image))
-            {
-                try
-                {
-                    club.Image = await _fileService.GetUrlFromFilenameAsync(club.Image);
-                }
-                catch (Exception)
-                {
-                    club.Image = "";
-                }
-            }
+            club.Image = await GetUrlImage(club.Image, club.Id);
 
             return club;
         }
@@ -72,23 +62,39 @@ namespace UniCEC.Business.Services.ClubSvc
                 element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
                 element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
-                if (!string.IsNullOrEmpty(element.Image))
-                {
-                    try
-                    {
-                        element.Image = await _fileService.GetUrlFromFilenameAsync(element.Image);
-                    }
-                    catch (Exception)
-                    {
-                        element.Image = "";
-                    }
-                }
+                element.Image = await GetUrlImage(element.Image, element.Id);                
             }
 
             return clubs;
         }
 
-        public async Task<ViewClub> GetById(string token, int id) 
+        private async Task<List<ViewClub>> AddMoreInfoClub(List<ViewClub> clubs)
+        {
+            foreach (ViewClub club in clubs)
+            {
+                club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(club.Id);
+                club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(club.Id);
+                club.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(club.Id);
+                club.Image = await GetUrlImage(club.Image, club.Id);
+            }
+
+            return clubs;
+        }
+
+        private async Task<string> GetUrlImage(string imageUrl, int clubId)
+        {
+            string fullPathImage = await _fileService.GetUrlFromFilenameAsync(imageUrl) ?? "";
+            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Equals(fullPathImage)) // for old data save filename in  db
+            {
+                Club club = await _clubRepo.Get(clubId);
+                club.Image = fullPathImage;
+                await _clubRepo.Update();
+            }
+
+            return fullPathImage;
+        }
+
+        public async Task<ViewClub> GetById(string token, int id)
         {
             bool? status = null;
 
@@ -135,10 +141,10 @@ namespace UniCEC.Business.Services.ClubSvc
             if (!roleId.Equals(4)) // not system admin
             {
                 int uniId = _decodeToken.Decode(token, "UniversityId");
-                if (!request.UniversityId.Equals(uniId)) throw new UnauthorizedAccessException("You do not have permission to access this club");                
+                if (!request.UniversityId.Equals(uniId)) throw new UnauthorizedAccessException("You do not have permission to access this club");
             }
 
-            if(roleId.Equals(3)) request.Status = true; // default status for student
+            if (roleId.Equals(3)) request.Status = true; // default status for student
 
             PagingResult<ViewClub> clubs = await _clubRepo.GetByConditions(request);
             if (clubs == null) throw new NullReferenceException("Not found any club with this name");
@@ -162,28 +168,21 @@ namespace UniCEC.Business.Services.ClubSvc
                 if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
 
                 // add more info
-                foreach (ViewClub element in clubs)
-                {
-                    element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                    element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
-                    element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
-                    if (!string.IsNullOrEmpty(element.Image))
-                    {
-                        try
-                        {
-                            element.Image = await _fileService.GetUrlFromFilenameAsync(element.Image);
-                        }
-                        catch (Exception)
-                        {
-                            element.Image = "";
-                        }
-                    }
-                }
-
-                return clubs;
+                return await AddMoreInfoClub(clubs);
             }
 
             throw new UnauthorizedAccessException("You can not access this resource");
+        }
+
+        //TA
+        public async Task<List<ViewClub>> GetClubByUni(string token)
+        {
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            List<ViewClub> clubs = await _clubRepo.GetByUni(universityId);
+            if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
+
+            // add more info
+            return await AddMoreInfoClub(clubs);
         }
 
         public async Task<PagingResult<ViewClub>> GetByManager(string token, ClubRequestByManagerModel request)
@@ -197,24 +196,6 @@ namespace UniCEC.Business.Services.ClubSvc
 
             return await AddMoreInfoClub(clubs);
         }
-
-        //public async Task<PagingResult<ViewClub>> GetByUniversity(string token, int id, PagingRequest request)
-        //{
-
-        //    int roleId = DecodeToken(token, "RoleId");
-
-        //    if (!roleId.Equals(4) && roleId.Equals(2)) // system admin and sponsor
-        //    {
-        //        int universityId = DecodeToken(token, "UniversityId");
-        //        if (!universityId.Equals(id)) throw new UnauthorizedAccessException("You do not have permission to access this club");
-        //    }
-
-        //    PagingResult<ViewClub> clubs = await _clubRepo.GetByUniversity(id, request);
-        //    if (clubs == null) throw new NullReferenceException("This university have no any clubs");
-
-        //    // add more info
-        //    return await AddMoreInfoClub(clubs);
-        //}
 
         public async Task<ViewClub> Insert(string token, ClubInsertModel model)
         {
@@ -256,7 +237,7 @@ namespace UniCEC.Business.Services.ClubSvc
             {
                 ClubId = clubId,
                 ClubRoleId = 1, // leader
-                StartTime = currentTime,                
+                StartTime = currentTime,
                 UserId = model.UserId,
                 Status = MemberStatus.Active // default status 
             };
@@ -340,36 +321,6 @@ namespace UniCEC.Business.Services.ClubSvc
             await _clubRepo.Update();
 
             await _memberRepo.UpdateStatusDeletedClub(id);
-        }
-
-        //TA
-        public async Task<List<ViewClub>> GetClubByUni(string token)
-        {
-            int universityId = _decodeToken.Decode(token, "UniversityId");
-            List<ViewClub> clubs = await _clubRepo.GetByUni(universityId);
-            if (clubs == null) throw new NullReferenceException("This user is not a member of any clubs");
-
-            // add more info
-            foreach (ViewClub element in clubs)
-            {
-                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
-                element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
-                element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
-                if (!string.IsNullOrEmpty(element.Image))
-                {
-                    try
-                    {
-                        element.Image = await _fileService.GetUrlFromFilenameAsync(element.Image);
-                    }
-                    catch (Exception)
-                    {
-                        element.Image = "";
-                    }
-                }
-            }
-
-            return clubs;
-
         }
     }
 }
