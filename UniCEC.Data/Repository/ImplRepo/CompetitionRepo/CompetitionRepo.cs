@@ -1034,6 +1034,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
             return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId)) != null;
         }
 
-
+        public async Task<bool> CheckExistedCompetitionByStatus(int competitionId, CompetitionStatus status)
+        {
+            return await context.Competitions.FirstOrDefaultAsync(competition => competition.Id.Equals(competitionId) 
+                                                                                    && competition.Status.Equals(status)) != null;
+        }
     }
 }

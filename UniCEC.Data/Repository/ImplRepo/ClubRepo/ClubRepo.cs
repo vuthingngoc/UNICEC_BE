@@ -253,7 +253,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 
         public async Task<bool> CheckExistedClub(int clubId)
         {
-            return await context.Clubs.FirstOrDefaultAsync(club => club.Id.Equals(clubId)) != null;
+            return await context.Clubs.FirstOrDefaultAsync(club => club.Id.Equals(clubId) && club.Status.Equals(true)) != null;
         }
     }
 }

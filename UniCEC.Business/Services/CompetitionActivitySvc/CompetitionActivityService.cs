@@ -21,7 +21,6 @@ using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 using UniCEC.Data.ViewModels.Entities.CompetitionActivity;
-using UniCEC.Data.ViewModels.Entities.Member;
 using UniCEC.Data.ViewModels.Entities.MemberInCompetition;
 using UniCEC.Data.ViewModels.Entities.MemberTakesActivity;
 
@@ -68,9 +67,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _notificationService = notificationService;
             _decodeToken = new DecodeToken();
         }
-
-
-        //Get Process cần code lại
+        
         public async Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token)
         {
             try
@@ -101,6 +98,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListActivitiesByConditions(conditions);
                 //
                 if (result == null) throw new NullReferenceException();
+                return result;
 
                 //List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
@@ -149,8 +147,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //    {
                 //        viewDetailCompetitionActivity.ActivitiesEntities = null;
                 //    }
-                //}
-                return result;
+                //}               
                 //}
                 ////kh có Competition Id
                 //else
@@ -186,7 +183,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 PagingResult<ViewCompetitionActivity> result = await _competitionActivityRepo.GetListCompetitionActivitiesIsAssigned(request, competitionId, priorityStatus, statuses, name, userId);
                 //
                 if (result == null) throw new NullReferenceException();
-
+                return result;
                 //List<ViewCompetitionActivity> list_vdca = result.Items.ToList();
 
                 //foreach (ViewCompetitionActivity viewDetailCompetitionActivity in list_vdca)
@@ -235,10 +232,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //    {
                 //        viewDetailCompetitionActivity.ActivitiesEntities = null;
                 //    }
-                //}
-                
-                return result;
-
+                //}                               
             }
             catch (Exception)
             {
@@ -255,23 +249,21 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 if (id == 0 || clubId == 0) throw new ArgumentException(" Id Null || Club Id Null");
 
-                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
-                if (competitionActivity == null) throw new NullReferenceException();
-
-
                 //------------- CHECK Club in system
-                Club club = await _clubRepo.Get(clubId);
-                if (club == null) throw new ArgumentException("Club in not found");
+                bool isExisted = await _clubRepo.CheckExistedClub(clubId);
+                if(!isExisted) throw new ArgumentException("Club in not found");
 
                 //------------- CHECK Is Member in Club
-                int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), club.Id);
-                Member member = await _memberRepo.Get(memberId);
-                if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+                int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), clubId);
+                if (memberId.Equals(0)) throw new UnauthorizedAccessException("You aren't member in Club");
 
                 //Check Condititon
                 // trong đây đã check được là nếu User cố tình lấy Id Task của Competition khác thì sẽ không được
                 // khi check đến MemberInCompetition thì sẽ thấy được là User đó kh thuộc trong Competition
                 //await CheckMemberInCompetition(token, competitionActivity.CompetitionId, clubId, false);
+
+                CompetitionActivity competitionActivity = await _competitionActivityRepo.Get(id);
+                if (competitionActivity == null) throw new NullReferenceException();
 
                 return await TransformViewDetailCompetitionActivity(competitionActivity);
 
@@ -299,12 +291,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, false);
 
                 //Check Status Competition
-                Competition compe = await _competitionRepo.Get(model.CompetitionId);
-                if (compe.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
+                bool isCancleCompetition = await _competitionRepo.CheckExistedCompetitionByStatus(model.CompetitionId, CompetitionStatus.Cancel);
+                if(isCancleCompetition) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Ending date
-                bool checkDate = CheckDate(model.Ending);
-                if (checkDate == false) throw new ArgumentException("Date not suitable");
+                bool isValidDate = CheckDate(model.Ending);
+                if (isValidDate == false) throw new ArgumentException("Date not suitable");
 
                 //Add List Activities Entity
                 bool insertActivitiesEntity;
@@ -604,8 +596,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check booker can not assign task for yourself 
                 int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
-                ViewMember vdm = await _memberRepo.GetById(memId);
-                if (vdm.Id == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself");
+                if (memId == model.MemberId) throw new ArgumentException("Booker can not assign task for yourself");
 
                 //Check add the same task for this member 
                 bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, model.MemberId);
@@ -662,9 +653,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
                 //Competition Status
-                Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
-
+                bool isCancelCompetition = await _competitionRepo.CheckExistedCompetitionByStatus(competitionActivity.CompetitionId, CompetitionStatus.Cancel);
+                if (isCancelCompetition) throw new ArgumentException("The competition is cancelled");// Cuộc thi đã bị hủy
 
                 //Check User is Member of club
                 int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
@@ -679,13 +669,16 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 if (model.Status == CompetitionActivityStatus.Cancelling || model.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("You don't have permission to update this Status");
 
+                competitionActivity.Status = model.Status;
+                await _competitionActivityRepo.Update();
+
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
 
                 MemberInCompetitionRequestModel request = new MemberInCompetitionRequestModel()
                 {
                     ClubId = model.ClubId,
-                    CompetitionId = competition.Id,
+                    CompetitionId = competitionActivity.CompetitionId,
                 };
                 PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request);
                 foreach (var manager in managers.Items)
@@ -715,8 +708,6 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     await _notificationService.SendNotification(notification, deviceToken);
                 }
 
-                competitionActivity.Status = model.Status;
-                await _competitionActivityRepo.Update();
                 return true;
 
             }
@@ -739,12 +730,12 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 if (ca.Status == CompetitionActivityStatus.Cancelling || ca.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("Competition Activity is Cancelling or Completed");
 
-                //Check Competition Status
-                Competition competition = await _competitionRepo.Get(ca.CompetitionId);
-                if (competition.Status == CompetitionStatus.Cancel) throw new ArgumentException("Cuộc thi đã bị hủy");
+                //Check Competition Status                
+                bool isCancelCompetition = await _competitionRepo.CheckExistedCompetitionByStatus(ca.CompetitionId, CompetitionStatus.Cancel);
+                if (isCancelCompetition) throw new ArgumentException("The competition is cancelled");// Cuộc thi đã bị hủy
 
                 //Check Condition
-                await CheckMemberInCompetition(token, competition.Id, ClubId, false);
+                await CheckMemberInCompetition(token, ca.CompetitionId, ClubId, false);
 
                 // -1 Number Of Participant
                 ca.NumOfMember = ca.NumOfMember - 1;
@@ -772,29 +763,11 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             {
                 foreach (ActivitiesEntity ActivitiesEntity in ActivitiesEntities)
                 {
-                    //get IMG from Firebase                        
-                    string imgUrl_ActivitiesEntity;
-                    try
-                    {
-                        if (ActivitiesEntity.ImageUrl.Contains("https"))
-                        {
-                            imgUrl_ActivitiesEntity = ActivitiesEntity.ImageUrl;
-                        }
-                        else
-                        {
-                            imgUrl_ActivitiesEntity = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        imgUrl_ActivitiesEntity = "";
-                    }
-
                     ViewActivitiesEntity viewActivitiesEntity = new ViewActivitiesEntity()
                     {
                         Id = ActivitiesEntity.Id,
                         CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                        ImageUrl = imgUrl_ActivitiesEntity,
+                        ImageUrl = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl) ?? "",
                         Name = ActivitiesEntity.Name,
                     };
                     //
@@ -907,48 +880,36 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
         //Check date 
         // COC < Ending
-        private bool CheckDate(DateTime Ending)
+        private bool CheckDate(DateTime endTime)
         {
-            bool result = false;
-            DateTime lt = new LocalTime().GetLocalTime().DateTime;
-            int rs1 = DateTime.Compare(Ending, lt);
+            DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
+            int result = DateTime.Compare(endTime, currentTime);
 
-            if (rs1 > 0)
-            {
-                result = true;
-            }
-            return result;
+            return (result > 0) ? true : false;          
         }
 
         private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)
         {
             //------------- CHECK Competition in system
-            Competition competition = await _competitionRepo.Get(CompetitionId);
-            if (competition == null) throw new ArgumentException("Competition or Event not found ");
+            bool isExisted = await _competitionRepo.CheckExistedCompetition(CompetitionId);
+            if (!isExisted) throw new ArgumentException("Competition or Event not found ");
 
             //------------- CHECK Club in system
-            Club club = await _clubRepo.Get(ClubId);
-            if (club == null) throw new ArgumentException("Club in not found");
+            isExisted = await _clubRepo.CheckExistedClub(ClubId);
+            if (!isExisted) throw new ArgumentException("Club in not found");
 
             //------------- CHECK Is Member in Club
-            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), club.Id);
-            Member member = await _memberRepo.Get(memberId);
-            if (member == null) throw new UnauthorizedAccessException("You aren't member in Club");
+            int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(Token, "Id"), ClubId);
+            if (memberId.Equals(0)) throw new UnauthorizedAccessException("You aren't member in Club");
 
             //------------- CHECK User is in CompetitionManger table                
-            MemberInCompetition isAllow = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
-            if (isAllow == null) throw new UnauthorizedAccessException("You do not in Competition Manager ");
+            MemberInCompetition competitionManager = await _memberInCompetitionRepo.GetMemberInCompetition(CompetitionId, memberId);
+            if (competitionManager == null) throw new UnauthorizedAccessException("You do not in Competition Managers");
 
-            if (isOrganization)
-            {
-                //1,2 accept
-                if (isAllow.CompetitionRoleId >= 3) throw new UnauthorizedAccessException("Only role Manager can do this action");
-                return true;
-            }
-            else
-            {
-                return true;
-            }
+            if (isOrganization && competitionManager.CompetitionRoleId >= 3) // accept competitionRoleId 1,2
+                throw new UnauthorizedAccessException("Only role Manager can do this action");
+
+            return true;
         }
     }
 }

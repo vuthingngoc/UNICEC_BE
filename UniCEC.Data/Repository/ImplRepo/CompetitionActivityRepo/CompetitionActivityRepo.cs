@@ -189,7 +189,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (conditions.PriorityStatus.HasValue) query = query.Where(ca => ca.Priority == conditions.PriorityStatus);
 
             //Statuses
-            if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains((CompetitionActivityStatus)ca.Status));
+            if (conditions.Statuses != null) query = query.Where(ca => conditions.Statuses.Contains(ca.Status)); //((CompetitionActivityStatus)ca.Status));
 
             //search name
             if(!string.IsNullOrEmpty(conditions.name)) query.Where(ca => ca.Name.ToLower().Contains(conditions.name.ToLower()));
@@ -239,7 +239,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
             if (priorityStatus.HasValue) query = query.Where(x => x.ca.Priority == priorityStatus.Value);
 
             //Statuses
-            if (statuses.Count > 0) query = query.Where(x => statuses.Contains((CompetitionActivityStatus)x.ca.Status));
+            if (statuses.Count > 0) query = query.Where(x => statuses.Contains(x.ca.Status));//(CompetitionActivityStatus)x.ca.Status));
 
             //name
             if(!string.IsNullOrEmpty(name)) query = query.Where(x => x.ca.Name.ToLower().Contains(name.ToLower()));
@@ -279,12 +279,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
         // Nhat
         public async Task<int> GetTotalActivityByClub(int clubId)
         {
-            //var query = from ca in context.CompetitionActivities
-            //            where ca.ClubId.Equals(clubId) && ca.Ending.Date >= new LocalTime().GetLocalTime().DateTime  
-            //            select new { ca };
+            var query = from cic in context.CompetitionInClubs
+                        join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                        join ca in context.CompetitionActivities on comp.Id equals ca.CompetitionId
+                        where !comp.Status.Equals(CompetitionStatus.Cancel) && !ca.Status.Equals(CompetitionActivityStatus.Cancelling)
+                                && cic.ClubId.Equals(clubId)
+                        select ca;
 
-            //return await query.CountAsync();
-            return 0;
+            return await query.CountAsync();
+            //return 0;
         }
 
 
