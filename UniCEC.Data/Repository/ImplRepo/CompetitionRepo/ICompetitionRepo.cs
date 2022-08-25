@@ -45,5 +45,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
         public Task<CompetitionScopeStatus> GetScopeCompetition(int id);
         public Task<bool> CheckExisteUniInCompetition(int universityId, int competitionId);
         public Task<bool> CheckExistedCompetition(int competitionId);
+        public Task<bool> CheckExistedCompetitionByStatus(int competitionId, CompetitionStatus status);
     }
 }

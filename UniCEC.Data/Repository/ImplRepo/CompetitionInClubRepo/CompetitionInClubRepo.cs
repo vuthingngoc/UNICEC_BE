@@ -8,6 +8,7 @@ using UniCEC.Data.Common;
 using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Entities.Competition;
 using UniCEC.Data.ViewModels.Entities.CompetitionInClub;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
 {
@@ -91,8 +92,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
         {
             var query = from cic in context.CompetitionInClubs
                         join c in context.Competitions on cic.CompetitionId equals c.Id
-                        where cic.ClubId.Equals(clubId) && c.EndTime.Date >= new LocalTime().GetLocalTime().DateTime
-                        select new { c };
+                        where cic.ClubId.Equals(clubId) && !c.Status.Equals(CompetitionStatus.Cancel)
+                        select c;
 
             return await query.CountAsync();
         }
