@@ -2542,6 +2542,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             bool round2 = false;
             bool round3 = false;
             bool round4 = false;
+            bool round5 = false;
             bool result = false;
 
 
@@ -2602,7 +2603,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }//end kq1
             }
 
-
             //ROUND 3
             //ETR < ST < ET -> ETR true
             if (round1 && round2)
@@ -2631,8 +2631,30 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     round4 = true;
                 }
             }
+            
+            
+            //ROUND 5 check Time must be sperate 1 hours
+            if(round1 && round2 && round3 && round4)
+            {
+                //STR < ETR 1 hours or more
+                TimeSpan cm1 = EndTimeRegister - StartTimeRegister;
+                if((TimeSpan.Compare(cm1,TimeSpan.FromHours(1)) >= 0)){
+                    //ETR < ST 1 hours or more chỗ này chắc chắn là ceremony time hợp lệ vì nó sớm hơn ETR time 30p
+                    TimeSpan cm2 = StartTime - EndTimeRegister;
+                    if ((TimeSpan.Compare(cm2, TimeSpan.FromHours(1)) >= 0))
+                    {
+                        //ST < ET 1 hours or more
+                        TimeSpan cm3 = EndTime - StartTime;
+                        if((TimeSpan.Compare(cm3, TimeSpan.FromHours(1)) >= 0))
+                        {
+                            round5 = true;
+                        }
+                    }
+                }
+            }
+
             //
-            if (round1 && round2 && round3 && round4)
+            if (round1 && round2 && round3 && round4 && round5)
             {
                 result = true;
             }
@@ -3064,22 +3086,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
             return comp;
         }
 
-        private string CompetitionStatusToString(CompetitionStatus competitionStatus)
-        {
-            if (competitionStatus == CompetitionStatus.Register)
-            {
-                return "Register";
-            }
-            if (competitionStatus == CompetitionStatus.Publish)
-            {
-                return "Publish";
-            }
-            return null;
-        }
-
-
-
-
+        //private string CompetitionStatusToString(CompetitionStatus competitionStatus)
+        //{
+        //    if (competitionStatus == CompetitionStatus.Register)
+        //    {
+        //        return "Register";
+        //    }
+        //    if (competitionStatus == CompetitionStatus.Publish)
+        //    {
+        //        return "Publish";
+        //    }
+        //    return null;
+        //}
 
 
         //Special for update State Approve
