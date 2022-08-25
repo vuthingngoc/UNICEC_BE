@@ -21,7 +21,7 @@ namespace UniCEC.Business.Services.ClubSvc
     public class ClubService : IClubService
     {
         private IClubRepo _clubRepo;
-        private ICompetitionActivityRepo _clubActivityRepo;
+        private ICompetitionActivityRepo _competitionActivityRepo;
         private IMemberRepo _memberRepo;
         private ICompetitionInClubRepo _competitionInClubRepo;
         private ICompetitionRepo _competitionRepo;
@@ -31,12 +31,12 @@ namespace UniCEC.Business.Services.ClubSvc
 
         private DecodeToken _decodeToken;
 
-        public ClubService(IClubRepo clubRepo, ICompetitionActivityRepo clubActivityRepo
+        public ClubService(IClubRepo clubRepo, ICompetitionActivityRepo competitionActivityRepo
                             , IMemberRepo memberRepo, ICompetitionInClubRepo competitionInClubRepo
                                 , ICompetitionRepo competitionRepo, IFileService fileService, IUserRepo userRepo)
         {
             _clubRepo = clubRepo;
-            _clubActivityRepo = clubActivityRepo;
+            _competitionActivityRepo = competitionActivityRepo;
             _memberRepo = memberRepo;
             _competitionInClubRepo = competitionInClubRepo;
             _competitionRepo = competitionRepo;
@@ -47,7 +47,7 @@ namespace UniCEC.Business.Services.ClubSvc
 
         private async Task<ViewClub> AddMoreInfoClub(ViewClub club)
         {
-            club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(club.Id);
+            club.TotalActivity = await _competitionActivityRepo.GetTotalActivityByClub(club.Id);
             club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(club.Id);
             club.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(club.Id);
             club.Image = await GetUrlImage(club.Image, club.Id);
@@ -59,7 +59,7 @@ namespace UniCEC.Business.Services.ClubSvc
         {
             foreach (ViewClub element in clubs.Items)
             {
-                element.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(element.Id);
+                element.TotalActivity = await _competitionActivityRepo.GetTotalActivityByClub(element.Id);
                 element.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(element.Id);
                 element.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(element.Id);
                 element.Image = await GetUrlImage(element.Image, element.Id);                
@@ -72,7 +72,7 @@ namespace UniCEC.Business.Services.ClubSvc
         {
             foreach (ViewClub club in clubs)
             {
-                club.TotalActivity = await _clubActivityRepo.GetTotalActivityByClub(club.Id);
+                club.TotalActivity = await _competitionActivityRepo.GetTotalActivityByClub(club.Id);
                 club.TotalEvent = await _competitionInClubRepo.GetTotalEventOrganizedByClub(club.Id);
                 club.MemberIncreaseThisMonth = await _memberRepo.GetQuantityNewMembersByClub(club.Id);
                 club.Image = await GetUrlImage(club.Image, club.Id);
