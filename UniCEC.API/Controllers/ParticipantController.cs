@@ -73,7 +73,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpPut("attendance")]
         [SwaggerOperation(Summary = "Update Attendance of paritcipant in Competition Or Event")]
-        public async Task<IActionResult> UpdateAttendance([FromQuery(Name = "seeds_code"), BindRequired] string seedsCode)
+        public async Task<IActionResult> UpdateAttendance([FromQuery(Name = "seedsCode"), BindRequired] string seedsCode)
         {
             try
             {
