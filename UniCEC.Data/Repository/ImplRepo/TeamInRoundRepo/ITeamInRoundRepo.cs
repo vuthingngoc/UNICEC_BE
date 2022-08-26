@@ -13,5 +13,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public Task<PagingResult<ViewTeamInRound>> GetByConditions(TeamInRoundRequestModel request);
         public Task<ViewTeamInRound> GetById(int id, bool? status);
         public Task<List<ViewTeamInRound>> GetTopTeamsInCompetition(int competitionId, int top);
+        public Task UpdateRankTeamsInRound(int roundId);
+        public Task<List<ViewTeamInRound>> GetViewTeams(List<int> teamIds);
     }
 }

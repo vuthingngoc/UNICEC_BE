@@ -83,23 +83,45 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             return teamInRound;
         }
 
+        public async Task UpdateRankTeamsInRound(int roundId)
+        {
+            var query = from tir in context.TeamInRounds
+                        where tir.RoundId.Equals(roundId) && tir.Status.Equals(true)
+                        select tir;
+
+            int rank = 1;
+            List<TeamInRound> teams = query.OrderByDescending(team => team.Scores).ToList();
+            for (int index = 0; index < teams.Count; index++)
+            {
+                if (index > 0 && !teams[index - 1].Scores.Equals(teams[index].Scores)) rank++;
+                teams[index].Rank = rank;
+            }
+
+            await Update();
+        }
+
         public async Task<List<ViewTeamInRound>> GetTopTeamsInCompetition(int competitionId, int top)
         {
             List<ViewTeamInRound> teamsInRound = await (from tir in context.TeamInRounds
-                                                       join t in context.Teams on tir.TeamId equals t.Id
-                                                       join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
-                                                       where cr.CompetitionId.Equals(competitionId) && tir.Rank <= top && tir.Status.Equals(true)
-                                                       orderby(tir.Rank)
-                                                       select new ViewTeamInRound()
-                                                       {
-                                                           Id = tir.Id,
-                                                           RoundId = tir.RoundId,
-                                                           Rank = tir.Rank,
-                                                           Scores = tir.Scores,
-                                                           TeamId = tir.TeamId,
-                                                           TeamName = t.Name,
-                                                           Status = tir.Status
-                                                       }).Take(top).ToListAsync();
+                                                        join t in context.Teams on tir.TeamId equals t.Id
+                                                        join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
+                                                        where cr.CompetitionId.Equals(competitionId) && tir.Rank <= top && tir.Status.Equals(true)
+                                                        orderby (tir.Rank)
+                                                        select new ViewTeamInRound()
+                                                        {
+                                                            Id = tir.Id,
+                                                            RoundId = tir.RoundId,
+                                                            Rank = tir.Rank,
+                                                            Scores = tir.Scores,
+                                                            TeamId = tir.TeamId,
+                                                            TeamName = t.Name,
+                                                            Status = tir.Status
+                                                        }).Take(top).ToListAsync();
+
+            foreach (var element in teamsInRound)
+            {
+                element.MembersInTeam = await GetMembersInTeam(element.TeamId);
+            }
 
             return (teamsInRound.Count > 0) ? teamsInRound : null;
         }
@@ -117,6 +139,32 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                               Avatar = u.Avatar,
                               StudentCode = u.StudentCode
                           }).ToListAsync();
+        }
+
+        public async Task<List<ViewTeamInRound>> GetViewTeams(List<int> teamIds)
+        {
+            var query = from tir in context.TeamInRounds
+                        join t in context.Teams on tir.TeamId equals t.Id
+                        where teamIds.Contains(tir.TeamId)
+                        select new { t, tir };
+
+            List<ViewTeamInRound> items = await query.Select(selector => new ViewTeamInRound()
+            {
+                Id = selector.tir.Id,
+                RoundId = selector.tir.RoundId,
+                Rank = selector.tir.Rank,
+                Scores = selector.tir.Scores,
+                TeamId = selector.tir.TeamId,
+                TeamName = selector.t.Name,
+                Status = selector.tir.Status
+            }).ToListAsync();
+
+            foreach (var element in items)
+            {
+                element.MembersInTeam = await GetMembersInTeam(element.TeamId);
+            }
+
+            return items;
         }
     }
 }
