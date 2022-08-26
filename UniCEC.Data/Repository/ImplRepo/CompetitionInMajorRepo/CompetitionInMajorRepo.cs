@@ -44,34 +44,46 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
         //    }
         //}
 
-        public async Task<List<ViewMajorInComp>> GetListMajorInCompetition(int CompetitionId)
+        public async Task<List<ViewMajorInComp>> GetListMajorInCompetition(int competitionId)
         {
-            List<CompetitionInMajor> majorInCompetitionList = await (from cid in context.CompetitionInMajors
-                                                                     where CompetitionId == cid.CompetitionId
-                                                                     select cid).ToListAsync();
-            List<ViewMajorInComp> list_vdic = new List<ViewMajorInComp>();
-            if (majorInCompetitionList.Count > 0)
-            {
-                foreach (var majorInCompetition in majorInCompetitionList)
-                {
-                    Major major = await (from d in context.Majors
-                                         where d.Id == majorInCompetition.MajorId
-                                         select d).FirstOrDefaultAsync();
+            //List<CompetitionInMajor> majorInCompetitionList = await (from cid in context.CompetitionInMajors
+            //                                                         where competitionId == cid.CompetitionId
+            //                                                         select cid).ToListAsync();
 
-                    ViewMajorInComp vdic = new ViewMajorInComp()
-                    {
-                        Id = major.Id,
-                        Name = major.Name,
-                    };
-                    list_vdic.Add(vdic);
-                }
+            var majorsInCompe = await (from m in context.Majors
+                                       join cim in context.CompetitionInMajors on m.Id equals cim.MajorId
+                                       where cim.CompetitionId.Equals(competitionId)
+                                       select new ViewMajorInComp()
+                                       {
+                                           Id = m.Id,
+                                           Name = m.Name
+                                       }).ToListAsync();
 
-                if (list_vdic.Count > 0)
-                {
-                    return list_vdic;
-                }
-            }
-            return null;
+            return (majorsInCompe.Any()) ? majorsInCompe : null;
+
+            //List<ViewMajorInComp> list_vdic = new List<ViewMajorInComp>();
+            //if (majorInCompetitionList.Count > 0)
+            //{
+            //    foreach (var majorInCompetition in majorInCompetitionList)
+            //    {
+            //        Major major = await (from d in context.Majors
+            //                             where d.Id == majorInCompetition.MajorId
+            //                             select d).FirstOrDefaultAsync();
+
+            //        ViewMajorInComp vdic = new ViewMajorInComp()
+            //        {
+            //            Id = major.Id,
+            //            Name = major.Name,
+            //        };
+            //        list_vdic.Add(vdic);
+            //    }
+
+            //    if (list_vdic.Count > 0)
+            //    {
+            //        return list_vdic;
+            //    }
+            //}
+            //return null;
         }
 
         public async Task DeleteCompetitionInMajor(int competitionInMajorId)

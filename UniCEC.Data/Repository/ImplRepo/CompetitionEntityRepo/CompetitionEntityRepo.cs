@@ -36,6 +36,27 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionEntityRepo
             }
         }
 
+        public async Task<List<ViewCompetitionEntity>> GetCompetitionEntities(int competitionId)
+        {
+            List<ViewCompetitionEntity> competitionEntities = await (from ce in context.CompetitionEntities
+                                                                     join e in context.EntityTypes on ce.EntityTypeId equals e.Id
+                                                                     where ce.CompetitionId.Equals(competitionId)
+                                                                     select new ViewCompetitionEntity()
+                                                                     {
+                                                                         Id = ce.Id,
+                                                                         CompetitionId = competitionId,
+                                                                         Description = ce.Description,
+                                                                         Email = ce.Email,
+                                                                         EntityTypeId = ce.EntityTypeId,
+                                                                         EntityTypeName = e.Name,
+                                                                         Name = ce.Name,
+                                                                         Website = ce.Website,
+                                                                         ImageUrl = ce.ImageUrl
+                                                                     }).ToListAsync();
+
+            return (competitionEntities.Count > 0) ? competitionEntities : null;
+        }
+
         public async Task<List<CompetitionEntity>> GetListCompetitionEntity(int competitionId)
         {
             List<CompetitionEntity> competitionEntities = await (from ce in context.CompetitionEntities
