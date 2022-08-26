@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Common;
 
 namespace UniCEC.Data.RequestModels
@@ -9,9 +10,9 @@ namespace UniCEC.Data.RequestModels
         public int? UniversityId { get; set; }
         [FromQuery(Name = "departmentId")]
         public int? DepartmentId { get; set; }
-        [FromQuery(Name = "fullName")]
-        public string Fullname { get; set; }
+        [FromQuery(Name = "searchString")]
+        public string SearchString { get; set; }
         [FromQuery(Name = "status")]
-        public bool? Status { get; set; }
+        public UserStatus? Status { get; set; }
     }
 }

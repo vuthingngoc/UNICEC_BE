@@ -166,7 +166,9 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
             if (request.DepartmentId.HasValue) query = query.Where(selector => selector.u.DepartmentId.Equals(request.DepartmentId));
 
-            if (!string.IsNullOrEmpty(request.Fullname)) query = query.Where(selector => selector.u.Fullname.Equals(request.Fullname));
+            if (!string.IsNullOrEmpty(request.SearchString)) 
+                query = query.Where(selector => selector.u.Fullname.ToLower().Contains(request.SearchString.ToLower())
+                                                    || selector.u.Email.ToLower().Contains(request.SearchString.ToLower()));
 
             if (request.Status.HasValue) query = query.Where(selector => selector.u.Status.Equals(request.Status));
 
