@@ -102,13 +102,6 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teamsInRound;
         }
 
-        //public Task<ViewTeamInRound> GetById(string token, int id)
-        //{
-        //    ViewTeamInRound teamInRound = 
-        //    throw new NotImplementedException();
-        //}
-        //}
-
         public async Task<List<ViewTeamInRound>> Insert(string token, List<TeamInRoundInsertModel> models)
         {
             if (models.Count() == 0) throw new ArgumentException("Null data");
@@ -135,28 +128,26 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             }
 
             models.OrderByDescending(tir => tir.Scores);
-            int rank = 1;
 
-            List<ViewTeamInRound> teamInRounds = new List<ViewTeamInRound>();
-            foreach (var model in models)
+            List<int> teamIds = new List<int>();
+            for(int index = 0; index < models.Count; index++)
             {
+                teamIds.Add(models[index].TeamId);
                 TeamInRound teamInRound = new TeamInRound()
                 {
-                    Id = model.RoundId,
-                    Rank = rank,
-                    Scores = model.Scores,
-                    RoundId = model.RoundId,
-                    TeamId = model.TeamId,
+                    Rank = 0,// rank,
+                    Scores = models[index].Scores,
+                    RoundId = models[index].RoundId,
+                    TeamId = models[index].TeamId,
                     Status = true // default status when insert                    
                 };
 
                 int teamInRoundId = await _teamInRoundRepo.Insert(teamInRound);
                 ViewTeamInRound viewModel = await _teamInRoundRepo.GetById(teamInRoundId, teamInRound.Status);
-                teamInRounds.Add(viewModel);
-                rank++;
             }
 
-            return teamInRounds;
+            await _teamInRoundRepo.UpdateRankTeamsInRound(models[0].RoundId);
+            return await _teamInRoundRepo.GetViewTeams(teamIds);
         }
 
         public async Task Update(string token, TeamInRoundUpdateModel model)
@@ -182,6 +173,8 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             if (model.Rank.HasValue && model.Rank.Value > 0) teamInRound.Rank = model.Rank.Value;
 
             await _teamInRoundRepo.Update();
+
+            if (model.Scores.HasValue) await _teamInRoundRepo.UpdateRankTeamsInRound(model.RoundId);
         }
 
         public async Task Delete(string token, int id)
