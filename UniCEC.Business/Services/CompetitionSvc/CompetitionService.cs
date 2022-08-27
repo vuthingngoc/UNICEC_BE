@@ -109,7 +109,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Equals(fullPathImage)) // for old data save filename in  db
             {
                 Club club = await _clubRepo.Get(clubId);
-                club.Image = fullPathImage;
+                club.Image = fullPathImage ;
                 await _clubRepo.Update();
             }
 
@@ -312,7 +312,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         //    imgClub = "";
                         //}
 
-                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
                     }
 
 
@@ -436,7 +436,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         foreach (ViewClubInComp viewClub in item.ClubInCompetition)
                         {
                             //viewClub.Image = imgClub;
-                            viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                            viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
                         }
                         List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
 
@@ -478,7 +478,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             //    imgClub = "";
                             //}
 
-                            viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                            viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
                         }
 
                         //List Competition Entity
@@ -672,7 +672,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     foreach (ViewClubInComp viewClub in item.ClubInCompetition)
                     {
                         //viewClub.Image = imgClub;
-                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
                     }
                     List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
 
@@ -715,7 +715,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         //}
 
                         //viewClub.Image = imgClub;
-                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
                     }
                     List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
 
@@ -2287,7 +2287,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             //Add image club
             foreach (ViewClubInComp viewClub in viewClubsInCompetition)
             {
-                viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.ClubId);
             }
 
             //List Majors in Competition
