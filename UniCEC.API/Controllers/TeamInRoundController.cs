@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using UniCEC.Business.Services.TeamInRoundSvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Team;
 using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.API.Controllers
@@ -80,15 +81,15 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("top-teams/{number}")]
-        [SwaggerOperation(Summary = "Get top teams in round - Authenticated user - can not use right now !!!")]
-        public async Task<IActionResult> GetTopTeamsInCompetition(int number, [FromQuery, BindRequired] int competitionId)
+        [HttpGet("total-result")]
+        [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
+        public async Task<IActionResult> GetTopTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewTeamInRound> teamsInRound = await _teamInRoundService.GetTopTeamsInCompetition(token, competitionId, number);
-                return Ok(teamsInRound);
+                List<ViewResultTeam> teams = await _teamInRoundService.GetTotalResultTeamInCompetition(token, competitionId, top);
+                return Ok(teams);
             }
             catch (ArgumentException ex)
             {

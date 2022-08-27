@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -29,5 +30,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         public Task<bool> CheckExistedTeam(int teamId);
 
         public Task<int> getNumberOfMemberInTeam(int teamId);
+        public Task<List<ViewResultTeam>> GetAllTeamInComp(int competitionId); // for get total result of a team in a competition
     }
 }
