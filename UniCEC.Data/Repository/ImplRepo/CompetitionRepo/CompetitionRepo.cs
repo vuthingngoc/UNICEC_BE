@@ -192,6 +192,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                   select new ViewMajorInComp()
                                                   {
                                                       Id = cim.Id,
+                                                      MajorId = cim.MajorId,
                                                       Name = m.Name
                                                   }).ToListAsync();
 
@@ -407,7 +408,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     {
                         ViewMajorInComp vdic = new ViewMajorInComp()
                         {
-                            Id = major.Id,
+                            Id = competitionInMajor.Id, //fix
+                            MajorId = competitionInMajor.MajorId,
                             Name = major.Name,
                         };
                         listViewMajorInComp.Add(vdic);
@@ -487,6 +489,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                         select new ViewMajorInComp()
                                                         {
                                                             Id = cim.Id,
+                                                            MajorId = cim.MajorId,
                                                             Name = m.Name
                                                         }).ToListAsync();
             }
@@ -650,6 +653,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                         select new ViewMajorInComp()
                                                         {
                                                             Id = cim.Id,
+                                                            MajorId = cim.MajorId,
                                                             Name = m.Name
                                                         }).ToListAsync();
             }
@@ -865,6 +869,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                         select new ViewMajorInComp()
                                                         {
                                                             Id = cim.Id,
+                                                            MajorId = cim.MajorId,
                                                             Name = m.Name
                                                         }).ToListAsync();
             }
@@ -1018,7 +1023,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     {
                         ViewMajorInComp vdic = new ViewMajorInComp()
                         {
-                            Id = major.Id,
+                            Id = competitionInMajor.Id, //fix
+                            MajorId = competitionInMajor.MajorId,
                             Name = major.Name,
                         };
                         listViewMajorInComp.Add(vdic);
@@ -1180,7 +1186,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                     {
                         ViewMajorInComp vdic = new ViewMajorInComp()
                         {
-                            Id = major.Id,
+                            Id = competitionInMajor.Id,//fix
+                            MajorId = competitionInMajor.MajorId,
                             Name = major.Name,
                         };
                         listViewMajorInComp.Add(vdic);
