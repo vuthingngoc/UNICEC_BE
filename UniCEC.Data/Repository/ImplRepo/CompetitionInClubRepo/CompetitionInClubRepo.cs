@@ -50,41 +50,56 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo
             }
         }
 
-        public async Task<List<ViewClubInComp>> GetListClubInCompetition(int CompetitionId)
+        public async Task<List<ViewClubInComp>> GetListClubInCompetition(int competitionId)
         {
             List<CompetitionInClub> clubList = await (from cic in context.CompetitionInClubs
-                                                      where CompetitionId == cic.CompetitionId
+                                                      where competitionId == cic.CompetitionId
                                                       select cic).ToListAsync();
 
-            List<ViewClubInComp> List_vcip = new List<ViewClubInComp>();
+            var clubs = await (from c in context.Clubs
+                               join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
+                               where cic.CompetitionId.Equals(competitionId)
+                               select new ViewClubInComp()
+                               {
+                                   Id = cic.Id,
+                                   ClubId = c.Id,
+                                   Name = c.Name,
+                                   Image = c.Image,
+                                   Fanpage = c.ClubFanpage,
+                                   IsOwner = cic.IsOwner
+                               }).ToListAsync();
 
-            if (clubList.Count > 0)
-            {
-                foreach (var competitionInClub in clubList)
-                {
-                    Club club = await (from c in context.Clubs
-                                       where c.Id == competitionInClub.ClubId
-                                       select c).FirstOrDefaultAsync();
+            return (clubs.Any()) ? clubs : null;
 
-                    ViewClubInComp vcip = new ViewClubInComp()
-                    {
-                        Id = competitionInClub.Id,
-                        Name = club.Name,
-                        Image = club.Image,
-                        Fanpage = club.ClubFanpage,
-                        IsOwner = competitionInClub.IsOwner,
-                        ClubId = club.Id,
-                    };
+            //List<ViewClubInComp> List_vcip = new List<ViewClubInComp>();
 
-                    List_vcip.Add(vcip);
-                }
-                if (List_vcip.Count > 0)
-                {
-                    return List_vcip;
-                }
-            }
+            //if (clubList.Count > 0)
+            //{
+            //    foreach (var competitionInClub in clubList)
+            //    {
+            //        Club club = await (from c in context.Clubs
+            //                           where c.Id == competitionInClub.ClubId
+            //                           select c).FirstOrDefaultAsync();
 
-            return null;
+            //        ViewClubInComp vcip = new ViewClubInComp()
+            //        {
+            //            Id = competitionInClub.Id,
+            //            Name = club.Name,
+            //            Image = club.Image,
+            //            Fanpage = club.ClubFanpage,
+            //            IsOwner = competitionInClub.IsOwner,
+            //            ClubId = club.Id,
+            //        };
+
+            //        List_vcip.Add(vcip);
+            //    }
+            //    if (List_vcip.Count > 0)
+            //    {
+            //        return List_vcip;
+            //    }
+            //}
+
+            //return null;
         }
 
         // Nhat

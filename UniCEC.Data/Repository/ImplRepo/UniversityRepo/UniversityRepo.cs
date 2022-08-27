@@ -193,5 +193,10 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                           where u.CityId.Equals(cityId)
                           select u.Id).ToListAsync();
         }
+
+        public async Task<bool> CheckExistedUniversity(int universityId)
+        {
+            return await context.Universities.FirstOrDefaultAsync(uni => uni.Id.Equals(universityId) && uni.Status.Equals(true)) != null;
+        }
     }
 }
