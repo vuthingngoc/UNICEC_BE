@@ -14,6 +14,7 @@ using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Team;
 using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Business.Services.TeamInRoundSvc
@@ -87,7 +88,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teamInRounds;
         }
 
-        public async Task<List<ViewTeamInRound>> GetTopTeamsInCompetition(string token, int competitionId, int top) // not finish
+        public async Task<List<ViewResultTeam>> GetTotalResultTeamInCompetition(string token, int competitionId, int top)
         {
             // check valid
             if (competitionId == 0) throw new ArgumentException("Invalid competition");
@@ -97,9 +98,26 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             await CheckValidAuthorizedViewer(token, competitionId);
 
             // Action
-            List<ViewTeamInRound> teamsInRound = await _teamInRoundRepo.GetTopTeamsInCompetition(competitionId, top);
-            if(teamsInRound == null) throw new NullReferenceException();
-            return teamsInRound;
+            List<ViewResultTeam> teams = await _teamRepo.GetAllTeamInComp(competitionId);
+            if (teams == null) throw new NullReferenceException("Not found any teams in this competition");
+
+            foreach(var team in teams)
+            {
+                team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
+            }
+
+            teams = teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
+
+            for(int index = 0; index < teams.Count; index++)
+            {
+                teams[index].Rank = index + 1;
+            }
+
+            return teams;
+
+            //List<ViewTeamInRound> teamsInRound = await _teamInRoundRepo.GetTopTeamsInCompetition(competitionId, top);
+            //if(teamsInRound == null) throw new NullReferenceException();
+            //return teamsInRound;
         }
 
         public async Task<List<ViewTeamInRound>> Insert(string token, List<TeamInRoundInsertModel> models)

@@ -166,5 +166,14 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
             return items;
         }
+
+        public async Task<int> GetTotalPointsTeam(int teamId, int competitionId)
+        {
+            return await (from tir in context.TeamInRounds
+                    join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
+                    where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
+                            && tir.Status.Equals(true)
+                    select tir.Scores).SumAsync();
+        }
     }
 }

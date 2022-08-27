@@ -93,7 +93,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                         where t.CompetitionId == request.CompetitionId
                         select t;
             //status trong requestModel sẽ khác null còn ở controller sẽ khác 0
-            if(request.status != null) query = query.Where(t => t.Status == request.status.Value);
+            if (request.status != null) query = query.Where(t => t.Status == request.status.Value);
 
             //teamName
             if (!string.IsNullOrEmpty(request.TeamName)) query = query.Where(t => t.Name.ToLower().Contains(request.TeamName.ToLower()));
@@ -187,7 +187,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                         Status = x.pit.Status
                     }
                     ).FirstOrDefaultAsync();
-                   
+
 
                     viewParticipants.Add(vp);
                 }
@@ -247,6 +247,24 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                                                           where pit.TeamId == teamId
                                                           select pit).ToListAsync();
             return participants.Count;
+        }
+
+        public async Task<List<ViewResultTeam>> GetAllTeamInComp(int competitionId)
+        {
+            return await (from t in context.Teams
+                          where t.CompetitionId.Equals(competitionId)
+                          select new ViewResultTeam()
+                          {
+                              Id = t.Id,
+                              CompetitionId = t.CompetitionId,
+                              Description = t.Description,
+                              Name = t.Name,
+                              InvitedCode = t.InvitedCode,
+                              Status = t.Status,
+                              NumberOfMemberInTeam = t.NumberOfStudentInTeam,
+                              TotalPoint = 0,
+                              Rank = 0
+                          }).ToListAsync();
         }
     }
 }
