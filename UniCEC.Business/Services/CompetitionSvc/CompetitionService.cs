@@ -2896,7 +2896,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
             else
             {
-                insertMajor = false;
+                await _competitionInMajorRepo.DeleteAllCompetitionInMajor(comp.Id);
+                insertMajor = true;
             }
 
             //-----------------insert major
