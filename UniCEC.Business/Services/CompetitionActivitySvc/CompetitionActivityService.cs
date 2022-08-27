@@ -750,6 +750,19 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             }
         }
 
+        private async Task<string> GetUrlImageActivityEntity(string imageUrl, int activityEntityId)
+        {
+            string fullPathImage = await _fileService.GetUrlFromFilenameAsync(imageUrl) ?? "";
+            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Equals(fullPathImage)) // for old data save filename in  db
+            {
+                ActivitiesEntity activityEntity = await _activitiesEntityRepo.Get(activityEntityId);
+                activityEntity.ImageUrl = fullPathImage;
+                await _activitiesEntityRepo.Update();
+            }
+
+            return fullPathImage;
+        }
+
         //transform View Model
         public async Task<ViewDetailCompetitionActivity> TransformViewDetailCompetitionActivity(CompetitionActivity competitionActivity)
         {
@@ -767,7 +780,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     {
                         Id = ActivitiesEntity.Id,
                         CompetitionActivityId = ActivitiesEntity.CompetitionActivityId,
-                        ImageUrl = await _fileService.GetUrlFromFilenameAsync(ActivitiesEntity.ImageUrl) ?? "",
+                        ImageUrl = await GetUrlImageActivityEntity(ActivitiesEntity.ImageUrl, ActivitiesEntity.Id),
                         Name = ActivitiesEntity.Name,
                     };
                     //
