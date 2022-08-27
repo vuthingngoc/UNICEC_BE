@@ -196,6 +196,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                                                       Name = m.Name
                                                   }).ToListAsync();
 
+                //total activity
+                int totalCompetitionActivity = await (from ca in context.CompetitionActivities
+                                                      where ca.CompetitionId == compe.Id
+                                                      select ca).CountAsync();
+
+                //total activity completed
+                int totalCompetitionActivityCompleted = await (from ca in context.CompetitionActivities
+                                                               where ca.CompetitionId == compe.Id && ca.Status == CompetitionActivityStatus.Completed
+                                                               select ca).CountAsync();
+
+                compe.totalCompetitionActivity = totalCompetitionActivity;
+                compe.totalCompetitionActivityCompleted = totalCompetitionActivityCompleted;
 
                 ////lấy department ID 
                 //List<ViewMajorInComp> listViewMajorInComp = new List<ViewMajorInComp>();
@@ -248,15 +260,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                 //    }
                 //}
 
-                ////total activity
-                //int totalCompetitionActivity = await (from ca in context.CompetitionActivities
-                //                                      where ca.CompetitionId == compe.Id
-                //                                      select ca).CountAsync();
 
-                ////total activity completed
-                //int totalCompetitionActivityCompleted = await (from ca in context.CompetitionActivities
-                //                                               where ca.CompetitionId == compe.Id && ca.Status == CompetitionActivityStatus.Completed
-                //                                               select ca).CountAsync();
 
                 ////cb tạo View
                 //ViewCompetition vc = new ViewCompetition()
