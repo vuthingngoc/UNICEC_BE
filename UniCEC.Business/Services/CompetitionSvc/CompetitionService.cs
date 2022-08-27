@@ -670,7 +670,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 {
                     //Add image club
                     foreach (ViewClubInComp viewClub in item.ClubInCompetition)
-                    {                       
+                    {
                         //viewClub.Image = imgClub;
                         viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
                     }
@@ -722,7 +722,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (competitionEntities != null)
                     {
                         foreach (ViewCompetitionEntity competitionEntity in competitionEntities)
-                        {                         
+                        {
                             competitionEntity.ImageUrl = await GetUrlImageCompEntity(competitionEntity.ImageUrl, competitionEntity.Id);
                         }
                         item.CompetitionEntities = competitionEntities;
@@ -2863,7 +2863,6 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (ct == null) throw new ArgumentException("Competition Type Id not have in System");
 
             //------------ Check FK
-
             // MajorId
             bool insertMajor;
             if (model.ListMajorId.Count > 0)
@@ -2904,33 +2903,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (insertMajor)
             {
                 //run delete 
-                List<CompetitionInMajor> lcim = comp.CompetitionInMajors.ToList();
-                foreach (CompetitionInMajor cim in lcim)
-                {
-                    //CompetitionInMajorDeleteModel requestDelete = new CompetitionInMajorDeleteModel()
-                    //{
-                    //    CompetitionInMajorId = cim.Id,
-                    //    ClubId = model.ClubId
-                    //};
-                    await _competitionInMajorRepo.DeleteCompetitionInMajor(cim.Id);
-                    //await DeleteMajorInCompetition(requestDelete, token);
-                }
-                //add new
-                //CompetitionInMajorInsertModel requestAdd = new CompetitionInMajorInsertModel()
-                //{
-                //    ClubId = model.ClubId,
-                //    CompetitionId = model.Id,
-                //    ListMajorId = model.ListMajorId,
 
-                //};
-                foreach (int majorId in model.ListMajorId) {
+                await _competitionInMajorRepo.DeleteAllCompetitionInMajor(comp.Id);
+
+                foreach (int majorId in model.ListMajorId)
+                {
                     CompetitionInMajor comInMaj = new CompetitionInMajor()
                     {
                         MajorId = majorId,
                         CompetitionId = comp.Id
                     };
                     await _competitionInMajorRepo.Insert(comInMaj);
-                }            
+                }
             }
             comp.CompetitionTypeId = model.CompetitionTypeId.HasValue ? model.CompetitionTypeId.Value : comp.CompetitionTypeId;
             comp.SeedsPoint = (double)(model.SeedsPoint.HasValue ? model.SeedsPoint.Value : comp.SeedsPoint);
