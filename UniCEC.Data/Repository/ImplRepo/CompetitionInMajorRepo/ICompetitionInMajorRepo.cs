@@ -15,5 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
         public Task<CompetitionInMajor> GetMajorInCompetition(int majorId, int competitionId);
 
         public Task DeleteCompetitionInMajor(int competitionInMajorId);
+
+        public Task DeleteAllCompetitionInMajor(int competitionId);
     }
 }

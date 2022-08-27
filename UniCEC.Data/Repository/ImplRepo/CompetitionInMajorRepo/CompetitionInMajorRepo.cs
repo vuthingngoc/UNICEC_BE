@@ -95,5 +95,19 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
             context.CompetitionInMajors.Remove(competitionInMajor);
             await Update();
         }
+
+        public async Task DeleteAllCompetitionInMajor(int competitionId)
+        {
+            List<CompetitionInMajor> query = await(from cim in context.CompetitionInMajors
+                        where competitionId == cim.CompetitionId
+                        select cim).ToListAsync();
+            foreach (CompetitionInMajor cim in query)
+            {
+                context.CompetitionInMajors.Remove(cim);
+            }
+
+            await Update();
+
+        }
     }
 }
