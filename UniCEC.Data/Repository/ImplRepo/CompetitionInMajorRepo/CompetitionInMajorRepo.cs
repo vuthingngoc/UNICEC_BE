@@ -55,7 +55,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo
                                        where cim.CompetitionId.Equals(competitionId)
                                        select new ViewMajorInComp()
                                        {
-                                           Id = m.Id,
+                                           Id = cim.Id,
+                                           MajorId = cim.MajorId,
                                            Name = m.Name
                                        }).ToListAsync();
 
