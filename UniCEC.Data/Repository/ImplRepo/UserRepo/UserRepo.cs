@@ -172,6 +172,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
             if (request.Status.HasValue) query = query.Where(selector => selector.u.Status.Equals(request.Status));
 
+            int totalCount = query.Count();
+
             List<ViewUser> items = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
                                           .Select(selector => new ViewUser()
                                           {
@@ -194,7 +196,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                                           }
                                           ).ToListAsync();
 
-            return (items.Count() > 0) ? new PagingResult<ViewUser>(items, context.Users.Count(), request.CurrentPage, request.PageSize) : null;
+            return (items.Count() > 0) ? new PagingResult<ViewUser>(items, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<bool> CheckExistedEmail(string email, int? userId)
