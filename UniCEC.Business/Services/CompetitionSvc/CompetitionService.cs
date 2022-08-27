@@ -428,6 +428,29 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEveByAdminUni(request, _decodeToken.Decode(token, "UniversityId"));
                 if (result == null) throw new NullReferenceException();
 
+                if (!request.getEntities.HasValue)
+                {
+                    foreach (ViewCompetition item in result.Items)
+                    {
+                        //Add image club
+                        foreach (ViewClubInComp viewClub in item.ClubInCompetition)
+                        {
+                            //viewClub.Image = imgClub;
+                            viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                        }
+                        List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
+
+                        if (competitionEntities != null)
+                        {
+                            foreach (ViewCompetitionEntity competitionEntity in competitionEntities)
+                            {
+                                competitionEntity.ImageUrl = await GetUrlImageCompEntity(competitionEntity.ImageUrl, competitionEntity.Id);
+                            }
+                            item.CompetitionEntities = competitionEntities;
+                        }
+                    }
+                }
+
                 //Không có value là lấy hình
                 if (request.getEntities.Equals(true))
                 {
@@ -641,11 +664,32 @@ namespace UniCEC.Business.Services.CompetitionSvc
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token, "UniversityId"));
             if (result == null) throw new NullReferenceException();
 
-            //Nếu kh có truyền getEntities thì kh show hình
-            if (request.getEntities.Equals(true))
+            if (!request.getEntities.HasValue)
             {
-                //List<ViewCompetition> resultList = result.Items.ToList();
+                foreach (ViewCompetition item in result.Items)
+                {
+                    //Add image club
+                    foreach (ViewClubInComp viewClub in item.ClubInCompetition)
+                    {                       
+                        //viewClub.Image = imgClub;
+                        viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
+                    }
+                    List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
 
+                    if (competitionEntities != null)
+                    {
+                        foreach (ViewCompetitionEntity competitionEntity in competitionEntities)
+                        {
+                            competitionEntity.ImageUrl = await GetUrlImageCompEntity(competitionEntity.ImageUrl, competitionEntity.Id);
+                        }
+                        item.CompetitionEntities = competitionEntities;
+                    }
+                }
+            }
+
+            //Nếu kh có truyền getEntities thì kh show hình
+            if (request.getEntities.HasValue.Equals(true))
+            {
                 foreach (ViewCompetition item in result.Items)
                 {
                     //Add image club
@@ -673,58 +717,18 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         //viewClub.Image = imgClub;
                         viewClub.Image = await GetUrlImageClub(viewClub.Image, viewClub.Id);
                     }
-
-                    //List Competition Entity
-                    //List<ViewCompetitionEntity> ListView_CompetitionEntities = new List<ViewCompetitionEntity>();
-
                     List<ViewCompetitionEntity> competitionEntities = await _competitionEntityRepo.GetCompetitionEntities(item.Id);
 
                     if (competitionEntities != null)
                     {
                         foreach (ViewCompetitionEntity competitionEntity in competitionEntities)
-                        {
-                            //get IMG from Firebase                        
-                            //string imgUrl_CompetitionEntity;
-                            //try
-                            //{
-                            //    if (competitionEntity.ImageUrl.Contains("https"))
-                            //    {
-                            //        imgUrl_CompetitionEntity = competitionEntity.ImageUrl;
-                            //    }
-                            //    else
-                            //    {
-                            //        imgUrl_CompetitionEntity = await _fileService.GetUrlFromFilenameAsync(competitionEntity.ImageUrl);
-                            //    }
-
-                            //}
-                            //catch (Exception)
-                            //{
-                            //    imgUrl_CompetitionEntity = "";
-                            //}
-
+                        {                         
                             competitionEntity.ImageUrl = await GetUrlImageCompEntity(competitionEntity.ImageUrl, competitionEntity.Id);
-
-                            //ViewCompetitionEntity viewCompetitionEntity = new ViewCompetitionEntity()
-                            //{
-                            //    Id = competitionEntity.Id,
-                            //    CompetitionId = competitionEntity.CompetitionId,
-                            //    Name = competitionEntity.Name,
-                            //    Description = competitionEntity.Description,
-                            //    Email = competitionEntity.Email,
-                            //    EntityTypeId = competitionEntity.EntityTypeId,
-                            //    EntityTypeName = competitionEntity.EntityType.Name,
-                            //    Website = competitionEntity.Website,
-                            //    ImageUrl = imgUrl_CompetitionEntity,
-                            //};
-                            ////
-                            //ListView_CompetitionEntities.Add(viewCompetitionEntity);
                         }
-
                         item.CompetitionEntities = competitionEntities;
                     }
                 }
             }
-
             return result;
         }
 
@@ -2903,22 +2907,30 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 List<CompetitionInMajor> lcim = comp.CompetitionInMajors.ToList();
                 foreach (CompetitionInMajor cim in lcim)
                 {
-                    CompetitionInMajorDeleteModel requestDelete = new CompetitionInMajorDeleteModel()
-                    {
-                        CompetitionInMajorId = cim.Id,
-                        ClubId = model.ClubId
-                    };
-                    await DeleteMajorInCompetition(requestDelete, token);
+                    //CompetitionInMajorDeleteModel requestDelete = new CompetitionInMajorDeleteModel()
+                    //{
+                    //    CompetitionInMajorId = cim.Id,
+                    //    ClubId = model.ClubId
+                    //};
+                    await _competitionInMajorRepo.DeleteCompetitionInMajor(cim.Id);
+                    //await DeleteMajorInCompetition(requestDelete, token);
                 }
                 //add new
-                CompetitionInMajorInsertModel requestAdd = new CompetitionInMajorInsertModel()
-                {
-                    ClubId = model.ClubId,
-                    CompetitionId = model.Id,
-                    ListMajorId = model.ListMajorId,
+                //CompetitionInMajorInsertModel requestAdd = new CompetitionInMajorInsertModel()
+                //{
+                //    ClubId = model.ClubId,
+                //    CompetitionId = model.Id,
+                //    ListMajorId = model.ListMajorId,
 
-                };
-                await AddCompetitionInMajor(requestAdd, token);
+                //};
+                foreach (int majorId in model.ListMajorId) {
+                    CompetitionInMajor comInMaj = new CompetitionInMajor()
+                    {
+                        MajorId = majorId,
+                        CompetitionId = comp.Id
+                    };
+                    await _competitionInMajorRepo.Insert(comInMaj);
+                }            
             }
             comp.CompetitionTypeId = model.CompetitionTypeId.HasValue ? model.CompetitionTypeId.Value : comp.CompetitionTypeId;
             comp.SeedsPoint = (double)(model.SeedsPoint.HasValue ? model.SeedsPoint.Value : comp.SeedsPoint);
