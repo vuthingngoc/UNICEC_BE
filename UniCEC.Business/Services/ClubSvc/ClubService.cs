@@ -334,6 +334,15 @@ namespace UniCEC.Business.Services.ClubSvc
 
         public async Task<ViewActivityOfClubModel> GetActivityOfClubById(string token, int clubId)
         {
+            int userId = _decodeToken.Decode(token, "Id");
+            int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
+
+            // if role is not leader or vice president
+            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to update this club");
+
+            Club club = await _clubRepo.Get(clubId);
+            if (club == null) throw new NullReferenceException("Not found this club");
+
             ViewActivityOfClubModel result = await _clubRepo.GetActivityOfClubById(clubId);
             return result;
         }
