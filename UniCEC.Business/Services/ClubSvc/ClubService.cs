@@ -331,5 +331,11 @@ namespace UniCEC.Business.Services.ClubSvc
 
             await _memberRepo.UpdateStatusDeletedClub(id);
         }
+
+        public async Task<ViewActivityOfClubModel> GetActivityOfClubById(string token, int clubId)
+        {
+            ViewActivityOfClubModel result = await _clubRepo.GetActivityOfClubById(clubId);
+            return result;
+        }
     }
 }
