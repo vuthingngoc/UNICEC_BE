@@ -274,10 +274,19 @@ namespace UniCEC.Business.Services.ClubSvc
 
             if (model.Status != false) club.Status = model.Status;
 
-            if (!string.IsNullOrEmpty(model.Image))
+            //if (!string.IsNullOrEmpty(model.Image))
+            if(!string.IsNullOrEmpty(model.Image)) // base64
             {
-                if (string.IsNullOrEmpty(club.Image)) club.Image = await _fileService.UploadFile(model.Image); // insert
-                else await _fileService.UploadFile(club.Image, model.Image); // update                
+                if (!model.Image.Contains("token"))
+                {
+                    club.Image = (string.IsNullOrEmpty(club.Image))
+                                ? await _fileService.UploadFile(model.Image) // insert
+                                : await _fileService.UploadFile(club.Image, model.Image);// update           
+                }
+                else
+                {
+                    club.Image = model.Image;
+                }   
             }
 
             if (!string.IsNullOrEmpty(model.ClubContact)) club.ClubContact = model.ClubContact;
