@@ -43,6 +43,7 @@ namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
         {
             var query = from noties in context.Notifications
                         where noties.UserId.Equals(userId)
+                        orderby noties.CreateTime descending
                         select noties;
 
             int totalCount = query.Count();
