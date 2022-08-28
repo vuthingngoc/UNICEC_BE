@@ -269,11 +269,11 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
                            && ca.CreatorId == u.Id // tìm thằng tạo tại vì nó là thằng member của club
                         select ca;
             //
-            int totalActivity = await query.CountAsync();
+            int totalActivity = await query.Where(ca => ca.Status != CompetitionActivityStatus.Cancelling).CountAsync();
             //
             int totalActivityComplete = await query.Where(ca => ca.Status == CompetitionActivityStatus.Completed).CountAsync();
             //
-            int totalActivityLate = await query.Where(ca => ca.Ending < new LocalTime().GetLocalTime().DateTime && ca.Status != CompetitionActivityStatus.Finished && ca.Status != CompetitionActivityStatus.Completed).CountAsync();
+            int totalActivityLate = await query.Where(ca => ca.Ending < new LocalTime().GetLocalTime().DateTime && ca.Status != CompetitionActivityStatus.Finished && ca.Status != CompetitionActivityStatus.Completed && ca.Status != CompetitionActivityStatus.Cancelling).CountAsync();
 
             return new ViewActivityOfClubModel
             {
