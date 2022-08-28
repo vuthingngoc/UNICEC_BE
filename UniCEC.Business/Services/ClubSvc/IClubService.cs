@@ -19,5 +19,7 @@ namespace UniCEC.Business.Services.ClubSvc
         public Task Update(string token, ClubUpdateModel model);
         public Task Update(string token,int clubId, bool status); // for university admin
         public Task Delete(string token, int id);
+        //TA
+        public Task<ViewActivityOfClubModel> GetActivityOfClubById(string token, int clubId);
     }
 }

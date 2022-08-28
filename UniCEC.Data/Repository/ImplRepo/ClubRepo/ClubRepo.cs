@@ -8,6 +8,7 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.Club;
 using UniCEC.Data.RequestModels;
+using UniCEC.Data.Common;
 
 namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
 {
@@ -254,6 +255,33 @@ namespace UniCEC.Data.Repository.ImplRepo.ClubRepo
         public async Task<bool> CheckExistedClub(int clubId)
         {
             return await context.Clubs.FirstOrDefaultAsync(club => club.Id.Equals(clubId) && club.Status.Equals(true)) != null;
+        }
+
+        public async Task<ViewActivityOfClubModel> GetActivityOfClubById(int clubId)
+        {
+            var query = from u in context.Users
+                        join m in context.Members on u.Id equals m.UserId
+                        join c in context.Clubs on m.ClubId equals c.Id
+                        join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
+                        join comp in context.Competitions on cic.CompetitionId equals comp.Id
+                        join ca in context.CompetitionActivities on comp.Id equals ca.CompetitionId
+                        where c.Id == clubId
+                           && ca.CreatorId == u.Id // tìm thằng tạo tại vì nó là thằng member của club
+                        select ca;
+            //
+            int totalActivity = await query.CountAsync();
+            //
+            int totalActivityComplete = await query.Where(ca => ca.Status == CompetitionActivityStatus.Completed).CountAsync();
+            //
+            int totalActivityLate = await query.Where(ca => ca.Ending < new LocalTime().GetLocalTime().DateTime && ca.Status != CompetitionActivityStatus.Finished && ca.Status != CompetitionActivityStatus.Completed).CountAsync();
+
+            return new ViewActivityOfClubModel
+            {
+                ClubId = clubId,
+                TotalActivity = totalActivity,
+                TotalActivityComplete = totalActivityComplete,
+                TotalActivityLate = totalActivityLate,  
+            };
         }
     }
 }

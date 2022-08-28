@@ -301,5 +301,30 @@ namespace UniCEC.API.Controllers
                 return Unauthorized(ex.Message);
             }
         }
+
+
+        [HttpGet("activity-of-club")]
+        [SwaggerOperation(Summary = "Get activity of club by id - Authenticated user in the university")]
+        public async Task<IActionResult> GetActivityOfClubById([FromQuery(Name = "clubId"), BindRequired]int clubId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewActivityOfClubModel clubActivity = await _clubService.GetActivityOfClubById(token, clubId);
+                return Ok(clubActivity);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
     }
 }
