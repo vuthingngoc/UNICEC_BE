@@ -338,7 +338,7 @@ namespace UniCEC.Business.Services.ClubSvc
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, clubId);
 
             // if role is not leader or vice president
-            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to update this club");
+            if (!clubRoleId.Equals(1)) throw new UnauthorizedAccessException("You do not have permission to get information");
 
             Club club = await _clubRepo.Get(clubId);
             if (club == null) throw new NullReferenceException("Not found this club");
