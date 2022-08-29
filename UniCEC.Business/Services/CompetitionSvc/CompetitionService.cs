@@ -1113,7 +1113,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                             CompetitionId = comp.Id,
                             ChangerId = mem.Id,
                             ChangeDate = new LocalTime().GetLocalTime().DateTime,
-                            Description = mem.User.Fullname + " Change Rule Or Condition Of Competition",
+                            Description = "Thay đổi cập nhật thể lệ cuộc thi",
                             Status = CompetitionStatus.PendingReview,
                         };
                         int result = await _competitionHistoryRepo.Insert(chim);

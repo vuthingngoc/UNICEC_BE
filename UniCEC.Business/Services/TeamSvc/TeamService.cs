@@ -458,6 +458,9 @@ namespace UniCEC.Business.Services.TeamSvc
                 Team team = await _teamRepo.Get(TeamId);
                 if (team == null) throw new ArgumentException("Not found this team");
 
+                //----- Check Team Status Is Locked 
+                if (team.Status == TeamStatus.IsLocked) throw new ArgumentException("Team Is Locked you delete");
+
                 //2.check user in same Team in Competition
                 ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(TeamId, UserId);
                 if (participantInTeam == null) throw new ArgumentException("You aren't participant in that team");
