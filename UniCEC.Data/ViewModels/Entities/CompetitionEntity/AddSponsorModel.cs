@@ -13,10 +13,10 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionEntity
         [JsonPropertyName("base64_string_img")]
         public string Base64StringImg { get; set; }
 
-        public string Website { get; set; }
+        public string? Website { get; set; }
 
         public string Email { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }
