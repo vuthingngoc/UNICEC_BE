@@ -238,7 +238,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
                 if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-                if (clubRoleId <= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                if (clubRoleId >= member.ClubRoleId) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
                 if (member.Status.Equals(MemberStatus.Inactive)) return;
             }
