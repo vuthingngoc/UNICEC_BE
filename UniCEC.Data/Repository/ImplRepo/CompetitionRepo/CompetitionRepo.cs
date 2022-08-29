@@ -814,6 +814,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         join p in context.Participants on c.Id equals p.CompetitionId
                         where p.StudentId == userId
                               && c.CreateTime < new LocalTime().GetLocalTime().DateTime
+                              && c.Status != CompetitionStatus.Draft
+                              && c.Status != CompetitionStatus.Cancel
+                              && c.Status != CompetitionStatus.PendingReview
+                              && c.Status != CompetitionStatus.Approve
                         orderby c.CreateTime descending
                         select new { c, ct };
             //Scope
@@ -1106,7 +1110,10 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         where ca.Id == mta.CompetitionActivityId
                               && ca.Status != CompetitionActivityStatus.Cancelling
                         from c in context.Competitions
-                        where ca.CompetitionId == c.Id
+                        where ca.CompetitionId == c.Id && c.Status != CompetitionStatus.Draft
+                              && c.Status != CompetitionStatus.Cancel
+                              && c.Status != CompetitionStatus.PendingReview
+                              && c.Status != CompetitionStatus.Approve
                         from cic in context.CompetitionInClubs
                         where cic.ClubId == clubId && c.Id == cic.CompetitionId && c.CreateTime < new LocalTime().GetLocalTime().DateTime
                         orderby c.CreateTime descending
