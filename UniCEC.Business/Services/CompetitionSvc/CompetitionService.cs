@@ -863,10 +863,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         if (string.IsNullOrEmpty(sponsor.Base64StringImg)
                            || string.IsNullOrEmpty(sponsor.Name)
-                           || string.IsNullOrEmpty(sponsor.Email)
-                           || string.IsNullOrEmpty(sponsor.Description)
-                           || string.IsNullOrEmpty(sponsor.Website))
-                            throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL || Description is NULL|| Website is NULL");
+                           || string.IsNullOrEmpty(sponsor.Email))
+                           //|| string.IsNullOrEmpty(sponsor.Description)
+                           //|| string.IsNullOrEmpty(sponsor.Website))
+                            throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL");
                     }
                     insertSponsor = true;
                 }
