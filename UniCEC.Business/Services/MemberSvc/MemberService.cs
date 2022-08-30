@@ -163,7 +163,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 // send notification
                 Club club = await _clubRepo.Get(model.ClubId);                
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                if(deviceToken != null)
+                if(!string.IsNullOrEmpty(deviceToken))
                 {
                     string body = (model.Status.Equals(MemberStatus.Active))
                     ? $"Chúc mừng bạn đã trở thành thành viên câu lạc bộ {club.Name}"
