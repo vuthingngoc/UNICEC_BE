@@ -1490,7 +1490,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(deviceToken != null)
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
                         string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
                         Notification notification = new Notification()
@@ -1525,7 +1525,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(deviceToken != null)
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
                         string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
                         Notification notification = new Notification()

@@ -619,7 +619,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                if(deviceToken != null)
+                if(!string.IsNullOrEmpty(deviceToken))
                 {
                     Notification notification = new Notification()
                     {
@@ -687,7 +687,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 foreach (var manager in managers.Items)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(deviceToken != null)
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
                         Notification notification = new Notification()
                         {
@@ -704,7 +704,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 foreach (var element in members)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(deviceToken != null)
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
                         Notification notification = new Notification()
                         {
