@@ -619,14 +619,17 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                Notification notification = new Notification()
+                if(deviceToken != null)
                 {
-                    Title = "Thông báo",
-                    Body = $"{fullname} vừa phân công cho bạn 1 công việc mới!",
-                    RedirectUrl = "/viewCompetitionMemberTask",
-                    UserId = member.UserId,
-                };
-                await _notificationService.SendNotification(notification, deviceToken);
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa phân công cho bạn 1 công việc mới!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
+                }
 
                 return await TransferViewDetailMTA(mtaInsert);
             }
@@ -684,28 +687,34 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 foreach (var manager in managers.Items)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    Notification notification = new Notification()
+                    if(deviceToken != null)
                     {
-                        Title = "Thông báo",
-                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                        RedirectUrl = "/viewCompetitionMemberTask",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                            RedirectUrl = "/viewCompetitionMemberTask",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
                 };
 
                 List<MemberTakesActivity> members = await _memberTakesActivityRepo.ListMemberTakesActivity(model.CompetitionActivityId);
                 foreach (var element in members)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    Notification notification = new Notification()
+                    if(deviceToken != null)
                     {
-                        Title = "Thông báo",
-                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                        RedirectUrl = "/viewCompetitionMemberTask",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                            RedirectUrl = "/viewCompetitionMemberTask",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
                 }
 
                 return true;
