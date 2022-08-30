@@ -49,31 +49,34 @@ namespace UniCEC.Business.Services.UniversitySvc
         //Get-University-By-Id
         public async Task<ViewUniversity> GetUniversityById(int id)
         {
-            University uni = await _universityRepo.Get(id);
-            //
-            City city = await _cityRepo.Get(uni.CityId);
-            //
-            ViewUniversity uniView = new ViewUniversity();
-            //
-            if (uni != null)
-            {
-                //gán vào các trường view
-                uniView.Id = id;
-                uniView.ImgURL = await GetImageUrl(uni.ImageUrl, uni.Id);
-                uniView.Name = uni.Name;
-                uniView.Description = uni.Description;
-                uniView.Phone = uni.Phone;
-                uniView.Email = uni.Email;
-                uniView.Opening = uni.Openning;
-                uniView.Closing = uni.Closing;
-                uniView.CityId = uni.CityId;
-                uniView.CityName = city.Name;
-                uniView.Status = uni.Status;                
-                uniView.Founding = uni.Founding;
-                uniView.UniCode = uni.UniCode;
-                //
-            }
-            return uniView;
+            //University uni = await _universityRepo.Get(id);
+            ////
+            //City city = await _cityRepo.Get(uni.CityId);
+            ////
+            //ViewUniversity uniView = new ViewUniversity();
+            ////
+            //if (uni != null)
+            //{
+            //    //gán vào các trường view
+            //    uniView.Id = id;
+            //    uniView.ImgURL = await GetImageUrl(uni.ImageUrl, uni.Id);
+            //    uniView.Name = uni.Name;
+            //    uniView.Description = uni.Description;
+            //    uniView.Phone = uni.Phone;
+            //    uniView.Email = uni.Email;
+            //    uniView.Opening = uni.Openning;
+            //    uniView.Closing = uni.Closing;
+            //    uniView.CityId = uni.CityId;
+            //    uniView.CityName = city.Name;
+            //    uniView.Status = uni.Status;                
+            //    uniView.Founding = uni.Founding;
+            //    uniView.UniCode = uni.UniCode;
+            //    //
+            //}
+
+            ViewUniversity university = await _universityRepo.GetById(id);
+            if (university == null) throw new NullReferenceException("Not found this university");
+            return university;
 
         }
 
@@ -111,8 +114,10 @@ namespace UniCEC.Business.Services.UniversitySvc
                 uni.Description = universityModel.Description;
                 uni.Phone = universityModel.Phone;
                 //
-                if (!string.IsNullOrEmpty(universityModel.Base64StringImg))
-                    uni.ImageUrl = await _fileService.UploadFile(universityModel.Base64StringImg);
+                if (!string.IsNullOrEmpty(universityModel.Image))
+                    uni.ImageUrl = (universityModel.Image.Contains("https"))
+                        ? universityModel.Image
+                        : await _fileService.UploadFile(universityModel.Image);
 
                 uni.Email = universityModel.Email;
                 uni.Openning = universityModel.Openning;
@@ -168,6 +173,9 @@ namespace UniCEC.Business.Services.UniversitySvc
                     if (!uniId.Equals(university.Id)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
                 }
 
+                if (university.Opening?.Length > 5 || university.Closing?.Length > 5) 
+                    throw new ArgumentException("Opening time || Closing time length must smaller than five");        
+
                 if (university.Id == 0) throw new ArgumentNullException("University Id Null");
                 //get Uni
                 University uni = await _universityRepo.Get(university.Id);
@@ -177,17 +185,19 @@ namespace UniCEC.Business.Services.UniversitySvc
                 // check duplicated university
                 if (!string.IsNullOrEmpty(university.Name) && university.CityId > 0 && !string.IsNullOrEmpty(university.UniCode)){
                     int existedUniId = await _universityRepo.CheckDuplicatedUniversity(university.Name, university.CityId, university.UniCode);
-                    if (existedUniId != uni.Id) throw new ArgumentException("Duplicated university");
+                    if (existedUniId > 0 && existedUniId != uni.Id) throw new ArgumentException("Duplicated university");
                 }
 
                 // upload new image to firebase
-                if(!string.IsNullOrEmpty(university.ImgURL)) 
-                    uni.ImageUrl = await _fileService.UploadFile(university.ImgURL);
+                if(!string.IsNullOrEmpty(university.Image)) 
+                    uni.ImageUrl = (university.Image.Contains("https")) 
+                        ? university.Image 
+                        : await _fileService.UploadFile(university.Image);
 
                 //update name-des-phone-opening-closing-founding-cityId-unicode
                 uni.Name = (!string.IsNullOrEmpty(university.Name)) ? university.Name : uni.Name;
                 uni.Description = (!string.IsNullOrEmpty(university.Description)) ? university.Description : uni.Description;
-                uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;
+                uni.Phone = (!string.IsNullOrEmpty(university.Phone)) ? university.Phone : uni.Phone;                
                 uni.Openning = (!string.IsNullOrEmpty(university.Opening)) ? university.Opening : uni.Openning;
                 uni.Closing = (!string.IsNullOrEmpty(university.Closing)) ? university.Closing : uni.Closing;
                 uni.CityId = (university.CityId > 0) ? university.CityId : uni.CityId;

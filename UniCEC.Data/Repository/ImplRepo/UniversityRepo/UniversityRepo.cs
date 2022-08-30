@@ -21,6 +21,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         {
             _userRepo = userRepo;
         }
+
         //Check-University-Email
         public async Task<bool> CheckEmailUniversity(string email)
         {
@@ -57,6 +58,28 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
             await Update();
         }
 
+        public async Task<ViewUniversity> GetById(int id)
+        {
+            return await (from u in context.Universities
+                          join c in context.Cities on u.CityId equals c.Id
+                          select new ViewUniversity()
+                          {
+                              Id = u.Id,
+                              CityId = u.CityId,
+                              UniCode = u.UniCode,
+                              Name = u.Name,
+                              Description = u.Description,
+                              Phone = u.Phone,
+                              Email = u.Email,
+                              Founding = u.Founding,
+                              Opening = u.Openning,
+                              Closing = u.Closing,
+                              Status = u.Status,
+                              CityName = c.Name,
+                              ImgURL = u.ImageUrl,
+                          }).FirstOrDefaultAsync();
+        }
+
         //Get-List-Universities-By-Email
         public async Task<List<ViewUniversity>> GetListUniversityByEmail(string email)
         {
@@ -84,8 +107,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 viewUniversity.Status = u.Status;
                 viewUniversity.CityName = u.City.Name;
                 viewUniversity.ImgURL = u.ImageUrl;
-                //
-                viewUniversities.Add(viewUniversity);
+            //
+            viewUniversities.Add(viewUniversity);
             });
 
             return viewUniversities;
@@ -172,8 +195,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
                 viewUniversity.Status = u.Status;
                 viewUniversity.CityName = u.City.Name;
                 viewUniversity.ImgURL = u.ImageUrl;
-                //
-                viewUniversities.Add(viewUniversity);
+            //
+            viewUniversities.Add(viewUniversity);
             });
 
             return viewUniversities;
