@@ -446,7 +446,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             var query = from cic in context.CompetitionInClubs
                         join c in context.Clubs on cic.ClubId equals c.Id
                         join m in context.Members on c.Id equals m.ClubId
-                        where cic.CompetitionId.Equals(competitionId) && cic.IsOwner.Equals(true)
+                        where cic.CompetitionId.Equals(competitionId) && cic.IsOwner.Equals(true) && m.ClubRoleId.Equals(1) // club manager
                         select m;
 
             return (query.Any()) ? await query.FirstOrDefaultAsync() : null;
