@@ -15,8 +15,6 @@ namespace UniCEC.Data.ViewModels.Entities.University
         public DateTime Founding { get; set; }
         public string Openning { get; set; }
         public string Closing { get; set; }
-
-        [JsonPropertyName("base64_string_img")]
-        public string Base64StringImg { get; set; }
+        public string Image { get; set; }
     }
 }
