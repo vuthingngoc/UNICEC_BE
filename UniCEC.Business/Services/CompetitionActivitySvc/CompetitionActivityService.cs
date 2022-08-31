@@ -484,7 +484,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Competition Activity is Cancel Or Compeleted");
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) 
+                    throw new ArgumentException("Competition Activity has already be Cancel Or Compeleted");
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
@@ -496,7 +497,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     {
                         //competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
                         //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
-                        if ((model.Status.Value == CompetitionActivityStatus.Completed) && (competitionActivity.Status == CompetitionActivityStatus.Finished))
+                        if ((model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Open) 
+                                && (competitionActivity.Status == CompetitionActivityStatus.Finished))
                         {
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
                             foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
