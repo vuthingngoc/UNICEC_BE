@@ -253,6 +253,21 @@ namespace UniCEC.Business.Services.MemberSvc
             Club club = await _clubRepo.Get(member.ClubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();
+
+            // send notification
+            string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+            if (!string.IsNullOrEmpty(deviceToken))
+            {
+                string body = $"{club.Name} đã mời bạn ra khỏi câu lạc bộ";
+                Notification notification = new Notification()
+                {
+                    Title = "Thông báo",
+                    Body = body,
+                    RedirectUrl = "/notification",
+                    UserId = member.UserId,
+                };
+                await _notificationService.SendNotification(notification, deviceToken);
+            }
         }
 
         public async Task<List<ViewDetailMember>> GetMemberInfoByClub(string token, int? clubId)
