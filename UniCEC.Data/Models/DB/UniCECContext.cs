@@ -453,6 +453,16 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.Address)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
                 entity.Property(e => e.EndTime).HasColumnType("datetime");
 
                 entity.Property(e => e.MatchTypeId).HasColumnName("MatchTypeID");
@@ -461,17 +471,21 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
 
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
                 entity.HasOne(d => d.MatchType)
                     .WithMany(p => p.Matches)
                     .HasForeignKey(d => d.MatchTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Match__MatchType__2BFE89A6");
+                    .HasConstraintName("FK__Match__MatchType__3493CFA7");
 
                 entity.HasOne(d => d.Round)
                     .WithMany(p => p.Matches)
                     .HasForeignKey(d => d.RoundId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Match__RoundID__2B0A656D");
+                    .HasConstraintName("FK__Match__RoundID__339FAB6E");
             });
 
             modelBuilder.Entity<MatchType>(entity =>
@@ -726,13 +740,13 @@ namespace UniCEC.Data.Models.DB
                     .WithMany(p => p.TeamInMatches)
                     .HasForeignKey(d => d.MatchId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TeamInMat__Match__2EDAF651");
+                    .HasConstraintName("FK__TeamInMat__Match__37703C52");
 
                 entity.HasOne(d => d.Team)
                     .WithMany(p => p.TeamInMatches)
                     .HasForeignKey(d => d.TeamId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TeamInMat__TeamI__2FCF1A8A");
+                    .HasConstraintName("FK__TeamInMat__TeamI__3864608B");
             });
 
             modelBuilder.Entity<TeamInRound>(entity =>
