@@ -37,6 +37,8 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<EntityType> EntityTypes { get; set; }
         public virtual DbSet<Major> Majors { get; set; }
+        public virtual DbSet<Match> Matches { get; set; }
+        public virtual DbSet<MatchType> MatchTypes { get; set; }
         public virtual DbSet<Member> Members { get; set; }
         public virtual DbSet<MemberInCompetition> MemberInCompetitions { get; set; }
         public virtual DbSet<MemberTakesActivity> MemberTakesActivities { get; set; }
@@ -46,6 +48,7 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<SeedsWallet> SeedsWallets { get; set; }
         public virtual DbSet<Team> Teams { get; set; }
+        public virtual DbSet<TeamInMatch> TeamInMatches { get; set; }
         public virtual DbSet<TeamInRound> TeamInRounds { get; set; }
         public virtual DbSet<TeamRole> TeamRoles { get; set; }
         public virtual DbSet<University> Universities { get; set; }
@@ -444,6 +447,44 @@ namespace UniCEC.Data.Models.DB
                     .HasMaxLength(50);
             });
 
+            modelBuilder.Entity<Match>(entity =>
+            {
+                entity.ToTable("Match");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.EndTime).HasColumnType("datetime");
+
+                entity.Property(e => e.MatchTypeId).HasColumnName("MatchTypeID");
+
+                entity.Property(e => e.RoundId).HasColumnName("RoundID");
+
+                entity.Property(e => e.StartTime).HasColumnType("datetime");
+
+                entity.HasOne(d => d.MatchType)
+                    .WithMany(p => p.Matches)
+                    .HasForeignKey(d => d.MatchTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Match__MatchType__2BFE89A6");
+
+                entity.HasOne(d => d.Round)
+                    .WithMany(p => p.Matches)
+                    .HasForeignKey(d => d.RoundId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Match__RoundID__2B0A656D");
+            });
+
+            modelBuilder.Entity<MatchType>(entity =>
+            {
+                entity.ToTable("MatchType");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
             modelBuilder.Entity<Member>(entity =>
             {
                 entity.ToTable("Member");
@@ -669,6 +710,29 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Team__Competitio__73BA3083");
+            });
+
+            modelBuilder.Entity<TeamInMatch>(entity =>
+            {
+                entity.ToTable("TeamInMatch");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.MatchId).HasColumnName("MatchID");
+
+                entity.Property(e => e.TeamId).HasColumnName("TeamID");
+
+                entity.HasOne(d => d.Match)
+                    .WithMany(p => p.TeamInMatches)
+                    .HasForeignKey(d => d.MatchId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__TeamInMat__Match__2EDAF651");
+
+                entity.HasOne(d => d.Team)
+                    .WithMany(p => p.TeamInMatches)
+                    .HasForeignKey(d => d.TeamId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__TeamInMat__TeamI__2FCF1A8A");
             });
 
             modelBuilder.Entity<TeamInRound>(entity =>
