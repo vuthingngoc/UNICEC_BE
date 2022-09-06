@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
@@ -23,5 +24,8 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public Task<UserTokenModel> GetUserTokenById(int id);
         // notification
         public Task<string> GetDeviceTokenByUser(int userId);
+        public Task<List<string>> GetDeviceTokenByUsers(List<int> userIds);
+        public Task<string> GetDeviceTokenByMember(int memberId);
+        public Task<List<string>> GetDeviceTokenByMembers(List<int> memberIds);
     }
 }

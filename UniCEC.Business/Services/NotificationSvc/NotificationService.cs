@@ -51,84 +51,25 @@ namespace UniCEC.Business.Services.NotificationSvc
 
         public async Task SendNotification(Notification notification, string deviceToken)
         {
-            var appSettingsSection = _configuration.GetSection("FcmNotification");
-            try
+            var message = new FirebaseAdmin.Messaging.Message()
             {
-                var applicationID = appSettingsSection.GetSection("ServerKey").Value; 
-
-                var senderId = appSettingsSection.GetSection("SenderId").Value;
-
-                WebRequest tRequest = WebRequest.Create(_configuration.GetSection("FcmNotification").GetSection("GoogleApi").Value);
-
-                tRequest.Method = "post";
-
-                tRequest.ContentType = "application/json";
-
-                var data = new
-
+                Token = deviceToken,
+                Notification = new FirebaseAdmin.Messaging.Notification()
                 {
-
-                    to = deviceToken,
-
-                    notification = new
-
-                    {
-
-                        body = notification.Body,
-
-                        title = notification.Title,
-
-                        icon = "myicon",
-
-                        click_action = notification.RedirectUrl
-
-                    }
-                };
-
-                var json = JsonConvert.SerializeObject(data);
-
-                Byte[] byteArray = Encoding.UTF8.GetBytes(json);
-
-                tRequest.Headers.Add(string.Format("Authorization: key={0}", applicationID));
-
-                tRequest.Headers.Add(string.Format("Sender: id={0}", senderId));
-
-                tRequest.ContentLength = byteArray.Length;
-
-
-                using (Stream dataStream = tRequest.GetRequestStream())
+                    Title = notification.Title,
+                    Body = notification.Body,
+                },
+                Android = new FirebaseAdmin.Messaging.AndroidConfig()
                 {
-
-                    dataStream.Write(byteArray, 0, byteArray.Length);
-
-
-                    using (WebResponse tResponse = tRequest.GetResponse())
-                    {
-
-                        using (Stream dataStreamResponse = tResponse.GetResponseStream())
-                        {
-
-                            using (StreamReader tReader = new StreamReader(dataStreamResponse))
-                            {
-
-                                String sResponseFromServer = tReader.ReadToEnd();
-
-                                string str = sResponseFromServer;
-
-                            }
-                        }
-                    }
+                    Priority = FirebaseAdmin.Messaging.Priority.High
                 }
+            };
 
-                // Save notification
-                notification.CreateTime = new LocalTime().GetLocalTime().DateTime;
-                await _notificationRepo.Insert(notification);
-            }
+            await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
 
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            // Save notification
+            notification.CreateTime = new LocalTime().GetLocalTime().DateTime;
+            await _notificationRepo.Insert(notification);
         }
 
         public async Task SendNotification(Notification notification, List<string> deviceTokens)

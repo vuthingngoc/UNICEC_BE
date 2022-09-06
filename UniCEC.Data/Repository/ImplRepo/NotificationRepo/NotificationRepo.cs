@@ -61,5 +61,11 @@ namespace UniCEC.Data.Repository.ImplRepo.NotificationRepo
 
             return (notifications.Count() > 0) ? new PagingResult<ViewNotification>(notifications, totalCount, request.CurrentPage, request.PageSize) : null;
         }
+
+        public async Task InsertNotifications(List<Notification> notifications)
+        {
+            await context.Notifications.AddRangeAsync(notifications);
+            await context.SaveChangesAsync();
+        }
     }
 }

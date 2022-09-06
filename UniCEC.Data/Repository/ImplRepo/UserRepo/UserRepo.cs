@@ -21,8 +21,10 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public async Task<ViewUser> GetById(int id, bool isFullInfo)
         {
             var query = from u in context.Users
-                        join uni in context.Universities on u.UniversityId equals uni.Id into uniJoin from uni in uniJoin.DefaultIfEmpty()
-                        join d in context.Departments on u.DepartmentId equals d.Id into depJoin from d in depJoin.DefaultIfEmpty()
+                        join uni in context.Universities on u.UniversityId equals uni.Id into uniJoin
+                        from uni in uniJoin.DefaultIfEmpty()
+                        join d in context.Departments on u.DepartmentId equals d.Id into depJoin
+                        from d in depJoin.DefaultIfEmpty()
                         where u.Id.Equals(id)
                         select new { u, uni, d };
 
@@ -166,7 +168,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
 
             if (request.DepartmentId.HasValue) query = query.Where(selector => selector.u.DepartmentId.Equals(request.DepartmentId));
 
-            if (!string.IsNullOrEmpty(request.SearchString)) 
+            if (!string.IsNullOrEmpty(request.SearchString))
                 query = query.Where(selector => selector.u.Fullname.ToLower().Contains(request.SearchString.ToLower())
                                                     || selector.u.Email.ToLower().Contains(request.SearchString.ToLower()));
 
@@ -243,6 +245,33 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         {
             User user = await context.Users.FirstOrDefaultAsync(user => user.Id.Equals(userId));
             return (user != null) ? user.DeviceToken : null;
+        }
+
+        public async Task<string> GetDeviceTokenByMember(int memberId)
+        {
+            return await (from m in context.Members
+                          join u in context.Users on m.UserId equals u.Id
+                          where m.Id.Equals(memberId)
+                          select u.DeviceToken).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<string>> GetDeviceTokenByUsers(List<int> userIds)
+        {
+            var query = from u in context.Users
+                        where userIds.Contains(u.Id)
+                        select u.DeviceToken;
+            
+            return (query.Any()) ? await query.ToListAsync() : null;
+        }
+
+        public async Task<List<string>> GetDeviceTokenByMembers(List<int> memberIds)
+        {
+            var query = from m in context.Members
+                        join u in context.Users on m.UserId equals u.Id
+                        where memberIds.Contains(m.Id)
+                        select u.DeviceToken;
+
+            return (query.Any()) ? await query.ToListAsync(): null;
         }
     }
 }
