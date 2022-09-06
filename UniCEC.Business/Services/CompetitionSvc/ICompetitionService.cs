@@ -28,11 +28,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         //update Status
         public Task<bool> CompetitionStatusUpdate(CompetitionStatusUpdateModel model, string token);
-
-        public Task<bool> CompetitionUpdateStatusAfterPending(int competitionId, int clubId, string token);
-
         public Task<bool> UpdateCompetitionByState(LeaderUpdateCompOrEventModel model, string token);
-        
+        public Task<bool> CompetitionUpdateStatusAfterPending(UpdateCompetitionWithStatePendingModel model, string token);
+
+
         //BE  use to test
         public Task<bool> UpdateBE(LeaderUpdateCompOrEventModel competition, string token);
 
