@@ -13,6 +13,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     {
         [JsonPropertyName("competition_id"), BindRequired]
         public int CompetitionId { get; set; }
+        [JsonPropertyName("start_time_register")]
         public DateTime? StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
         public DateTime? EndTimeRegister { get; set; }

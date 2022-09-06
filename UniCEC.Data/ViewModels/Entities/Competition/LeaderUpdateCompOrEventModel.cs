@@ -37,6 +37,9 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int? MaxNumber { get; set; }
         [JsonPropertyName("min_number")]
         public int? MinNumber { get; set; }
+
+        [JsonPropertyName("min_team_or_participant")]
+        public int? MinTeamOrParticipant { get; set; }
         public CompetitionScopeStatus? Scope { get; set; }
 
         //---------List DepartmentID belong to University Insert in Competition

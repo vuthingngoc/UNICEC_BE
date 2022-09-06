@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -17,11 +18,13 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
+using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -914,7 +917,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     competition.MinNumber = 0;
                 }
                 competition.NumberOfParticipation = model.NumberOfParticipations;
-                
+                competition.RequiredMin = model.MinTeamOrParticipant;
                 competition.CreateTime = localTime;
                 competition.StartTimeRegister = model.StartTimeRegister;
                 competition.EndTimeRegister = model.EndTimeRegister;
@@ -1056,6 +1059,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
             try
             {
                 if (model.Id == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null  || ClubId Null");
+
+                if (string.IsNullOrEmpty(model.Name)
+                  || string.IsNullOrEmpty(model.Content)
+                  || string.IsNullOrEmpty(model.Address)
+                  || string.IsNullOrEmpty(model.AddressName)
+                  || model.MinTeamOrParticipant < 0
+                  || model.CompetitionTypeId == 0
+                  || model.NumberOfParticipant == 0
+                  || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.SeedsPoint < 0
+                  || model.ClubId == 0)
+                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || MinTeamOfParticipant > 0 or Not Null" +
+                                                    "|| StartTimeRegister Null ||EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint > 0 or Not Null  || ClubId Null");
+
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
                 bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
@@ -1156,6 +1176,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
                     comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
                     comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+                    comp.RequiredMin = (int)(model.MinTeamOrParticipant.HasValue ? model.MinTeamOrParticipant : comp.RequiredMin);
                     comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
                     comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
 
@@ -1509,20 +1530,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
+                    Notification notification = new Notification()
                     {
-                        string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = body,
-                            RedirectUrl = "/notification",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
-                    
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
+
                 }
 
                 if (model.Status.Value == CompetitionStatus.Draft)
@@ -1544,20 +1562,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
+                    Notification notification = new Notification()
                     {
-                        string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = body,
-                            RedirectUrl = "/notification",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
-                    
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
+
                 }
 
                 throw new ArgumentException("State condition : Draft - Approve can update");
@@ -2931,7 +2946,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         private async Task<Competition> UpdateFieldCompetition(Competition comp, LeaderUpdateCompOrEventModel model, string token)
         {
-
+            
             //Check Competition Type 
             CompetitionType ct = await _competitionTypeRepo.Get(model.CompetitionTypeId.Value);
             if (ct == null) throw new ArgumentException("Competition Type Id not have in System");
@@ -3006,6 +3021,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             comp.MaxNumber = model.MaxNumber.HasValue ? model.MaxNumber.Value : comp.MaxNumber;
             comp.MinNumber = model.MinNumber.HasValue ? model.MinNumber.Value : comp.MinNumber;
             comp.NumberOfParticipation = model.NumberOfParticipant.HasValue ? model.NumberOfParticipant.Value : comp.NumberOfParticipation;
+            comp.RequiredMin = model.MinTeamOrParticipant.HasValue ? model.MinTeamOrParticipant.Value : comp.RequiredMin;
             comp.Scope = model.Scope.HasValue ? model.Scope.Value : comp.Scope;
             return comp;
         }
