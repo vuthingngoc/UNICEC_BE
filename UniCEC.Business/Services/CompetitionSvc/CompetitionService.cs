@@ -2418,6 +2418,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 NumberOfTeam = (int)competition.NumberOfTeam,
                 MinNumber = (int)competition.MinNumber,
                 MaxNumber = (int)competition.MaxNumber,
+                MinTeamOrParticipant = competition.RequiredMin,
                 AddressName = competition.AddressName,
                 CreateTime = competition.CreateTime,
                 StartTime = competition.StartTime,
