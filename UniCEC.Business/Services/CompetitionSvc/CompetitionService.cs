@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -17,11 +18,13 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
+using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -106,7 +109,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Equals(fullPathImage)) // for old data save filename in  db
             {
                 Club club = await _clubRepo.Get(clubId);
-                club.Image = fullPathImage ;
+                club.Image = fullPathImage;
                 await _clubRepo.Update();
             }
 
@@ -743,6 +746,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || string.IsNullOrEmpty(model.Content)
                     || string.IsNullOrEmpty(model.Address)
                     || string.IsNullOrEmpty(model.AddressName)
+                    || model.MinTeamOrParticipant < 0
                     || model.CompetitionTypeId == 0
                     || model.NumberOfParticipations == 0
                     || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
@@ -751,8 +755,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
                     || model.SeedsPoint < 0
                     || model.ClubId == 0)
-                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null" +
-                                                    " ||StartTimeRegister Null ||EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint Null  || ClubId Null");
+                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || MinTeamOfParticipant > 0 or Not Null" +
+                                                    "||StartTimeRegister Null ||EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint > 0 or Not Null  || ClubId Null");
 
                 //------------- CHECK Club in system
                 Club club = await _clubRepo.Get(model.ClubId);
@@ -861,8 +865,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         if (string.IsNullOrEmpty(sponsor.Base64StringImg)
                            || string.IsNullOrEmpty(sponsor.Name)
                            || string.IsNullOrEmpty(sponsor.Email))
-                           //|| string.IsNullOrEmpty(sponsor.Description)
-                           //|| string.IsNullOrEmpty(sponsor.Website))
+                            //|| string.IsNullOrEmpty(sponsor.Description)
+                            //|| string.IsNullOrEmpty(sponsor.Website))
                             throw new ArgumentNullException("Image of Sponsor is NULL || Name is NULL || Email is NULL");
                     }
                     insertSponsor = true;
@@ -913,6 +917,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     competition.MinNumber = 0;
                 }
                 competition.NumberOfParticipation = model.NumberOfParticipations;
+                competition.RequiredMin = model.MinTeamOrParticipant;
                 competition.CreateTime = localTime;
                 competition.StartTimeRegister = model.StartTimeRegister;
                 competition.EndTimeRegister = model.EndTimeRegister;
@@ -1054,6 +1059,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
             try
             {
                 if (model.Id == 0 || model.ClubId == 0) throw new ArgumentNullException("Competition Id Null  || ClubId Null");
+
+                if (string.IsNullOrEmpty(model.Name)
+                  || string.IsNullOrEmpty(model.Content)
+                  || string.IsNullOrEmpty(model.Address)
+                  || string.IsNullOrEmpty(model.AddressName)
+                  || model.MinTeamOrParticipant < 0
+                  || model.CompetitionTypeId == 0
+                  || model.NumberOfParticipant == 0
+                  || model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.SeedsPoint < 0
+                  || model.ClubId == 0)
+                    throw new ArgumentNullException("Name Null || Content Null || Address || AddressName || CompetitionTypeId Null || NumberOfParticipations Null || MinTeamOfParticipant > 0 or Not Null" +
+                                                    "|| StartTimeRegister Null ||EndTimeRegister Null  || StartTime Null || EndTime Null ||  SeedsPoint > 0 or Not Null  || ClubId Null");
+
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
 
                 bool Check = await CheckMemberInCompetition(token, model.Id, model.ClubId, true);
@@ -1081,6 +1103,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
 
                 //-------------------------------------------------------State Approve       
+
                 if (comp.Status == CompetitionStatus.Approve)
                 {
                     //Update Everything Except: Content, Scope
@@ -1153,6 +1176,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     comp.MaxNumber = (model.MaxNumber.HasValue) ? model.MaxNumber : comp.MaxNumber;
                     comp.MinNumber = (model.MinNumber.HasValue) ? model.MinNumber : comp.MinNumber;
                     comp.NumberOfParticipation = (int)((model.NumberOfParticipant.HasValue) ? model.NumberOfParticipant : comp.NumberOfParticipation);
+                    comp.RequiredMin = (int)(model.MinTeamOrParticipant.HasValue ? model.MinTeamOrParticipant : comp.RequiredMin);
                     comp.AddressName = (!string.IsNullOrEmpty(model.AddressName)) ? model.AddressName : comp.AddressName;
                     comp.Address = (!string.IsNullOrEmpty(model.Address)) ? model.Address : comp.Address;
 
@@ -1160,28 +1184,44 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     return true;
                 }
 
-
                 //-------------------------------------------------------State Pending
                 //State pending move to State Publish - Register - UpComing
                 //Update Date
                 if (comp.Status == CompetitionStatus.Pending)
                 {
+                    //check xem các mốc thời gian có đúng form hay không STR < ETR < ST < ET
                     bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
-                    if (dateInsertCases == false) throw new ArgumentException("Date not suitable");
+                    if (dateInsertCases == false) throw new ArgumentException("Ngày tháng không hợp lệ phải theo quy tắc STR < ETR < ST < ET");
 
-                    //update những field cho phép
-                    comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                    comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
-                    comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                    comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                    //chỉ có 3 trạng thái được quay về
 
-                    await _competitionRepo.Update();
-                    return true;
+                    //Puplish
+                    bool statePuplish = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+
+                    //Register
+                    bool stateRegister = CheckStateRegister(localTime, model.StartTimeRegister.Value, model.StartTimeRegister.Value);
+
+                    //Up-Coming
+                    bool stateUpComing = CheckStateUpComing(localTime, model.StartTimeRegister.Value, model.StartTime.Value.AddMinutes(-30));
+
+                    if (statePuplish || stateRegister || stateUpComing)
+                    {
+                        //update những field cho phép
+                        comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                        comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                        comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
+                        comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                        comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+
+                        await _competitionRepo.Update();
+                        return true;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Chỉ cập nhật được thời gian nằm trong trạng thái là Puplish, Register, Up-coming thôi");
+                    }
                 }
-
                 return false;
-
             }
             catch (Exception)
             {
@@ -1490,20 +1530,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
+                    Notification notification = new Notification()
                     {
-                        string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = body,
-                            RedirectUrl = "/notification",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
-                    
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
+
                 }
 
                 if (model.Status.Value == CompetitionStatus.Draft)
@@ -1525,20 +1562,17 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
+                    string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
+                    Notification notification = new Notification()
                     {
-                        string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = body,
-                            RedirectUrl = "/notification",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
-                    
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
                     return true;
+
                 }
 
                 throw new ArgumentException("State condition : Draft - Approve can update");
@@ -1654,7 +1688,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //State Condition : Puplish, Register, UpComing
                 if (model.Status == CompetitionStatus.Pending)
                 {
-                    if (comp.Status == CompetitionStatus.Approve || comp.Status == CompetitionStatus.Publish || comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
+                    if (comp.Status == CompetitionStatus.Publish || comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
                     {
                         comp.Status = CompetitionStatus.Pending;
                         await _competitionRepo.Update();
@@ -1711,7 +1745,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     {
                         foreach (Participant participant in participants)
                         {
-                            await _seedsWalletService.UpdateAmount(participant.StudentId, comp.SeedsPoint + comp.SeedsDeposited);
+                            await _seedsWalletService.UpdateAmount(participant.StudentId, comp.SeedsPoint);
                         }
                     }
                     return true;
@@ -1756,6 +1790,22 @@ namespace UniCEC.Business.Services.CompetitionSvc
                      || comp.Status == CompetitionStatus.UpComing
                      || comp.Status == CompetitionStatus.Pending)
                     {
+                        //nếu ở 2 trạng thái này mà hủy thì sẽ hoàn lại phí seedpoint đăng ký nếu có
+                        if (comp.Status == CompetitionStatus.Register || comp.Status == CompetitionStatus.UpComing)
+                        {
+                            //lấy thông tin ng tham gia
+                            List<Participant> participants = await _participantRepo.ListParticipant(comp.Id);
+                            //return point
+                            if (participants != null)
+                            {
+                                foreach (Participant participant in participants)
+                                {
+                                    await _seedsWalletService.UpdateAmount(participant.StudentId, comp.SeedsDeposited);
+                                }
+                            }
+                        }
+
+
                         comp.Status = CompetitionStatus.Cancel;
                         await _competitionRepo.Update();
 
@@ -1873,59 +1923,78 @@ namespace UniCEC.Business.Services.CompetitionSvc
         }
 
 
-        public async Task<bool> CompetitionUpdateStatusAfterPending(int competitionId, int clubId, string token)
+        public async Task<bool> CompetitionUpdateStatusAfterPending(UpdateCompetitionWithStatePendingModel model, string token)
         {
             try
             {
+                if (model.StartTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTimeRegister == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.StartTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                  || model.EndTime == DateTime.Parse("1/1/0001 12:00:00 AM")
+                 )
+                    throw new ArgumentNullException("StartTimeRegister Null || EndTimeRegister Null  || StartTime Null || EndTime Null");
+
                 DateTime localTime = new LocalTime().GetLocalTime().DateTime;
                 //
-                bool check = await CheckMemberInCompetition(token, competitionId, clubId, true);
-                if (check == false) throw new ArgumentException("Update Status Competition Failed");
+                await CheckMemberInCompetition(token, model.CompetitionId, model.ClubId, true);
 
-                int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), clubId);
+                int memId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
                 Member member = await _memberRepo.Get(memId);
 
-                Competition comp = await _competitionRepo.Get(competitionId);
+                Competition comp = await _competitionRepo.Get(model.CompetitionId);
                 if (comp == null) throw new ArgumentException("Competition not found");
 
                 //Check Competition Status hiện tại 
                 if (comp.Status != CompetitionStatus.Pending) throw new ArgumentException("API only Support Competition Or Event has State Pending");
 
                 //lấy nearest State of Competition before Pending
-                CompetitionHistory compeHis = await _competitionHistoryRepo.GetNearestStateAfterPending(comp.Id);
-                if (compeHis == null) throw new ArgumentException("Competition History Lost Data");
+                //CompetitionHistory compeHis = await _competitionHistoryRepo.GetNearestStateAfterPending(comp.Id);
+                //if (compeHis == null) throw new ArgumentException("Competition History Lost Data");
 
                 //if (status == CompetitionStatus.Publish || status == CompetitionStatus.Register || status == CompetitionStatus.UpComing)
                 //{
-                if (compeHis.Status == CompetitionStatus.Approve)
-                {
-                    comp.Status = CompetitionStatus.Approve;
-                    await _competitionRepo.Update();
+                //if (compeHis.Status == CompetitionStatus.Approve)
+                //{
+                //    comp.Status = CompetitionStatus.Approve;
+                //    await _competitionRepo.Update();
 
-                    //----------- InsertCompetition History
-                    CompetitionHistory chim = new CompetitionHistory()
-                    {
-                        CompetitionId = comp.Id,
-                        ChangerId = member.Id,
-                        ChangeDate = localTime,
-                        Description = //member.User.Fullname + 
-                        "Trạng thái Chờ sang Duyệt",
-                        Status = CompetitionStatus.Approve,
-                    };
-                    int result = await _competitionHistoryRepo.Insert(chim);
-                    if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                    return true;
-                }
+                //    //----------- InsertCompetition History
+                //    CompetitionHistory chim = new CompetitionHistory()
+                //    {
+                //        CompetitionId = comp.Id,
+                //        ChangerId = member.Id,
+                //        ChangeDate = localTime,
+                //        Description = //member.User.Fullname + 
+                //        "Trạng thái Chờ sang Duyệt",
+                //        Status = CompetitionStatus.Approve,
+                //    };
+                //    int result = await _competitionHistoryRepo.Insert(chim);
+                //    if (result == 0) throw new ArgumentException("Add Competition History Failed");
+                //    return true;
+                //}
+
+                //check xem các mốc thời gian có đúng form hay không STR < ETR < ST < ET
+                bool checkRuleDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                if (checkRuleDate == false) throw new ArgumentException("Ngày tháng không hợp lệ phải theo quy tắc STR < ETR < ST < ET");
+
+                //chỉ có 3 trạng thái được quay về
+                //Puplish
+                bool statePuplish = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+
+                //Register
+                bool stateRegister = CheckStateRegister(localTime, model.StartTimeRegister.Value, model.StartTimeRegister.Value);
+
+                //Up-Coming
+                bool stateUpComing = CheckStateUpComing(localTime, model.StartTimeRegister.Value, model.StartTime.Value.AddMinutes(-30));
 
                 //-----------------------------------------------------------------Puplish
-                if (compeHis.Status == CompetitionStatus.Publish)
+                if (statePuplish)
                 {
                     bool checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
                     if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR");
 
-
                     comp.Status = CompetitionStatus.Publish;
-                    await _competitionRepo.Update();
+                    //await _competitionRepo.Update();
 
                     //----------- InsertCompetition History
                     CompetitionHistory chim = new CompetitionHistory()
@@ -1943,14 +2012,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 }
 
                 //-----------------------------------------------------------------Register
-                if (compeHis.Status == CompetitionStatus.Register)
+                if (stateRegister)
                 {
                     bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
                     if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister");
 
 
                     comp.Status = CompetitionStatus.Register;
-                    await _competitionRepo.Update();
+                    //await _competitionRepo.Update();
 
                     //----------- InsertCompetition History
                     CompetitionHistory chim = new CompetitionHistory()
@@ -1958,7 +2027,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         CompetitionId = comp.Id,
                         ChangerId = member.Id,
                         ChangeDate = localTime,
-                        Description = member.User.Fullname +
+                        Description = //member.User.Fullname +
                         "Trạng thái Chờ sang Mở Đăng Ký",
                         Status = CompetitionStatus.Register,
                     };
@@ -1966,16 +2035,16 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
                     return true;
                 }
-                //throw new ArgumentException("The Nearest Status Of Competition is " + CompetitionStatusToString(compeHis.Status) + ", you must update from this Status");
+
 
                 //-----------------------------------------------------------------Up - Comming
-                if (compeHis.Status == CompetitionStatus.UpComing)
+                if (stateUpComing)
                 {
                     bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
                     if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime");
 
                     comp.Status = CompetitionStatus.UpComing;
-                    await _competitionRepo.Update();
+                    //await _competitionRepo.Update();
 
                     //-----------InsertCompetition History
                     CompetitionHistory chim = new CompetitionHistory()
@@ -1992,7 +2061,24 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     return true;
                 }
                 //}
-                throw new ArgumentException("Only Previous Status Puplish, Register, UpComing can Update Check Competition History");
+
+                //update competition
+                if (statePuplish || stateRegister || stateUpComing)
+                {
+                    //update những field cho phép
+                    comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
+                    comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
+                    comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
+                    comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
+                    comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                    await _competitionRepo.Update();
+                    return true;
+                }
+                else
+                {
+                    throw new ArgumentException("Chỉ cập nhật được thời gian nằm trong trạng thái là Puplish, Register, Up-coming thôi");
+                }
+
             }
             catch (Exception)
             {
@@ -2332,6 +2418,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 NumberOfTeam = (int)competition.NumberOfTeam,
                 MinNumber = (int)competition.MinNumber,
                 MaxNumber = (int)competition.MaxNumber,
+                MinTeamOrParticipant = competition.RequiredMin,
                 AddressName = competition.AddressName,
                 CreateTime = competition.CreateTime,
                 StartTime = competition.StartTime,
@@ -2860,7 +2947,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         private async Task<Competition> UpdateFieldCompetition(Competition comp, LeaderUpdateCompOrEventModel model, string token)
         {
-
+            
             //Check Competition Type 
             CompetitionType ct = await _competitionTypeRepo.Get(model.CompetitionTypeId.Value);
             if (ct == null) throw new ArgumentException("Competition Type Id not have in System");
@@ -2935,6 +3022,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             comp.MaxNumber = model.MaxNumber.HasValue ? model.MaxNumber.Value : comp.MaxNumber;
             comp.MinNumber = model.MinNumber.HasValue ? model.MinNumber.Value : comp.MinNumber;
             comp.NumberOfParticipation = model.NumberOfParticipant.HasValue ? model.NumberOfParticipant.Value : comp.NumberOfParticipation;
+            comp.RequiredMin = model.MinTeamOrParticipant.HasValue ? model.MinTeamOrParticipant.Value : comp.RequiredMin;
             comp.Scope = model.Scope.HasValue ? model.Scope.Value : comp.Scope;
             return comp;
         }

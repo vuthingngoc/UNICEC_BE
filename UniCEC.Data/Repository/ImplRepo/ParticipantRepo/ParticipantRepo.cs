@@ -118,9 +118,18 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
 
         public async Task<List<Participant>> ListParticipantToAddPoint(int CompetitionId)
         {
-            List<Participant> participants = await (from p in context.Participants
-                                                    join pit in context.ParticipantInTeams on p.Id equals pit.ParticipantId
+            List<Participant> participants = await (from p in context.Participants                                                   
                                                     where p.CompetitionId == CompetitionId && p.Attendance == true
+                                                    select p).ToListAsync();
+
+            return (participants.Count > 0) ? participants : null;
+        }
+
+
+        public async Task<List<Participant>> ListParticipant(int CompetitionId)
+        {
+            List<Participant> participants = await (from p in context.Participants                                                  
+                                                    where p.CompetitionId == CompetitionId 
                                                     select p).ToListAsync();
 
             return (participants.Count > 0) ? participants : null;
@@ -261,5 +270,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
             }
             
         }
+
+       
     }
 }
