@@ -28,6 +28,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public Task UpdateMemberRole(int memberId, int clubRoleId);
         //public Task DeleteMember(int memberId);
         public Task UpdateStatusDeletedClub(int clubId);
+        public Task<List<int>> GetUserIdsByMembers(List<int> memberIds);
         //TA
         public Task<ViewBasicInfoMember> GetBasicInfoMember(GetMemberInClubModel model);      
         public Task<Member> IsMemberInListClubCompetition(List<int> List_ClubId_In_Competition, User studentInfo);

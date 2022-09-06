@@ -16,6 +16,7 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
+using UniCEC.Data.Repository.ImplRepo.NotificationRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -40,6 +41,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ISeedsWalletService _seedsWalletService;
         private INotificationService _notificationService;
+        private INotificationRepo _notificationRepo;
         private DecodeToken _decodeToken;
 
         public CompetitionActivityService(ICompetitionActivityRepo clubActivityRepo,
@@ -52,7 +54,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                           IMemberInCompetitionRepo memberInCompetitionRepo,
                                           ISeedsWalletService seedsWalletService,
                                           IFileService fileService,
-                                          INotificationService notificationService)
+                                          INotificationService notificationService,
+                                          INotificationRepo notificationRepo)
         {
             _competitionActivityRepo = clubActivityRepo;
             _memberTakesActivityRepo = memberTakesActivityRepo;
@@ -65,9 +68,10 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             _seedsWalletService = seedsWalletService;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _notificationService = notificationService;
+            _notificationRepo = notificationRepo;
             _decodeToken = new DecodeToken();
         }
-        
+
         public async Task<List<ViewProcessCompetitionActivity>> GetTopTasksOfCompetition(int clubId, int topCompetition, int topCompetitionActivity, string token)
         {
             try
@@ -251,7 +255,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //------------- CHECK Club in system
                 bool isExisted = await _clubRepo.CheckExistedClub(clubId);
-                if(!isExisted) throw new ArgumentException("Club in not found");
+                if (!isExisted) throw new ArgumentException("Club in not found");
 
                 //------------- CHECK Is Member in Club
                 int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), clubId);
@@ -292,7 +296,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 //Check Status Competition
                 bool isCancleCompetition = await _competitionRepo.CheckExistedCompetitionByStatus(model.CompetitionId, CompetitionStatus.Cancel);
-                if(isCancleCompetition) throw new ArgumentException("Cuộc thi đã bị hủy");
+                if (isCancleCompetition) throw new ArgumentException("Cuộc thi đã bị hủy");
 
                 //Check Ending date
                 bool isValidDate = CheckDate(model.Ending);
@@ -484,7 +488,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) 
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("Competition Activity has already be Cancel Or Compeleted");
 
                 //Check Competition Status
@@ -497,7 +501,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     {
                         //competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
                         //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
-                        if ((model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Open) 
+                        if ((model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Open)
                                 && (competitionActivity.Status == CompetitionActivityStatus.Finished))
                         {
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
@@ -621,7 +625,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                if(!string.IsNullOrEmpty(deviceToken))
+                if (!string.IsNullOrEmpty(deviceToken))
                 {
                     Notification notification = new Notification()
                     {
@@ -630,9 +634,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         RedirectUrl = "/viewCompetitionMemberTask",
                         UserId = member.UserId,
                     };
-                    List<string> deviceTokens = new List<string>();
-                    deviceTokens.Add(deviceToken);
-                    await _notificationService.SendNotification(notification, deviceTokens);
+
+                    await _notificationService.SendNotification(notification, deviceToken);
                 }
 
                 return await TransferViewDetailMTA(mtaInsert);
@@ -681,46 +684,41 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
-
-                MemberInCompetitionRequestModel request = new MemberInCompetitionRequestModel()
-                {
-                    ClubId = model.ClubId,
-                    CompetitionId = competitionActivity.CompetitionId,
-                };
-                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request); // here
-                foreach (var manager in managers.Items)
-                {
-                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
-                    {
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                            RedirectUrl = "/viewCompetitionMemberTask",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
-                };
-
+                List<MemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(competitionActivity.CompetitionId);                                                                                                                                                                                                                                                        
                 List<MemberTakesActivity> members = await _memberTakesActivityRepo.ListMemberTakesActivity(model.CompetitionActivityId);
-                foreach (var element in members)
+                List<int> listMemberIds = new List<int>();
+
+                if (managers != null)
                 {
-                    string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    if(!string.IsNullOrEmpty(deviceToken))
-                    {
-                        Notification notification = new Notification()
-                        {
-                            Title = "Thông báo",
-                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                            RedirectUrl = "/viewCompetitionMemberTask",
-                            UserId = member.UserId,
-                        };
-                        await _notificationService.SendNotification(notification, deviceToken);
-                    }
+                    List<int> managerIds = managers.Select(manager => manager.MemberId).ToList();
+                    if (managerIds.Count > 0) listMemberIds.AddRange(managerIds);                    
                 }
 
+                if(members != null)
+                {
+                    List<int> memberIds = members.Select(member => member.MemberId).ToList();
+                    if (memberIds.Count > 0) listMemberIds.AddRange(memberIds);
+                }
+
+                List<string> deviceTokens = await _userRepo.GetDeviceTokenByMembers(listMemberIds);
+                Notification notification = new Notification()
+                {
+                    Title = "Thông báo",
+                    Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                    RedirectUrl = "/viewCompetitionMemberTask"
+                };
+                await _notificationService.SendNotification(notification, deviceTokens);
+                
+                // save notification
+                List<Notification> notifications = new List<Notification>();
+                List<int> userIds = await _memberRepo.GetUserIdsByMembers(listMemberIds);
+                foreach (int userId in userIds)
+                {
+                    notification.UserId = userId;
+                    notifications.Add(notification);
+                }
+
+                await _notificationRepo.InsertNotifications(notifications);
                 return true;
 
             }
@@ -911,7 +909,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
             DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
             int result = DateTime.Compare(endTime, currentTime);
 
-            return (result > 0) ? true : false;          
+            return (result > 0) ? true : false;
         }
 
         private async Task<bool> CheckMemberInCompetition(string Token, int CompetitionId, int ClubId, bool isOrganization)

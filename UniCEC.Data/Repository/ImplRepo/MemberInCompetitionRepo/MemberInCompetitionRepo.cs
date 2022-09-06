@@ -67,6 +67,15 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo
 
         }
 
+        public async Task<List<MemberInCompetition>> GetAllManagerCompOrEve(int competitionId)
+        {
+            var query = from mic in context.MemberInCompetitions
+                        where mic.CompetitionId.Equals(competitionId)
+                        select mic;
+
+            return (query.Any()) ? await query.ToListAsync() : null;
+        }
+
         public async Task<MemberInCompetition> GetMemberInCompetition(int competitionId, int memberId)
         {
             MemberInCompetition mem = await (from mic in context.MemberInCompetitions

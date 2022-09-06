@@ -22,7 +22,6 @@ namespace UniCEC.Data.Models.DB
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int NumberOfTeam { get; set; }
-        public int Scores { get; set; }
         public int Status { get; set; }
 
         public virtual MatchType MatchType { get; set; }

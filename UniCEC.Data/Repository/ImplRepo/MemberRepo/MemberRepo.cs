@@ -451,5 +451,12 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             return (query.Any()) ? await query.FirstOrDefaultAsync() : null;
         }
+
+        public async Task<List<int>> GetUserIdsByMembers(List<int> memberIds)
+        {
+            return await (from m in context.Members
+                          where memberIds.Contains(m.Id)
+                          select m.UserId).ToListAsync();
+        }
     }
 }
