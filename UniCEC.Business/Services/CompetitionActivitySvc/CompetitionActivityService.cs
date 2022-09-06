@@ -630,7 +630,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         RedirectUrl = "/viewCompetitionMemberTask",
                         UserId = member.UserId,
                     };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                    List<string> deviceTokens = new List<string>();
+                    deviceTokens.Add(deviceToken);
+                    await _notificationService.SendNotification(notification, deviceTokens);
                 }
 
                 return await TransferViewDetailMTA(mtaInsert);
@@ -685,7 +687,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     ClubId = model.ClubId,
                     CompetitionId = competitionActivity.CompetitionId,
                 };
-                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request);
+                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request); // here
                 foreach (var manager in managers.Items)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);

@@ -175,7 +175,9 @@ namespace UniCEC.Business.Services.MemberSvc
                         RedirectUrl = "/notification",
                         UserId = member.UserId,
                     };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                    List<string> devicetokens = new List<string>();
+                    devicetokens.Add(deviceToken);
+                    await _notificationService.SendNotification(notification, devicetokens);
                 }
             }
             else
