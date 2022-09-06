@@ -71,7 +71,7 @@ namespace UniCEC.Business.Services.FileSvc
 
         private string GetFileName(string imgUrl)
         {
-            return (imgUrl.Contains("token"))
+            return (imgUrl.Contains("https"))
                         ? imgUrl.Split("%2F")[1].Split("?")[0]
                         : imgUrl;
         }
@@ -120,7 +120,7 @@ namespace UniCEC.Business.Services.FileSvc
 
         public async Task<string> GetUrlFromFilenameAsync(string imageUrl)
         {
-            return (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Contains("token")) // if imageUrl is just a fileName 
+            return (!string.IsNullOrEmpty(imageUrl) && !imageUrl.Contains("https")) // if imageUrl is just a fileName 
                 ? await new FirebaseStorage(_bucket).Child("assets").Child($"{imageUrl}").GetDownloadUrlAsync()
                 : imageUrl;
         }

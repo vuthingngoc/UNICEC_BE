@@ -10,6 +10,7 @@ namespace UniCEC.Data.Models.DB
     {
         public CompetitionRound()
         {
+            Matches = new HashSet<Match>();
             TeamInRounds = new HashSet<TeamInRound>();
         }
 
@@ -24,6 +25,7 @@ namespace UniCEC.Data.Models.DB
         public CompetitionRoundStatus Status { get; set; }
 
         public virtual Competition Competition { get; set; }
+        public virtual ICollection<Match> Matches { get; set; }
         public virtual ICollection<TeamInRound> TeamInRounds { get; set; }
     }
 }

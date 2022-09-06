@@ -163,17 +163,22 @@ namespace UniCEC.Business.Services.MemberSvc
                 // send notification
                 Club club = await _clubRepo.Get(model.ClubId);                
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                string body = (model.Status.Equals(MemberStatus.Active)) 
-                    ? $"Chúc mừng bạn đã trở thành thành viên câu lạc bộ {club.Name}" 
-                    : $"Câu lạc bộ {club.Name} đã từ chối bạn";
-                Notification notification = new Notification()
+                if(!string.IsNullOrEmpty(deviceToken))
                 {
-                    Title = "Thông báo",
-                    Body = body,
-                    RedirectUrl = "/notification",
-                    UserId = member.UserId,
-                };
-                await _notificationService.SendNotification(notification, deviceToken);
+                    string body = (model.Status.Equals(MemberStatus.Active))
+                    ? $"Chúc mừng bạn đã trở thành thành viên câu lạc bộ {club.Name}"
+                    : $"Câu lạc bộ {club.Name} đã từ chối bạn";
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    List<string> devicetokens = new List<string>();
+                    devicetokens.Add(deviceToken);
+                    await _notificationService.SendNotification(notification, devicetokens);
+                }
             }
             else
             {
@@ -250,6 +255,21 @@ namespace UniCEC.Business.Services.MemberSvc
             Club club = await _clubRepo.Get(member.ClubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();
+
+            // send notification
+            string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+            if (!string.IsNullOrEmpty(deviceToken))
+            {
+                string body = $"{club.Name} đã mời bạn ra khỏi câu lạc bộ";
+                Notification notification = new Notification()
+                {
+                    Title = "Thông báo",
+                    Body = body,
+                    RedirectUrl = "/notification",
+                    UserId = member.UserId,
+                };
+                await _notificationService.SendNotification(notification, deviceToken);
+            }
         }
 
         public async Task<List<ViewDetailMember>> GetMemberInfoByClub(string token, int? clubId)

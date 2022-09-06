@@ -46,6 +46,7 @@ namespace UniCEC.Data.Models.DB
         public CompetitionScopeStatus Scope { get; set; }
         public bool IsSponsor { get; set; }
         public CompetitionStatus Status { get; set; }
+        public int RequiredMin { get; set; }
 
         public virtual CompetitionType CompetitionType { get; set; }
         public virtual University University { get; set; }

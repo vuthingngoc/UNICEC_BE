@@ -1,5 +1,3 @@
-using CorePush.Apple;
-using CorePush.Google;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -42,7 +40,6 @@ using UniCEC.Business.Services.TeamSvc;
 using UniCEC.Business.Services.UniversitySvc;
 using UniCEC.Business.Services.UserSvc;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Models.Notification;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.Repository.ImplRepo.ActivitiesEntityRepo;
 using UniCEC.Data.Repository.ImplRepo.CityRepo;
@@ -101,12 +98,6 @@ namespace UniCEC.API
                 //
                 config.ApiVersionReader = new HeaderApiVersionReader();
             });
-
-            // config for notification
-            var appSettingsSection = Configuration.GetSection("FcmNotification");
-            services.Configure<FcmNotificationSettings>(appSettingsSection);
-            services.AddHttpClient<FcmSender>();
-            services.AddHttpClient<ApnSender>();
 
             // DI - Dependency Injection
             // Add DbContext

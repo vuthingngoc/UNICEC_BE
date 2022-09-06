@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UniCEC.Data.Enum;
-
 #nullable disable
 
 namespace UniCEC.Data.Models.DB
@@ -11,6 +10,7 @@ namespace UniCEC.Data.Models.DB
         public Team()
         {
             ParticipantInTeams = new HashSet<ParticipantInTeam>();
+            TeamInMatches = new HashSet<TeamInMatch>();
             TeamInRounds = new HashSet<TeamInRound>();
         }
 
@@ -24,6 +24,7 @@ namespace UniCEC.Data.Models.DB
 
         public virtual Competition Competition { get; set; }
         public virtual ICollection<ParticipantInTeam> ParticipantInTeams { get; set; }
+        public virtual ICollection<TeamInMatch> TeamInMatches { get; set; }
         public virtual ICollection<TeamInRound> TeamInRounds { get; set; }
     }
 }

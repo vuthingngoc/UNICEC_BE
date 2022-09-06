@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.Common;
 using UniCEC.Business.Utilities;
+using System.Collections.Generic;
 
 namespace UniCEC.Business.Services.NotificationSvc
 {
@@ -77,7 +78,9 @@ namespace UniCEC.Business.Services.NotificationSvc
 
                         title = notification.Title,
 
-                        icon = "myicon"
+                        icon = "myicon",
+
+                        click_action = notification.RedirectUrl
 
                     }
                 };
@@ -126,6 +129,25 @@ namespace UniCEC.Business.Services.NotificationSvc
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task SendNotification(Notification notification, List<string> deviceTokens)
+        {
+            var message = new FirebaseAdmin.Messaging.MulticastMessage()
+            {
+                Tokens = deviceTokens,
+                Notification = new FirebaseAdmin.Messaging.Notification()
+                {
+                    Title = notification.Title,
+                    Body = notification.Body,
+                },
+                Android = new FirebaseAdmin.Messaging.AndroidConfig()
+                {
+                    Priority = FirebaseAdmin.Messaging.Priority.High
+                }
+            };
+
+            await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendMulticastAsync(message).ConfigureAwait(false);
         }
     }
 }

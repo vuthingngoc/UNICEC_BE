@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -18,13 +17,11 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
-using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
-using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -1512,17 +1509,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
-                    Notification notification = new Notification()
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = body,
-                        RedirectUrl = "/notification",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = body,
+                            RedirectUrl = "/notification",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
+                    
                     return true;
-
                 }
 
                 if (model.Status.Value == CompetitionStatus.Draft)
@@ -1544,17 +1544,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
-                    Notification notification = new Notification()
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = body,
-                        RedirectUrl = "/notification",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = body,
+                            RedirectUrl = "/notification",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
+                    
                     return true;
-
                 }
 
                 throw new ArgumentException("State condition : Draft - Approve can update");

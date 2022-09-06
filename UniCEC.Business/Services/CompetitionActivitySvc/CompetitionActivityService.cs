@@ -484,7 +484,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) throw new ArgumentException("Competition Activity is Cancel Or Compeleted");
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed) 
+                    throw new ArgumentException("Competition Activity has already be Cancel Or Compeleted");
 
                 //Check Competition Status
                 Competition competition = await _competitionRepo.Get(competitionActivity.CompetitionId);
@@ -496,7 +497,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     {
                         //competitionActivity.Status = (model.Status.HasValue) ? model.Status.Value : competitionActivity.Status;
                         //if Compeleted thì sẽ add point cho tất cả người tham gia trong task
-                        if ((model.Status.Value == CompetitionActivityStatus.Completed) && (competitionActivity.Status == CompetitionActivityStatus.Finished))
+                        if ((model.Status.Value == CompetitionActivityStatus.Completed || model.Status.Value == CompetitionActivityStatus.Open) 
+                                && (competitionActivity.Status == CompetitionActivityStatus.Finished))
                         {
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
                             foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
@@ -619,14 +621,19 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                Notification notification = new Notification()
+                if(!string.IsNullOrEmpty(deviceToken))
                 {
-                    Title = "Thông báo",
-                    Body = $"{fullname} vừa phân công cho bạn 1 công việc mới!",
-                    RedirectUrl = "/viewCompetitionMemberTask",
-                    UserId = member.UserId,
-                };
-                await _notificationService.SendNotification(notification, deviceToken);
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa phân công cho bạn 1 công việc mới!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        UserId = member.UserId,
+                    };
+                    List<string> deviceTokens = new List<string>();
+                    deviceTokens.Add(deviceToken);
+                    await _notificationService.SendNotification(notification, deviceTokens);
+                }
 
                 return await TransferViewDetailMTA(mtaInsert);
             }
@@ -680,32 +687,38 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     ClubId = model.ClubId,
                     CompetitionId = competitionActivity.CompetitionId,
                 };
-                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request);
+                PagingResult<ViewMemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(request); // here
                 foreach (var manager in managers.Items)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    Notification notification = new Notification()
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                        RedirectUrl = "/viewCompetitionMemberTask",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                            RedirectUrl = "/viewCompetitionMemberTask",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
                 };
 
                 List<MemberTakesActivity> members = await _memberTakesActivityRepo.ListMemberTakesActivity(model.CompetitionActivityId);
                 foreach (var element in members)
                 {
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    Notification notification = new Notification()
+                    if(!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                        RedirectUrl = "/viewCompetitionMemberTask",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                            RedirectUrl = "/viewCompetitionMemberTask",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
                 }
 
                 return true;
