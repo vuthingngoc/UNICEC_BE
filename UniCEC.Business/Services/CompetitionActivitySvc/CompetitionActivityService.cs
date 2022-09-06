@@ -701,11 +701,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 }
 
                 List<string> deviceTokens = await _userRepo.GetDeviceTokenByMembers(listMemberIds);
+                deviceTokens = deviceTokens.Where(token => !string.IsNullOrEmpty(token)).ToList();
                 Notification notification = new Notification()
                 {
                     Title = "Thông báo",
                     Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                    RedirectUrl = "/viewCompetitionMemberTask"
+                    RedirectUrl = "/viewCompetitionMemberTask",
+                    CreateTime = new LocalTime().GetLocalTime().DateTime
                 };
                 await _notificationService.SendNotification(notification, deviceTokens);
                 
@@ -714,8 +716,15 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 List<int> userIds = await _memberRepo.GetUserIdsByMembers(listMemberIds);
                 foreach (int userId in userIds)
                 {
-                    notification.UserId = userId;
-                    notifications.Add(notification);
+                    Notification noti = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        CreateTime = new LocalTime().GetLocalTime().DateTime,
+                        UserId = userId
+                    };
+                    notifications.Add(noti);                    
                 }
 
                 await _notificationRepo.InsertNotifications(notifications);
