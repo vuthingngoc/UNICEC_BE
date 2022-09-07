@@ -28,6 +28,8 @@ using UniCEC.Business.Services.EntityTypeSvc;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Business.Services.MajorSvc;
+using UniCEC.Business.Services.MatchSvc;
+using UniCEC.Business.Services.MatchTypeSvc;
 using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Business.Services.MemberTakesActivitySvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -35,6 +37,7 @@ using UniCEC.Business.Services.ParticipantInTeamSvc;
 using UniCEC.Business.Services.ParticipantSvc;
 using UniCEC.Business.Services.RoleSvc;
 using UniCEC.Business.Services.SeedsWalletSvc;
+using UniCEC.Business.Services.TeamInMatchSvc;
 using UniCEC.Business.Services.TeamInRoundSvc;
 using UniCEC.Business.Services.TeamSvc;
 using UniCEC.Business.Services.UniversitySvc;
@@ -57,6 +60,8 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
+using UniCEC.Data.Repository.ImplRepo.MatchRepo;
+using UniCEC.Data.Repository.ImplRepo.MatchTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
@@ -65,6 +70,7 @@ using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
 using UniCEC.Data.Repository.ImplRepo.RoleRepo;
 using UniCEC.Data.Repository.ImplRepo.SeedsWalletRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
@@ -131,6 +137,9 @@ namespace UniCEC.API
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IMatchService, MatchService>();
+            services.AddScoped<IMatchTypeService, MatchTypeService>();
+            services.AddScoped<ITeamInMatchService, TeamInMatchService>();
 
             // Repository
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -164,6 +173,9 @@ namespace UniCEC.API
             services.AddTransient<IUserRepo, UserRepo>();
             services.AddTransient<IMemberInCompetitionRepo, MemberInCompetitionRepo>();
             services.AddTransient<INotificationRepo, NotificationRepo>();
+            services.AddTransient<IMatchRepo, MatchRepo>();
+            services.AddTransient<IMatchTypeRepo, MatchTypeRepo>();
+            services.AddTransient<ITeamInMatchRepo, TeamInMatchRepo>();
 
             //----------------------------------------------FIREBASE-------------------------
             string path = Path.Combine(Directory.GetCurrentDirectory(), Configuration["Jwt:Firebase:FileConfig"]);
