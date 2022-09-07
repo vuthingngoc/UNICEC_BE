@@ -12,6 +12,7 @@ namespace UniCEC.Data.Models.DB
         public int TeamId { get; set; }
         public int Scores { get; set; }
         public int Status { get; set; }
+        public string Description { get; set; }
 
         public virtual Match Match { get; set; }
         public virtual Team Team { get; set; }

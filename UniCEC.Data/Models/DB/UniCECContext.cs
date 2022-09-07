@@ -732,6 +732,10 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
                 entity.Property(e => e.MatchId).HasColumnName("MatchID");
 
                 entity.Property(e => e.TeamId).HasColumnName("TeamID");

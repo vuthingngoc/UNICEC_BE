@@ -14,6 +14,7 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public bool Status { get; set; }
 
         public virtual ICollection<Match> Matches { get; set; }
     }
