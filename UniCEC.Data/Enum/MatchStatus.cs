@@ -5,7 +5,8 @@
         Ready,
         Start,
         OnGoing,
-        End,
-        Delay
+        Finish,
+        Cancel,
+        IsDeleted
     }
 }
