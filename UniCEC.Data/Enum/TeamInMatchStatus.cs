@@ -2,6 +2,8 @@
 {
     public enum TeamInMatchStatus
     {
-        
+        Win,
+        Lose,
+        Draw
     }
 }
