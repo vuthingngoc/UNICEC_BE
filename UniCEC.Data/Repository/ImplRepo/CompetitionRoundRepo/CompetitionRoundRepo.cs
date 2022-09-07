@@ -53,7 +53,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                     EndTime = cr.EndTime,
                     NumberOfTeam = cr.NumberOfTeam,
                     SeedsPoint = cr.SeedsPoint,
-                    Status = cr.Status
+                    Status = cr.Status,
+                    Order = cr.Order
                 }).ToListAsync();
 
             return (query.Any()) ? new PagingResult<ViewCompetitionRound>(competitionRounds, totalCount, request.CurrentPage, request.PageSize) : null;
@@ -77,7 +78,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                 EndTime = cr.EndTime,
                 NumberOfTeam = cr.NumberOfTeam,
                 SeedsPoint = cr.SeedsPoint,
-                Status = cr.Status
+                Status = cr.Status,
+                Order = cr.Order
             }).FirstOrDefaultAsync();
         }
 
@@ -141,6 +143,26 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<bool> CheckExistedRound(int roundId)
         {
             return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId)) != null;
+        }
+
+        public async Task UpdateOrderRoundsByCompe(int competitionId)
+        {
+            var rounds = await (from cr in context.CompetitionRounds
+                                where cr.CompetitionId.Equals(competitionId) && cr.Status.Equals(CompetitionRoundStatus.Active)
+                                orderby cr.StartTime ascending
+                                select cr).ToListAsync();
+            
+            if(rounds.Count > 0)
+            {
+                int count = 1;
+                foreach(var round in rounds)
+                {
+                    round.Order = count;
+                    ++count;
+                }
+
+                await Update();
+            }
         }
     }
 }

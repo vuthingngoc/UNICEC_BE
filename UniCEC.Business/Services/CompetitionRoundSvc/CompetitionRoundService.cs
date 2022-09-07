@@ -67,12 +67,12 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             Competition competition = await _competitionRepo.Get(competitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
             if (competition.Status.Equals(4) || competition.Status.Equals(5)) throw new ArgumentException("Can not access the cancel or ending competition");
-
+            
             List<ViewCompetitionRound> viewCompetitionRounds = new List<ViewCompetitionRound>();
             DateTime timePreviousRound = new LocalTime().GetLocalTime().DateTime;
             List<string> titleRounds = new List<string>();
 
-
+            models.Sort((a, b) => a.StartTime.CompareTo(b.StartTime));
             foreach (var model in models)
             {
                 // check in list
@@ -110,6 +110,9 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 if (roundId > 0) throw new ArgumentException("Duplicated round in this competition");
             }
 
+            // insert round            
+            int count = 1;
+
             foreach (var model in models)
             {
                 CompetitionRound competitionRound = new CompetitionRound()
@@ -121,7 +124,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     EndTime = model.EndTime,
                     NumberOfTeam = 0, // default number when insert round
                     SeedsPoint = model.SeedsPoint,
-                    Status = CompetitionRoundStatus.Active // default status insert
+                    Status = CompetitionRoundStatus.Active, // default status insert
+                    Order = count
                 };
                 int id = await _competitionRoundRepo.Insert(competitionRound);
                 ViewCompetitionRound viewCompetitionRound = new ViewCompetitionRound()
@@ -134,9 +138,12 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     EndTime = model.EndTime,
                     NumberOfTeam = competitionRound.NumberOfTeam,
                     SeedsPoint = model.SeedsPoint,
-                    Status = competitionRound.Status
+                    Status = competitionRound.Status,
+                    Order = count
                 };
                 viewCompetitionRounds.Add(viewCompetitionRound);
+
+                ++count;
             }
 
             return viewCompetitionRounds;
@@ -202,6 +209,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             }
 
             await _competitionRoundRepo.Update();
+
+            if (model.StartTime.HasValue) await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
         }
 
         public async Task Delete(string token, int id)
@@ -212,7 +221,9 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             CheckValidAuthorized(token, competitionRound.CompetitionId);
 
             competitionRound.Status = CompetitionRoundStatus.Cancel;
+            competitionRound.Order = 0;
             await _competitionRoundRepo.Update();
+            await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
         }
     }
 }

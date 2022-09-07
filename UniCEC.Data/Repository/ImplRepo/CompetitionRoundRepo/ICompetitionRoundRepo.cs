@@ -15,6 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public Task<int> GetCompetitionIdByRound(int competitionRoundId);
         public Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime);
         public Task UpdateNumberOfTeam(int roundId, int numberOfTeam);
+        public Task UpdateOrderRoundsByCompe(int competitionId);
         public Task<bool> CheckExistedRound(int roundId);
     }
 }
