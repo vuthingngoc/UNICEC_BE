@@ -20,5 +20,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionRound
         [JsonPropertyName("seeds_point")]
         public int SeedsPoint { get; set; }
         public CompetitionRoundStatus Status { get; set; }
+        public int Order { get; set; }
     }
 }
