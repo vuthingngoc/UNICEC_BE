@@ -16,6 +16,7 @@ namespace UniCEC.API.Controllers
         [SwaggerOperation(Summary = "Get match by id - All user")]
         public Task<IActionResult> GetMatchTypeById(int id)
         {
+
             throw new System.NotImplementedException();
         }
 

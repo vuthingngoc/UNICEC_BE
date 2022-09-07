@@ -23,6 +23,7 @@ namespace UniCEC.Data.Models.DB
         public int NumberOfTeam { get; set; }
         public int SeedsPoint { get; set; }
         public CompetitionRoundStatus Status { get; set; }
+        public int Order { get; set; }
 
         public virtual Competition Competition { get; set; }
         public virtual ICollection<Match> Matches { get; set; }

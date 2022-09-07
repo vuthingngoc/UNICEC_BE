@@ -8,5 +8,6 @@ namespace UniCEC.Business.Services.MatchSvc
 {
     public interface IMatchService
     {
+
     }
 }
