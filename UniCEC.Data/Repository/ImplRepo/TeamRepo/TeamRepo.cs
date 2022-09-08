@@ -241,7 +241,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             return (await query.CountAsync() > 0) ? await query.CountAsync() : -1;
         }
 
-        public async Task<int> getNumberOfMemberInTeam(int teamId)
+        public async Task<int> GetNumberOfMemberInTeam(int teamId)
         {
             List<ParticipantInTeam> participants = await (from pit in context.ParticipantInTeams
                                                           where pit.TeamId == teamId
@@ -265,6 +265,13 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                               TotalPoint = 0,
                               Rank = 0
                           }).ToListAsync();
+        }
+
+        public async Task<List<int>> GetAllTeamIdsInComp(int competitionId)
+        {
+            return await (from t in context.Teams
+                         where t.CompetitionId.Equals(competitionId)
+                         select t.Id).ToListAsync();
         }
     }
 }

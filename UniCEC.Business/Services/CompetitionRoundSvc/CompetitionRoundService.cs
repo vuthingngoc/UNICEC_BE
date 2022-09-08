@@ -8,6 +8,8 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionRound;
@@ -22,13 +24,20 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
 
+        private ITeamRepo _teamRepo;
+
+        private ITeamInRoundRepo _teamInRoundRepo;
+
         private DecodeToken _decodeToken;
 
-        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo,  ICompetitionRepo competitionRepo, IMemberInCompetitionRepo memberInCompetitionRepo)
+        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo,  ICompetitionRepo competitionRepo, 
+                                        IMemberInCompetitionRepo memberInCompetitionRepo, ITeamRepo teamRepo, ITeamInRoundRepo teamInRoundRepo)
         {
             _competitionRoundRepo = competitionRoundRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRepo = competitionRepo;
+            _teamRepo = teamRepo;
+            _teamInRoundRepo = teamInRoundRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -46,7 +55,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             return competitionRounds;
         }
 
-        public async Task<ViewCompetitionRound> GetById(string token, int id)
+        public async Task<ViewCompetitionRound> GetById(string token, int id) // not test yet
         {
             ViewCompetitionRound competitionRound = await _competitionRoundRepo.GetById(id, null);
             if (competitionRound == null) throw new NullReferenceException();
@@ -54,6 +63,30 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             int userId = _decodeToken.Decode(token, "Id");
             bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId, null);
             if (!isValidUser && competitionRound.Status.Equals(false)) throw new NullReferenceException();
+
+            // trigger add teams in round
+            if (competitionRound.Status.Equals(CompetitionRoundStatus.Happening))
+            {
+                bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
+                if (isExisted) return competitionRound;
+
+                if (competitionRound.Order.Equals(1)) // first round
+                {
+                    List<int> teamIds = await _teamRepo.GetAllTeamIdsInComp(competitionRound.CompetitionId);
+                    await _teamInRoundRepo.InsertMultiTeams(teamIds, id);                    
+                }
+                else // another round else
+                {
+                    int previousRoundOrder = competitionRound.Order - 1;
+                    CompetitionRound previousRound = await _competitionRoundRepo.GetPreviousRound(competitionRound.CompetitionId, previousRoundOrder);
+                    if (previousRound.Status.Equals(CompetitionRoundStatus.Finished))
+                    {
+                        bool isNextRound = true;
+                        List<int> teamIds = await _teamInRoundRepo.GetTeamIdsByRound(previousRound.Id, isNextRound);
+                        await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
+                    }
+                }
+            }
 
             return competitionRound;
         }

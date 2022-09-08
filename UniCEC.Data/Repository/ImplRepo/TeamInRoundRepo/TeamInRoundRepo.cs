@@ -175,5 +175,49 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                             && tir.Status.Equals(true)
                     select tir.Scores).SumAsync();
         }
+
+        public async Task InsertMultiTeams(List<int> teamIds, int roundId)
+        {
+            if(teamIds.Count > 0)
+            {
+                List<TeamInRound> teams = new List<TeamInRound>();
+                foreach(int teamId in teamIds)
+                {
+                    TeamInRound team = new TeamInRound()
+                    {
+                        RoundId = roundId,
+                        Rank = 0,
+                        Scores = 0,
+                        TeamId = teamId,
+                        Status = true // default status when insert
+                    };
+
+                    teams.Add(team);
+                }
+
+                await context.TeamInRounds.AddRangeAsync(teams);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<List<int>> GetTeamIdsByRound(int roundId, bool? status)
+        {
+            var query = from tir in context.TeamInRounds
+                        where tir.RoundId.Equals(roundId)
+                        select tir;
+
+            if (status.HasValue) query = query.Where(tir => tir.Status.Equals(status.Value));
+
+            return (query.Any()) ? await query.Select(tir => tir.TeamId).ToListAsync() : null;
+        }
+
+        public async Task<bool> CheckExistedTeamsInRound(int roundId)
+        {
+            var query = from tir in context.TeamInRounds
+                        where tir.RoundId.Equals(roundId)
+                        select tir;
+
+            return await query.AnyAsync();            
+        }
     }
 }
