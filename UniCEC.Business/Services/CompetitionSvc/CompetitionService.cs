@@ -1530,15 +1530,19 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
-                    Notification notification = new Notification()
+                    if (!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = body,
-                        RedirectUrl = "/notification",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
+                        string body = $"Cuộc thi {comp.Name} của bạn vừa được duyệt bởi Admin";
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = body,
+                            RedirectUrl = "/notification",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
+
                     return true;
 
                 }
@@ -1562,17 +1566,20 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     // send notification
                     Member member = await _memberRepo.GetLeaderClubOwnerByCompetition(model.Id);
                     string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                    string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
-                    Notification notification = new Notification()
+                    if (!string.IsNullOrEmpty(deviceToken))
                     {
-                        Title = "Thông báo",
-                        Body = body,
-                        RedirectUrl = "/notification",
-                        UserId = member.UserId,
-                    };
-                    await _notificationService.SendNotification(notification, deviceToken);
-                    return true;
+                        string body = $"Cuộc thi {comp.Name} của bạn vừa bị từ chối bởi Admin";
+                        Notification notification = new Notification()
+                        {
+                            Title = "Thông báo",
+                            Body = body,
+                            RedirectUrl = "/notification",
+                            UserId = member.UserId,
+                        };
+                        await _notificationService.SendNotification(notification, deviceToken);
+                    }
 
+                    return true;
                 }
 
                 throw new ArgumentException("State condition : Draft - Approve can update");
@@ -2947,7 +2954,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
         private async Task<Competition> UpdateFieldCompetition(Competition comp, LeaderUpdateCompOrEventModel model, string token)
         {
-            
+
             //Check Competition Type 
             CompetitionType ct = await _competitionTypeRepo.Get(model.CompetitionTypeId.Value);
             if (ct == null) throw new ArgumentException("Competition Type Id not have in System");
