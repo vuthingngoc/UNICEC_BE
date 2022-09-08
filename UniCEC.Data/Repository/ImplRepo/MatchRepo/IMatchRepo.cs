@@ -10,5 +10,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
     public interface IMatchRepo : IRepository<Match>
     {
         public Task<PagingResult<ViewMatch>> GetByConditions(MatchRequestModel request);
+        public Task<ViewMatch> GetById(int id);
+        public Task<bool> CheckDuplicatedMatch(string title, int roundId);
     }
 }

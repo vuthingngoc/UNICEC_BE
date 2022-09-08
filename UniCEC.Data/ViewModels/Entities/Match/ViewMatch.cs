@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Match
 {
@@ -25,6 +26,6 @@ namespace UniCEC.Data.ViewModels.Entities.Match
         public DateTime EndTime { get; set; }
         [JsonPropertyName("number_of_team")]
         public int NumberOfTeam { get; set; }
-        public int Status { get; set; }
+        public MatchStatus Status { get; set; }
     }
 }

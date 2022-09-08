@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
 {
@@ -14,6 +15,6 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
         [JsonPropertyName("team_name")]
         public string TeamName { get; set; }
         public int Scores { get; set; }
-        public int Status { get; set; }
+        public TeamInMatchStatus Status { get; set; }
     }
 }
