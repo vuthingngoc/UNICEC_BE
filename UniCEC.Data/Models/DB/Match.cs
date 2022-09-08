@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniCEC.Data.Enum;
 
 #nullable disable
 
@@ -22,7 +23,7 @@ namespace UniCEC.Data.Models.DB
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int NumberOfTeam { get; set; }
-        public int Status { get; set; }
+        public MatchStatus Status { get; set; }
 
         public virtual MatchType MatchType { get; set; }
         public virtual CompetitionRound Round { get; set; }

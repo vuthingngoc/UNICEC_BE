@@ -55,7 +55,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                                                         Status = selector.m.Status
                                                     }).ToListAsync();
 
-            return (totalCount > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
+            return (members.Count > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
         public async Task<List<Member>> GetMembersByClub(int clubId, string? searchName, int? roleId)

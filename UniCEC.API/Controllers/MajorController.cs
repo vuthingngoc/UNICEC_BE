@@ -161,6 +161,10 @@ namespace UniCEC.API.Controllers
                 await _majorService.Delete(token, id);
                 return NoContent();
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (SqlException)
             {
                 return StatusCode(500, "Internal Server Exception");
