@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -17,5 +18,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public Task UpdateNumberOfTeam(int roundId, int numberOfTeam);
         public Task UpdateOrderRoundsByCompe(int competitionId);
         public Task<bool> CheckExistedRound(int roundId);
+        public Task<CompetitionRound> GetPreviousRound(int competitionId, int order);
     }
 }
