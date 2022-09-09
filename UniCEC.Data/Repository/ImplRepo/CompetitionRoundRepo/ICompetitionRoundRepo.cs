@@ -18,5 +18,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public Task UpdateOrderRoundsByCompe(int competitionId);
         public Task<bool> CheckExistedRound(int roundId);
         public Task<CompetitionRound> GetPreviousRound(int competitionId, int order);
+        //TA
+        //public Task<CompetitionRound> GetLastRound(int competitionId);       
     }
 }
