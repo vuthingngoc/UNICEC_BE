@@ -1184,42 +1184,23 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     return true;
                 }
 
-                //-------------------------------------------------------State Pending
-                //State pending move to State Publish - Register - UpComing
+                //-------------------------------------------------------State Start - OnGoing
+                //State Start - OnGoing
                 //Update Date
-                if (comp.Status == CompetitionStatus.Pending)
-                {
-                    //check xem các mốc thời gian có đúng form hay không STR < ETR < ST < ET
-                    bool dateInsertCases = CheckDateInsertCases(comp, localTime, model);
-                    if (dateInsertCases == false) throw new ArgumentException("Ngày tháng không hợp lệ phải theo quy tắc STR < ETR < ST < ET");
+                if (comp.Status == CompetitionStatus.Start || comp.Status == CompetitionStatus.OnGoing)
+                {             
+                    //Xem đã đúng form chưa 
+                    bool formDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, model.EndTime.Value, true);
 
-                    //chỉ có 3 trạng thái được quay về
+                    if (formDate == false) throw new ArgumentException("Ngày tháng không hợp lệ phải theo quy tắc STR < ETR < ST < ET, và các mốc thời gian phải cách nhau đúng 1 giờ");
 
-                    //Puplish
-                    bool statePuplish = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+                    //check với round cuối cùng trong cuộc thi
 
-                    //Register
-                    bool stateRegister = CheckStateRegister(localTime, model.StartTimeRegister.Value, model.StartTimeRegister.Value);
-
-                    //Up-Coming
-                    bool stateUpComing = CheckStateUpComing(localTime, model.StartTimeRegister.Value, model.StartTime.Value.AddMinutes(-30));
-
-                    if (statePuplish || stateRegister || stateUpComing)
-                    {
-                        //update những field cho phép
-                        comp.StartTimeRegister = (DateTime)((model.StartTimeRegister.HasValue) ? model.StartTimeRegister : comp.StartTimeRegister);
-                        comp.EndTimeRegister = (DateTime)((model.EndTimeRegister.HasValue) ? model.EndTimeRegister : comp.EndTimeRegister);
-                        comp.CeremonyTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime.Value.AddMinutes(-30) : comp.StartTime);
-                        comp.StartTime = (DateTime)((model.StartTime.HasValue) ? model.StartTime : comp.StartTime);
-                        comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
-
-                        await _competitionRepo.Update();
-                        return true;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Chỉ cập nhật được thời gian nằm trong trạng thái là Puplish, Register, Up-coming thôi");
-                    }
+                    //update những field cho phép
+                    comp.EndTime = (DateTime)((model.EndTime.HasValue) ? model.EndTime : comp.EndTime);
+                    await _competitionRepo.Update();
+                    return true;
+                  
                 }
                 return false;
             }
@@ -1981,12 +1962,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //}
 
                 //check xem các mốc thời gian có đúng form hay không STR < ETR < ST < ET
-                bool checkRuleDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, true);
+                bool checkRuleDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, true);
                 if (checkRuleDate == false) throw new ArgumentException("Ngày tháng không hợp lệ phải theo quy tắc STR < ETR < ST < ET");
 
                 //chỉ có 3 trạng thái được quay về
                 //Puplish
-                bool statePuplish = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, comp.EndTime, false);
+                bool statePuplish = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
 
                 //Register
                 bool stateRegister = CheckStateRegister(localTime, model.StartTimeRegister.Value, model.StartTimeRegister.Value);
@@ -1997,8 +1978,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 //-----------------------------------------------------------------Puplish
                 if (statePuplish)
                 {
-                    bool checkDate = CheckDate(localTime, comp.StartTimeRegister, comp.EndTimeRegister, comp.StartTime, comp.EndTime, false);
-                    if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR");
+                    bool checkDate = CheckDate(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value, model.StartTime.Value, model.EndTime.Value, false);
+                    if (checkDate == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, Now < STR < ETR < ET < ETR, các mốc thời gian cách nhau 1 giờ");
 
                     comp.Status = CompetitionStatus.Publish;
                     //await _competitionRepo.Update();
@@ -2015,14 +1996,14 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                    return true;
+                    //return true;
                 }
 
                 //-----------------------------------------------------------------Register
                 if (stateRegister)
                 {
-                    bool checkStateRegister = CheckStateRegister(localTime, comp.StartTimeRegister, comp.EndTimeRegister);
-                    if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister");
+                    bool checkStateRegister = CheckStateRegister(localTime, model.StartTimeRegister.Value, model.EndTimeRegister.Value);
+                    if (checkStateRegister == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, StartTimeRegister < Now < EndTimeRegister, các mốc thời gian cách nhay 1 giờ");
 
 
                     comp.Status = CompetitionStatus.Register;
@@ -2040,15 +2021,15 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                    return true;
+                    //return true;
                 }
 
 
                 //-----------------------------------------------------------------Up - Comming
                 if (stateUpComing)
                 {
-                    bool checkStateUpComing = CheckStateUpComing(localTime, comp.EndTimeRegister, comp.CeremonyTime);
-                    if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime");
+                    bool checkStateUpComing = CheckStateUpComing(localTime, model.EndTimeRegister.Value, model.StartTime.Value.AddMinutes(-30));
+                    if (checkStateUpComing == false) throw new ArgumentException("Thời gian hiện tại không phù hợp, EndTimeRegister < Now < StartTime, các mốc thời gian cách nhau 1 giờ");
 
                     comp.Status = CompetitionStatus.UpComing;
                     //await _competitionRepo.Update();
@@ -2065,7 +2046,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
                     };
                     int result = await _competitionHistoryRepo.Insert(chim);
                     if (result == 0) throw new ArgumentException("Add Competition History Failed");
-                    return true;
+                    //return true;
                 }
                 //}
 
@@ -2612,6 +2593,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
         //Check state Register
         private bool CheckStateRegister(DateTime localTime, DateTime StartTimeRegister, DateTime EndTimeRegister)
         {
+            bool round1 = false;
             bool result = false;
 
             // Register < localTime < EndRegister
@@ -2621,15 +2603,25 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int result2 = DateTime.Compare(localTime, EndTimeRegister); // < 0 sooner
                 if (result2 < 0)
                 {
+                   round1 = true;
+                }
+            }
+
+            if (round1) {
+                //1 hours or more
+                TimeSpan cm1 = EndTimeRegister - StartTimeRegister;
+                if ((TimeSpan.Compare(cm1, TimeSpan.FromHours(1)) >= 0))
+                {
                     result = true;
                 }
             }
-            return result;
+                return result;
         }
 
         //Check state UpComing
         private bool CheckStateUpComing(DateTime localTime, DateTime EndTimeRegister, DateTime CeremonyTime)
         {
+            bool round1 = false;
             bool result = false;
 
             // EndRegister < localTime < Ceremony time
@@ -2639,9 +2631,21 @@ namespace UniCEC.Business.Services.CompetitionSvc
                 int result2 = DateTime.Compare(localTime, CeremonyTime); // < 0 sooner
                 if (result2 < 0)
                 {
+                    round1 = true;
+                }
+            }
+
+
+            if (round1)
+            {
+                //30 minutes or more
+                TimeSpan cm1 = CeremonyTime - EndTimeRegister;
+                if ((TimeSpan.Compare(cm1, TimeSpan.FromMinutes(30)) >= 0))
+                {
                     result = true;
                 }
             }
+
             return result;
         }
 

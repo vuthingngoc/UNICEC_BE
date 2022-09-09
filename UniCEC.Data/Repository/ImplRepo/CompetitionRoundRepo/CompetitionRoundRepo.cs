@@ -171,5 +171,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                     where cr.CompetitionId.Equals(competitionId) && cr.Order.Equals(order)
                     select cr).FirstOrDefaultAsync();
         }
+
+        ////TA
+        //public async Task<CompetitionRound> GetLastRound(int competitionId)
+        //{
+        //    return await (from cr in context.CompetitionRounds
+        //                  where cr.CompetitionId.Equals(competitionId)
+        //                  select cr).Max;
+        //}
     }
 }
