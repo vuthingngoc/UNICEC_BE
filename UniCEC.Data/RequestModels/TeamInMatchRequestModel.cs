@@ -5,8 +5,6 @@ namespace UniCEC.Data.RequestModels
 {
     public class TeamInMatchRequestModel : PagingRequest
     {
-        [FromQuery(Name = "id")]
-        public int Id { get; set; }
         [FromQuery(Name = "matchId")]
         public int MatchId { get; set; }
         [FromQuery(Name = "teamId")]
