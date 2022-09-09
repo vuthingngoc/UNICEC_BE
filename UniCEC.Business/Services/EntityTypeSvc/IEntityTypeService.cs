@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.EntityType;
 
 namespace UniCEC.Business.Services.EntityTypeSvc

@@ -1,8 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Business.Services.TeamInMatchSvc;
 using UniCEC.Data.RequestModels;
+using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.TeamInMatch;
 
 namespace UniCEC.API.Controllers
@@ -10,51 +16,155 @@ namespace UniCEC.API.Controllers
     [Route("api/v1/teams-in-match")]
     [ApiController]
     [ApiVersion("1.0")]
+    
     public class TeamInMatchController : ControllerBase
     {
-        [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get match type by id - all user")]
-        public Task<IActionResult> GetMatchTypeById(int id)
+        private ITeamInMatchService _teamInMatchService;
+
+        public TeamInMatchController(ITeamInMatchService teamInMatchService)
         {
-            throw new System.NotImplementedException();
+            _teamInMatchService = teamInMatchService;
+        }
+
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get detail team in match by id - all user")]
+        public async Task<IActionResult> GetTeamInMatchById(int id)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"];
+                if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
+                ViewTeamInMatch match = await _teamInMatchService.GetById(id, token);
+                return Ok(match);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Search match type by name - all user")]
-        public Task<IActionResult> GetMatchTypeByConditions(TeamInMatchRequestModel request)
+        [SwaggerOperation(Summary = "Search teams in match by conditions - all user")]
+        public async Task<IActionResult> GetMatchTypeByConditions(TeamInMatchRequestModel request)
         {
-            throw new System.NotImplementedException();
-        }
-
-        [HttpGet]
-        [SwaggerOperation(Summary = "Get all match type - all user")]
-        public Task<IActionResult> GetAllMatchTypes(string name)
-        {
-            throw new System.NotImplementedException();
+            try
+            {
+                string token = (Request.Headers)["Authorization"];
+                if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
+                PagingResult< ViewTeamInMatch> match = await _teamInMatchService.GetByConditions(request, token);
+                return Ok(match);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPost]
         [Authorize]
-        [SwaggerOperation(Summary = "Insert match type - Competition manager")]
-        public Task<IActionResult> InsertMatchType(TeamInMatchInsertModel model)
+        [SwaggerOperation(Summary = "Insert team in match - Competition manager")]
+        public async Task<IActionResult> InsertTeamInMatch(TeamInMatchInsertModel model)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                ViewTeamInMatch teamInMatch = await _teamInMatchService.Insert(model, token);
+                return Ok(teamInMatch);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         [HttpPut]
         [Authorize]
         [SwaggerOperation(Summary = "Update match type - Competition manager")]
-        public Task<IActionResult> UpdateMatchType(TeamInMatchUpdateModel model)
+        public async Task<IActionResult> UpdateTeamInMatch(TeamInMatchUpdateModel model)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _teamInMatchService.Update(model, token);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         [SwaggerOperation(Summary = "Update match - Competition manager")]
-        public Task<IActionResult> DeleteMatchType(int id)
+        public async Task<IActionResult> DeleteTeamInMatch(int id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                await _teamInMatchService.Delete(id, token);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal server exception");
+            }
         }
     }
 }
