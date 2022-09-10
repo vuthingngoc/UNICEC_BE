@@ -95,6 +95,8 @@ namespace UniCEC.Business.Services.MatchTypeSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
+            if (model.Id.Equals(0)) throw new ArgumentException("MatchTypeId Null");
+
             MatchType matchType = await _matchTypeRepo.Get(model.Id);
             if (matchType == null) throw new NullReferenceException("Not found this match type");
 

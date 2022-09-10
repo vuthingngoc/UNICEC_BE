@@ -48,12 +48,23 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Get match types by conditions - All user")]
-        public async Task<IActionResult> GetAllMatchTypes(MatchTypeRequestModel request)
+        public async Task<IActionResult> GetMatchTypesByConditions([FromQuery] MatchTypeRequestModel request)
         {
-            string token = (Request.Headers)["Authorization"];
-            if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-            List<ViewMatchType> matchTypes = await _matchTypeService.GetByConditions(request, token);
-            return Ok(matchTypes);
+            try
+            {
+                string token = (Request.Headers)["Authorization"];
+                if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
+                List<ViewMatchType> matchTypes = await _matchTypeService.GetByConditions(request, token);
+                return Ok(matchTypes);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
         }
 
         [HttpPost]
