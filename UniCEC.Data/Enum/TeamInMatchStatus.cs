@@ -4,6 +4,7 @@
     {
         Win,
         Lose,
-        Draw
+        Draw,
+        Cancel
     }
 }

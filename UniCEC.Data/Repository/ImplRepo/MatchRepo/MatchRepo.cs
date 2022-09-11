@@ -6,6 +6,7 @@ using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Match;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
 {
@@ -13,6 +14,12 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
     {
         public MatchRepo(UniCECContext context) : base(context)
         {
+        }
+
+        public async Task<bool> CheckAvailableMatchId(int matchId)
+        {
+            return await context.Matches.FirstOrDefaultAsync(match => match.Id.Equals(matchId) 
+                                                                        && !match.Status.Equals(MatchStatus.IsDeleted)) != null;
         }
 
         public async Task<bool> CheckDuplicatedMatch(string title, int roundId)
@@ -103,6 +110,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                 Title = selector.m.Title,
                 Status = selector.m.Status
             }).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> GetCompetitionIdByMatch(int matchId)
+        {
+            return await (from m in context.Matches
+                         join cr in context.CompetitionRounds on m.RoundId equals cr.Id
+                         where m.Id.Equals(matchId)
+                         select cr.CompetitionId).FirstOrDefaultAsync();
         }
     }
 }

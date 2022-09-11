@@ -49,7 +49,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search teams in match by conditions - all user")]
-        public async Task<IActionResult> GetMatchTypeByConditions(TeamInMatchRequestModel request)
+        public async Task<IActionResult> GetMatchTypeByConditions([FromQuery] TeamInMatchRequestModel request)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPost]
         [Authorize]
-        [SwaggerOperation(Summary = "Insert team in match - Competition manager")]
+        [SwaggerOperation(Summary = "Insert result team in match - Competition manager")]
         public async Task<IActionResult> InsertTeamInMatch(TeamInMatchInsertModel model)
         {
             try
@@ -103,7 +103,7 @@ namespace UniCEC.API.Controllers
 
         [HttpPut]
         [Authorize]
-        [SwaggerOperation(Summary = "Update match type - Competition manager")]
+        [SwaggerOperation(Summary = "Update result team in match - Competition manager")]
         public async Task<IActionResult> UpdateTeamInMatch(TeamInMatchUpdateModel model)
         {
             try
@@ -136,7 +136,7 @@ namespace UniCEC.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        [SwaggerOperation(Summary = "Update match - Competition manager")]
+        [SwaggerOperation(Summary = "Delete result team in match - Competition manager")]
         public async Task<IActionResult> DeleteTeamInMatch(int id)
         {
             try
