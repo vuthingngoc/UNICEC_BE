@@ -12,5 +12,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public Task<PagingResult<ViewMatch>> GetByConditions(MatchRequestModel request);
         public Task<ViewMatch> GetById(int id);
         public Task<bool> CheckDuplicatedMatch(string title, int roundId);
+        public Task<int> GetCompetitionIdByMatch(int matchId);
+        public Task<bool> CheckAvailableMatchId(int matchId);
     }
 }

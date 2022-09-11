@@ -8,13 +8,14 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
         public int Id { get; set; }
         [JsonPropertyName("match_id")]
         public int MatchId { get; set; }
-        [JsonPropertyName("match_name")]
-        public string MatchName { get; set; }
+        [JsonPropertyName("match_title")]
+        public string MatchTitle { get; set; }
         [JsonPropertyName("team_id")]
         public int TeamId { get; set; }
         [JsonPropertyName("team_name")]
         public string TeamName { get; set; }
         public int Scores { get; set; }
         public TeamInMatchStatus Status { get; set; }
+        public string Description { get; set; }
     }
 }
