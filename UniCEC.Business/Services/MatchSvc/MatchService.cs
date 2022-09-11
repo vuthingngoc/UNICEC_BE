@@ -172,7 +172,14 @@ namespace UniCEC.Business.Services.MatchSvc
 
             if(model.NumberOfTeam.HasValue) match.NumberOfTeam = model.NumberOfTeam.Value;
 
-            if (model.Status.HasValue) match.Status = model.Status.Value;
+            if (model.Status.HasValue)
+            {
+                // check valid status
+                if (!Enum.IsDefined(typeof(MatchStatus), model.Status.Value)) 
+                    throw new ArgumentException("Invalid match status");
+
+                match.Status = model.Status.Value;
+            }
 
             await _matchRepo.Update();
         }

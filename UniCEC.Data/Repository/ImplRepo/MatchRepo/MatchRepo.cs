@@ -119,5 +119,24 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                          where m.Id.Equals(matchId)
                          select cr.CompetitionId).FirstOrDefaultAsync();
         }
+
+        public async Task UpdateStatusMatchesByComp(int competitionId, MatchStatus status)
+        {
+            (from m in context.Matches
+             join cr in context.CompetitionRounds on m.RoundId equals cr.Id
+             where cr.CompetitionId.Equals(competitionId)
+             select m).ToList().ForEach(m => m.Status = status);
+
+            await Update();
+        }
+
+        public async Task UpdateStatusMatchesByRound(int roundId, MatchStatus status)
+        {
+            (from m in context.Matches
+             where m.RoundId.Equals(roundId)
+             select m).ToList().ForEach(m => m.Status = status);
+
+            await Update();
+        }
     }
 }

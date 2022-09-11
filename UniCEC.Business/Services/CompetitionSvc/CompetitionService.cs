@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -17,14 +16,13 @@ using UniCEC.Data.Repository.ImplRepo.CompetitionInClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionInMajorRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoleRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionTypeRepo;
-using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
-using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
+using UniCEC.Data.Repository.ImplRepo.MatchRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
-using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.UniversityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
@@ -54,9 +52,10 @@ namespace UniCEC.Business.Services.CompetitionSvc
         private IMajorRepo _majorRepo;
         private ICompetitionInMajorRepo _competitionInMajorRepo;
         private ICompetitionHistoryRepo _competitionHistoryRepo;
+        private ICompetitionRoundRepo _competitionRoundRepo;
+        private IMatchRepo _matchRepo;
         private DecodeToken _decodeToken;
         private readonly IConfiguration _configuration;
-        private IEntityTypeRepo _entityTypeRepo;
         private ISeedsWalletService _seedsWalletService;
         private IUniversityRepo _universityRepo;
         private INotificationService _notificationService;
@@ -75,7 +74,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
                                   ICompetitionInMajorRepo competitionInMajorRepo,
                                   ICompetitionHistoryRepo competitionHistoryRepo,
                                   ICompetitionRoleRepo competitionRoleRepo,
-                                  IEntityTypeRepo entityTypeRepo,
+                                  ICompetitionRoundRepo competitionRoundRepo,
+                                  IMatchRepo matchRepo,
                                   ISeedsWalletService seedsWalletService,
                                   IUniversityRepo universityRepo,
                                   IFileService fileService,
@@ -97,7 +97,8 @@ namespace UniCEC.Business.Services.CompetitionSvc
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionInMajorRepo = competitionInMajorRepo;
             _competitionHistoryRepo = competitionHistoryRepo;
-            _entityTypeRepo = entityTypeRepo;
+            _competitionRoundRepo = competitionRoundRepo;
+            _matchRepo = matchRepo;
             _seedsWalletService = seedsWalletService;
             _universityRepo = universityRepo;
             _notificationService = notificationService;
@@ -1796,6 +1797,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
 
                         comp.Status = CompetitionStatus.Cancel;
                         await _competitionRepo.Update();
+
+                        // Update status rounds in competition
+                        await _competitionRoundRepo.UpdateStatusRoundByCompe(comp.Id, CompetitionRoundStatus.Cancel);
+
+                        // Update status matches in rounds
+                        await _matchRepo.UpdateStatusMatchesByComp(comp.Id, MatchStatus.Cancel);
 
                         //----------- InsertCompetition History
                         CompetitionHistory chim = new CompetitionHistory()

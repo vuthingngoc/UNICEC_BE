@@ -7,6 +7,7 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
+using UniCEC.Data.Repository.ImplRepo.MatchRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
@@ -19,7 +20,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
     public class CompetitionRoundService : ICompetitionRoundService
     {
         private ICompetitionRoundRepo _competitionRoundRepo;
-        
+
         private ICompetitionRepo _competitionRepo;
 
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
@@ -28,16 +29,24 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
         private ITeamInRoundRepo _teamInRoundRepo;
 
+        private IMatchRepo _matchRepo;
+
         private DecodeToken _decodeToken;
 
-        public CompetitionRoundService(ICompetitionRoundRepo competitionRoundRepo,  ICompetitionRepo competitionRepo, 
-                                        IMemberInCompetitionRepo memberInCompetitionRepo, ITeamRepo teamRepo, ITeamInRoundRepo teamInRoundRepo)
+        public CompetitionRoundService(
+            ICompetitionRoundRepo competitionRoundRepo,
+            ICompetitionRepo competitionRepo,
+            IMemberInCompetitionRepo memberInCompetitionRepo,
+            ITeamRepo teamRepo,
+            ITeamInRoundRepo teamInRoundRepo,
+            IMatchRepo matchRepo)
         {
             _competitionRoundRepo = competitionRoundRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRepo = competitionRepo;
             _teamRepo = teamRepo;
             _teamInRoundRepo = teamInRoundRepo;
+            _matchRepo = matchRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -73,7 +82,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 if (competitionRound.Order.Equals(1)) // first round
                 {
                     List<int> teamIds = await _teamRepo.GetAllTeamIdsInComp(competitionRound.CompetitionId);
-                    await _teamInRoundRepo.InsertMultiTeams(teamIds, id);                    
+                    await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
                 }
                 else // another round else
                 {
@@ -99,8 +108,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             Competition competition = await _competitionRepo.Get(competitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
-            if (competition.Status.Equals(4) || competition.Status.Equals(5)) throw new ArgumentException("Can not access the cancel or ending competition");
-            
+            if (competition.Status.Equals(CompetitionStatus.End) || competition.Status.Equals(CompetitionStatus.Complete) 
+                || competition.Status.Equals(CompetitionStatus.Cancel)) 
+                throw new ArgumentException("Can not access the cancel or ending competition");
+
             List<ViewCompetitionRound> viewCompetitionRounds = new List<ViewCompetitionRound>();
             DateTime timePreviousRound = new LocalTime().GetLocalTime().DateTime;
             List<string> titleRounds = new List<string>();
@@ -131,7 +142,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
                 if (model.SeedsPoint < 0) throw new ArgumentException("SeedsPoint must be greater than 0");
 
-                if (model.StartTime < timePreviousRound || model.EndTime <= model.StartTime 
+                if (model.StartTime < timePreviousRound || model.EndTime <= model.StartTime
                     || model.StartTime < competition.StartTime || model.StartTime > competition.EndTime
                     || model.EndTime > competition.EndTime)
                     throw new ArgumentException("StartTime < EndTime and time in each round is in order follow by competition");
@@ -191,8 +202,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             Competition competition = await _competitionRepo.Get(competitionRound.CompetitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
-            if (competition.Status.Equals(4) || competition.Status.Equals(5)) throw new ArgumentException("Can not access the cancel or ending competition");
-            
+            if (competition.Status.Equals(CompetitionStatus.End) || competition.Status.Equals(CompetitionStatus.Complete)
+                || competition.Status.Equals(CompetitionStatus.Cancel))
+                throw new ArgumentException("Can not access the cancel or ending competition");
+
             if (!string.IsNullOrEmpty(model.Title))
             {
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, model.Title, null, null);
@@ -202,14 +215,14 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (!string.IsNullOrEmpty(model.Description)) competitionRound.Description = model.Description;
 
-            if (model.StartTime.HasValue) 
+            if (model.StartTime.HasValue)
             {
                 if (model.StartTime.Value < competition.StartTime || model.StartTime.Value > competition.EndTime)
                     throw new ArgumentException("Invalid startTime");
 
                 if (model.EndTime.HasValue && model.StartTime.Value >= model.EndTime.Value)
                     throw new ArgumentException("Invalid time");
-                else if(!model.EndTime.HasValue && model.StartTime.Value >= competitionRound.EndTime)
+                else if (!model.EndTime.HasValue && model.StartTime.Value >= competitionRound.EndTime)
                     throw new ArgumentException("Invalid startTime");
 
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, null, model.StartTime.Value, null);
@@ -217,11 +230,11 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 competitionRound.StartTime = model.StartTime.Value;
             }
 
-            if (model.EndTime.HasValue) 
+            if (model.EndTime.HasValue)
             {
-                if(model.EndTime.Value > competition.EndTime) throw new ArgumentException("Invalid endTime");
+                if (model.EndTime.Value > competition.EndTime) throw new ArgumentException("Invalid endTime");
 
-                if(!model.StartTime.HasValue && model.EndTime.Value <= competitionRound.StartTime)
+                if (!model.StartTime.HasValue && model.EndTime.Value <= competitionRound.StartTime)
                     throw new ArgumentException("Invalid endTime");
 
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, null, null, model.EndTime.Value);
@@ -237,8 +250,29 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             if (model.SeedsPoint.HasValue)
             {
-                if(model.SeedsPoint.Value < 0) throw new ArgumentException("SeedsPoint must greater than 0");
+                if (model.SeedsPoint.Value < 0) throw new ArgumentException("SeedsPoint must greater than 0");
                 competitionRound.SeedsPoint = model.SeedsPoint.Value;
+            }
+
+            if (model.Status.HasValue)
+            {
+                // check valid status
+                if (!Enum.IsDefined(typeof(CompetitionRoundStatus), model.Status.Value)) 
+                    throw new ArgumentException("Invalid competition round status");
+
+                competitionRound.Status = model.Status.Value;
+                MatchStatus matchStatus = MatchStatus.Ready; // default match status
+                if (model.Status.Equals(CompetitionRoundStatus.Cancel))
+                {
+                    matchStatus = MatchStatus.Cancel;
+                }
+                else if (model.Status.Equals(CompetitionRoundStatus.Finished))
+                {
+                    matchStatus = MatchStatus.Finish;
+                }
+
+                // update status matches in round
+                await _matchRepo.UpdateStatusMatchesByRound(competitionRound.Id, matchStatus);
             }
 
             await _competitionRoundRepo.Update();
@@ -257,6 +291,9 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             competitionRound.Order = 0;
             await _competitionRoundRepo.Update();
             await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
+
+            // update status matches in round
+            await _matchRepo.UpdateStatusMatchesByRound(competitionRound.Id, MatchStatus.Cancel);
         }
     }
 }
