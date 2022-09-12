@@ -20,7 +20,7 @@ namespace UniCEC.Business.Services.MemberSvc
         public Task Update(string token, MemberUpdateModel member);
         public Task Delete(string token, int id);
         //TA
-        public Task<List<ViewMember>> GetMembersByClub(string token, int clubId, string? searchName, int? RoleId);
+        public Task<List<ViewMember>> GetMembersByClub(string token, int clubId, string searchName, int? RoleId);
 
     }
 }

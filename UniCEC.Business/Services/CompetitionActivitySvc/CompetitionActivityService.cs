@@ -178,7 +178,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
 
 
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string? name, string token)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus> statuses, string name, string token)
         {
             try
             {

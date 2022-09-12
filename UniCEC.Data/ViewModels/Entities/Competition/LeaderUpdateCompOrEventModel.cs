@@ -15,7 +15,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public int Id { get; set; }
         [JsonPropertyName("competition_type_id")]
         public int? CompetitionTypeId { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; }
         [JsonPropertyName("start_time_register")]
         public DateTime? StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
@@ -24,13 +24,13 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime? StartTime { get; set; }
         [JsonPropertyName("end_time")]
         public DateTime? EndTime { get; set; }
-        public string? Content { get; set; }
+        public string Content { get; set; }
         public double? Fee { get; set; }
         [JsonPropertyName("seeds_point")]
         public double? SeedsPoint { get; set; }    
         [JsonPropertyName("address_name")]
-        public string? AddressName { get; set; }
-        public string? Address { get; set; }
+        public string AddressName { get; set; }
+        public string Address { get; set; }
         [JsonPropertyName("number_of_participant")]
         public int? NumberOfParticipant { get; set; }
         [JsonPropertyName("max_number")]
@@ -44,7 +44,7 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //---------List DepartmentID belong to University Insert in Competition
         [JsonPropertyName("list_major_id")]
-        public List<int>? ListMajorId { get; set; }
+        public List<int> ListMajorId { get; set; }
 
         //---------Author to check user is Leader of Club and Collaborate in Copetition
         [JsonPropertyName("club_id"), BindRequired]

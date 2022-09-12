@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
     public class UpdateCompetitionWithStateApproveModel
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; }
         [JsonPropertyName("start_time_register")]
         public DateTime? StartTimeRegister { get; set; }
         [JsonPropertyName("end_time_register")]
@@ -26,8 +22,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         [JsonPropertyName("seeds_deposited")]
         public double? SeedsDeposited { get; set; }
         [JsonPropertyName("address_name")]
-        public string? AddressName { get; set; }
-        public string? Address { get; set; }
+        public string AddressName { get; set; }
+        public string Address { get; set; }
         [JsonPropertyName("number_of_participant")]
         public int? NumberOfParticipant { get; set; }
         [JsonPropertyName("max_number")]

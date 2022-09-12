@@ -10,8 +10,8 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
     public class CompetitionActivityUpdateModel
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
         [JsonPropertyName("seeds_point")]
         public double? SeedsPoint { get; set; }       
         public DateTime? Ending { get; set; }

@@ -15,12 +15,12 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionHistory
         public int? ChangerId { get; set; }
 
         [JsonPropertyName("changer_name")]
-        public string? ChangerName { get; set; }
+        public string ChangerName { get; set; }
 
         [JsonPropertyName("change_date")]
         public DateTime ChangeDate { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; }
 
         public CompetitionStatus Status { get; set; }
     }

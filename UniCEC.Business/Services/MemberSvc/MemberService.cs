@@ -280,7 +280,7 @@ namespace UniCEC.Business.Services.MemberSvc
         }
 
         // Tien Anh
-        public async Task<List<ViewMember>> GetMembersByClub(string token, int clubId, string? searchName, int? roleId)
+        public async Task<List<ViewMember>> GetMembersByClub(string token, int clubId, string searchName, int? roleId)
         {
             int userId = _decodeToken.Decode(token, "Id");
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);

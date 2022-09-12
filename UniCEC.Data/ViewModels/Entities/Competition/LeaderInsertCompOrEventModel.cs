@@ -46,19 +46,19 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
 
         //List Department Id Belong To University
         [JsonPropertyName("list_major_id")]
-        public List<int>? ListMajorId { get; set; }
+        public List<int> ListMajorId { get; set; }
 
         //List Image
         [JsonPropertyName("list_image")]
-        public List<AddImageModel>? ListImage { get; set; }
+        public List<AddImageModel> ListImage { get; set; }
 
         //List Influencer
         [JsonPropertyName("list_influencer")]
-        public List<AddInfluencerModel>? ListInfluencer { get; set; }
+        public List<AddInfluencerModel> ListInfluencer { get; set; }
 
         //List Sponsor
         [JsonPropertyName("list_sponsor")]
-        public List<AddSponsorModel>? ListSponsor { get; set; }
+        public List<AddSponsorModel> ListSponsor { get; set; }
 
 
         //---------Author to check user is Leader of Club   

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.ActivitiesEntity;
 
@@ -32,6 +29,6 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionActivity
 
         //------------- ADD Field Activities Entities -> Object Array  
         [JsonPropertyName("activities_entities")]
-        public List<ViewActivitiesEntity>? ActivitiesEntities { get; set; }
+        public List<ViewActivitiesEntity> ActivitiesEntities { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace UniCEC.Data.RequestModels
     {
         // find-by-name
         [FromQuery(Name = "name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
         // find-by-cityId
         [FromQuery(Name = "cityId")]
         public int? CityId { get; set; }

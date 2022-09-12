@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
 {
@@ -20,8 +16,8 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
         public DateTime? EndTime { get; set; }
 
         [JsonPropertyName("address_name")]
-        public string? AddressName { get; set; }
-        public string? Address { get; set; }
+        public string AddressName { get; set; }
+        public string Address { get; set; }
         [JsonPropertyName("number_of_participant")]
         public int? NumberOfParticipant { get; set; }
         [JsonPropertyName("max_number")]

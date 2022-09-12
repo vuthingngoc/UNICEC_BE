@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.Competition
@@ -12,9 +7,9 @@ namespace UniCEC.Data.ViewModels.Entities.Competition
     {
         public int Id { get; set; }
 
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
-        public string? Content { get; set; }
+        public string Content { get; set; }
 
         public CompetitionScopeStatus? Scope { get; set; }
 

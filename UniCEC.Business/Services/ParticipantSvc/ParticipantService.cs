@@ -204,7 +204,7 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 if (round1 && round2)
                 {
                     //Check Number Of Participant join this competition
-                    if (await _participantRepo.CheckNumOfParticipant(competition.Id, competition.NumberOfParticipation))
+                    if (_participantRepo.CheckNumOfParticipant(competition.Id, competition.NumberOfParticipation))
                     {
                         round3 = true;
                     }

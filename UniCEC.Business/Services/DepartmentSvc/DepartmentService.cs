@@ -174,7 +174,7 @@ namespace UniCEC.Business.Services.DepartmentSvc
                 if (result == null) throw new NullReferenceException();
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

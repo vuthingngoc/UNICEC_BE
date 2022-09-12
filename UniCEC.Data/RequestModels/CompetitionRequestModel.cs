@@ -21,15 +21,15 @@ namespace UniCEC.Data.RequestModels
         public CompetitionScopeStatus? Scope { get; set; }
         //Name
         [FromQuery(Name = "name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
         //Status
         [FromQuery(Name = "statuses")]
-        public List<CompetitionStatus>? Statuses { get; set; }
+        public List<CompetitionStatus> Statuses { get; set; }
         //ViewMost
         [FromQuery(Name = "viewMost")]
         public bool? ViewMost { get; set; }
         //Get Entities
         [FromQuery(Name = "getEntities")]
-        public bool? getEntities { get; set; }
+        public bool? GetEntities { get; set; }
     }
 }
