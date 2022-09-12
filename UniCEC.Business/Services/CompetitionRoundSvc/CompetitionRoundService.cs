@@ -64,14 +64,14 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             return competitionRounds;
         }
 
-        public async Task<ViewCompetitionRound> GetById(string token, int id) // not test yet
+        public async Task<ViewCompetitionRound> GetById(string token, int id)
         {
             ViewCompetitionRound competitionRound = await _competitionRoundRepo.GetById(id, null);
             if (competitionRound == null) throw new NullReferenceException();
 
             int userId = _decodeToken.Decode(token, "Id");
             bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId, null);
-            if (!isValidUser && competitionRound.Status.Equals(false)) throw new NullReferenceException();
+            if (!isValidUser && competitionRound.Status.Equals(CompetitionRoundStatus.IsDeleted)) throw new NullReferenceException();
 
             // trigger add teams in round
             if (competitionRound.Status.Equals(CompetitionRoundStatus.Happening))
