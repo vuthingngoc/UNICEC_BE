@@ -14,12 +14,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public Task<ViewCompetitionRound> GetById(int id, bool? status);
         public Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request);
         public Task<int> GetCompetitionIdByRound(int competitionRoundId);
-        public Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime);
+        public Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime, int? order);
         public Task UpdateNumberOfTeam(int roundId, int numberOfTeam);
         public Task UpdateOrderRoundsByCompe(int competitionId);
         public Task UpdateStatusRoundByCompe(int competitionId, CompetitionRoundStatus status);
         public Task<bool> CheckExistedRound(int roundId);
         public Task<CompetitionRound> GetPreviousRound(int competitionId, int order);
+        public Task<int> GetNumberOfRoundsByCompetition(int competitionId);
         //TA
         //public Task<CompetitionRound> GetLastRound(int competitionId);       
     }
