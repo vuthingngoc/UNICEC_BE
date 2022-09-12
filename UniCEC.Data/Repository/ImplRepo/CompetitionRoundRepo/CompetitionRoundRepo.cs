@@ -175,7 +175,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task UpdateStatusRoundByCompe(int competitionId, CompetitionRoundStatus status)
         {
             (from cr in context.CompetitionRounds
-             where cr.CompetitionId.Equals(competitionId)
+             where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.IsDeleted)
              select cr).ToList().ForEach(cr => cr.Status = status);
 
             await Update();

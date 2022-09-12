@@ -124,7 +124,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         {
             (from m in context.Matches
              join cr in context.CompetitionRounds on m.RoundId equals cr.Id
-             where cr.CompetitionId.Equals(competitionId)
+             where cr.CompetitionId.Equals(competitionId) && !m.Status.Equals(MatchStatus.IsDeleted)
              select m).ToList().ForEach(m => m.Status = status);
 
             await Update();
@@ -133,7 +133,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public async Task UpdateStatusMatchesByRound(int roundId, MatchStatus status)
         {
             (from m in context.Matches
-             where m.RoundId.Equals(roundId)
+             where m.RoundId.Equals(roundId) && !m.Status.Equals(MatchStatus.IsDeleted)
              select m).ToList().ForEach(m => m.Status = status);
 
             await Update();
