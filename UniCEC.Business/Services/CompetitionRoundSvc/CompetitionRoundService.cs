@@ -270,6 +270,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 {
                     matchStatus = MatchStatus.Finish;
                 }
+                else if (model.Status.Equals(CompetitionRoundStatus.IsDeleted))
+                {
+                    matchStatus = MatchStatus.IsDeleted;
+                }
 
                 // update status matches in round
                 await _matchRepo.UpdateStatusMatchesByRound(competitionRound.Id, matchStatus);
@@ -287,7 +291,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             CheckValidAuthorized(token, competitionRound.CompetitionId);
 
-            competitionRound.Status = CompetitionRoundStatus.Cancel;
+            competitionRound.Status = CompetitionRoundStatus.IsDeleted;
             competitionRound.Order = 0;
             await _competitionRoundRepo.Update();
             await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
