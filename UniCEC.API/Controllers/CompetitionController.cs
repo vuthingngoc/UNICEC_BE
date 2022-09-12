@@ -156,7 +156,7 @@ namespace UniCEC.API.Controllers
         [Authorize(Roles = "Student")]
         [HttpGet("student-is-assigned")]
         [SwaggerOperation(Summary = "Get EVENTS or COMPETITIONS that Student is assigned in Task (Status != Canceling)")]
-        public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request, [FromQuery(Name = "clubId"), BindRequired] int clubId, [FromQuery(Name = "name")] string? searchName, [FromQuery(Name = "event")] bool? isEvent)
+        public async Task<IActionResult> GetCompOrEveStudentIsAssignedTask([FromQuery] PagingRequest request, [FromQuery(Name = "clubId"), BindRequired] int clubId, [FromQuery(Name = "name")] string searchName, [FromQuery(Name = "event")] bool? isEvent)
         {
             try
             {

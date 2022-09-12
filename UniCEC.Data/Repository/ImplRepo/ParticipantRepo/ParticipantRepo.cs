@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.Participant;
@@ -70,7 +69,7 @@ namespace UniCEC.Data.Repository.ImplRepo.ParticipantRepo
         //}
 
         //
-        public async Task<bool> CheckNumOfParticipant(int CompetitionId, int NumOfCompetition)
+        public bool CheckNumOfParticipant(int CompetitionId, int NumOfCompetition)
         {
 
             var query = from p in context.Participants

@@ -219,7 +219,7 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 if (result <= 0) throw new ArgumentException("Add Team Leader Failed");
 
-                return await TransformViewTeam(getTeam);
+                return TransformViewTeam(getTeam);
 
             }
             catch (Exception)
@@ -608,7 +608,7 @@ namespace UniCEC.Business.Services.TeamSvc
             };
         }
 
-        public async Task<ViewTeam> TransformViewTeam(Team team)
+        public ViewTeam TransformViewTeam(Team team)
         {
             return new ViewTeam()
             {

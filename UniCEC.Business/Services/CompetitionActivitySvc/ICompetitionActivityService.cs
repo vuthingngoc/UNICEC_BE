@@ -30,7 +30,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
         public Task<PagingResult<ViewCompetitionActivity>> GetListActivitiesByConditions(CompetitionActivityRequestModel conditions, string token);
 
         //lấy tất cả task cho thành viên được assign
-        public Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses, string? name ,string token);
+        public Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus> statuses, string name ,string token);
 
 
         //------------------------------------Member Take Activity

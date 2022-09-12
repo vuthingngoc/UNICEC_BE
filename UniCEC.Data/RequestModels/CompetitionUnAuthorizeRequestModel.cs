@@ -9,7 +9,7 @@ namespace UniCEC.Data.RequestModels
         public bool? Sponsor { get; set; }
 
         [FromQuery(Name = "name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [FromQuery(Name = "nearlyDate")]
         public bool? NearlyDate { get; set; }

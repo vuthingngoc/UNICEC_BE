@@ -665,7 +665,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             PagingResult<ViewCompetition> result = await _competitionRepo.GetCompOrEve(request, _decodeToken.Decode(token, "UniversityId"));
             if (result == null) throw new NullReferenceException();
 
-            if (!request.getEntities.HasValue)
+            if (!request.GetEntities.HasValue)
             {
                 foreach (ViewCompetition item in result.Items)
                 {
@@ -689,7 +689,7 @@ namespace UniCEC.Business.Services.CompetitionSvc
             }
 
             //Nếu kh có truyền getEntities thì kh show hình
-            if (request.getEntities.HasValue.Equals(true))
+            if (request.GetEntities.HasValue.Equals(true))
             {
                 foreach (ViewCompetition item in result.Items)
                 {

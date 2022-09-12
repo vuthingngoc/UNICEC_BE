@@ -125,7 +125,7 @@ namespace UniCEC.API.Controllers
                 ViewParticipant viewParticipant = await _participantService.GetByCompetitionId(competitionId, token);
                 return Ok(viewParticipant);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
                 return Ok(new object());
             }
@@ -161,7 +161,7 @@ namespace UniCEC.API.Controllers
                 PagingResult<ViewParticipant> result = await _participantService.GetByConditions(request, token);
                 return Ok(result);
             }
-            catch (NullReferenceException ex)
+            catch (NullReferenceException)
             {
                 return Ok(new List<object>());
             }

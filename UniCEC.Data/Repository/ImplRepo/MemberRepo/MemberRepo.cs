@@ -58,7 +58,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (members.Count > 0) ? new PagingResult<ViewMember>(members, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<List<Member>> GetMembersByClub(int clubId, string? searchName, int? roleId)
+        public async Task<List<Member>> GetMembersByClub(int clubId, string searchName, int? roleId)
         {
             var query = from m in context.Members
                         join cr in context.ClubRoles on m.ClubRoleId equals cr.Id

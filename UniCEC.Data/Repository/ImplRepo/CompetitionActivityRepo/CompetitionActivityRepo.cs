@@ -226,7 +226,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionActivityRepo
 
 
         //lấy task cho thằng đó trong competition
-        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus>? statuses,  string? name, int userId)
+        public async Task<PagingResult<ViewCompetitionActivity>> GetListCompetitionActivitiesIsAssigned(PagingRequest request, int competitionId, PriorityStatus? priorityStatus, List<CompetitionActivityStatus> statuses, string name, int userId)
         {
             
             var query = from m in context.Members

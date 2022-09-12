@@ -17,10 +17,10 @@ namespace UniCEC.Data.RequestModels
         public PriorityStatus? PriorityStatus { get; set; }
 
         [FromQuery(Name = "statuses")]
-        public List<CompetitionActivityStatus>? Statuses { get; set; }
+        public List<CompetitionActivityStatus> Statuses { get; set; }
 
         [FromQuery(Name = "name")]
-        public string? name { get; set; }
+        public string name { get; set; }
 
         //Club Id
         [FromQuery(Name = "clubId"), BindRequired]

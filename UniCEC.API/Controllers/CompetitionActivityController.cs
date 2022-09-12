@@ -97,8 +97,8 @@ namespace UniCEC.API.Controllers
         public async Task<IActionResult> GetListCompetitionActivitiesIsAssigned([FromQuery] PagingRequest request,
             [FromQuery(Name = "competitionId"), BindRequired] int competitionId,
             [FromQuery(Name = "priorityStatus")] PriorityStatus? priorityStatus,
-            [FromQuery(Name = "statuses")] List<CompetitionActivityStatus>? statuses,
-            [FromQuery(Name = "name")] string? name
+            [FromQuery(Name = "statuses")] List<CompetitionActivityStatus> statuses,
+            [FromQuery(Name = "name")] string name
             )
         {
             try

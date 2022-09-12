@@ -19,6 +19,6 @@ namespace UniCEC.Data.RequestModels
         public CompetitionScopeStatus? Scope { get; set; }
         //Name
         [FromQuery(Name = "name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
     }
 }
