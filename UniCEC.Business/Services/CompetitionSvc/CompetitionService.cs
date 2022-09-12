@@ -1604,6 +1604,12 @@ namespace UniCEC.Business.Services.CompetitionSvc
                         comp.Status = CompetitionStatus.Draft;
                         await _competitionRepo.Update();
 
+                        // Update status rounds in competition
+                        await _competitionRoundRepo.UpdateStatusRoundByCompe(comp.Id, CompetitionRoundStatus.Active);
+
+                        // Update status matches in rounds
+                        await _matchRepo.UpdateStatusMatchesByComp(comp.Id, MatchStatus.Ready);
+
                         //----------- InsertCompetition History
                         CompetitionHistory chim = new CompetitionHistory()
                         {
