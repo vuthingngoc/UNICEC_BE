@@ -91,15 +91,23 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                         select cr.Id).FirstOrDefaultAsync();
         }
 
-        private async Task<int> CheckDuplicatedTime(int competitionId, DateTime time)
+        private async Task<int> CheckInvalidStartTime(int competitionId, DateTime time)
         {
             return await (from cr in context.CompetitionRounds
                         where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
-                                && cr.StartTime.CompareTo(time) < 0 && cr.EndTime.CompareTo(time) > 0
+                                && cr.EndTime.CompareTo(time) > 0
                         select cr.Id).FirstOrDefaultAsync();
         }
 
-        public async Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime)
+        private async Task<int> CheckInvalidEndtime(int competitionId, DateTime time, int order)
+        {
+            return await (from cr in context.CompetitionRounds
+                          where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
+                                  && cr.StartTime.CompareTo(time) < 0 && cr.Order > order
+                          select cr.Id).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime, int? order)
         {
             int roundId = 0;
             if (!string.IsNullOrEmpty(title))
@@ -110,15 +118,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
             if (startTime.HasValue) 
             {
-                roundId = await CheckDuplicatedTime(competitionId, startTime.Value);
+                roundId = await CheckInvalidStartTime(competitionId, startTime.Value);
                 if (roundId != 0) return roundId;
             }
 
-            if (endTime.HasValue) 
+            if (endTime.HasValue)
             {
-                roundId = await CheckDuplicatedTime(competitionId, endTime.Value);
+                roundId = await CheckInvalidEndtime(competitionId, endTime.Value, order.Value);
                 if (roundId != 0) return roundId;
-            } 
+            }
 
             return roundId;
         }
@@ -179,6 +187,15 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
              select cr).ToList().ForEach(cr => cr.Status = status);
 
             await Update();
+        }
+
+        public async Task<int> GetNumberOfRoundsByCompetition(int competitionId)
+        {
+            var query = from cr in context.CompetitionRounds
+                        where cr.CompetitionId.Equals(competitionId) && cr.Status.Equals(CompetitionRoundStatus.Active)
+                        select cr;
+
+            return await query.CountAsync();
         }
 
         ////TA
