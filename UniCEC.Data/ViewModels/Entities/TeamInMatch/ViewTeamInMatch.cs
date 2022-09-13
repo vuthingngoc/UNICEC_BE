@@ -17,5 +17,7 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
         public int Scores { get; set; }
         public TeamInMatchStatus Status { get; set; }
         public string Description { get; set; }
+        [JsonPropertyName("number_of_members")]
+        public int NumberOfMembers { get; set; }
     }
 }
