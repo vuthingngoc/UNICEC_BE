@@ -55,7 +55,7 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"];
                 if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                PagingResult< ViewTeamInMatch> match = await _teamInMatchService.GetByConditions(request, token);
+                PagingResult<ViewTeamInMatch> match = await _teamInMatchService.GetByConditions(request, token);
                 return Ok(match);
             }
             catch (NullReferenceException)

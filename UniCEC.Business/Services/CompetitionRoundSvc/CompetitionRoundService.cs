@@ -70,11 +70,11 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (competitionRound == null) throw new NullReferenceException();
 
             int userId = _decodeToken.Decode(token, "Id");
-            bool isValidUser = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.Id, userId, null);
-            if (!isValidUser && competitionRound.Status.Equals(CompetitionRoundStatus.IsDeleted)) throw new NullReferenceException();
+            bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionRound.CompetitionId, userId, null);
+            if (!isManager && competitionRound.Status.Equals(CompetitionRoundStatus.IsDeleted)) throw new NullReferenceException();
 
             // trigger add teams in round
-            if (competitionRound.Status.Equals(CompetitionRoundStatus.Happening))
+            if (isManager)
             {
                 bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
                 if (isExisted) return competitionRound;
@@ -84,7 +84,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     List<int> teamIds = await _teamRepo.GetAllTeamIdsInComp(competitionRound.CompetitionId);
                     await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
                 }
-                else // another round else
+                else // the nth round
                 {
                     int previousRoundOrder = competitionRound.Order - 1;
                     CompetitionRound previousRound = await _competitionRoundRepo.GetPreviousRound(competitionRound.CompetitionId, previousRoundOrder);
@@ -108,8 +108,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             Competition competition = await _competitionRepo.Get(competitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
-            if (competition.Status.Equals(CompetitionStatus.End) || competition.Status.Equals(CompetitionStatus.Complete) 
-                || competition.Status.Equals(CompetitionStatus.Cancel)) 
+            if (competition.Status.Equals(CompetitionStatus.End) || competition.Status.Equals(CompetitionStatus.Complete)
+                || competition.Status.Equals(CompetitionStatus.Cancel))
                 throw new ArgumentException("Can not access the cancel or ending competition");
 
             List<ViewCompetitionRound> viewCompetitionRounds = new List<ViewCompetitionRound>();
@@ -257,7 +257,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (model.Status.HasValue)
             {
                 // check valid status
-                if (!Enum.IsDefined(typeof(CompetitionRoundStatus), model.Status.Value)) 
+                if (!Enum.IsDefined(typeof(CompetitionRoundStatus), model.Status.Value))
                     throw new ArgumentException("Invalid competition round status");
 
                 competitionRound.Status = model.Status.Value;
