@@ -7,6 +7,7 @@ using UniCEC.Data.ViewModels.Entities.TeamInMatch;
 using UniCEC.Data.RequestModels;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
 {
@@ -16,7 +17,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         {
         }
 
-        public  bool CheckDuplicatedTeamInMatch(int matchId, int teamId, int? teamInMatchId)
+        public bool CheckDuplicatedTeamInMatch(int matchId, int teamId, int? teamInMatchId)
         {
             //return await context.TeamInMatches.FirstOrDefaultAsync(team => team.MatchId.Equals(matchId) && team.TeamId.Equals(teamId)
             //                                                                && !team.Id.Equals(teamInMatchId)) != null;
@@ -67,26 +68,49 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
                                                     Description = selector.tim.Description,
                                                 }).ToListAsync();
 
-            return (items.Count > 0) ? new PagingResult<ViewTeamInMatch>(items, totalCount, request.CurrentPage, request.PageSize) : null;
+            if(items.Count > 0)
+            {
+                foreach(var item in items)
+                {
+                    int numberOfMembers = (from pit in context.ParticipantInTeams
+                                           where pit.TeamId.Equals(item.TeamId) && pit.Status.Equals(ParticipantInTeamStatus.InTeam)
+                                           select pit).Count();
+                    item.NumberOfMembers = numberOfMembers;
+                }
+
+                return new PagingResult<ViewTeamInMatch>(items, totalCount, request.CurrentPage, request.PageSize);
+            }
+
+            return null;
         }
 
         public async Task<ViewTeamInMatch> GetById(int id)
         {
-            return await (from tim in context.TeamInMatches
-                          join m in context.Matches on tim.MatchId equals m.Id
-                          join t in context.Teams on tim.TeamId equals t.Id
-                          where tim.Id.Equals(id)
-                          select new ViewTeamInMatch()
-                          {
-                              Id = tim.Id,
-                              MatchId = tim.MatchId,
-                              MatchTitle = m.Title,
-                              Scores = tim.Scores,
-                              TeamId = tim.TeamId,
-                              TeamName = t.Name,
-                              Status = tim.Status,
-                              Description = tim.Description,                              
-                          }).FirstOrDefaultAsync();
+            ViewTeamInMatch team = await (from tim in context.TeamInMatches
+                                          join m in context.Matches on tim.MatchId equals m.Id
+                                          join t in context.Teams on tim.TeamId equals t.Id
+                                          where tim.Id.Equals(id)
+                                          select new ViewTeamInMatch()
+                                          {
+                                              Id = tim.Id,
+                                              MatchId = tim.MatchId,
+                                              MatchTitle = m.Title,
+                                              Scores = tim.Scores,
+                                              TeamId = tim.TeamId,
+                                              TeamName = t.Name,
+                                              Status = tim.Status,
+                                              Description = tim.Description,
+                                          }).FirstOrDefaultAsync();
+
+            if(team != null)
+            {
+                int numberOfMembers = (from pit in context.ParticipantInTeams
+                                      where pit.TeamId.Equals(team.TeamId) && pit.Status.Equals(ParticipantInTeamStatus.InTeam)
+                                      select pit).Count();
+                team.NumberOfMembers = numberOfMembers;                
+            }
+
+            return team;
         }
     }
 }
