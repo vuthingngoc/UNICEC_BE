@@ -1,6 +1,6 @@
-﻿namespace UniCEC.Data.ViewModels.Entities.MatchType
+﻿namespace UniCEC.Data.ViewModels.Entities.CompetitionRoundType
 {
-    public class ViewMatchType
+    public class ViewCompetitionRoundType
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -100,7 +100,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             await Update();
         }
 
-        public async Task<List<ViewTeamInRound>> GetTopTeamsInCompetition(int competitionId, int top)
+        public async Task<List<ViewTeamInRound>> GetTopTeamsInCompetition(int competitionId, int top) // no use anymore
         {
             List<ViewTeamInRound> teamsInRound = await (from tir in context.TeamInRounds
                                                         join t in context.Teams on tir.TeamId equals t.Id
@@ -170,18 +170,18 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public async Task<int> GetTotalPointsTeam(int teamId, int competitionId)
         {
             return await (from tir in context.TeamInRounds
-                    join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
-                    where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
-                            && tir.Status.Equals(true)
-                    select tir.Scores).SumAsync();
+                          join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
+                          where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
+                                  && tir.Status.Equals(true)
+                          select tir.Scores).SumAsync();
         }
 
         public async Task InsertMultiTeams(List<int> teamIds, int roundId)
         {
-            if(teamIds.Count > 0)
+            if (teamIds.Count > 0)
             {
                 List<TeamInRound> teams = new List<TeamInRound>();
-                foreach(int teamId in teamIds)
+                foreach (int teamId in teamIds)
                 {
                     TeamInRound team = new TeamInRound()
                     {
@@ -211,13 +211,65 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             return (query.Any()) ? await query.Select(tir => tir.TeamId).ToListAsync() : null;
         }
 
+        public async Task<List<ViewTeamInRound>> GetTeamsByRound(int roundId, int? top) // for competition manager
+        {
+            List<ViewTeamInRound> teams = await (from tir in context.TeamInRounds
+                                                 join t in context.Teams on tir.TeamId equals t.Id
+                                                 where tir.RoundId.Equals(roundId)
+                                                 orderby (tir.Rank)
+                                                 select new ViewTeamInRound()
+                                                 {
+                                                     Id = tir.Id,
+                                                     RoundId = tir.RoundId,
+                                                     Rank = tir.Rank,
+                                                     Scores = tir.Scores,
+                                                     TeamId = tir.TeamId,
+                                                     TeamName = t.Name,
+                                                     Status = tir.Status
+                                                 }).ToListAsync();
+
+            if (teams.Any())
+            {
+                if (top.HasValue)  
+                {
+                    // update status teams in round
+                    var winTeams = teams.Take(top.Value).ToList();
+                    var loseTeams = teams.Skip(top.Value).ToList();
+                    List<int> winTeamIds = winTeams.Select(team => team.TeamId).ToList();
+                    List<int> loseTeamIds = loseTeams.Select(team => team.TeamId).ToList();
+
+                    context.TeamInRounds.Where(team => winTeamIds.Contains(team.TeamId)).ToList()
+                                        .ForEach(team => team.Status = true); // status win
+
+                    context.TeamInRounds.Where(team => loseTeamIds.Contains(team.TeamId)).ToList()
+                                        .ForEach(team => team.Status = false); // status lose
+
+                    await Update();
+                    foreach (var team in winTeams)
+                    {
+                        team.Status = true;
+                        team.MembersInTeam = await GetMembersInTeam(team.TeamId);
+                    }
+
+                    return winTeams;
+                }
+
+                foreach (var team in teams)
+                {
+                    team.MembersInTeam = await GetMembersInTeam(team.TeamId);
+                }
+            }
+
+            return teams;
+        }
+
         public async Task<bool> CheckExistedTeamsInRound(int roundId)
         {
             var query = from tir in context.TeamInRounds
                         where tir.RoundId.Equals(roundId)
                         select tir;
 
-            return await query.AnyAsync();            
+            return await query.AnyAsync();
         }
     }
 }

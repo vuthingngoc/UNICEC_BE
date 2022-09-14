@@ -12,6 +12,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
         //public Task<ViewTeamInRound> GetById(string token, int id);
         public Task<PagingResult<ViewTeamInRound>> GetByConditions(string token, TeamInRoundRequestModel request);
         public Task<List<ViewResultTeam>> GetTotalResultTeamInCompetition(string token, int competitionId, int top);
+        public Task<List<ViewTeamInRound>> GetTopTeamsToNextRound(string token, int roundId, int top);
         public Task<List<ViewTeamInRound>> Insert(string token, List<TeamInRoundInsertModel> models);
         public Task Update(string token, TeamInRoundUpdateModel model);
         public Task Delete(string token, int id);

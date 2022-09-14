@@ -83,12 +83,40 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("total-result")]
         [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
-        public async Task<IActionResult> GetTopTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
+        public async Task<IActionResult> GetTotalResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
                 List<ViewResultTeam> teams = await _teamInRoundService.GetTotalResultTeamInCompetition(token, competitionId, top);
+                return Ok(teams);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
+        [HttpGet("next-round")]
+        [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
+        public async Task<IActionResult> GetTopTeamsToNextRound([FromQuery, BindRequired] int roundId, [FromQuery, BindRequired]  int top)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewTeamInRound> teams = await _teamInRoundService.GetTopTeamsToNextRound(token, roundId, top);
                 return Ok(teams);
             }
             catch (ArgumentException ex)

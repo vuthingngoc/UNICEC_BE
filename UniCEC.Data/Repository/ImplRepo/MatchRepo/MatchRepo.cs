@@ -34,16 +34,16 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public async Task<PagingResult<ViewMatch>> GetByConditions(MatchRequestModel request)
         {
             var query = from m in context.Matches
-                        join mt in context.MatchTypes on m.MatchTypeId equals mt.Id
+                        //join mt in context.CompetitionRoundTypes on m.CompetitionRoundTypeId equals mt.Id
                         join cr in context.CompetitionRounds on m.RoundId equals cr.Id
                         join c in context.Competitions on cr.CompetitionId equals c.Id
-                        select new { m, mt, cr, c };
+                        select new { m, /*mt*/cr, c };
 
             if (request.CompetitionId.HasValue) query = query.Where(selector => selector.c.Id.Equals(request.CompetitionId.Value));
 
             if (request.RoundId.HasValue) query = query.Where(selector => selector.cr.Id.Equals(request.RoundId.Value));
 
-            if (request.MatchTypeId.HasValue) query = query.Where(selector => selector.m.MatchTypeId.Equals(request.MatchTypeId.Value));
+            //if (request.MatchTypeId.HasValue) query = query.Where(selector => selector.m.MatchTypeId.Equals(request.MatchTypeId.Value));
 
             if (request.StartTime.HasValue) query = query.Where(selector => selector.m.StartTime.Year.Equals(request.StartTime.Value.Year)
                     && selector.m.StartTime.Month.Equals(request.StartTime.Value.Month) && selector.m.StartTime.Day.Equals(request.StartTime.Value.Day));
@@ -67,8 +67,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                                     CreateTime = selector.m.CreateTime,
                                     Description = selector.m.Description,
                                     EndTime = selector.m.EndTime,
-                                    MatchTypeId = selector.m.MatchTypeId,
-                                    MatchTypeName = selector.mt.Name,
+                                    //MatchTypeId = selector.m.MatchTypeId,
+                                    //MatchTypeName = selector.mt.Name,
                                     NumberOfTeam = selector.m.NumberOfTeam,
                                     RoundId = selector.m.RoundId,
                                     RoundName = selector.cr.Title,
@@ -87,10 +87,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public async Task<ViewMatch> GetById(int id)
         {
             var query = from m in context.Matches
-                        join mt in context.MatchTypes on m.MatchTypeId equals mt.Id
+                        //join mt in context.MatchTypes on m.MatchTypeId equals mt.Id
                         join cr in context.CompetitionRounds on m.RoundId equals cr.Id
                         where m.Id.Equals(id)
-                        select new { m, mt, cr };
+                        select new { m, /*mt,*/ cr };
 
             if (!query.Any()) return null;
 
@@ -101,8 +101,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                 CreateTime = selector.m.CreateTime,
                 Description = selector.m.Description,
                 EndTime = selector.m.EndTime,
-                MatchTypeId = selector.m.MatchTypeId,
-                MatchTypeName = selector.mt.Name,
+                //MatchTypeId = selector.m.MatchTypeId,
+                //MatchTypeName = selector.mt.Name,
                 NumberOfTeam = selector.m.NumberOfTeam,
                 RoundId = selector.m.RoundId,
                 RoundName = selector.cr.Title,

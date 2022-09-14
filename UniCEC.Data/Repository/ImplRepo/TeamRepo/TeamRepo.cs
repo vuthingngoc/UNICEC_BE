@@ -8,6 +8,7 @@ using UniCEC.Data.ViewModels.Entities.Team;
 using UniCEC.Data.RequestModels;
 using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Entities.Participant;
+using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {
@@ -230,7 +231,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 
         public async Task<bool> CheckExistedTeam(int teamId)
         {
-            return await context.Teams.FirstOrDefaultAsync(team => team.Id.Equals(teamId)) != null;
+            return await context.Teams.FirstOrDefaultAsync(team => team.Id.Equals(teamId) && team.Status.Equals(TeamStatus.IsLocked)) != null;
         }
 
         public async Task<int> CountNumberOfTeamIsLocked(int competitionId)

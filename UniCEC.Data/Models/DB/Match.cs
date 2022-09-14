@@ -15,7 +15,6 @@ namespace UniCEC.Data.Models.DB
 
         public int Id { get; set; }
         public int RoundId { get; set; }
-        public int MatchTypeId { get; set; }
         public string Address { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -24,8 +23,8 @@ namespace UniCEC.Data.Models.DB
         public DateTime EndTime { get; set; }
         public int NumberOfTeam { get; set; }
         public MatchStatus Status { get; set; }
+        public bool? IsLoseMatch { get; set; }
 
-        public virtual MatchType MatchType { get; set; }
         public virtual CompetitionRound Round { get; set; }
         public virtual ICollection<TeamInMatch> TeamInMatches { get; set; }
     }

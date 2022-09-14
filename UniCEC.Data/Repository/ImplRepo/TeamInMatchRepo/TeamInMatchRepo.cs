@@ -19,8 +19,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
 
         public bool CheckDuplicatedTeamInMatch(int matchId, int teamId, int? teamInMatchId)
         {
-            //return await context.TeamInMatches.FirstOrDefaultAsync(team => team.MatchId.Equals(matchId) && team.TeamId.Equals(teamId)
-            //                                                                && !team.Id.Equals(teamInMatchId)) != null;
             var query = from tim in context.TeamInMatches
                         where tim.MatchId.Equals(matchId) && tim.TeamId.Equals(teamId)
                         select tim;
@@ -111,6 +109,12 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
             }
 
             return team;
+        }
+
+        public async Task InsertMultiTeams(List<TeamInMatch> teams)
+        {
+            await context.TeamInMatches.AddRangeAsync(teams);
+            await context.SaveChangesAsync();
         }
     }
 }

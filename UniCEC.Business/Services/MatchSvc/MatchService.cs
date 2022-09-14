@@ -11,7 +11,7 @@ using UniCEC.Data.ViewModels.Entities.Match;
 using System.Linq;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Common;
-using UniCEC.Data.Repository.ImplRepo.MatchTypeRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo;
 
 namespace UniCEC.Business.Services.MatchSvc
 {
@@ -20,11 +20,11 @@ namespace UniCEC.Business.Services.MatchSvc
         private IMatchRepo _matchRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ICompetitionRoundRepo _competitionRoundRepo;
-        private IMatchTypeRepo _matchTypeRepo;
+        private ICompetitionRoundTypeRepo _matchTypeRepo;
         private DecodeToken _decodeToken;
 
         public MatchService(IMatchRepo matchRepo, IMemberInCompetitionRepo memberInCompetitionRepo, ICompetitionRoundRepo competitionRoundRepo
-                                , IMatchTypeRepo matchTypeRepo)
+                                , ICompetitionRoundTypeRepo matchTypeRepo)
         {
             _matchRepo = matchRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
@@ -112,7 +112,7 @@ namespace UniCEC.Business.Services.MatchSvc
                 CreateTime = new LocalTime().GetLocalTime().DateTime,
                 Description = model.Description,
                 EndTime = model.EndTime,
-                MatchTypeId = model.MatchTypeId,
+                //MatchTypeId = model.MatchTypeId,
                 NumberOfTeam = model.NumberOfTeam,
                 RoundId = model.RoundId,
                 StartTime = model.StartTime,
@@ -147,7 +147,7 @@ namespace UniCEC.Business.Services.MatchSvc
             {
                 bool isExisted = await _matchTypeRepo.CheckExistedType(model.MatchTypeId.Value);
                 if (!isExisted) throw new ArgumentException("Not found this match type");
-                match.MatchTypeId = model.MatchTypeId.Value;
+                //match.MatchTypeId = model.MatchTypeId.Value;
             } 
 
             if(!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;

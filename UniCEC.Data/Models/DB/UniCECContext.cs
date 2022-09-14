@@ -33,12 +33,12 @@ namespace UniCEC.Data.Models.DB
         public virtual DbSet<CompetitionInMajor> CompetitionInMajors { get; set; }
         public virtual DbSet<CompetitionRole> CompetitionRoles { get; set; }
         public virtual DbSet<CompetitionRound> CompetitionRounds { get; set; }
+        public virtual DbSet<CompetitionRoundType> CompetitionRoundTypes { get; set; }
         public virtual DbSet<CompetitionType> CompetitionTypes { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<EntityType> EntityTypes { get; set; }
         public virtual DbSet<Major> Majors { get; set; }
         public virtual DbSet<Match> Matches { get; set; }
-        public virtual DbSet<MatchType> MatchTypes { get; set; }
         public virtual DbSet<Member> Members { get; set; }
         public virtual DbSet<MemberInCompetition> MemberInCompetitions { get; set; }
         public virtual DbSet<MemberTakesActivity> MemberTakesActivities { get; set; }
@@ -359,6 +359,8 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.CompetitionId).HasColumnName("CompetitionID");
 
+                entity.Property(e => e.CompetitionRoundTypeId).HasColumnName("CompetitionRoundTypeID");
+
                 entity.Property(e => e.Description)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -376,6 +378,23 @@ namespace UniCEC.Data.Models.DB
                     .HasForeignKey(d => d.CompetitionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Competiti__Compe__6383C8BA");
+
+                entity.HasOne(d => d.CompetitionRoundType)
+                    .WithMany(p => p.CompetitionRounds)
+                    .HasForeignKey(d => d.CompetitionRoundTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Competiti__Compe__3D2915A8");
+            });
+
+            modelBuilder.Entity<CompetitionRoundType>(entity =>
+            {
+                entity.ToTable("CompetitionRoundType");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<CompetitionType>(entity =>
@@ -465,8 +484,6 @@ namespace UniCEC.Data.Models.DB
 
                 entity.Property(e => e.EndTime).HasColumnType("datetime");
 
-                entity.Property(e => e.MatchTypeId).HasColumnName("MatchTypeID");
-
                 entity.Property(e => e.RoundId).HasColumnName("RoundID");
 
                 entity.Property(e => e.StartTime).HasColumnType("datetime");
@@ -475,28 +492,11 @@ namespace UniCEC.Data.Models.DB
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.HasOne(d => d.MatchType)
-                    .WithMany(p => p.Matches)
-                    .HasForeignKey(d => d.MatchTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Match__MatchType__3493CFA7");
-
                 entity.HasOne(d => d.Round)
                     .WithMany(p => p.Matches)
                     .HasForeignKey(d => d.RoundId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Match__RoundID__339FAB6E");
-            });
-
-            modelBuilder.Entity<MatchType>(entity =>
-            {
-                entity.ToTable("MatchType");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<Member>(entity =>

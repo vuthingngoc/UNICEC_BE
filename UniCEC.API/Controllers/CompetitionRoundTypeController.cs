@@ -6,21 +6,21 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UniCEC.Business.Services.MatchTypeSvc;
+using UniCEC.Business.Services.CompetitionRoundTypeSvc;
 using UniCEC.Data.RequestModels;
-using UniCEC.Data.ViewModels.Entities.MatchType;
+using UniCEC.Data.ViewModels.Entities.CompetitionRoundType;
 
 namespace UniCEC.API.Controllers
 {
-    [Route("api/v1/match-types")]
+    [Route("api/v1/competition-round-types")]
     [ApiController]
     [ApiVersion("1.0")]
 
-    public class MatchTypeController : ControllerBase
+    public class CompetitionRoundTypeController : ControllerBase
     {
-        private IMatchTypeService _matchTypeService;
+        private ICompetitionRoundTypeService _matchTypeService;
 
-        public MatchTypeController(IMatchTypeService matchTypeService)
+        public CompetitionRoundTypeController(ICompetitionRoundTypeService matchTypeService)
         {
             _matchTypeService = matchTypeService;
         }
@@ -33,7 +33,7 @@ namespace UniCEC.API.Controllers
             {
                 string token = (Request.Headers)["Authorization"];
                 if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                ViewMatchType matchType = await _matchTypeService.GetById(id, token);
+                ViewCompetitionRoundType matchType = await _matchTypeService.GetById(id, token);
                 return Ok(matchType);
             }
             catch (NullReferenceException)
@@ -48,13 +48,13 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Get match types by conditions - All user")]
-        public async Task<IActionResult> GetMatchTypesByConditions([FromQuery] MatchTypeRequestModel request)
+        public async Task<IActionResult> GetMatchTypesByConditions([FromQuery] CompetitionRoundTypeRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"];
                 if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                List<ViewMatchType> matchTypes = await _matchTypeService.GetByConditions(request, token);
+                List<ViewCompetitionRoundType> matchTypes = await _matchTypeService.GetByConditions(request, token);
                 return Ok(matchTypes);
             }
             catch (NullReferenceException)
@@ -70,12 +70,12 @@ namespace UniCEC.API.Controllers
         [HttpPost]
         [Authorize(Roles = "System Admin")]
         [SwaggerOperation(Summary = "Insert match type - System admin")]
-        public async Task<IActionResult> InsertMatchType(MatchTypeInsertModel model)
+        public async Task<IActionResult> InsertMatchType(CompetitionRoundTypeInsertModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewMatchType matchType = await _matchTypeService.Insert(model, token);
+                ViewCompetitionRoundType matchType = await _matchTypeService.Insert(model, token);
                 return Ok(matchType);
             }
             catch (UnauthorizedAccessException ex)
@@ -103,7 +103,7 @@ namespace UniCEC.API.Controllers
         [HttpPut]
         [Authorize(Roles = "System Admin")]
         [SwaggerOperation(Summary = "Update match type - System admin")]
-        public async Task<IActionResult> UpdateMatchType(MatchTypeUpdateModel model)
+        public async Task<IActionResult> UpdateMatchType(CompetitionRoundTypeUpdateModel model)
         {
             try
             {

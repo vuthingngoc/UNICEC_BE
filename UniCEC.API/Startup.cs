@@ -29,7 +29,7 @@ using UniCEC.Business.Services.FileSvc;
 using UniCEC.Business.Services.FirebaseSvc;
 using UniCEC.Business.Services.MajorSvc;
 using UniCEC.Business.Services.MatchSvc;
-using UniCEC.Business.Services.MatchTypeSvc;
+using UniCEC.Business.Services.CompetitionRoundTypeSvc;
 using UniCEC.Business.Services.MemberSvc;
 using UniCEC.Business.Services.MemberTakesActivitySvc;
 using UniCEC.Business.Services.NotificationSvc;
@@ -61,7 +61,7 @@ using UniCEC.Data.Repository.ImplRepo.DepartmentRepo;
 using UniCEC.Data.Repository.ImplRepo.EntityTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MajorRepo;
 using UniCEC.Data.Repository.ImplRepo.MatchRepo;
-using UniCEC.Data.Repository.ImplRepo.MatchTypeRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
@@ -138,7 +138,7 @@ namespace UniCEC.API
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IMatchService, MatchService>();
-            services.AddScoped<IMatchTypeService, MatchTypeService>();
+            services.AddScoped<ICompetitionRoundTypeService, CompetitionRoundTypeService>();
             services.AddScoped<ITeamInMatchService, TeamInMatchService>();
 
             // Repository
@@ -174,7 +174,7 @@ namespace UniCEC.API
             services.AddTransient<IMemberInCompetitionRepo, MemberInCompetitionRepo>();
             services.AddTransient<INotificationRepo, NotificationRepo>();
             services.AddTransient<IMatchRepo, MatchRepo>();
-            services.AddTransient<IMatchTypeRepo, MatchTypeRepo>();
+            services.AddTransient<ICompetitionRoundTypeRepo, CompetitionRoundTypeRepo>();
             services.AddTransient<ITeamInMatchRepo, TeamInMatchRepo>();
 
             //----------------------------------------------FIREBASE-------------------------

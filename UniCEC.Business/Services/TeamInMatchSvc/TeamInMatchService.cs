@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
@@ -42,7 +43,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
         {
             TeamInMatch teamInMatch = await _teamInMatchRepo.Get(id);
             if (teamInMatch == null) throw new NullReferenceException("Not found this team in match");
-            
+
             bool isManager = await IsValidCompetitionManager(teamInMatch.MatchId, token);
             if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
@@ -75,76 +76,97 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
             return teamInMatch;
         }
 
-        public async Task<ViewTeamInMatch> Insert(TeamInMatchInsertModel model, string token)
+        public async Task<List<ViewTeamInMatch>> Insert(TeamInMatchInsertModel model, string token)
         {
-            if (model.MatchId.Equals(0) || model.TeamId.Equals(0) || model.Scores < 0)
-                throw new ArgumentException("MatchId Null || TeamId Null || Scores < 0");
+            if (model.MatchId.Equals(0) || model.TeamIds.Count.Equals(0) || model.Scores < 0)
+                throw new ArgumentException("MatchId Null || TeamIds Null || Scores < 0");
 
             bool isExisted = await _matchRepo.CheckAvailableMatchId(model.MatchId);
             if (!isExisted) throw new ArgumentException("Not found this match");
 
-            isExisted = await _teamRepo.CheckExistedTeam(model.TeamId);
-            if (!isExisted) throw new ArgumentException("Not found this team");
+            foreach (var teamId in model.TeamIds)
+            {
+                isExisted = await _teamRepo.CheckExistedTeam(teamId);
+                if (!isExisted) throw new ArgumentException("Not found this team");
+
+                bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, teamId, null);
+                if (isDuplicated) throw new ArgumentException("Duplicated team in match");
+            }
 
             bool isManager = await IsValidCompetitionManager(model.MatchId, token);
             if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, model.TeamId, null);
-            if (isDuplicated) throw new ArgumentException("Duplicated team in match");
-
-            TeamInMatch teamInMatch = new TeamInMatch()
+            // insert
+            List<ViewTeamInMatch> teams = new List<ViewTeamInMatch>();
+            foreach (var teamId in model.TeamIds)
             {
-                Description = model.Description ?? "",
-                MatchId = model.MatchId,
-                TeamId = model.TeamId,
-                Scores = model.Scores,
-                Status = model.Status
-            };
+                TeamInMatch teamInMatch = new TeamInMatch()
+                {
+                    Description = model.Description ?? "",
+                    MatchId = model.MatchId,
+                    TeamId = teamId,
+                    Scores = model.Scores,
+                    Status = model.Status
+                };
+
+                int id = await _teamInMatchRepo.Insert(teamInMatch);
+                ViewTeamInMatch team = await _teamInMatchRepo.GetById(id);
+                teams.Add(team);
+            }
             
-            int id = await _teamInMatchRepo.Insert(teamInMatch);
-            return await _teamInMatchRepo.GetById(id);
+            return teams;
         }
 
-        public async Task Update(TeamInMatchUpdateModel model, string token)
+        public async Task Update(List<TeamInMatchUpdateModel> models, string token)
         {
-            TeamInMatch teamInMatch = await _teamInMatchRepo.Get(model.Id);
-            if (teamInMatch == null) throw new NullReferenceException("Not found result of the team in match");
+            if (models.Count.Equals(0)) throw new ArgumentException("Input Data Null");
 
-            // validation data
-            if(model.MatchId.HasValue || model.TeamId.HasValue)
+            foreach(var model in models)
             {
-                int matchId = model.MatchId ?? teamInMatch.MatchId;
-                int teamId = model.TeamId ?? teamInMatch.TeamId;
-                bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(matchId, teamId, model.Id);
-                if (isDuplicated) throw new ArgumentException("Duplicated team in match");
+                TeamInMatch teamInMatch = await _teamInMatchRepo.Get(model.Id);
+                if (teamInMatch == null) throw new NullReferenceException("Not found result of the team in match");
 
-                bool isExisted = await _matchRepo.CheckAvailableMatchId(matchId);
-                if (!isExisted) throw new ArgumentException("Not found this match");
+                // validation data
+                if (model.MatchId.HasValue || model.TeamId.HasValue)
+                {
+                    int matchId = model.MatchId ?? teamInMatch.MatchId;
+                    int teamId = model.TeamId ?? teamInMatch.TeamId;
+                    bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(matchId, teamId, model.Id);
+                    if (isDuplicated) throw new ArgumentException("Duplicated team in match");
 
-                isExisted = await _teamRepo.CheckExistedTeam(teamId);
-                if (!isExisted) throw new ArgumentException("Not found this team");
+                    bool isExisted = await _matchRepo.CheckAvailableMatchId(matchId);
+                    if (!isExisted) throw new ArgumentException("Not found this match");
+
+                    isExisted = await _teamRepo.CheckExistedTeam(teamId);
+                    if (!isExisted) throw new ArgumentException("Not found this team");
+                }
+
+                bool isManager = await IsValidCompetitionManager(teamInMatch.MatchId, token);
+                if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+                if (model.Scores.HasValue && model.Scores.Value < 0) throw new ArgumentException("The scores must greater than 0");
+
+                if (model.Status.HasValue && !Enum.IsDefined(typeof(TeamInMatchStatus), model.Status.Value))
+                    throw new ArgumentException("Invalid team in match status");
+
+                // update
+                if (model.MatchId.HasValue) teamInMatch.MatchId = model.MatchId.Value;
+
+                if (model.TeamId.HasValue) teamInMatch.TeamId = model.TeamId.Value;
+
+                if (model.Scores.HasValue) teamInMatch.Scores = model.Scores.Value;
+
+                if (model.Status.HasValue) teamInMatch.Status = model.Status.Value;
+
+                if (!string.IsNullOrEmpty(model.Description)) teamInMatch.Description = model.Description;
+
+                await _teamInMatchRepo.Update();
             }
+        }
 
-            bool isManager = await IsValidCompetitionManager(teamInMatch.MatchId, token);
-            if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
-
-            if (model.Scores.HasValue && model.Scores.Value < 0) throw new ArgumentException("The scores must greater than 0");
-
-            if (model.Status.HasValue && !Enum.IsDefined(typeof(TeamInMatchStatus), model.Status.Value))
-                throw new ArgumentException("Invalid team in match status");
-
-            // update
-            if (model.MatchId.HasValue) teamInMatch.MatchId = model.MatchId.Value;
-
-            if(model.TeamId.HasValue) teamInMatch.TeamId = model.TeamId.Value;
-
-            if(model.Scores.HasValue) teamInMatch.Scores = model.Scores.Value;
-
-            if (model.Status.HasValue) teamInMatch.Status = model.Status.Value;
-
-            if(!string.IsNullOrEmpty(model.Description)) teamInMatch.Description = model.Description;
-
-            await _teamInMatchRepo.Update();
+        public Task<List<ViewTeamInMatch>> GetTotalResult(int roundId, string token)
+        {
+            throw new NotImplementedException();
         }
     }
 }
