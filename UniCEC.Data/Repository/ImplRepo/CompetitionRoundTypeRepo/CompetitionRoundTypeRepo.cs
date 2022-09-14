@@ -4,30 +4,30 @@ using UniCEC.Data.Repository.GenericRepo;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using UniCEC.Data.ViewModels.Entities.MatchType;
+using UniCEC.Data.ViewModels.Entities.CompetitionRoundType;
 using UniCEC.Data.RequestModels;
 
-namespace UniCEC.Data.Repository.ImplRepo.MatchTypeRepo
+namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo
 {
-    public class MatchTypeRepo : Repository<MatchType>, IMatchTypeRepo
+    public class CompetitionRoundTypeRepo : Repository<CompetitionRoundType>, ICompetitionRoundTypeRepo
     {
-        public MatchTypeRepo(UniCECContext context) : base(context)
+        public CompetitionRoundTypeRepo(UniCECContext context) : base(context)
         {
         }
 
         public async Task<bool> CheckDuplicatedMatchType(string name)
         {
-            return await context.MatchTypes.FirstOrDefaultAsync(type => type.Name.ToLower().Equals(name.ToLower())) != null;
+            return await context.CompetitionRoundTypes.FirstOrDefaultAsync(type => type.Name.ToLower().Equals(name.ToLower())) != null;
         }
 
         public async Task<bool> CheckExistedType(int typeId)
         {
-            return await context.MatchTypes.FirstOrDefaultAsync(type => type.Id.Equals(typeId)) != null;
+            return await context.CompetitionRoundTypes.FirstOrDefaultAsync(type => type.Id.Equals(typeId)) != null;
         }
 
-        public async Task<List<ViewMatchType>> GetByConditions(MatchTypeRequestModel request)
+        public async Task<List<ViewCompetitionRoundType>> GetByConditions(CompetitionRoundTypeRequestModel request)
         {
-            var query = from mt in context.MatchTypes
+            var query = from mt in context.CompetitionRoundTypes
                         select mt;
 
             if (request.Status.HasValue) query = query.Where(mt => mt.Status.Equals(request.Status.Value));
@@ -35,7 +35,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchTypeRepo
             if (!string.IsNullOrEmpty(request.Name)) query = query.Where(mt => mt.Name.ToLower().Contains(request.Name.ToLower()));
 
             return (query.Any())
-                ? await query.Select(mt => new ViewMatchType()
+                ? await query.Select(mt => new ViewCompetitionRoundType()
                 {
                     Id = mt.Id,
                     Name = mt.Name,
@@ -45,9 +45,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchTypeRepo
 
         }
 
-        public async Task<ViewMatchType> GetById(int id)
+        public async Task<ViewCompetitionRoundType> GetById(int id)
         {
-            return await context.MatchTypes.Where(type => type.Id.Equals(id)).Select(type => new ViewMatchType()
+            return await context.CompetitionRoundTypes.Where(type => type.Id.Equals(id)).Select(type => new ViewCompetitionRoundType()
             {
                 Id = id,
                 Name = type.Name,

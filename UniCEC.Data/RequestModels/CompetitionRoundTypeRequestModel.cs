@@ -2,7 +2,7 @@
 
 namespace UniCEC.Data.RequestModels
 {
-    public class MatchTypeRequestModel
+    public class CompetitionRoundTypeRequestModel
     {
         [FromQuery(Name = "name")]
         public string Name { get; set; }

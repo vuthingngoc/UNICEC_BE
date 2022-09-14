@@ -5,17 +5,17 @@ using System.Collections.Generic;
 
 namespace UniCEC.Data.Models.DB
 {
-    public partial class MatchType
+    public partial class CompetitionRoundType
     {
-        public MatchType()
+        public CompetitionRoundType()
         {
-            Matches = new HashSet<Match>();
+            CompetitionRounds = new HashSet<CompetitionRound>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
         public bool Status { get; set; }
 
-        public virtual ICollection<Match> Matches { get; set; }
+        public virtual ICollection<CompetitionRound> CompetitionRounds { get; set; }
     }
 }

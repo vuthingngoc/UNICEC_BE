@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -13,5 +14,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         public Task<ViewTeamInMatch> GetById(int id);
         public Task Delete(TeamInMatch teamInMatch);
         public bool CheckDuplicatedTeamInMatch(int matchId, int teamId, int? teamInMatchId);
+        public Task InsertMultiTeams(List<TeamInMatch> teams);
     }
 }

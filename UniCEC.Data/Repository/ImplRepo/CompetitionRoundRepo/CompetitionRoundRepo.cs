@@ -20,9 +20,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
         public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request)
         {
-            var query = from cr in context.CompetitionRounds                        
+            var query = from cr in context.CompetitionRounds
                         where cr.CompetitionId.Equals(request.CompetitionId)
-                        select cr;            
+                        select cr;
 
             if (!string.IsNullOrEmpty(request.Title)) query = query.Where(cr => cr.Title.ToLower().Contains(request.Title.ToLower()));
 
@@ -86,17 +86,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         private async Task<int> CheckDuplicatedTitle(int competitionId, string title)
         {
             return await (from cr in context.CompetitionRounds
-                        where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel) 
-                                && cr.Title.ToLower().Equals(title.ToLower())
-                        select cr.Id).FirstOrDefaultAsync();
+                          where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
+                                  && cr.Title.ToLower().Equals(title.ToLower())
+                          select cr.Id).FirstOrDefaultAsync();
         }
 
         private async Task<int> CheckInvalidStartTime(int competitionId, DateTime time)
         {
             return await (from cr in context.CompetitionRounds
-                        where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
-                                && cr.EndTime.CompareTo(time) > 0
-                        select cr.Id).FirstOrDefaultAsync();
+                          where cr.CompetitionId.Equals(competitionId) && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
+                                  && cr.EndTime.CompareTo(time) > 0
+                          select cr.Id).FirstOrDefaultAsync();
         }
 
         private async Task<int> CheckInvalidEndtime(int competitionId, DateTime time, int order)
@@ -116,7 +116,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                 if (roundId != 0) return roundId;
             }
 
-            if (startTime.HasValue) 
+            if (startTime.HasValue)
             {
                 roundId = await CheckInvalidStartTime(competitionId, startTime.Value);
                 if (roundId != 0) return roundId;
@@ -134,11 +134,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task UpdateNumberOfTeam(int roundId, int numberOfTeam)
         {
             CompetitionRound round = await Get(roundId);
-            if(round != null && numberOfTeam > 0)
+            if (round != null && numberOfTeam > 0)
             {
                 round.NumberOfTeam = numberOfTeam;
                 await Update();
-            }            
+            }
         }
 
         public async Task<int> GetCompetitionIdByRound(int competitionRoundId)
@@ -150,7 +150,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
         public async Task<bool> CheckExistedRound(int roundId)
         {
-            return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId)) != null;
+            return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId) 
+                                                                                && !round.Status.Equals(CompetitionRoundStatus.Cancel)
+                                                                                && !round.Status.Equals(CompetitionRoundStatus.IsDeleted)) != null;
         }
 
         public async Task UpdateOrderRoundsByCompe(int competitionId)
@@ -159,11 +161,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                                 where cr.CompetitionId.Equals(competitionId) && cr.Status.Equals(CompetitionRoundStatus.Active)
                                 orderby cr.StartTime ascending
                                 select cr).ToListAsync();
-            
-            if(rounds.Count > 0)
+
+            if (rounds.Count > 0)
             {
                 int count = 1;
-                foreach(var round in rounds)
+                foreach (var round in rounds)
                 {
                     round.Order = count;
                     ++count;
@@ -176,8 +178,8 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<CompetitionRound> GetPreviousRound(int competitionId, int order)
         {
             return await (from cr in context.CompetitionRounds
-                    where cr.CompetitionId.Equals(competitionId) && cr.Order.Equals(order)
-                    select cr).FirstOrDefaultAsync();
+                          where cr.CompetitionId.Equals(competitionId) && cr.Order.Equals(order)
+                          select cr).FirstOrDefaultAsync();
         }
 
         public async Task UpdateStatusRoundByCompe(int competitionId, CompetitionRoundStatus status)

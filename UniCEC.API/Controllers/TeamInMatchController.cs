@@ -49,7 +49,7 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search teams in match by conditions - all user")]
-        public async Task<IActionResult> GetMatchTypeByConditions([FromQuery] TeamInMatchRequestModel request)
+        public async Task<IActionResult> GetTeamsInMatchByConditions([FromQuery] TeamInMatchRequestModel request)
         {
             try
             {
@@ -68,16 +68,37 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpGet("total-results")]
+        [SwaggerOperation(Summary = "Get total result of the specific match - Competition manager")]
+        public async Task<IActionResult> GetTotalResultTeamsInMatch([FromQuery] int roundId)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"];
+                if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
+                List<ViewTeamInMatch> match = await _teamInMatchService.GetTotalResult(roundId, token);
+                return Ok(match);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exception");
+            }
+        }
+
         [HttpPost]
         [Authorize]
-        [SwaggerOperation(Summary = "Insert result team in match - Competition manager")]
-        public async Task<IActionResult> InsertTeamInMatch(TeamInMatchInsertModel model)
+        [SwaggerOperation(Summary = "Insert result teams in match - Competition manager")]
+        public async Task<IActionResult> InsertTeamsInMatch(TeamInMatchInsertModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewTeamInMatch teamInMatch = await _teamInMatchService.Insert(model, token);
-                return Ok(teamInMatch);
+                List<ViewTeamInMatch> teamsInMatch = await _teamInMatchService.Insert(model, token);
+                return Ok(teamsInMatch);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -103,13 +124,13 @@ namespace UniCEC.API.Controllers
 
         [HttpPut]
         [Authorize]
-        [SwaggerOperation(Summary = "Update result team in match - Competition manager")]
-        public async Task<IActionResult> UpdateTeamInMatch(TeamInMatchUpdateModel model)
+        [SwaggerOperation(Summary = "Update result teams in match - Competition manager")]
+        public async Task<IActionResult> UpdateTeamInMatch(List<TeamInMatchUpdateModel> models)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _teamInMatchService.Update(model, token);
+                await _teamInMatchService.Update(models, token);
                 return Ok();
             }
             catch (UnauthorizedAccessException ex)

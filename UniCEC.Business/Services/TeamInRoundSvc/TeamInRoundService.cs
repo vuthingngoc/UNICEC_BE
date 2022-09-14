@@ -114,10 +114,36 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             }
 
             return teams;
+        }
 
-            //List<ViewTeamInRound> teamsInRound = await _teamInRoundRepo.GetTopTeamsInCompetition(competitionId, top);
-            //if(teamsInRound == null) throw new NullReferenceException();
-            //return teamsInRound;
+        public async Task<List<ViewTeamInRound>> GetTopTeamsToNextRound(string token, int roundId, int top)
+        {
+            // check valid
+            int userId = _decodeToken.Decode(token, "Id");
+            int competitionId = await _competitionRoundRepo.GetCompetitionIdByRound(roundId);
+
+            bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId, null);
+            if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            // Action
+            List<ViewTeamInRound> teams = await _teamInRoundRepo.GetTeamsByRound(roundId, top);
+            if (teams == null) throw new NullReferenceException("Not found any teams in this round");
+
+
+
+            //foreach (var team in teams)
+            //{
+            //    team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
+            //}
+
+            //teams = teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
+
+            for (int index = 0; index < teams.Count; index++)
+            {
+                teams[index].Rank = index + 1;
+            }
+
+            return teams;
         }
 
         public async Task<List<ViewTeamInRound>> Insert(string token, List<TeamInRoundInsertModel> models)
@@ -141,8 +167,8 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
                 bool isExisted = await _teamRepo.CheckExistedTeam(model.TeamId);
                 if (!isExisted) throw new ArgumentException("Not found this team");
 
-                isExisted = await _teamRepo.CheckExistedTeam(model.TeamId);
-                if (!isExisted) throw new ArgumentException("Not found this team");
+                isExisted = await _competitionRoundRepo.CheckExistedRound(model.RoundId);
+                if (!isExisted) throw new ArgumentException("Not found this round or this round is cancel");
             }
 
             models.OrderByDescending(tir => tir.Scores);
@@ -182,7 +208,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             if (!isExisted) throw new ArgumentException("Not found this team");
 
             isExisted = await _competitionRoundRepo.CheckExistedRound(model.RoundId);
-            if (!isExisted) throw new ArgumentException("Not found this round");
+            if (!isExisted) throw new ArgumentException("Not found this round or this round is cancel");
 
             if (model.Scores.HasValue) teamInRound.Scores = model.Scores.Value;
 
