@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.MatchRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -19,15 +21,20 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
     {
         private ITeamInMatchRepo _teamInMatchRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
+        private ICompetitionRoundRepo _competitionRoundRepo;
+        private ITeamInRoundRepo _teamInRoundRepo;
         private IMatchRepo _matchRepo;
         private ITeamRepo _teamRepo;
         private DecodeToken _decodeToken;
 
-        public TeamInMatchService(ITeamInMatchRepo teamInMatchRepo, IMemberInCompetitionRepo memberInCompetitionRepo
-                                    , IMatchRepo matchRepo, ITeamRepo teamRepo)
+        public TeamInMatchService(ITeamInMatchRepo teamInMatchRepo, IMemberInCompetitionRepo memberInCompetitionRepo,
+                                    ICompetitionRoundRepo competitionRoundRepo, IMatchRepo matchRepo, ITeamRepo teamRepo,
+                                    ITeamInRoundRepo teamInRoundRepo)
         {
             _teamInMatchRepo = teamInMatchRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
+            _competitionRoundRepo = competitionRoundRepo;
+            _teamInRoundRepo = teamInRoundRepo;
             _matchRepo = matchRepo;
             _teamRepo = teamRepo;
             _decodeToken = new DecodeToken();
@@ -129,7 +136,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
             return teams;
         }
 
-        public async Task Update(List<TeamInMatchUpdateModel> models, string token)
+        public async Task Update(List<TeamInMatchUpdateModel> models, string token) // not finished !!! To be continue ...
         {
             if (models.Count.Equals(0)) throw new ArgumentException("Input Data Null");
 
@@ -139,19 +146,16 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 if (teamInMatch == null) throw new NullReferenceException("Not found result of the team in match");
 
                 // validation data
-                if (model.MatchId.HasValue || model.TeamId.HasValue)
-                {
-                    int matchId = model.MatchId ?? teamInMatch.MatchId;
-                    int teamId = model.TeamId ?? teamInMatch.TeamId;
-                    bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(matchId, teamId, model.Id);
-                    if (isDuplicated) throw new ArgumentException("Duplicated team in match");
+                if (model.MatchId.Equals(0) || model.TeamId.Equals(0)) throw new ArgumentException("MatchId Null || TeamId Null"); 
 
-                    bool isExisted = await _matchRepo.CheckAvailableMatchId(matchId);
-                    if (!isExisted) throw new ArgumentException("Not found this match");
+                bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, model.TeamId, model.Id);
+                if (isDuplicated) throw new ArgumentException("Duplicated team in match");
 
-                    isExisted = await _teamRepo.CheckExistedTeam(teamId);
-                    if (!isExisted) throw new ArgumentException("Not found this team");
-                }
+                bool isExisted = await _matchRepo.CheckAvailableMatchId(model.MatchId);
+                if (!isExisted) throw new ArgumentException("Not found this match");
+
+                isExisted = await _teamRepo.CheckExistedTeam(model.TeamId);
+                if (!isExisted) throw new ArgumentException("Not found this team");
 
                 bool isManager = await IsValidCompetitionManager(teamInMatch.MatchId, token);
                 if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -161,10 +165,22 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 if (model.Status.HasValue && !Enum.IsDefined(typeof(TeamInMatchStatus), model.Status.Value))
                     throw new ArgumentException("Invalid team in match status");
 
-                // update
-                if (model.MatchId.HasValue) teamInMatch.MatchId = model.MatchId.Value;
+                int roundTypeId = await _competitionRoundRepo.GetRoundTypeByMatch(model.MatchId);
+                if (roundTypeId.Equals(1)) // elimination
+                {
+                    
+                }else if(roundTypeId.Equals(2)) // round robin
+                {
 
-                if (model.TeamId.HasValue) teamInMatch.TeamId = model.TeamId.Value;
+                }else if (roundTypeId.Equals(3)) // lose elimination
+                {
+
+                }
+
+                // update
+                teamInMatch.MatchId = model.MatchId;
+
+                teamInMatch.TeamId = model.TeamId;
 
                 if (model.Scores.HasValue) teamInMatch.Scores = model.Scores.Value;
 
@@ -173,12 +189,25 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 if (!string.IsNullOrEmpty(model.Description)) teamInMatch.Description = model.Description;
 
                 await _teamInMatchRepo.Update();
+
+                // update to team in round
+
             }
         }
 
-        public Task<List<ViewTeamInMatch>> GetTotalResult(int roundId, string token)
+        private void ProcessingEliminationRoundType(int matchId, int teamId, TeamInMatchStatus status)
         {
-            throw new NotImplementedException();
+
+        }
+
+        private void ProcessingRoundRobinRoundType(int matchId, int teamId, int scores)
+        {
+
+        }
+
+        private void ProcessingLoseEliminationRoundType(int matchId, int teamId, TeamInMatchStatus status)
+        {
+
         }
     }
 }

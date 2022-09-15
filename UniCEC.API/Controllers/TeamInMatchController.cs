@@ -66,28 +66,7 @@ namespace UniCEC.API.Controllers
             {
                 return StatusCode(500, "Internal Server Exception");
             }
-        }
-
-        [HttpGet("total-results")]
-        [SwaggerOperation(Summary = "Get total result of the specific match - Competition manager")]
-        public async Task<IActionResult> GetTotalResultTeamsInMatch([FromQuery] int roundId)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"];
-                if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                List<ViewTeamInMatch> match = await _teamInMatchService.GetTotalResult(roundId, token);
-                return Ok(match);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exception");
-            }
-        }
+        }        
 
         [HttpPost]
         [Authorize]

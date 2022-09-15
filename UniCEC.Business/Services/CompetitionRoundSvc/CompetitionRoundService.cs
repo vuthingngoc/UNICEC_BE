@@ -203,6 +203,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 || competition.Status.Equals(CompetitionStatus.Cancel))
                 throw new ArgumentException("Can not access the cancel or ending competition");
 
+            DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
+            TimeSpan timeSpan = competitionRound.StartTime - currentTime;
+            if (timeSpan.TotalMinutes < 10) throw new ArgumentException("Can not update round < 10 mins before round start");
+
             if (!string.IsNullOrEmpty(model.Title))
             {
                 int roundId = await _competitionRoundRepo.CheckInvalidRound(competitionRound.CompetitionId, model.Title, null, null, null);
