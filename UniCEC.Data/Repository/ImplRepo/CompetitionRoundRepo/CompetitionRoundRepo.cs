@@ -169,7 +169,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task UpdateOrderRoundsByCompe(int competitionId)
         {
             var rounds = await (from cr in context.CompetitionRounds
-                                where cr.CompetitionId.Equals(competitionId) && cr.Status.Equals(CompetitionRoundStatus.Active)
+                                where cr.CompetitionId.Equals(competitionId) 
+                                      && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
+                                      && !cr.Status.Equals(CompetitionRoundStatus.IsDeleted)
                                 orderby cr.StartTime ascending
                                 select cr).ToListAsync();
 
@@ -181,9 +183,18 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
                     round.Order = count;
                     ++count;
                 }
-
-                await Update();
             }
+
+            List<CompetitionRoundStatus> invalidStatuses = new List<CompetitionRoundStatus>();
+            invalidStatuses.Add(CompetitionRoundStatus.Cancel);
+            invalidStatuses.Add(CompetitionRoundStatus.IsDeleted);
+
+            (from cr in context.CompetitionRounds
+             where cr.CompetitionId.Equals(competitionId)
+                    && invalidStatuses.Contains(cr.Status)
+                         select cr).ToList().ForEach(cr => cr.Order = 0);
+
+            await Update();
         }
 
         public async Task<CompetitionRound> GetPreviousRound(int competitionId, int order)

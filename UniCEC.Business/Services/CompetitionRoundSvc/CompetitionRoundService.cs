@@ -278,7 +278,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             await _competitionRoundRepo.Update();
 
-            if (model.StartTime.HasValue) await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
+            if (model.StartTime.HasValue || model.EndTime.HasValue || model.Status.HasValue) 
+                await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
         }
 
         public async Task Delete(string token, int id)
