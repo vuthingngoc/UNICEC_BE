@@ -11,7 +11,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 {
     public interface ICompetitionRoundRepo : IRepository<CompetitionRound>
     {
-        public Task<ViewCompetitionRound> GetById(int id, bool? status);
+        public Task<ViewCompetitionRound> GetById(int id, CompetitionRoundStatus? status);
         public Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request);
         public Task<int> GetCompetitionIdByRound(int competitionRoundId);
         public Task<int> CheckInvalidRound(int competitionId, string title, DateTime? startTime, DateTime? endTime, int? order);

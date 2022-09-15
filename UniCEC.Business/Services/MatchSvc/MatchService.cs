@@ -11,7 +11,6 @@ using UniCEC.Data.ViewModels.Entities.Match;
 using System.Linq;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Common;
-using UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo;
 
 namespace UniCEC.Business.Services.MatchSvc
 {
@@ -20,16 +19,14 @@ namespace UniCEC.Business.Services.MatchSvc
         private IMatchRepo _matchRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ICompetitionRoundRepo _competitionRoundRepo;
-        private ICompetitionRoundTypeRepo _matchTypeRepo;
         private DecodeToken _decodeToken;
 
-        public MatchService(IMatchRepo matchRepo, IMemberInCompetitionRepo memberInCompetitionRepo, ICompetitionRoundRepo competitionRoundRepo
-                                , ICompetitionRoundTypeRepo matchTypeRepo)
+        public MatchService(IMatchRepo matchRepo, IMemberInCompetitionRepo memberInCompetitionRepo
+                                , ICompetitionRoundRepo competitionRoundRepo)
         {
             _matchRepo = matchRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRoundRepo = competitionRoundRepo;
-            _matchTypeRepo = matchTypeRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -82,10 +79,10 @@ namespace UniCEC.Business.Services.MatchSvc
         public async Task<ViewMatch> Insert(MatchInsertModel model, string token)
         {
             // check model
-            if (model.RoundId.Equals(0) || model.MatchTypeId.Equals(0) || string.IsNullOrEmpty(model.Address) || string.IsNullOrEmpty(model.Title)
+            if (model.RoundId.Equals(0) || string.IsNullOrEmpty(model.Address) || string.IsNullOrEmpty(model.Title)
                 || string.IsNullOrEmpty(model.Description) || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
                 || model.NumberOfTeam < 0)
-                throw new ArgumentException("RoudId Null || MatchTypeId Null || Address Null || Title Null || Description Null || StartTime Null || EndTime Null || NumberOfTeam < 0");
+                throw new ArgumentException("RoudId Null ||  Address Null || Title Null || Description Null || StartTime Null || EndTime Null || NumberOfTeam < 0");
             
             // check authorize
             bool isManager = await CheckValidManager(model.RoundId, token);
@@ -98,9 +95,6 @@ namespace UniCEC.Business.Services.MatchSvc
             CompetitionRound round = await _competitionRoundRepo.Get(model.RoundId);
             if (round == null) throw new ArgumentException("Not found this round");
 
-            bool isExisted = await _matchTypeRepo.CheckExistedType(model.MatchTypeId);
-            if (!isExisted) throw new ArgumentException("Not found this match type");
-
             if (model.StartTime < round.StartTime || model.StartTime > round.EndTime
                 || model.EndTime < round.StartTime || model.EndTime > round.EndTime)
                 throw new ArgumentException("The time of match must in the range time of round");
@@ -112,13 +106,14 @@ namespace UniCEC.Business.Services.MatchSvc
                 CreateTime = new LocalTime().GetLocalTime().DateTime,
                 Description = model.Description,
                 EndTime = model.EndTime,
-                //MatchTypeId = model.MatchTypeId,
+                IsLoseMatch = model.IsLoseMatch,
                 NumberOfTeam = model.NumberOfTeam,
                 RoundId = model.RoundId,
                 StartTime = model.StartTime,
                 Status = MatchStatus.Ready, // default status when insert
                 Title = model.Title
             };
+            if (model.IsLoseMatch.HasValue) match.IsLoseMatch = model.IsLoseMatch.Value;
 
             int matchId = await _matchRepo.Insert(match);
             return await _matchRepo.GetById(matchId);
@@ -143,12 +138,7 @@ namespace UniCEC.Business.Services.MatchSvc
 
             match.RoundId = model.RoundId;
 
-            if (model.MatchTypeId.HasValue) 
-            {
-                bool isExisted = await _matchTypeRepo.CheckExistedType(model.MatchTypeId.Value);
-                if (!isExisted) throw new ArgumentException("Not found this match type");
-                //match.MatchTypeId = model.MatchTypeId.Value;
-            } 
+            if (model.IsLoseMatch.HasValue) match.IsLoseMatch = model.IsLoseMatch.Value;
 
             if(!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;
             

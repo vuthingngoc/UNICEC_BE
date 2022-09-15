@@ -18,23 +18,23 @@ namespace UniCEC.API.Controllers
 
     public class CompetitionRoundTypeController : ControllerBase
     {
-        private ICompetitionRoundTypeService _matchTypeService;
+        private ICompetitionRoundTypeService _competitionRoundTypeService;
 
-        public CompetitionRoundTypeController(ICompetitionRoundTypeService matchTypeService)
+        public CompetitionRoundTypeController(ICompetitionRoundTypeService competitionRoundTypeService)
         {
-            _matchTypeService = matchTypeService;
+            _competitionRoundTypeService = competitionRoundTypeService;
         }
 
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get match type by id - All user")]
-        public async Task<IActionResult> GetMatchTypeById(int id)
+        [SwaggerOperation(Summary = "Get round type by id - All user")]
+        public async Task<IActionResult> GetCompetitionRoundTypeById(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"];
                 if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                ViewCompetitionRoundType matchType = await _matchTypeService.GetById(id, token);
-                return Ok(matchType);
+                ViewCompetitionRoundType competitionRoundType = await _competitionRoundTypeService.GetById(id, token);
+                return Ok(competitionRoundType);
             }
             catch (NullReferenceException)
             {
@@ -47,15 +47,15 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("search")]
-        [SwaggerOperation(Summary = "Get match types by conditions - All user")]
-        public async Task<IActionResult> GetMatchTypesByConditions([FromQuery] CompetitionRoundTypeRequestModel request)
+        [SwaggerOperation(Summary = "Get round types by conditions - All user")]
+        public async Task<IActionResult> GetCompetitionRoundTypesByConditions([FromQuery] CompetitionRoundTypeRequestModel request)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"];
                 if (!string.IsNullOrEmpty(token)) token = token.ToString().Split(" ")[1];
-                List<ViewCompetitionRoundType> matchTypes = await _matchTypeService.GetByConditions(request, token);
-                return Ok(matchTypes);
+                List<ViewCompetitionRoundType> competitionRoundTypes = await _competitionRoundTypeService.GetByConditions(request, token);
+                return Ok(competitionRoundTypes);
             }
             catch (NullReferenceException)
             {
@@ -69,14 +69,14 @@ namespace UniCEC.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "System Admin")]
-        [SwaggerOperation(Summary = "Insert match type - System admin")]
-        public async Task<IActionResult> InsertMatchType(CompetitionRoundTypeInsertModel model)
+        [SwaggerOperation(Summary = "Insert round type - System admin")]
+        public async Task<IActionResult> InsertCompetitionRoundType(CompetitionRoundTypeInsertModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                ViewCompetitionRoundType matchType = await _matchTypeService.Insert(model, token);
-                return Ok(matchType);
+                ViewCompetitionRoundType competitionRoundType = await _competitionRoundTypeService.Insert(model, token);
+                return Ok(competitionRoundType);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -102,13 +102,13 @@ namespace UniCEC.API.Controllers
 
         [HttpPut]
         [Authorize(Roles = "System Admin")]
-        [SwaggerOperation(Summary = "Update match type - System admin")]
-        public async Task<IActionResult> UpdateMatchType(CompetitionRoundTypeUpdateModel model)
+        [SwaggerOperation(Summary = "Update round type - System admin")]
+        public async Task<IActionResult> UpdateCompetitionRoundType(CompetitionRoundTypeUpdateModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _matchTypeService.Update(model, token);
+                await _competitionRoundTypeService.Update(model, token);
                 return Ok();
             }
             catch (UnauthorizedAccessException ex)
@@ -135,13 +135,13 @@ namespace UniCEC.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "System Admin")]
-        [SwaggerOperation(Summary = "Delete match type - System admin")]
-        public async Task<IActionResult> DeleteMatchType(int id)
+        [SwaggerOperation(Summary = "Delete round type - System admin")]
+        public async Task<IActionResult> DeleteCompetitionRoundType(int id)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                await _matchTypeService.Delete(id, token);
+                await _competitionRoundTypeService.Delete(id, token);
                 return NoContent();
             }
             catch (UnauthorizedAccessException ex)

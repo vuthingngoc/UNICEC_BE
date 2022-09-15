@@ -12,6 +12,6 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo
         public Task<bool> CheckExistedType(int typeId);
         public Task<List<ViewCompetitionRoundType>> GetByConditions(CompetitionRoundTypeRequestModel request);
         public Task<ViewCompetitionRoundType> GetById(int id);
-        public Task<bool> CheckDuplicatedMatchType(string name);
+        public Task<bool> CheckDuplicatedCompetitionRoundType(string name);
     }
 }

@@ -24,9 +24,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo
             var query = from mic in context.MemberInCompetitions
                         join m in context.Members on mic.MemberId equals m.Id
                         join c in context.Clubs on m.ClubId equals c.Id
-                        join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
-                        where cic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && mic.Status.Equals(true) 
-                        select new { mic, m, c, cic };
+                        //join cic in context.CompetitionInClubs on c.Id equals cic.ClubId
+                        where mic.CompetitionId.Equals(competitionId) && m.UserId.Equals(userId) && mic.Status.Equals(true) 
+                        select new { mic, m, c/*, cic*/ };
 
             if (competitionRoleId.HasValue) query = query.Where(selector => selector.mic.CompetitionRoleId.Equals(competitionRoleId));
 

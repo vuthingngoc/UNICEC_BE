@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 
 namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
@@ -9,7 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
         [JsonPropertyName("match_id")]
         public int MatchId { get; set; }
         [JsonPropertyName("team_id")]
-        public List<int> TeamIds { get; set; }
+        public int TeamId { get; set; }
         public int Scores { get; set; }
         public TeamInMatchStatus Status { get; set; }
         public string Description { get; set; }

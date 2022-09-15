@@ -92,12 +92,12 @@ namespace UniCEC.API.Controllers
         [HttpPost]
         [Authorize]
         [SwaggerOperation(Summary = "Insert result teams in match - Competition manager")]
-        public async Task<IActionResult> InsertTeamsInMatch(TeamInMatchInsertModel model)
+        public async Task<IActionResult> InsertTeamsInMatch(List<TeamInMatchInsertModel> models)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewTeamInMatch> teamsInMatch = await _teamInMatchService.Insert(model, token);
+                List<ViewTeamInMatch> teamsInMatch = await _teamInMatchService.Insert(models, token);
                 return Ok(teamsInMatch);
             }
             catch (UnauthorizedAccessException ex)

@@ -10,6 +10,8 @@ namespace UniCEC.Data.RequestModels
     {
         [FromQuery(Name = "competitionId"), BindRequired]
         public int CompetitionId { get; set; }
+        [FromQuery(Name = "roundTypeId")]
+        public int? RoundTypeId { get; set; }
         [FromQuery(Name = "title")]
         public string Title { get; set; }
         [FromQuery(Name = "startTime")]
