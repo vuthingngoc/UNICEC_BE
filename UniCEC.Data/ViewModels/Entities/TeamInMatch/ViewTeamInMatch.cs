@@ -10,6 +10,10 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInMatch
         public int MatchId { get; set; }
         [JsonPropertyName("match_title")]
         public string MatchTitle { get; set; }
+        [JsonPropertyName("round_id")]
+        public int RoundId { get; set; }
+        [JsonPropertyName("round_name")]
+        public string RoundName { get; set; }
         [JsonPropertyName("team_id")]
         public int TeamId { get; set; }
         [JsonPropertyName("team_name")]

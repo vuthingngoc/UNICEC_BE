@@ -35,8 +35,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         {
             var query = from m in context.Matches
                         join cr in context.CompetitionRounds on m.RoundId equals cr.Id
+                        join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                         join c in context.Competitions on cr.CompetitionId equals c.Id
-                        select new { m, cr, c };
+                        select new { m, cr, crt, c };
 
             if (request.CompetitionId.HasValue) query = query.Where(selector => selector.c.Id.Equals(request.CompetitionId.Value));
 
@@ -70,6 +71,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                                     NumberOfTeam = selector.m.NumberOfTeam,
                                     RoundId = selector.m.RoundId,
                                     RoundName = selector.cr.Title,
+                                    RoundTypeId = selector.crt.Id,
+                                    RoundTypeName = selector.crt.Name,
                                     StartTime = selector.m.StartTime,
                                     Title = selector.m.Title,
                                     Status = selector.m.Status
@@ -85,10 +88,10 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public async Task<ViewMatch> GetById(int id)
         {
             var query = from m in context.Matches
-                        //join mt in context.MatchTypes on m.MatchTypeId equals mt.Id
                         join cr in context.CompetitionRounds on m.RoundId equals cr.Id
+                        join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                         where m.Id.Equals(id)
-                        select new { m, cr };
+                        select new { m, cr, crt };
 
             if (!query.Any()) return null;
 
@@ -103,6 +106,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
                 NumberOfTeam = selector.m.NumberOfTeam,
                 RoundId = selector.m.RoundId,
                 RoundName = selector.cr.Title,
+                RoundTypeId = selector.crt.Id,
+                RoundTypeName = selector.crt.Name,
                 StartTime = selector.m.StartTime,
                 Title = selector.m.Title,
                 Status = selector.m.Status

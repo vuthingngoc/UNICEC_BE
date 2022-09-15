@@ -271,5 +271,21 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
             return await query.AnyAsync();
         }
+
+        public async Task UpdateResultTeamsInRound(int roundId, int teamId, int? scores, bool? status)
+        {
+            var teamInRound = await (from tir in context.TeamInRounds
+                              where tir.TeamId.Equals(teamId) && tir.RoundId.Equals(roundId)
+                              select tir).FirstOrDefaultAsync();
+
+            if(teamInRound != null)
+            {
+                if(scores.HasValue) teamInRound.Scores = scores.Value;
+
+                if(status.HasValue) teamInRound.Status = status.Value;
+
+                await Update();
+            }
+        }
     }
 }

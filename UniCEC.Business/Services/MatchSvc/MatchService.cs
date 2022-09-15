@@ -96,8 +96,9 @@ namespace UniCEC.Business.Services.MatchSvc
             if (round == null) throw new ArgumentException("Not found this round");
 
             if (model.StartTime < round.StartTime || model.StartTime > round.EndTime
-                || model.EndTime < round.StartTime || model.EndTime > round.EndTime)
-                throw new ArgumentException("The time of match must in the range time of round");
+                || model.EndTime < round.StartTime || model.EndTime > round.EndTime
+                || model.EndTime <= model.StartTime)
+                throw new ArgumentException("The time of match must in the range time of round && StartTime < EndTime");
 
             // insert
             Match match = new Match()
@@ -111,9 +112,8 @@ namespace UniCEC.Business.Services.MatchSvc
                 RoundId = model.RoundId,
                 StartTime = model.StartTime,
                 Status = MatchStatus.Ready, // default status when insert
-                Title = model.Title
+                Title = model.Title,                
             };
-            if (model.IsLoseMatch.HasValue) match.IsLoseMatch = model.IsLoseMatch.Value;
 
             int matchId = await _matchRepo.Insert(match);
             return await _matchRepo.GetById(matchId);
@@ -134,7 +134,11 @@ namespace UniCEC.Business.Services.MatchSvc
             CompetitionRound round = await _competitionRoundRepo.Get(model.RoundId);
             if (round == null) throw new NullReferenceException("Not found this round");
 
-            if(!string.IsNullOrEmpty(model.Address)) match.Address = model.Address;
+            DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
+            TimeSpan timeSpan = match.StartTime - currentTime;
+            if (timeSpan.TotalMinutes < 10) throw new ArgumentException("Can not update match < 10 mins before round start");
+
+            if (!string.IsNullOrEmpty(model.Address)) match.Address = model.Address;
 
             match.RoundId = model.RoundId;
 
@@ -146,7 +150,9 @@ namespace UniCEC.Business.Services.MatchSvc
 
             if(model.StartTime.HasValue)
             {
-                if (model.StartTime.Value < round.StartTime || model.StartTime.Value > round.EndTime)
+                DateTime endTime = model.EndTime ?? match.EndTime;
+                if (model.StartTime.Value < round.StartTime || model.StartTime.Value > round.EndTime
+                    || model.StartTime.Value >= endTime)
                     throw new ArgumentException("The time of match must in the range time of round");
                 
                 match.StartTime = model.StartTime.Value;
@@ -154,7 +160,9 @@ namespace UniCEC.Business.Services.MatchSvc
 
             if (model.EndTime.HasValue)
             {
-                if (model.EndTime.Value < round.StartTime || model.EndTime.Value > round.EndTime)
+                DateTime startTime = model.StartTime ?? match.StartTime;
+                if (model.EndTime.Value < round.StartTime || model.EndTime.Value > round.EndTime
+                    || model.EndTime.Value <= startTime)
                     throw new ArgumentException("The time of match must in the range time of round");
 
                 match.EndTime = model.EndTime.Value;

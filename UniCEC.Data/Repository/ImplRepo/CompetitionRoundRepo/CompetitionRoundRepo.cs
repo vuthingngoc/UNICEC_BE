@@ -222,6 +222,13 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             return await query.CountAsync();
         }
 
+        public async Task<int> GetRoundTypeByMatch(int matchId)
+        {
+            return await (from cr in context.CompetitionRounds
+                        join m in context.Matches on cr.Id equals m.RoundId
+                        select cr.CompetitionRoundTypeId).FirstOrDefaultAsync();
+        }
+
         ////TA
         //public async Task<CompetitionRound> GetLastRound(int competitionId)
         //{

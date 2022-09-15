@@ -38,8 +38,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         {
             var query = from tim in context.TeamInMatches
                         join m in context.Matches on tim.MatchId equals m.Id
+                        join cr in context.CompetitionRounds on m.RoundId equals cr.Id
                         join t in context.Teams on tim.TeamId equals t.Id
-                        select new { tim, m, t };
+                        select new { tim, m, cr, t };
 
             if (request.Status.HasValue) query = query.Where(selector => selector.tim.Status.Equals(request.Status.Value));
 
@@ -59,6 +60,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
                                                     Id = selector.tim.Id,
                                                     MatchId = selector.tim.MatchId,
                                                     MatchTitle = selector.m.Title,
+                                                    RoundId = selector.cr.Id,
+                                                    RoundName = selector.cr.Title,
                                                     Scores = selector.tim.Scores,
                                                     TeamId = selector.tim.TeamId,
                                                     TeamName = selector.t.Name,
@@ -86,6 +89,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         {
             ViewTeamInMatch team = await (from tim in context.TeamInMatches
                                           join m in context.Matches on tim.MatchId equals m.Id
+                                          join cr in context.CompetitionRounds on m.RoundId equals cr.Id
                                           join t in context.Teams on tim.TeamId equals t.Id
                                           where tim.Id.Equals(id)
                                           select new ViewTeamInMatch()
@@ -93,6 +97,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
                                               Id = tim.Id,
                                               MatchId = tim.MatchId,
                                               MatchTitle = m.Title,
+                                              RoundId = cr.Id,
+                                              RoundName = cr.Title,
                                               Scores = tim.Scores,
                                               TeamId = tim.TeamId,
                                               TeamName = t.Name,
