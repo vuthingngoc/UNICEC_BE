@@ -11,7 +11,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
         public Task<ViewTeamInMatch> GetById(int id, string token);
         public Task<PagingResult<ViewTeamInMatch>> GetByConditions(TeamInMatchRequestModel request, string token);
         public Task<List<ViewTeamInMatch>> GetTotalResult(int roundId, string token);
-        public Task<List<ViewTeamInMatch>> Insert(TeamInMatchInsertModel model, string token);
+        public Task<List<ViewTeamInMatch>> Insert(List<TeamInMatchInsertModel> models, string token);
         public Task Update(List<TeamInMatchUpdateModel> models, string token);
         public Task Delete(int id, string token);
     }

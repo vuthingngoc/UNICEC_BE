@@ -21,65 +21,76 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<PagingResult<ViewCompetitionRound>> GetByConditions(CompetitionRoundRequestModel request)
         {
             var query = from cr in context.CompetitionRounds
+                        join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                         where cr.CompetitionId.Equals(request.CompetitionId)
-                        select cr;
+                        select new { cr, crt };
 
-            if (!string.IsNullOrEmpty(request.Title)) query = query.Where(cr => cr.Title.ToLower().Contains(request.Title.ToLower()));
+            if (!string.IsNullOrEmpty(request.Title)) query = query.Where(selector => selector.cr.Title.ToLower().Contains(request.Title.ToLower()));
 
-            if (request.StartTime.HasValue) query = query.Where(cr => cr.StartTime.Year.Equals(request.StartTime.Value.Year) && cr.StartTime.Month.Equals(request.StartTime.Value.Month)
-                && cr.StartTime.Day.Equals(request.StartTime.Value.Day));
+            if (request.RoundTypeId.HasValue) query = query.Where(selector => selector.cr.CompetitionRoundTypeId.Equals(request.RoundTypeId.Value));
 
-            if (request.StartTime.HasValue && request.StartTime.Value.Hour > 0) query = query.Where(cr => cr.StartTime.Hour.Equals(request.StartTime.Value.Hour));
+            if (request.StartTime.HasValue) query = query.Where(selector => selector.cr.StartTime.Year.Equals(request.StartTime.Value.Year) 
+                                                            && selector.cr.StartTime.Month.Equals(request.StartTime.Value.Month)
+                                                            && selector.cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
-            if (request.EndTime.HasValue) query = query.Where(cr => cr.EndTime.Year.Equals(request.EndTime.Value.Year) && cr.EndTime.Month.Equals(request.EndTime.Value.Month)
-                && cr.StartTime.Day.Equals(request.StartTime.Value.Day));
+            if (request.StartTime.HasValue && request.StartTime.Value.Hour > 0) query = query.Where(selector => selector.cr.StartTime.Hour.Equals(request.StartTime.Value.Hour));
 
-            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) query = query.Where(cr => cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
+            if (request.EndTime.HasValue) query = query.Where(selector => selector.cr.EndTime.Year.Equals(request.EndTime.Value.Year) 
+                                                                && selector.cr.EndTime.Month.Equals(request.EndTime.Value.Month)
+                                                                && selector.cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
-            if (request.Statuses != null) query = query.Where(cr => request.Statuses.Contains((int)cr.Status));
+            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) 
+                query = query.Where(selector => selector.cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
 
-            query = query.OrderBy(cr => cr.StartTime);
+            if (request.Statuses != null) query = query.Where(selector => request.Statuses.Contains((int)selector.cr.Status));
+
+            query = query.OrderBy(selector => selector.cr.StartTime);
 
             int totalCount = query.Count();
 
             List<ViewCompetitionRound> competitionRounds = await query.Skip((request.CurrentPage - 1) * request.PageSize).Take(request.PageSize)
-                .Select(cr => new ViewCompetitionRound()
+                .Select(selector => new ViewCompetitionRound()
                 {
-                    Id = cr.Id,
-                    CompetitionId = cr.CompetitionId,
-                    Title = cr.Title,
-                    Description = cr.Description,
-                    StartTime = cr.StartTime,
-                    EndTime = cr.EndTime,
-                    NumberOfTeam = cr.NumberOfTeam,
-                    SeedsPoint = cr.SeedsPoint,
-                    Status = cr.Status,
-                    Order = cr.Order
+                    Id = selector.cr.Id,
+                    CompetitionId = selector.cr.CompetitionId,
+                    RoundTypeId = selector.cr.CompetitionRoundTypeId,
+                    RoundTypeName = selector.crt.Name,
+                    Title = selector.cr.Title,
+                    Description = selector.cr.Description,
+                    StartTime = selector.cr.StartTime,
+                    EndTime = selector.cr.EndTime,
+                    NumberOfTeam = selector.cr.NumberOfTeam,
+                    SeedsPoint = selector.cr.SeedsPoint,
+                    Status = selector.cr.Status,
+                    Order = selector.cr.Order
                 }).ToListAsync();
 
             return (query.Any()) ? new PagingResult<ViewCompetitionRound>(competitionRounds, totalCount, request.CurrentPage, request.PageSize) : null;
         }
 
-        public async Task<ViewCompetitionRound> GetById(int id, bool? status)
+        public async Task<ViewCompetitionRound> GetById(int id, CompetitionRoundStatus? status)
         {
             var query = from cr in context.CompetitionRounds
+                        join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                         where cr.Id.Equals(id)
-                        select cr;
+                        select new { cr , crt };
 
-            if (status.HasValue) query = query.Where(cr => cr.Status.Equals(status.Value));
+            if (status.HasValue) query = query.Where(selector => selector.cr.Status.Equals(status.Value));
 
-            return await query.Select(cr => new ViewCompetitionRound()
+            return await query.Select(selector => new ViewCompetitionRound()
             {
-                Id = cr.Id,
-                CompetitionId = cr.CompetitionId,
-                Title = cr.Title,
-                Description = cr.Description,
-                StartTime = cr.StartTime,
-                EndTime = cr.EndTime,
-                NumberOfTeam = cr.NumberOfTeam,
-                SeedsPoint = cr.SeedsPoint,
-                Status = cr.Status,
-                Order = cr.Order
+                Id = selector.cr.Id,
+                CompetitionId = selector.cr.CompetitionId,
+                RoundTypeId = selector.cr.CompetitionRoundTypeId,
+                RoundTypeName = selector.crt.Name,
+                Title = selector.cr.Title,
+                Description = selector.cr.Description,
+                StartTime = selector.cr.StartTime,
+                EndTime = selector.cr.EndTime,
+                NumberOfTeam = selector.cr.NumberOfTeam,
+                SeedsPoint = selector.cr.SeedsPoint,
+                Status = selector.cr.Status,
+                Order = selector.cr.Order
             }).FirstOrDefaultAsync();
         }
 

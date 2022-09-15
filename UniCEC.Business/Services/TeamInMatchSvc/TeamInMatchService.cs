@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
@@ -76,35 +77,46 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
             return teamInMatch;
         }
 
-        public async Task<List<ViewTeamInMatch>> Insert(TeamInMatchInsertModel model, string token)
+        public async Task<List<ViewTeamInMatch>> Insert(List<TeamInMatchInsertModel> models, string token)
         {
-            if (model.MatchId.Equals(0) || model.TeamIds.Count.Equals(0) || model.Scores < 0)
-                throw new ArgumentException("MatchId Null || TeamIds Null || Scores < 0");
+            if(models.Count.Equals(0)) throw new ArgumentException("Data Input Null");
 
-            bool isExisted = await _matchRepo.CheckAvailableMatchId(model.MatchId);
-            if (!isExisted) throw new ArgumentException("Not found this match");
+            int matchId = models[0].MatchId;
+            bool isDuplicated = models.GroupBy(x => x.TeamId)
+                                      .Where(g => g.Count() > 1)
+                                      .Select(y => y.Key)
+                                      .ToList().Count > 0;
+            if (isDuplicated) throw new ArgumentException("Duplicated teams in round");
 
-            foreach (var teamId in model.TeamIds)
+            foreach (var model in models)
             {
-                isExisted = await _teamRepo.CheckExistedTeam(teamId);
+                if (model.MatchId.Equals(0) || model.Scores < 0)
+                    throw new ArgumentException("MatchId Null || Scores < 0");
+
+                bool isExisted = await _matchRepo.CheckAvailableMatchId(model.MatchId);
+                if (!isExisted) throw new ArgumentException("Not found this match");
+
+                isExisted = await _teamRepo.CheckExistedTeam(model.TeamId);
                 if (!isExisted) throw new ArgumentException("Not found this team");
 
-                bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, teamId, null);
+                isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, model.TeamId, null);
                 if (isDuplicated) throw new ArgumentException("Duplicated team in match");
-            }
 
-            bool isManager = await IsValidCompetitionManager(model.MatchId, token);
-            if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+                bool isManager = await IsValidCompetitionManager(model.MatchId, token);
+                if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+                if (!model.MatchId.Equals(matchId)) throw new ArgumentException("Can not insert multiple matches in one time");
+            }
 
             // insert
             List<ViewTeamInMatch> teams = new List<ViewTeamInMatch>();
-            foreach (var teamId in model.TeamIds)
+            foreach (var model in models)
             {
                 TeamInMatch teamInMatch = new TeamInMatch()
                 {
                     Description = model.Description ?? "",
                     MatchId = model.MatchId,
-                    TeamId = teamId,
+                    TeamId = model.TeamId,
                     Scores = model.Scores,
                     Status = model.Status
                 };

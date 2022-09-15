@@ -26,7 +26,7 @@ namespace UniCEC.Business.Services.CompetitionRoundTypeSvc
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
             CompetitionRoundType competitionRoundType = await _competitionRoundTypeRepo.Get(id);
-            if (competitionRoundType == null) throw new NullReferenceException("Not found this match type");
+            if (competitionRoundType == null) throw new NullReferenceException("Not found this round type");
 
             competitionRoundType.Status = false; // delete status
             await _competitionRoundTypeRepo.Update();
@@ -45,14 +45,14 @@ namespace UniCEC.Business.Services.CompetitionRoundTypeSvc
 
         public async Task<ViewCompetitionRoundType> GetById(int id, string token)
         {
-            ViewCompetitionRoundType matchType = await _competitionRoundTypeRepo.GetById(id);
-            if (matchType == null) throw new NullReferenceException("Not found this match type");
+            ViewCompetitionRoundType competitionRoundType = await _competitionRoundTypeRepo.GetById(id);
+            if (competitionRoundType == null) throw new NullReferenceException("Not found this round type");
 
             bool isSystemAdmin = IsSystemAdmin(token);
-            if(!isSystemAdmin && matchType.Status.Equals(false))
-                throw new NullReferenceException("Not found this match type");
+            if(!isSystemAdmin && competitionRoundType.Status.Equals(false))
+                throw new NullReferenceException("Not found this round type");
 
-            return matchType;
+            return competitionRoundType;
         }
 
         public async Task<List<ViewCompetitionRoundType>> GetByConditions(CompetitionRoundTypeRequestModel request, string token)
@@ -60,9 +60,9 @@ namespace UniCEC.Business.Services.CompetitionRoundTypeSvc
             bool isSystemAdmin = IsSystemAdmin(token);
             if(!isSystemAdmin) request.Status = true; // default status
 
-            List<ViewCompetitionRoundType> matchTypes = await _competitionRoundTypeRepo.GetByConditions(request);
-            if (matchTypes == null) throw new NullReferenceException("Not found any match types");
-            return matchTypes;
+            List<ViewCompetitionRoundType> competitionRoundTypes = await _competitionRoundTypeRepo.GetByConditions(request);
+            if (competitionRoundTypes == null) throw new NullReferenceException("Not found any round types");
+            return competitionRoundTypes;
         }
 
         public async Task<ViewCompetitionRoundType> Insert(CompetitionRoundTypeInsertModel model, string token)
@@ -72,8 +72,8 @@ namespace UniCEC.Business.Services.CompetitionRoundTypeSvc
 
             if (string.IsNullOrEmpty(model.Name)) throw new ArgumentException("Name Null");
 
-            bool isDuplicated = await _competitionRoundTypeRepo.CheckDuplicatedMatchType(model.Name);
-            if (isDuplicated) throw new ArgumentException("Duplicated match type");
+            bool isDuplicated = await _competitionRoundTypeRepo.CheckDuplicatedCompetitionRoundType(model.Name);
+            if (isDuplicated) throw new ArgumentException("Duplicated round type");
 
             CompetitionRoundType competitionRoundType = new CompetitionRoundType()
             {
@@ -95,15 +95,15 @@ namespace UniCEC.Business.Services.CompetitionRoundTypeSvc
             int roleId = _decodeToken.Decode(token, "RoleId");
             if (!roleId.Equals(4)) throw new UnauthorizedAccessException("You do not have permission to access this resource");
 
-            if (model.Id.Equals(0)) throw new ArgumentException("MatchTypeId Null");
+            if (model.Id.Equals(0)) throw new ArgumentException("RoundTypeId Null");
 
             CompetitionRoundType competitionRoundType = await _competitionRoundTypeRepo.Get(model.Id);
-            if (competitionRoundType == null) throw new NullReferenceException("Not found this match type");
+            if (competitionRoundType == null) throw new NullReferenceException("Not found this round type");
 
             if (!string.IsNullOrEmpty(model.Name))
             {
-                bool isDuplicated = await _competitionRoundTypeRepo.CheckDuplicatedMatchType(model.Name);
-                if (isDuplicated) throw new ArgumentException("Duplicated match type");
+                bool isDuplicated = await _competitionRoundTypeRepo.CheckDuplicatedCompetitionRoundType(model.Name);
+                if (isDuplicated) throw new ArgumentException("Duplicated round type");
                 competitionRoundType.Name = model.Name;
             }
 

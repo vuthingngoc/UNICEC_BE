@@ -7,6 +7,7 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
+using UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo;
 using UniCEC.Data.Repository.ImplRepo.MatchRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
@@ -20,6 +21,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
     public class CompetitionRoundService : ICompetitionRoundService
     {
         private ICompetitionRoundRepo _competitionRoundRepo;
+
+        private ICompetitionRoundTypeRepo _competitionRoundTypeRepo;
 
         private ICompetitionRepo _competitionRepo;
 
@@ -35,6 +38,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
         public CompetitionRoundService(
             ICompetitionRoundRepo competitionRoundRepo,
+            ICompetitionRoundTypeRepo competitionRoundTypeRepo,
             ICompetitionRepo competitionRepo,
             IMemberInCompetitionRepo memberInCompetitionRepo,
             ITeamRepo teamRepo,
@@ -42,6 +46,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             IMatchRepo matchRepo)
         {
             _competitionRoundRepo = competitionRoundRepo;
+            _competitionRoundTypeRepo = competitionRoundTypeRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRepo = competitionRepo;
             _teamRepo = teamRepo;
@@ -120,14 +125,17 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             foreach (var model in models)
             {
                 // check in list
-                if (model.CompetitionId.Equals(0) || string.IsNullOrEmpty(model.Title)
+                if (model.CompetitionId.Equals(0) || string.IsNullOrEmpty(model.Title) || model.RoundTypeId.Equals(0)
                     || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
                     || string.IsNullOrEmpty(model.Description) || model.SeedsPoint < 0)
-                    throw new ArgumentNullException("CompetitionId Null || Title Null || Description Null || StartTime Null " +
-                        "|| EndTime Null || SeedsPoint can not be negative number");
+                    throw new ArgumentNullException("CompetitionId Null || Title Null || RoundTypeId Null " +
+                        "|| Description Null || StartTime Null || EndTime Null || SeedsPoint can not be negative number");
 
                 if (!model.CompetitionId.Equals(competitionId))
                     throw new ArgumentException("You do not have permission to insert rounds for more than 1 competitions in the same time");
+
+                bool isExisted = await _competitionRoundTypeRepo.CheckExistedType(model.RoundTypeId);
+                if (!isExisted) throw new ArgumentException("Not found this round type");
 
                 // start comparing in 2nd element
                 if (titleRounds.Count > 0)
@@ -162,6 +170,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 CompetitionRound competitionRound = new CompetitionRound()
                 {
                     CompetitionId = competitionId,
+                    CompetitionRoundTypeId = model.RoundTypeId,
                     Title = model.Title,
                     Description = model.Description,
                     StartTime = model.StartTime,
@@ -172,19 +181,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     Order = count
                 };
                 int id = await _competitionRoundRepo.Insert(competitionRound);
-                ViewCompetitionRound viewCompetitionRound = new ViewCompetitionRound()
-                {
-                    Id = id,
-                    CompetitionId = competitionId,
-                    Title = model.Title,
-                    Description = model.Description,
-                    StartTime = model.StartTime,
-                    EndTime = model.EndTime,
-                    NumberOfTeam = competitionRound.NumberOfTeam,
-                    SeedsPoint = model.SeedsPoint,
-                    Status = competitionRound.Status,
-                    Order = count
-                };
+                ViewCompetitionRound viewCompetitionRound = await _competitionRoundRepo.GetById(id, CompetitionRoundStatus.Active);                   
                 viewCompetitionRounds.Add(viewCompetitionRound);
 
                 ++count;

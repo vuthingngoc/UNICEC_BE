@@ -11,10 +11,8 @@ namespace UniCEC.Data.ViewModels.Entities.Match
         public int RoundId { get; set; }
         [JsonPropertyName("round_name")]
         public string RoundName { get; set; }
-        [JsonPropertyName("match_type_id")]
-        public int MatchTypeId { get; set; }
-        [JsonPropertyName("match_type_name")]
-        public string MatchTypeName { get; set; }
+        [JsonPropertyName("is_lose_match")]
+        public bool? IsLoseMatch { get; set; }
         public string Address { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }

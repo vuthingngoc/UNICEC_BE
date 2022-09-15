@@ -11,8 +11,8 @@ namespace UniCEC.Data.RequestModels
         public int? CompetitionId { get; set; }
         [FromQuery(Name = "roundId")]
         public int? RoundId { get; set; }
-        [FromQuery(Name = "matchTypeId")]
-        public int? MatchTypeId { get; set; }
+        [FromQuery(Name = "isLoseMatch")]
+        public bool? IsLoseMatch { get; set; }
         [FromQuery(Name = "startTime")]
         public DateTime? StartTime { get; set; }
         [FromQuery(Name = "endTime")]

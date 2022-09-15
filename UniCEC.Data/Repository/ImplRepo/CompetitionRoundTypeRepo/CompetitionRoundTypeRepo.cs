@@ -15,7 +15,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo
         {
         }
 
-        public async Task<bool> CheckDuplicatedMatchType(string name)
+        public async Task<bool> CheckDuplicatedCompetitionRoundType(string name)
         {
             return await context.CompetitionRoundTypes.FirstOrDefaultAsync(type => type.Name.ToLower().Equals(name.ToLower())) != null;
         }
@@ -27,12 +27,12 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundTypeRepo
 
         public async Task<List<ViewCompetitionRoundType>> GetByConditions(CompetitionRoundTypeRequestModel request)
         {
-            var query = from mt in context.CompetitionRoundTypes
-                        select mt;
+            var query = from crt in context.CompetitionRoundTypes
+                        select crt;
 
             if (request.Status.HasValue) query = query.Where(mt => mt.Status.Equals(request.Status.Value));
 
-            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(mt => mt.Name.ToLower().Contains(request.Name.ToLower()));
+            if (!string.IsNullOrEmpty(request.Name)) query = query.Where(crt => crt.Name.ToLower().Contains(request.Name.ToLower()));
 
             return (query.Any())
                 ? await query.Select(mt => new ViewCompetitionRoundType()
