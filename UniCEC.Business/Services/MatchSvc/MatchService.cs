@@ -79,11 +79,13 @@ namespace UniCEC.Business.Services.MatchSvc
         public async Task<ViewMatch> Insert(MatchInsertModel model, string token)
         {
             // check model
-            if (model.RoundId.Equals(0) || string.IsNullOrEmpty(model.Address) || string.IsNullOrEmpty(model.Title)
-                || string.IsNullOrEmpty(model.Description) || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue)
-                || model.NumberOfTeam < 0)
-                throw new ArgumentException("RoudId Null ||  Address Null || Title Null || Description Null || StartTime Null || EndTime Null || NumberOfTeam < 0");
-            
+            if (model.RoundId.Equals(0) || string.IsNullOrEmpty(model.Title)
+                || model.StartTime.Equals(DateTime.MinValue) || model.EndTime.Equals(DateTime.MinValue))
+                throw new ArgumentException("RoudId Null || Title Null ||  StartTime Null || EndTime Null");
+
+            if (model.NumberOfTeam.HasValue && model.NumberOfTeam < 0)
+                throw new ArgumentException("NumberOfTeam must greater than 0");
+
             // check authorize
             bool isManager = await CheckValidManager(model.RoundId, token);
             if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -103,16 +105,16 @@ namespace UniCEC.Business.Services.MatchSvc
             // insert
             Match match = new Match()
             {
-                Address = model.Address,
+                Address = model.Address ?? "",
                 CreateTime = new LocalTime().GetLocalTime().DateTime,
-                Description = model.Description,
+                Description = model.Description ?? "",
                 EndTime = model.EndTime,
                 IsLoseMatch = model.IsLoseMatch,
-                NumberOfTeam = model.NumberOfTeam,
+                NumberOfTeam = model.NumberOfTeam ?? 0,
                 RoundId = model.RoundId,
                 StartTime = model.StartTime,
                 Status = MatchStatus.Ready, // default status when insert
-                Title = model.Title,                
+                Title = model.Title,
             };
 
             int matchId = await _matchRepo.Insert(match);
@@ -144,17 +146,17 @@ namespace UniCEC.Business.Services.MatchSvc
 
             if (model.IsLoseMatch.HasValue) match.IsLoseMatch = model.IsLoseMatch.Value;
 
-            if(!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;
-            
-            if(!string.IsNullOrEmpty(model.Description)) match.Description = model.Description;
+            if (!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;
 
-            if(model.StartTime.HasValue)
+            if (!string.IsNullOrEmpty(model.Description)) match.Description = model.Description;
+
+            if (model.StartTime.HasValue)
             {
                 DateTime endTime = model.EndTime ?? match.EndTime;
                 if (model.StartTime.Value < round.StartTime || model.StartTime.Value > round.EndTime
                     || model.StartTime.Value >= endTime)
                     throw new ArgumentException("The time of match must in the range time of round");
-                
+
                 match.StartTime = model.StartTime.Value;
             }
 
@@ -168,12 +170,12 @@ namespace UniCEC.Business.Services.MatchSvc
                 match.EndTime = model.EndTime.Value;
             }
 
-            if(model.NumberOfTeam.HasValue) match.NumberOfTeam = model.NumberOfTeam.Value;
+            if (model.NumberOfTeam.HasValue) match.NumberOfTeam = model.NumberOfTeam.Value;
 
             if (model.Status.HasValue)
             {
                 // check valid status
-                if (!Enum.IsDefined(typeof(MatchStatus), model.Status.Value)) 
+                if (!Enum.IsDefined(typeof(MatchStatus), model.Status.Value))
                     throw new ArgumentException("Invalid match status");
 
                 match.Status = model.Status.Value;

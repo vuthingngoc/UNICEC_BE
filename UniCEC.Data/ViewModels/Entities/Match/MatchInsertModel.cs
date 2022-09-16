@@ -17,6 +17,6 @@ namespace UniCEC.Data.ViewModels.Entities.Match
         [JsonPropertyName("end_time")]
         public DateTime EndTime { get; set; }
         [JsonPropertyName("number_of_team")]
-        public int NumberOfTeam { get; set; }
+        public int? NumberOfTeam { get; set; }
     }
 }
