@@ -5,6 +5,7 @@ using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Team;
+using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {
@@ -31,5 +32,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         public Task<int> GetNumberOfMemberInTeam(int teamId);
         public Task<List<ViewResultTeam>> GetAllTeamInComp(int competitionId); // for get total result of a team in a competition
         public Task<List<int>> GetAllTeamIdsInComp(int competitionId);
+        public Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId);
     }
 }

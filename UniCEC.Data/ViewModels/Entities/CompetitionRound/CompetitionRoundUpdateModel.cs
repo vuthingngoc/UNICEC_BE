@@ -8,7 +8,7 @@ namespace UniCEC.Data.ViewModels.Entities.CompetitionRound
     {
         public int Id { get; set; }
         [JsonPropertyName("round_type_id")]
-        public int RoundTypeId { get; set; }
+        public int? RoundTypeId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         [JsonPropertyName("start_time")]

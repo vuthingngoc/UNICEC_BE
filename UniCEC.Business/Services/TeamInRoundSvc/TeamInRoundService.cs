@@ -88,7 +88,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teamInRounds;
         }
 
-        public async Task<List<ViewResultTeam>> GetTotalResultTeamInCompetition(string token, int competitionId, int top)
+        public async Task<List<ViewResultTeam>> GetResultTeamsInCompetition(string token, int competitionId, int top)
         {
             // check valid
             if (competitionId == 0) throw new ArgumentException("Invalid competition");
@@ -116,7 +116,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teams;
         }
 
-        public async Task<List<ViewTeamInRound>> GetTopTeamsToNextRound(string token, int roundId, int top)
+        public async Task<List<ViewTeamInRound>> GetTopTeamsToNextRound(string token, int roundId, int top) // Not Finish yet !!!
         {
             // check valid
             int userId = _decodeToken.Decode(token, "Id");

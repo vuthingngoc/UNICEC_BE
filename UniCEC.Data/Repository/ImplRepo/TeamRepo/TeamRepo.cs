@@ -9,6 +9,7 @@ using UniCEC.Data.RequestModels;
 using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Entities.Participant;
 using UniCEC.Data.Enum;
+using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {
@@ -273,6 +274,60 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             return await (from t in context.Teams
                          where t.CompetitionId.Equals(competitionId)
                          select t.Id).ToListAsync();
+        }
+
+        public async Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId)
+        {
+            var teamInCompetition = await (from cr in context.CompetitionRounds
+                                           join c in context.Competitions on cr.CompetitionId equals c.Id
+                                           join tir in context.TeamInRounds on cr.Id equals tir.RoundId
+                                           join t in context.Teams on tir.TeamId equals t.Id
+                                           where cr.CompetitionId.Equals(competitionId) && tir.TeamId.Equals(teamId)
+                                           select new ViewTeamInCompetition()
+                                           {
+                                               CompetitionId = competitionId,
+                                               CompetitionName = c.Name,
+                                               TeamId = teamId,
+                                               TeamName = t.Name
+                                           }).FirstOrDefaultAsync();
+
+            var teamInRounds = await (from cr in context.CompetitionRounds
+                                      join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
+                                      join tir in context.TeamInRounds on cr.Id equals tir.RoundId
+                                      where cr.CompetitionId.Equals(competitionId)
+                                      select new ViewResultTeamInRounds()
+                                      {
+                                          Rank = tir.Rank,
+                                          RoundId = tir.RoundId,
+                                          RoundName = cr.Title,
+                                          RoundTypeId = cr.CompetitionRoundTypeId,
+                                          RoundTypeName = crt.Name,
+                                          Scores = tir.Scores,
+                                          Status = tir.Status,
+                                      }).ToListAsync();
+
+            if (teamInRounds.Any())
+            {
+                foreach (var round in teamInRounds)
+                {
+                    var teamInMatches = await (from m in context.Matches
+                                               join cr in context.CompetitionRounds on m.RoundId equals cr.Id
+                                               join tim in context.TeamInMatches on m.Id equals tim.MatchId
+                                               where cr.Id.Equals(round.RoundId) && tim.TeamId.Equals(teamId)
+                                               select new ViewResultTeamInMatches()
+                                               {
+                                                   Description = m.Description,
+                                                   MatchId = m.Id,
+                                                   MatchTitle = m.Title,
+                                                   Scores = tim.Scores,
+                                                   Status = tim.Status
+                                               }).ToListAsync();
+                    round.TeamInMatches = teamInMatches;
+                }
+            }
+
+            teamInCompetition.TeamInRounds = teamInRounds;
+            return teamInCompetition;
         }
     }
 }

@@ -3,6 +3,7 @@ using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
+using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Business.Services.TeamSvc
 {
@@ -28,5 +29,8 @@ namespace UniCEC.Business.Services.TeamSvc
         public Task<bool> DeleteByLeader(int teamId, string token);
 
         public Task<bool> OutTeam(int teamId, string token);
+
+        // Gwi
+        public Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId);
     }
 }

@@ -4,6 +4,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
+using UniCEC.Data.ViewModels.Entities.Participant;
 using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
@@ -21,6 +22,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public Task<bool> CheckExistedTeamsInRound(int roundId);
         public Task UpdateRankTeamsInRound(int roundId);
         public Task UpdateResultTeamsInRound(int roundId, int teamId, int? scores, bool? status);
+        public Task<List<ViewParticipantInTeam>> GetMembersInTeam(int teamId);
 
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Data.SqlClient;
@@ -20,6 +19,7 @@ namespace UniCEC.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Authorize]
+
     public class TeamInRoundController : ControllerBase
     {
         private ITeamInRoundService _teamInRoundService;
@@ -28,30 +28,6 @@ namespace UniCEC.API.Controllers
         {
             _teamInRoundService = teamInRoundService;
         }
-
-        //[HttpGet("{id}")]
-        //[SwaggerOperation(Summary = "Get team in round by id - Authenticated user")]
-        //public async Task<IActionResult> GetRoundById(int id)
-        //{
-        //    try
-        //    {
-        //        string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-        //        ViewTeamInRound teamInRound = await _teamInRoundService.GetById(token, id);
-        //        return Ok(teamInRound);
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Unauthorized(ex.Message);
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-        //        return Ok(new object());
-        //    }
-        //    catch (SqlException)
-        //    {
-        //        return StatusCode(500, "Internal Server Exeption");
-        //    }
-        //}
 
         [HttpGet("search")]
         [SwaggerOperation(Summary = "Search teams in round by conditions - Authenticated user")]
@@ -83,12 +59,12 @@ namespace UniCEC.API.Controllers
 
         [HttpGet("total-result")]
         [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
-        public async Task<IActionResult> GetTotalResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
+        public async Task<IActionResult> GetResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewResultTeam> teams = await _teamInRoundService.GetTotalResultTeamInCompetition(token, competitionId, top);
+                List<ViewResultTeam> teams = await _teamInRoundService.GetResultTeamsInCompetition(token, competitionId, top);
                 return Ok(teams);
             }
             catch (ArgumentException ex)
@@ -110,7 +86,7 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("next-round")]
-        [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
+        [SwaggerOperation(Summary = "Get teams that continue to participate next round - Competition manager")]
         public async Task<IActionResult> GetTopTeamsToNextRound([FromQuery, BindRequired] int roundId, [FromQuery, BindRequired]  int top)
         {
             try
