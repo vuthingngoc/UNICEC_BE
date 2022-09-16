@@ -28,6 +28,13 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
             return query.Any();
         }
 
+        public async Task<bool> CheckIsLoseMatch(int matchId)
+        {
+            return await (from m in context.Matches
+                          where m.Id.Equals(matchId) && m.IsLoseMatch.Equals(true)
+                          select m.IsLoseMatch).FirstOrDefaultAsync() != null;
+        }
+
         public async Task Delete(TeamInMatch teamInMatch)
         {
             context.TeamInMatches.Remove(teamInMatch);
@@ -115,6 +122,14 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
             }
 
             return team;
+        }
+
+        public async Task<int> GetRoundIdByMatch(int matchId)
+        {
+            return await (from tim in context.TeamInMatches
+                          join m in context.Matches on tim.MatchId equals m.Id
+                          where tim.MatchId.Equals(matchId)
+                          select m.RoundId).FirstOrDefaultAsync();
         }
 
         public async Task InsertMultiTeams(List<TeamInMatch> teams)

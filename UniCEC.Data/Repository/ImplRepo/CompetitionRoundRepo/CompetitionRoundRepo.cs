@@ -29,17 +29,17 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
             if (request.RoundTypeId.HasValue) query = query.Where(selector => selector.cr.CompetitionRoundTypeId.Equals(request.RoundTypeId.Value));
 
-            if (request.StartTime.HasValue) query = query.Where(selector => selector.cr.StartTime.Year.Equals(request.StartTime.Value.Year) 
+            if (request.StartTime.HasValue) query = query.Where(selector => selector.cr.StartTime.Year.Equals(request.StartTime.Value.Year)
                                                             && selector.cr.StartTime.Month.Equals(request.StartTime.Value.Month)
                                                             && selector.cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
             if (request.StartTime.HasValue && request.StartTime.Value.Hour > 0) query = query.Where(selector => selector.cr.StartTime.Hour.Equals(request.StartTime.Value.Hour));
 
-            if (request.EndTime.HasValue) query = query.Where(selector => selector.cr.EndTime.Year.Equals(request.EndTime.Value.Year) 
+            if (request.EndTime.HasValue) query = query.Where(selector => selector.cr.EndTime.Year.Equals(request.EndTime.Value.Year)
                                                                 && selector.cr.EndTime.Month.Equals(request.EndTime.Value.Month)
                                                                 && selector.cr.StartTime.Day.Equals(request.StartTime.Value.Day));
 
-            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0) 
+            if (request.EndTime.HasValue && request.EndTime.Value.Hour > 0)
                 query = query.Where(selector => selector.cr.EndTime.Hour.Equals(request.EndTime.Value.Hour));
 
             if (request.Statuses != null) query = query.Where(selector => request.Statuses.Contains((int)selector.cr.Status));
@@ -73,7 +73,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             var query = from cr in context.CompetitionRounds
                         join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                         where cr.Id.Equals(id)
-                        select new { cr , crt };
+                        select new { cr, crt };
 
             if (status.HasValue) query = query.Where(selector => selector.cr.Status.Equals(status.Value));
 
@@ -161,7 +161,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
 
         public async Task<bool> CheckExistedRound(int roundId)
         {
-            return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId) 
+            return await context.CompetitionRounds.FirstOrDefaultAsync(round => round.Id.Equals(roundId)
                                                                                 && !round.Status.Equals(CompetitionRoundStatus.Cancel)
                                                                                 && !round.Status.Equals(CompetitionRoundStatus.IsDeleted)) != null;
         }
@@ -169,7 +169,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task UpdateOrderRoundsByCompe(int competitionId)
         {
             var rounds = await (from cr in context.CompetitionRounds
-                                where cr.CompetitionId.Equals(competitionId) 
+                                where cr.CompetitionId.Equals(competitionId)
                                       && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
                                       && !cr.Status.Equals(CompetitionRoundStatus.IsDeleted)
                                 orderby cr.StartTime ascending
@@ -192,7 +192,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             (from cr in context.CompetitionRounds
              where cr.CompetitionId.Equals(competitionId)
                     && invalidStatuses.Contains(cr.Status)
-                         select cr).ToList().ForEach(cr => cr.Order = 0);
+             select cr).ToList().ForEach(cr => cr.Order = 0);
 
             await Update();
         }
@@ -225,8 +225,9 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<int> GetRoundTypeByMatch(int matchId)
         {
             return await (from cr in context.CompetitionRounds
-                        join m in context.Matches on cr.Id equals m.RoundId
-                        select cr.CompetitionRoundTypeId).FirstOrDefaultAsync();
+                          join m in context.Matches on cr.Id equals m.RoundId
+                          where m.Id.Equals(matchId)
+                          select cr.CompetitionRoundTypeId).FirstOrDefaultAsync();
         }
 
         ////TA

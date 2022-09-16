@@ -280,7 +280,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
             if(teamInRound != null)
             {
-                if(scores.HasValue) teamInRound.Scores = scores.Value;
+                if(scores.HasValue) teamInRound.Scores += scores.Value;
 
                 if(status.HasValue) teamInRound.Status = status.Value;
 
