@@ -86,7 +86,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
 
         public async Task<List<ViewTeamInMatch>> Insert(List<TeamInMatchInsertModel> models, string token)
         {
-            if(models.Count.Equals(0)) throw new ArgumentException("Data Input Null");
+            if (models.Count.Equals(0)) throw new ArgumentException("Data Input Null");
 
             int matchId = models[0].MatchId;
             bool isDuplicated = models.GroupBy(x => x.TeamId)
@@ -132,7 +132,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 ViewTeamInMatch team = await _teamInMatchRepo.GetById(id);
                 teams.Add(team);
             }
-            
+
             return teams;
         }
 
@@ -140,13 +140,13 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
         {
             if (models.Count.Equals(0)) throw new ArgumentException("Input Data Null");
 
-            foreach(var model in models)
+            foreach (var model in models)
             {
                 TeamInMatch teamInMatch = await _teamInMatchRepo.Get(model.Id);
                 if (teamInMatch == null) throw new NullReferenceException("Not found result of the team in match");
 
                 // validation data
-                if (model.MatchId.Equals(0) || model.TeamId.Equals(0)) throw new ArgumentException("MatchId Null || TeamId Null"); 
+                if (model.MatchId.Equals(0) || model.TeamId.Equals(0)) throw new ArgumentException("MatchId Null || TeamId Null");
 
                 bool isDuplicated = _teamInMatchRepo.CheckDuplicatedTeamInMatch(model.MatchId, model.TeamId, model.Id);
                 if (isDuplicated) throw new ArgumentException("Duplicated team in match");
@@ -165,49 +165,55 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 if (model.Status.HasValue && !Enum.IsDefined(typeof(TeamInMatchStatus), model.Status.Value))
                     throw new ArgumentException("Invalid team in match status");
 
-                int roundTypeId = await _competitionRoundRepo.GetRoundTypeByMatch(model.MatchId);
-                if (roundTypeId.Equals(1)) // elimination
-                {
-                    
-                }else if(roundTypeId.Equals(2)) // round robin
-                {
-
-                }else if (roundTypeId.Equals(3)) // lose elimination
-                {
-
-                }
-
                 // update
+                int roundTypeId = await _competitionRoundRepo.GetRoundTypeByMatch(model.MatchId);
+                
                 teamInMatch.MatchId = model.MatchId;
 
                 teamInMatch.TeamId = model.TeamId;
 
                 if (model.Scores.HasValue) teamInMatch.Scores = model.Scores.Value;
 
-                if (model.Status.HasValue) teamInMatch.Status = model.Status.Value;
+                if (model.Status.HasValue)
+                {
+                    teamInMatch.Status = (roundTypeId.Equals(2)) // Round robin type
+                                            ? TeamInMatchStatus.Win        
+                                            : model.Status.Value;
+                }   
 
                 if (!string.IsNullOrEmpty(model.Description)) teamInMatch.Description = model.Description;
 
                 await _teamInMatchRepo.Update();
 
-                // update to team in round
+                // update to team in round                
+                int roundId = await _teamInMatchRepo.GetRoundIdByMatch(model.MatchId);
 
+                if (roundTypeId.Equals(1)) // elimination type
+                {
+                    bool status = true;
+                    if (model.Status.HasValue && model.Status.Equals(TeamInMatchStatus.Lose)) status = false;
+
+                    await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, null, status);
+                }
+                else if (roundTypeId.Equals(2)) // round robin type
+                {
+                    if (model.Scores.HasValue)
+                        await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, model.Scores.Value, null);
+
+                }
+                else if (roundTypeId.Equals(3)) // combination type
+                {
+                    bool isLoseMatch = await _teamInMatchRepo.CheckIsLoseMatch(model.MatchId);
+                    if (isLoseMatch)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
             }
-        }
-
-        private void ProcessingEliminationRoundType(int matchId, int teamId, TeamInMatchStatus status)
-        {
-
-        }
-
-        private void ProcessingRoundRobinRoundType(int matchId, int teamId, int scores)
-        {
-
-        }
-
-        private void ProcessingLoseEliminationRoundType(int matchId, int teamId, TeamInMatchStatus status)
-        {
-
         }
     }
 }
