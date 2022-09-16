@@ -126,7 +126,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             return (teamsInRound.Count > 0) ? teamsInRound : null;
         }
 
-        private async Task<List<ViewParticipantInTeam>> GetMembersInTeam(int teamId)
+        public async Task<List<ViewParticipantInTeam>> GetMembersInTeam(int teamId)
         {
             return await (from pit in context.ParticipantInTeams
                           join p in context.Participants on pit.ParticipantId equals p.Id
@@ -230,7 +230,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
             if (teams.Any())
             {
-                if (top.HasValue)  
+                if (top.HasValue)
                 {
                     // update status teams in round
                     var winTeams = teams.Take(top.Value).ToList();
@@ -275,14 +275,14 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public async Task UpdateResultTeamsInRound(int roundId, int teamId, int? scores, bool? status)
         {
             var teamInRound = await (from tir in context.TeamInRounds
-                              where tir.TeamId.Equals(teamId) && tir.RoundId.Equals(roundId)
-                              select tir).FirstOrDefaultAsync();
+                                     where tir.TeamId.Equals(teamId) && tir.RoundId.Equals(roundId)
+                                     select tir).FirstOrDefaultAsync();
 
-            if(teamInRound != null)
+            if (teamInRound != null)
             {
-                if(scores.HasValue) teamInRound.Scores += scores.Value;
+                if (scores.HasValue) teamInRound.Scores += scores.Value;
 
-                if(status.HasValue) teamInRound.Status = status.Value;
+                if (status.HasValue) teamInRound.Status = status.Value;
 
                 await Update();
             }

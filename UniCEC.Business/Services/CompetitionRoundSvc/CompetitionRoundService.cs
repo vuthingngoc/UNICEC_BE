@@ -181,7 +181,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     Order = count
                 };
                 int id = await _competitionRoundRepo.Insert(competitionRound);
-                ViewCompetitionRound viewCompetitionRound = await _competitionRoundRepo.GetById(id, CompetitionRoundStatus.Active);                   
+                ViewCompetitionRound viewCompetitionRound = await _competitionRoundRepo.GetById(id, CompetitionRoundStatus.Active);
                 viewCompetitionRounds.Add(viewCompetitionRound);
 
                 ++count;
@@ -213,6 +213,8 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 if (roundId > 0 && !roundId.Equals(model.Id)) throw new ArgumentException("Duplicated title competition round");
                 competitionRound.Title = model.Title;
             }
+
+            if (model.RoundTypeId.HasValue) competitionRound.CompetitionRoundTypeId = model.RoundTypeId.Value;
 
             if (!string.IsNullOrEmpty(model.Description)) competitionRound.Description = model.Description;
 
@@ -282,7 +284,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             await _competitionRoundRepo.Update();
 
-            if (model.StartTime.HasValue || model.EndTime.HasValue || model.Status.HasValue) 
+            if (model.StartTime.HasValue || model.EndTime.HasValue || model.Status.HasValue)
                 await _competitionRoundRepo.UpdateOrderRoundsByCompe(competitionRound.CompetitionId);
         }
 

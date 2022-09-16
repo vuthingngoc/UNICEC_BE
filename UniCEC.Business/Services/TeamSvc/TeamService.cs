@@ -10,12 +10,14 @@ using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantRepo;
+using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRoleRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
+using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Business.Services.TeamSvc
 {
@@ -30,6 +32,7 @@ namespace UniCEC.Business.Services.TeamSvc
         private DecodeToken _decodeToken;
         private IMemberRepo _memberRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
+        private ITeamInRoundRepo _teamInRoundRepo;
 
 
 
@@ -40,7 +43,8 @@ namespace UniCEC.Business.Services.TeamSvc
                            IClubRepo clubRepo,
                            IParticipantInTeamRepo participantInTeamRepo,
                            IMemberRepo memberRepo,
-                           IMemberInCompetitionRepo memberInCompetitionRepo)
+                           IMemberInCompetitionRepo memberInCompetitionRepo,
+                           ITeamInRoundRepo teamInRoundRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
@@ -50,6 +54,7 @@ namespace UniCEC.Business.Services.TeamSvc
             _participantInTeamRepo = participantInTeamRepo;
             _memberRepo = memberRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
+            _teamInRoundRepo = teamInRoundRepo;
             _decodeToken = new DecodeToken();
 
         }
@@ -125,6 +130,15 @@ namespace UniCEC.Business.Services.TeamSvc
             {
                 throw;
             }
+        }
+
+        public async Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId)
+        {
+            ViewTeamInCompetition resultTeamInCompetition = await _teamRepo.GetTotalResultTeamInCompetition(competitionId, teamId);
+            if (resultTeamInCompetition == null) throw new NullReferenceException("Not found any result of team in this competition");
+
+            resultTeamInCompetition.MembersInTeam = await _teamInRoundRepo.GetMembersInTeam(teamId);
+            return resultTeamInCompetition;
         }
 
         //INSERT

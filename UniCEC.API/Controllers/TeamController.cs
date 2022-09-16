@@ -12,6 +12,7 @@ using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
+using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -107,6 +108,28 @@ namespace UniCEC.API.Controllers
             }
         }
 
+        [HttpGet("{id}/competititon/{competition-id}")]
+        [SwaggerOperation(Summary = "Get total results team in competition - Authenticated user")]
+        public async Task<IActionResult> GetTotalResultTeamInCompetition(int id, [FromRoute(Name = "competition-id")] int competitionId)
+        {
+            try
+            {
+                ViewTeamInCompetition totalResultTeamInCompetition = await _teamService.GetTotalResultTeamInCompetition(competitionId, id);
+                return Ok(totalResultTeamInCompetition);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
 
         // POST api/<TeamController>
         [Authorize(Roles = "Student")]

@@ -167,7 +167,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
 
                 // update
                 int roundTypeId = await _competitionRoundRepo.GetRoundTypeByMatch(model.MatchId);
-                
+
                 teamInMatch.MatchId = model.MatchId;
 
                 teamInMatch.TeamId = model.TeamId;
@@ -177,9 +177,9 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                 if (model.Status.HasValue)
                 {
                     teamInMatch.Status = (roundTypeId.Equals(2)) // Round robin type
-                                            ? TeamInMatchStatus.Win        
+                                            ? TeamInMatchStatus.Win
                                             : model.Status.Value;
-                }   
+                }
 
                 if (!string.IsNullOrEmpty(model.Description)) teamInMatch.Description = model.Description;
 
@@ -206,11 +206,21 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                     bool isLoseMatch = await _teamInMatchRepo.CheckIsLoseMatch(model.MatchId);
                     if (isLoseMatch)
                     {
-
+                        if (model.Status.HasValue && model.Status.Equals(TeamInMatchStatus.Lose)) // eliminate lose team
+                        {
+                            await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, null, false);
+                        }
+                        else if (model.Status.HasValue && model.Status.Equals(TeamInMatchStatus.Win)) // update win team to result of round
+                        {
+                            await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, null, true);
+                        }
                     }
                     else
                     {
+                        bool status = true;
+                        if (model.Status.HasValue && model.Status.Equals(TeamInMatchStatus.Lose)) status = false;
 
+                        await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, null, status);
                     }
                 }
             }

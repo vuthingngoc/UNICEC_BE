@@ -102,6 +102,9 @@ namespace UniCEC.Business.Services.MatchSvc
                 || model.EndTime <= model.StartTime)
                 throw new ArgumentException("The time of match must in the range time of round && StartTime < EndTime");
 
+            if (!round.CompetitionRoundTypeId.Equals(3) && model.IsLoseMatch.HasValue)
+                throw new ArgumentException("This round is not combination type");
+
             // insert
             Match match = new Match()
             {
@@ -144,7 +147,14 @@ namespace UniCEC.Business.Services.MatchSvc
 
             match.RoundId = model.RoundId;
 
-            if (model.IsLoseMatch.HasValue) match.IsLoseMatch = model.IsLoseMatch.Value;
+            if (model.IsLoseMatch.HasValue)
+            {
+                int roundTypeId = await _competitionRoundRepo.GetRoundTypeByMatch(match.Id);
+                if (!roundTypeId.Equals(3)) // different from combination type
+                    throw new ArgumentException("This round is not combination type");
+
+                match.IsLoseMatch = model.IsLoseMatch.Value;
+            }   
 
             if (!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;
 
