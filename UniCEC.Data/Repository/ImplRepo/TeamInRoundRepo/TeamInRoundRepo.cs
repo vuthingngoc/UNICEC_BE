@@ -173,7 +173,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                           join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
                           where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
                                   && tir.Status.Equals(true)
-                          select tir.Scores).SumAsync();
+                          orderby tir.Id 
+                          select tir.Scores).LastOrDefaultAsync();
         }
 
         public async Task InsertMultiTeams(List<int> teamIds, int roundId)
@@ -195,6 +196,15 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                     teams.Add(team);
                 }
 
+                await context.TeamInRounds.AddRangeAsync(teams);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task InsertMultiTeams(List<TeamInRound> teams)
+        {
+            if (teams.Count > 0)
+            {   
                 await context.TeamInRounds.AddRangeAsync(teams);
                 await context.SaveChangesAsync();
             }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
@@ -139,6 +141,57 @@ namespace UniCEC.Business.Services.TeamSvc
 
             resultTeamInCompetition.MembersInTeam = await _teamInRoundRepo.GetMembersInTeam(teamId);
             return resultTeamInCompetition;
+        }
+
+        public async Task<List<ViewResultTeam>> GetFinalResultTeamsInCompetition(string token, int competitionId, int top)
+        {
+            // check valid
+            if (competitionId == 0 || top < 0) throw new ArgumentException("Invalid competition || top must be greater than 0");
+            bool isExisted = await _competitionRepo.CheckExistedCompetition(competitionId);
+            if (!isExisted) throw new ArgumentException("Not found this competition");
+
+            await CheckValidAuthorizedViewer(token, competitionId);
+
+            // Action
+            List<ViewResultTeam> teams = await _teamRepo.GetFinalResultAllTeamsInComp(competitionId);
+            if (teams == null) throw new NullReferenceException("Not found any teams in this competition");
+
+            foreach (var team in teams)
+            {
+                team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
+            }
+
+            teams = (top.Equals(0))
+                    ? teams.OrderByDescending(team => team.TotalPoint).ToList()
+                    : teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
+
+            for (int index = 0; index < teams.Count; index++)
+            {
+                teams[index].Rank = index + 1;
+            }
+
+            return teams;
+        }
+
+        private async Task CheckValidAuthorizedViewer(string token, int competitionId)
+        {
+            int universityId = _decodeToken.Decode(token, "UniversityId");
+            bool isValid = await _competitionRepo.CheckExisteUniInCompetition(universityId, competitionId);
+            if (!isValid) throw new ArgumentException("You do not have permission to access this resource");
+            //CompetitionScopeStatus status = await _competitionRepo.GetScopeCompetition(competitionId);
+            //if (status.Equals(CompetitionScopeStatus.Club))
+            //{
+            //    int userId = _decodeToken.Decode(token, "Id");
+            //    List<int> clubIds = await _clubRepo.GetByCompetition(competitionId);
+            //    if(clubIds != null)
+            //    {
+            //        foreach (int clubId in clubIds)
+            //        {
+            //            bool isExisted = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            //            if(!isExisted) throw new ArgumentException("You do not have permission to access this resource");
+            //        }
+            //    }
+            //}
         }
 
         //INSERT

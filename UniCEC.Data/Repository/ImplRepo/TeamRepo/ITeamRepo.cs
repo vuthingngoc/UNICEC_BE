@@ -30,7 +30,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
         //
         public Task<bool> CheckExistedTeam(int teamId);
         public Task<int> GetNumberOfMemberInTeam(int teamId);
-        public Task<List<ViewResultTeam>> GetAllTeamInComp(int competitionId); // for get total result of a team in a competition
+        // for get total result of a team in a competition
+        public Task<List<ViewResultTeam>> GetFinalResultAllTeamsInComp(int competitionId); 
         public Task<List<int>> GetAllTeamIdsInComp(int competitionId);
         public Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId);
     }

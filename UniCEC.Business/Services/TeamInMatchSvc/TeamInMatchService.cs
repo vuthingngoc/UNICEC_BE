@@ -140,6 +140,10 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
         {
             if (models.Count.Equals(0)) throw new ArgumentException("Input Data Null");
 
+            int matchId = models[0].MatchId;
+            bool isInValid = models.Where(model => model.MatchId != matchId).ToList().Count > 0;
+            if (isInValid) throw new ArgumentException("Can not update 2 match in one time");
+
             foreach (var model in models)
             {
                 TeamInMatch teamInMatch = await _teamInMatchRepo.Get(model.Id);

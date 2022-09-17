@@ -5,16 +5,13 @@ using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
-using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Team;
 using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Business.Services.TeamInRoundSvc
@@ -26,44 +23,39 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
         private ICompetitionRepo _competitionRepo;
         private ICompetitionRoundRepo _competitionRoundRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
-        private IMemberRepo _memberRepo;
-        private IClubRepo _clubRepo;
 
         private DecodeToken _decodeToken;
 
         public TeamInRoundService(ITeamInRoundRepo teamInRoundRepo, ICompetitionRepo competitionRepo, ITeamRepo teamRepo
-                                    , ICompetitionRoundRepo competitionRoundRepo, IMemberInCompetitionRepo memberInCompetitionRepo
-                                    , IClubRepo clubRepo, IMemberRepo memberRepo)
+                                    , ICompetitionRoundRepo competitionRoundRepo, IMemberInCompetitionRepo memberInCompetitionRepo)
         {
             _teamInRoundRepo = teamInRoundRepo;
             _teamRepo = teamRepo;
             _competitionRepo = competitionRepo;
             _competitionRoundRepo = competitionRoundRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
-            _clubRepo = clubRepo;
-            _memberRepo = memberRepo;
             _decodeToken = new DecodeToken();
         }
 
         private async Task CheckValidAuthorizedViewer(string token, int competitionId)
         {
-            int universityId = _decodeToken.Decode(token, "UniversityId");
-            int userId = _decodeToken.Decode(token, "Id");
+            int universityId = _decodeToken.Decode(token, "UniversityId");            
             bool isValid = await _competitionRepo.CheckExisteUniInCompetition(universityId, competitionId);
             if (!isValid) throw new ArgumentException("You do not have permission to access this resource");
-            CompetitionScopeStatus status = await _competitionRepo.GetScopeCompetition(competitionId);
-            if (status.Equals(CompetitionScopeStatus.Club))
-            {
-                List<int> clubIds = await _clubRepo.GetByCompetition(competitionId);
-                if(clubIds != null)
-                {
-                    foreach (int clubId in clubIds)
-                    {
-                        bool isExisted = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
-                        if(!isExisted) throw new ArgumentException("You do not have permission to access this resource");
-                    }
-                }
-            }
+            //CompetitionScopeStatus status = await _competitionRepo.GetScopeCompetition(competitionId);
+            //if (status.Equals(CompetitionScopeStatus.Club))
+            //{
+            //    int userId = _decodeToken.Decode(token, "Id");
+            //    List<int> clubIds = await _clubRepo.GetByCompetition(competitionId);
+            //    if(clubIds != null)
+            //    {
+            //        foreach (int clubId in clubIds)
+            //        {
+            //            bool isExisted = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
+            //            if(!isExisted) throw new ArgumentException("You do not have permission to access this resource");
+            //        }
+            //    }
+            //}
         }
 
         private void CheckValidAuthorized(string token, int competitionId)
@@ -88,62 +80,44 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teamInRounds;
         }
 
-        public async Task<List<ViewResultTeam>> GetResultTeamsInCompetition(string token, int competitionId, int top)
+        public async Task<List<ViewTeamInRound>> InsertTopTeamsToNextRound(string token, int roundId, int top) // Not Test yet !!!
         {
             // check valid
-            if (competitionId == 0) throw new ArgumentException("Invalid competition");
-            bool isExisted = await _competitionRepo.CheckExistedCompetition(competitionId);
-            if (!isExisted) throw new ArgumentException("Not found this competition");
+            CompetitionRound round = await _competitionRoundRepo.Get(roundId);
+            if (round == null || (round != null && (round.Status.Equals(CompetitionRoundStatus.IsDeleted)
+                                                    || round.Status.Equals(CompetitionRoundStatus.Cancel))))
+                throw new ArgumentException("Not found this round");
 
-            await CheckValidAuthorizedViewer(token, competitionId);
-
-            // Action
-            List<ViewResultTeam> teams = await _teamRepo.GetAllTeamInComp(competitionId);
-            if (teams == null) throw new NullReferenceException("Not found any teams in this competition");
-
-            foreach(var team in teams)
-            {
-                team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
-            }
-
-            teams = teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
-
-            for(int index = 0; index < teams.Count; index++)
-            {
-                teams[index].Rank = index + 1;
-            }
-
-            return teams;
-        }
-
-        public async Task<List<ViewTeamInRound>> GetTopTeamsToNextRound(string token, int roundId, int top) // Not Finish yet !!!
-        {
-            // check valid
             int userId = _decodeToken.Decode(token, "Id");
             int competitionId = await _competitionRoundRepo.GetCompetitionIdByRound(roundId);
-
+            
             bool isManager = _memberInCompetitionRepo.CheckValidManagerByUser(competitionId, userId, null);
             if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            int nextRoundOrder = round.Order + 1;
+            CompetitionRound nextRound = await _competitionRoundRepo.GetRoundAtOrder(competitionId, nextRoundOrder);
+            if (nextRound == null) throw new ArgumentException("This is the last round");
 
             // Action
             List<ViewTeamInRound> teams = await _teamInRoundRepo.GetTeamsByRound(roundId, top);
             if (teams == null) throw new NullReferenceException("Not found any teams in this round");
-
-
-
-            //foreach (var team in teams)
-            //{
-            //    team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
-            //}
-
-            //teams = teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
-
-            for (int index = 0; index < teams.Count; index++)
+            List<TeamInRound> teamsInRound = teams.Select(team => new TeamInRound()
             {
-                teams[index].Rank = index + 1;
+                Rank = team.Rank,
+                RoundId = nextRound.Id,
+                Scores = team.Scores,
+                Status = team.Status,
+                TeamId = team.TeamId
+            }).OrderByDescending(team => team.Scores).ToList();
+
+            for (int index = 0; index < teamsInRound.Count; index++)
+            {
+                teamsInRound[index].Rank = index + 1;
             }
 
-            return teams;
+            await _teamInRoundRepo.InsertMultiTeams(teamsInRound);
+
+            return await _teamInRoundRepo.GetTeamsByRound(nextRound.Id, null);
         }
 
         public async Task<List<ViewTeamInRound>> Insert(string token, List<TeamInRoundInsertModel> models)

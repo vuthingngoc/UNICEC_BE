@@ -251,7 +251,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             return participants.Count;
         }
 
-        public async Task<List<ViewResultTeam>> GetAllTeamInComp(int competitionId)
+        public async Task<List<ViewResultTeam>> GetFinalResultAllTeamsInComp(int competitionId)
         {
             return await (from t in context.Teams
                           where t.CompetitionId.Equals(competitionId)
@@ -264,8 +264,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
                               InvitedCode = t.InvitedCode,
                               Status = t.Status,
                               NumberOfMemberInTeam = t.NumberOfStudentInTeam,
-                              TotalPoint = 0,
-                              Rank = 0
+                              TotalPoint = 0, // calculate in service
+                              Rank = 0 // calculate in service
                           }).ToListAsync();
         }
 

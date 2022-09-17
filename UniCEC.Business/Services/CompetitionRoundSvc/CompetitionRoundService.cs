@@ -92,7 +92,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                 else // the nth round
                 {
                     int previousRoundOrder = competitionRound.Order - 1;
-                    CompetitionRound previousRound = await _competitionRoundRepo.GetPreviousRound(competitionRound.CompetitionId, previousRoundOrder);
+                    CompetitionRound previousRound = await _competitionRoundRepo.GetRoundAtOrder(competitionRound.CompetitionId, previousRoundOrder);
                     if (previousRound.Status.Equals(CompetitionRoundStatus.Finished))
                     {
                         bool isNextRound = true;
