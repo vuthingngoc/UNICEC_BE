@@ -109,7 +109,8 @@ namespace UniCEC.API.Controllers
         }
 
         [HttpGet("{id}/competititon/{competition-id}")]
-        [SwaggerOperation(Summary = "Get total results team in competition - Authenticated user")]
+        [SwaggerOperation(Summary = "Get total results of a team in competition - Authenticated user")]
+        [Authorize]
         public async Task<IActionResult> GetTotalResultTeamInCompetition(int id, [FromRoute(Name = "competition-id")] int competitionId)
         {
             try
@@ -124,6 +125,35 @@ namespace UniCEC.API.Controllers
             catch (NullReferenceException)
             {
                 return Ok(new object());
+            }
+            catch (SqlException)
+            {
+                return StatusCode(500, "Internal Server Exeption");
+            }
+        }
+
+        [HttpGet("final-result-teams")]
+        [SwaggerOperation(Summary = "Get final result all teams in a competition - Authenticated user")]
+        [Authorize]
+        public async Task<IActionResult> GetResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
+        {
+            try
+            {
+                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
+                List<ViewResultTeam> teams = await _teamService.GetFinalResultTeamsInCompetition(token, competitionId, top);
+                return Ok(teams);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new List<object>());
             }
             catch (SqlException)
             {

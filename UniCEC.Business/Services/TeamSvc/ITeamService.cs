@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
@@ -32,5 +33,6 @@ namespace UniCEC.Business.Services.TeamSvc
 
         // Gwi
         public Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId);
+        public Task<List<ViewResultTeam>> GetFinalResultTeamsInCompetition(string token, int competitionId, int top);
     }
 }

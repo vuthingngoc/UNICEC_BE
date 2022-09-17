@@ -197,7 +197,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
             await Update();
         }
 
-        public async Task<CompetitionRound> GetPreviousRound(int competitionId, int order)
+        public async Task<CompetitionRound> GetRoundAtOrder(int competitionId, int order)
         {
             return await (from cr in context.CompetitionRounds
                           where cr.CompetitionId.Equals(competitionId) && cr.Order.Equals(order)

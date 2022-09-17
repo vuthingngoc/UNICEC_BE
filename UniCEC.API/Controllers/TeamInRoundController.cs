@@ -57,42 +57,14 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("total-result")]
-        [SwaggerOperation(Summary = "Get total result of teams in a competition - Authenticated user")]
-        public async Task<IActionResult> GetResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
+        [HttpPost("next-round")]
+        [SwaggerOperation(Summary = "Insert teams that continue to participate next round - Competition manager")]
+        public async Task<IActionResult> GetTopTeamsToNextRound([FromBody, BindRequired] ParamsNextRoundModel model)
         {
             try
             {
                 string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewResultTeam> teams = await _teamInRoundService.GetResultTeamsInCompetition(token, competitionId, top);
-                return Ok(teams);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NullReferenceException)
-            {
-                return Ok(new List<object>());
-            }
-            catch (SqlException)
-            {
-                return StatusCode(500, "Internal Server Exeption");
-            }
-        }
-
-        [HttpGet("next-round")]
-        [SwaggerOperation(Summary = "Get teams that continue to participate next round - Competition manager")]
-        public async Task<IActionResult> GetTopTeamsToNextRound([FromQuery, BindRequired] int roundId, [FromQuery, BindRequired]  int top)
-        {
-            try
-            {
-                string token = (Request.Headers)["Authorization"].ToString().Split(" ")[1];
-                List<ViewTeamInRound> teams = await _teamInRoundService.GetTopTeamsToNextRound(token, roundId, top);
+                List<ViewTeamInRound> teams = await _teamInRoundService.InsertTopTeamsToNextRound(token, model.RoundId, model.Top);
                 return Ok(teams);
             }
             catch (ArgumentException ex)
