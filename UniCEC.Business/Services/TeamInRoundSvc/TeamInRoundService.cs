@@ -184,15 +184,20 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             isExisted = await _competitionRoundRepo.CheckExistedRound(model.RoundId);
             if (!isExisted) throw new ArgumentException("Not found this round or this round is cancel");
 
+            if ((model.Scores.HasValue && model.Scores < 0)
+                || (model.Rank.HasValue && model.Rank < 0))
+                throw new ArgumentException("Scores || Rank must be greater than 0");
+
             if (model.Scores.HasValue) teamInRound.Scores = model.Scores.Value;
 
-            if (model.Status.HasValue && model.Status.Value.Equals(true)) teamInRound.Status = model.Status.Value;
+            if (model.Status.HasValue) teamInRound.Status = model.Status.Value;
 
-            if (model.Rank.HasValue && model.Rank.Value > 0) teamInRound.Rank = model.Rank.Value;
+            if (model.Rank.HasValue) teamInRound.Rank = model.Rank.Value;
 
             await _teamInRoundRepo.Update();
 
-            if (model.Scores.HasValue) await _teamInRoundRepo.UpdateRankTeamsInRound(model.RoundId);
+            if (model.Scores.HasValue || model.Status.HasValue) 
+                await _teamInRoundRepo.UpdateRankTeamsInRound(model.RoundId);
         }
 
         public async Task Delete(string token, int id)
