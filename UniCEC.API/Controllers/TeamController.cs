@@ -107,7 +107,7 @@ namespace UniCEC.API.Controllers
             }
         }
 
-        [HttpGet("{id}/competititon/{competition-id}")]
+        [HttpGet("{id}/competition/{competition-id}")]
         [SwaggerOperation(Summary = "Get total results of a team in competition - Authenticated user")]
         [Authorize]
         public async Task<IActionResult> GetTotalResultTeamInCompetition(int id, [FromRoute(Name = "competition-id")] int competitionId)
