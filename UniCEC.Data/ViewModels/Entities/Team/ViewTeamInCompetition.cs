@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using UniCEC.Data.Enum;
 using UniCEC.Data.ViewModels.Entities.Participant;
 
-namespace UniCEC.Data.ViewModels.Entities.TeamInRound
+namespace UniCEC.Data.ViewModels.Entities.Team
 {
     public class ViewTeamInCompetition
     {

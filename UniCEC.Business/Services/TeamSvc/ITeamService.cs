@@ -4,7 +4,6 @@ using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.ParticipantInTeam;
 using UniCEC.Data.ViewModels.Entities.Team;
-using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Business.Services.TeamSvc
 {
