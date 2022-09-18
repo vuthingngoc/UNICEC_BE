@@ -9,7 +9,6 @@ using UniCEC.Data.RequestModels;
 using System.Collections.Generic;
 using UniCEC.Data.ViewModels.Entities.Participant;
 using UniCEC.Data.Enum;
-using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {

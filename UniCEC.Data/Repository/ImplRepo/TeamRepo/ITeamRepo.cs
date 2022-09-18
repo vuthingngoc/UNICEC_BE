@@ -5,7 +5,6 @@ using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.Team;
-using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 {

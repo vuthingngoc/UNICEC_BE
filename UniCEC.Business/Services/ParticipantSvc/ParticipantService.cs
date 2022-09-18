@@ -299,6 +299,9 @@ namespace UniCEC.Business.Services.ParticipantSvc
                 RegisterTime = participant.RegisterTime,
                 StudentId = participant.StudentId,
                 Avatar = student.Avatar,
+                StudentCode = student.StudentCode,
+                StudentName = student.Fullname,
+                Attendance = participant.Attendance
             };
         }
 
