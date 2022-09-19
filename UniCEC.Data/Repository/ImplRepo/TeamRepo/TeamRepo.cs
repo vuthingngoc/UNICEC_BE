@@ -293,7 +293,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             var teamInRounds = await (from cr in context.CompetitionRounds
                                       join crt in context.CompetitionRoundTypes on cr.CompetitionRoundTypeId equals crt.Id
                                       join tir in context.TeamInRounds on cr.Id equals tir.RoundId
-                                      where cr.CompetitionId.Equals(competitionId)
+                                      where cr.CompetitionId.Equals(competitionId) && tir.TeamId.Equals(teamId)
                                       select new ViewResultTeamInRounds()
                                       {
                                           Rank = tir.Rank,

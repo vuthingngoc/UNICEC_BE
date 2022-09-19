@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using UniCEC.Business.Services.TeamInRoundSvc;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
-using UniCEC.Data.ViewModels.Entities.Team;
 using UniCEC.Data.ViewModels.Entities.TeamInRound;
 
 namespace UniCEC.API.Controllers
