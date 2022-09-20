@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -54,6 +55,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             foreach (var element in items)
             {
                 element.MembersInTeam = await GetMembersInTeam(element.TeamId);
+                element.NumberOfParticipatedMatches = GetNumberOfParticipatedMatches(element.TeamId, element.RoundId);
             }
 
             return new PagingResult<ViewTeamInRound>(items, totalCount, request.CurrentPage, request.PageSize);
@@ -80,6 +82,8 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             }).FirstOrDefaultAsync();
 
             teamInRound.MembersInTeam = await GetMembersInTeam(teamInRound.TeamId);
+            teamInRound.NumberOfParticipatedMatches = GetNumberOfParticipatedMatches(teamInRound.TeamId, teamInRound.RoundId);
+            
             return teamInRound;
         }
 
@@ -162,6 +166,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             foreach (var element in items)
             {
                 element.MembersInTeam = await GetMembersInTeam(element.TeamId);
+                element.NumberOfParticipatedMatches = GetNumberOfParticipatedMatches(element.TeamId, element.RoundId);
             }
 
             return items;
@@ -267,6 +272,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                 foreach (var team in teams)
                 {
                     team.MembersInTeam = await GetMembersInTeam(team.TeamId);
+                    team.NumberOfParticipatedMatches = GetNumberOfParticipatedMatches(team.TeamId, team.RoundId);
                 }
             }
 
@@ -296,6 +302,15 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
                 await Update();
             }
+        }
+
+        public int GetNumberOfParticipatedMatches(int teamId, int roundId)
+        {
+            return (from tim in context.TeamInMatches
+                        join m in context.Matches on tim.MatchId equals m.Id
+                        where m.RoundId.Equals(roundId) && tim.TeamId.Equals(teamId)
+                                && !m.Status.Equals(MatchStatus.IsDeleted) && !m.Status.Equals(MatchStatus.Cancel)
+                        select tim).ToList().Count;
         }
     }
 }
