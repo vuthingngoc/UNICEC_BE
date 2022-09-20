@@ -25,7 +25,8 @@ namespace UniCEC.Data.Repository.ImplRepo.MatchRepo
         public async Task<bool> CheckDuplicatedMatch(string title, int roundId)
         {
             var query = from m in context.Matches
-                        where m.Title.ToLower().Equals(title.ToLower()) && m.RoundId.Equals(roundId)
+                        where m.Title.ToLower().Equals(title.ToLower()) && m.RoundId.Equals(roundId) 
+                                && !m.Status.Equals(MatchStatus.IsDeleted)
                         select m;
 
             return await query.AnyAsync();
