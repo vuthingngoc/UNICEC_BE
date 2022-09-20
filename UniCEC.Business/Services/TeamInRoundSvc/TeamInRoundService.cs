@@ -65,6 +65,11 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             if (!isValid) throw new UnauthorizedAccessException("You do not have permission to access this resource");
         }
 
+        //private Task<int> GetNumberParticipatedMatches(int teamId, int roundId) // to be continued ... !!!
+        //{
+
+        //}
+
         public async Task<PagingResult<ViewTeamInRound>> GetByConditions(string token, TeamInRoundRequestModel request)
         {
             int competitionId = await _competitionRoundRepo.GetCompetitionIdByRound(request.RoundId);
@@ -80,7 +85,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
             return teamInRounds;
         }
 
-        public async Task<List<ViewTeamInRound>> InsertTopTeamsToNextRound(string token, int roundId, int top) // Not Test yet !!!
+        public async Task<List<ViewTeamInRound>> InsertTopTeamsToNextRound(string token, int roundId, int top)
         {
             // check valid
             CompetitionRound round = await _competitionRoundRepo.Get(roundId);
