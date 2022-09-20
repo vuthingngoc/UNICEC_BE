@@ -24,6 +24,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public Task UpdateRankTeamsInRound(int roundId);
         public Task UpdateResultTeamsInRound(int roundId, int teamId, int? scores, bool? status);
         public Task<List<ViewParticipantInTeam>> GetMembersInTeam(int teamId);
+        public int GetNumberOfParticipatedMatches(int teamId, int roundId);
 
     }
 }

@@ -141,7 +141,11 @@ namespace UniCEC.Business.Services.MatchSvc
 
             DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
             TimeSpan timeSpan = match.StartTime - currentTime;
-            if (timeSpan.TotalMinutes < 10) throw new ArgumentException("Can not update match < 10 mins before round start");
+
+            if ((!string.IsNullOrEmpty(model.Address) || model.IsLoseMatch.HasValue || !string.IsNullOrEmpty(model.Title)
+                || !string.IsNullOrEmpty(model.Description) || model.StartTime.HasValue || model.EndTime.HasValue
+                || model.NumberOfTeam.HasValue) && timeSpan.TotalMinutes < 10)
+                throw new ArgumentException("Can not update match < 10 mins before round start");
 
             if (!string.IsNullOrEmpty(model.Address)) match.Address = model.Address;
 
@@ -154,7 +158,7 @@ namespace UniCEC.Business.Services.MatchSvc
                     throw new ArgumentException("This round is not combination type");
 
                 match.IsLoseMatch = model.IsLoseMatch.Value;
-            }   
+            }
 
             if (!string.IsNullOrEmpty(model.Title)) match.Title = model.Title;
 
@@ -180,7 +184,12 @@ namespace UniCEC.Business.Services.MatchSvc
                 match.EndTime = model.EndTime.Value;
             }
 
-            if (model.NumberOfTeam.HasValue) match.NumberOfTeam = model.NumberOfTeam.Value;
+            if (model.NumberOfTeam.HasValue)
+            {
+                if (model.NumberOfTeam < 0) throw new ArgumentException("NumberOfTeam must be greater than 0");
+                match.NumberOfTeam = model.NumberOfTeam.Value;
+            }
+                
 
             if (model.Status.HasValue)
             {
@@ -201,6 +210,9 @@ namespace UniCEC.Business.Services.MatchSvc
 
             bool isManager = await CheckValidManager(match.RoundId, token);
             if (!isManager) throw new UnauthorizedAccessException("You do not have permission to access this resource");
+
+            if (match.Status.Equals(MatchStatus.OnGoing) || match.Status.Equals(MatchStatus.Finish))
+                throw new ArgumentException("Can not delete match when It's on-going or finish");
 
             match.Status = MatchStatus.IsDeleted; // delete status
             await _matchRepo.Update();

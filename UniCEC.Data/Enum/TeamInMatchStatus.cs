@@ -3,7 +3,7 @@
     public enum TeamInMatchStatus
     {
         Win,
-        WinLoseMatch,
+        LoseMatch,
         Lose,
         Draw,
         Cancel

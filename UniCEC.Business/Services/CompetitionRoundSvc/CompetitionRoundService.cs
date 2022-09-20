@@ -199,13 +199,18 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
 
             Competition competition = await _competitionRepo.Get(competitionRound.CompetitionId);
             if (competition == null) throw new ArgumentException("Not found this competition");
+
             if (competition.Status.Equals(CompetitionStatus.End) || competition.Status.Equals(CompetitionStatus.Complete)
                 || competition.Status.Equals(CompetitionStatus.Cancel))
                 throw new ArgumentException("Can not access the cancel or ending competition");
 
             DateTime currentTime = new LocalTime().GetLocalTime().DateTime;
             TimeSpan timeSpan = competitionRound.StartTime - currentTime;
-            if (timeSpan.TotalMinutes < 10) throw new ArgumentException("Can not update round < 10 mins before round start");
+
+            if ((!string.IsNullOrEmpty(model.Title) || model.RoundTypeId.HasValue || !string.IsNullOrEmpty(model.Description)
+                || model.StartTime.HasValue || model.EndTime.HasValue || model.NumberOfTeam.HasValue || model.SeedsPoint.HasValue)
+                && timeSpan.TotalMinutes < 10)
+                throw new ArgumentException("Can not update round < 10 mins before round start");
 
             if (!string.IsNullOrEmpty(model.Title))
             {
@@ -294,6 +299,10 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             if (competitionRound == null) throw new NullReferenceException("Not found this competition round");
 
             CheckValidAuthorized(token, competitionRound.CompetitionId);
+
+            if (competitionRound.Status.Equals(CompetitionRoundStatus.Happening)
+                || competitionRound.Status.Equals(CompetitionRoundStatus.Finished))
+                throw new ArgumentException("Can not delete round when It's happening or finished");
 
             competitionRound.Status = CompetitionRoundStatus.IsDeleted;
             competitionRound.Order = 0;
