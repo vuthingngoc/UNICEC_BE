@@ -27,5 +27,6 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
         public Task<List<string>> GetDeviceTokenByUsers(List<int> userIds);
         public Task<string> GetDeviceTokenByMember(int memberId);
         public Task<List<string>> GetDeviceTokenByMembers(List<int> memberIds);
+        public Task RemoveInactiveDeviceToken(string deviceToken);
     }
 }

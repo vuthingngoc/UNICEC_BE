@@ -260,7 +260,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
             var query = from u in context.Users
                         where userIds.Contains(u.Id)
                         select u.DeviceToken;
-            
+
             return (query.Any()) ? await query.ToListAsync() : null;
         }
 
@@ -271,7 +271,16 @@ namespace UniCEC.Data.Repository.ImplRepo.UserRepo
                         where memberIds.Contains(m.Id)
                         select u.DeviceToken;
 
-            return (query.Any()) ? await query.ToListAsync(): null;
+            return (query.Any()) ? await query.ToListAsync() : null;
+        }
+
+        public async Task RemoveInactiveDeviceToken(string deviceToken)
+        {
+            (from u in context.Users
+             where u.DeviceToken.Equals(deviceToken)
+             select u).ToList().ForEach(u => u.DeviceToken = null);
+
+            await Update();
         }
     }
 }

@@ -251,6 +251,7 @@ namespace UniCEC.Business.Services.UserSvc
         {
             try
             {
+                await _userRepo.RemoveInactiveDeviceToken(deviceToken);
                 Data.Models.DB.User user = new Data.Models.DB.User
                 {
                     RoleId = userModel.RoleId,
@@ -318,6 +319,7 @@ namespace UniCEC.Business.Services.UserSvc
             Data.Models.DB.User user = await _userRepo.Get(userId);
             if (user == null) throw new NullReferenceException("Not found this user");
 
+            await _userRepo.RemoveInactiveDeviceToken(deviceToken);
             user.Avatar = srcAvatar;
             user.IsOnline = status;
             user.DeviceToken = deviceToken;
