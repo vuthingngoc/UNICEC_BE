@@ -198,12 +198,15 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
                     if (model.Status.HasValue && model.Status.Equals(TeamInMatchStatus.Lose)) status = false;
 
                     await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, null, status);
+                    await _teamInRoundRepo.UpdateRankTeamsInRound(roundId);
                 }
                 else if (roundTypeId.Equals(2)) // round robin type
                 {
                     if (model.Scores.HasValue)
+                    {
                         await _teamInRoundRepo.UpdateResultTeamsInRound(roundId, model.TeamId, model.Scores.Value, null);
-
+                        await _teamInRoundRepo.UpdateRankTeamsInRound(roundId);
+                    }
                 }
                 else if (roundTypeId.Equals(3)) // combination type
                 {

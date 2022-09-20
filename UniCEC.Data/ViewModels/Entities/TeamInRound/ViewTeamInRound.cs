@@ -20,7 +20,10 @@ namespace UniCEC.Data.ViewModels.Entities.TeamInRound
         public bool Status { get; set; }
         [JsonPropertyName("rank")]
         public int Rank { get; set; }
+        [JsonPropertyName("number_of_participated_matches")]
+        public int NumberOfParticipatedMatches { get; set; }
         [JsonPropertyName("members_in_team")]
         public List<ViewParticipantInTeam> MembersInTeam { get; set; }
+        
     }
 }
