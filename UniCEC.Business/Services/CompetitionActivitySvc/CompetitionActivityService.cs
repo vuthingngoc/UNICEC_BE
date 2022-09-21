@@ -505,10 +505,13 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 && (competitionActivity.Status == CompetitionActivityStatus.Finished))
                         {
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
+                            if (memberTakesActivities.Count <= 0 && model.Status.Value == CompetitionActivityStatus.Completed) throw new ArgumentException("Hoạt động không có thành viên tham gia, không thể Duyệt");
+
                             foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
-                            {
-                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
-                            }
+                                {
+                                    await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
+                                }
+                            
                         }
                         else
                         {
