@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.GenericRepo;
 using UniCEC.Data.RequestModels;
@@ -17,5 +18,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         public Task Delete(TeamInMatch teamInMatch);
         public bool CheckDuplicatedTeamInMatch(int matchId, int teamId, int? teamInMatchId);
         public Task InsertMultiTeams(List<TeamInMatch> teams);
+        public void UpdateStatusTeams(int matchId, TeamInMatchStatus status); // update status follow match
     }
 }
