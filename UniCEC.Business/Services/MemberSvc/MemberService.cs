@@ -10,6 +10,7 @@ using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.ClubRoleRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
+using UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo;
 using UniCEC.Data.Repository.ImplRepo.UserRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
@@ -24,16 +25,18 @@ namespace UniCEC.Business.Services.MemberSvc
         private IUserRepo _userRepo;
         private IClubRoleRepo _clubRoleRepo;
         private INotificationService _notificationService;
-
+        private IMemberTakesActivityRepo _memberTakesActivityRepo;
         private DecodeToken _decodeToken;
+        
 
-        public MemberService(INotificationService notificationService, IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo)
+        public MemberService(INotificationService notificationService, IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo, IMemberTakesActivityRepo memberTakesActivityRepo )
         {
             _notificationService = notificationService;
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
             _userRepo = userRepo;
             _clubRoleRepo = clubRoleRepo;
+            _memberTakesActivityRepo = memberTakesActivityRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -127,7 +130,7 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMemberWithInActive = await _memberRepo.CheckExistedMemberInClubWhenInsert(userId, clubId);
             if (isMemberWithInActive)
             {
-                memberId = await _memberRepo.GetIdByUser(userId, clubId);
+                memberId = await _memberRepo.GetIdByUserWhenInsert(userId, clubId);
                 if (memberId == 0) throw new DbUpdateException();
                 Member mem = await _memberRepo.Get(memberId);
                 mem.StartTime = new LocalTime().GetLocalTime().DateTime;
@@ -274,6 +277,9 @@ namespace UniCEC.Business.Services.MemberSvc
             Club club = await _clubRepo.Get(member.ClubId);
             club.TotalMember -= 1;
             await _clubRepo.Update();
+
+            // xóa member ra khỏi task đang làm 
+            await _memberTakesActivityRepo.RemoveMemberTakeAllTaskIsDoing(memberId);
 
             // send notification
             string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);

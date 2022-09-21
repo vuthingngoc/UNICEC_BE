@@ -46,6 +46,24 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
             return (result.Count > 0) ? result : null;
         }
 
+        public async Task RemoveMemberTakeAllTaskIsDoing(int memberId)
+        {
+            List<MemberTakesActivity> result = await(from mta in context.MemberTakesActivities
+                                                     join ca in context.CompetitionActivities on mta.CompetitionActivityId equals ca.Id
+                                                     where mta.MemberId == memberId 
+                                                     && ca.Status != CompetitionActivityStatus.Completed
+                                                     && ca.Status != CompetitionActivityStatus.Cancelling
+                                                     select mta).ToListAsync();
+            if (result.Count > 0)
+            {
+                foreach (MemberTakesActivity activity in result)
+                {
+                    context.MemberTakesActivities.Remove(activity);
+                }
+            }
+            await Update();
+        }
+
         //Get-All-Taskes-By-Conditions 
         //lấy tất cả task được assigned cho member và thuộc Competition Activity - CompetitionManager Role
         //public async Task<PagingResult<ViewMemberTakesActivity>> GetAllTasksByConditions(MemberTakesActivityRequestModel request)

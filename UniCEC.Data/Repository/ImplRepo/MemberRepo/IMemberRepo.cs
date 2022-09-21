@@ -35,9 +35,6 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
         public Task<Member> GetLeaderByClub(int clubId);
         public Task<Member> GetLeaderClubOwnerByCompetition(int competitionId);
         public Task<bool> CheckExistedMemberInClubWhenInsert(int userId, int clubId);
-        
-
-
-
+        public Task<int> GetIdByUserWhenInsert(int userId, int clubId); 
     }
 }
