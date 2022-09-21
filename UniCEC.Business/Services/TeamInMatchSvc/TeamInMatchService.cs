@@ -136,7 +136,7 @@ namespace UniCEC.Business.Services.TeamInMatchSvc
             return teams;
         }
 
-        public async Task Update(List<TeamInMatchUpdateModel> models, string token) // not finished !!! To be continue ...
+        public async Task Update(List<TeamInMatchUpdateModel> models, string token)
         {
             if (models.Count.Equals(0)) throw new ArgumentException("Input Data Null");
 

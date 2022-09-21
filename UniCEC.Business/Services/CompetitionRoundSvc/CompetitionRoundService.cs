@@ -81,11 +81,14 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
             // trigger add teams in round
             if (isManager)
             {
-                bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
-                if (isExisted) return competitionRound;
+                //bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
+                //if (isExisted) return competitionRound;
 
                 if (competitionRound.Order.Equals(1)) // first round
                 {
+                    bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
+                    if (isExisted) return competitionRound;
+                    // 
                     List<int> teamIds = await _teamRepo.GetAllTeamIdsInComp(competitionRound.CompetitionId);
                     await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
                 }
@@ -96,8 +99,13 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     if (previousRound.Status.Equals(CompetitionRoundStatus.Finished))
                     {
                         bool isNextRound = true;
+                        // here
                         List<int> teamIds = await _teamInRoundRepo.GetTeamIdsByRound(previousRound.Id, isNextRound);
-                        await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
+                        // check existed rows in next round
+                        bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
+                        if (!isExisted) await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
+                        // 
+
                     }
                 }
             }

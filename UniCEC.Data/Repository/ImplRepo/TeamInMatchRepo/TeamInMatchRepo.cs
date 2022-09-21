@@ -76,9 +76,9 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
                                                     Description = selector.tim.Description,
                                                 }).ToListAsync();
 
-            if(items.Count > 0)
+            if (items.Count > 0)
             {
-                foreach(var item in items)
+                foreach (var item in items)
                 {
                     int numberOfMembers = (from pit in context.ParticipantInTeams
                                            where pit.TeamId.Equals(item.TeamId) && pit.Status.Equals(ParticipantInTeamStatus.InTeam)
@@ -113,12 +113,12 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
                                               Description = tim.Description,
                                           }).FirstOrDefaultAsync();
 
-            if(team != null)
+            if (team != null)
             {
                 int numberOfMembers = (from pit in context.ParticipantInTeams
-                                      where pit.TeamId.Equals(team.TeamId) && pit.Status.Equals(ParticipantInTeamStatus.InTeam)
-                                      select pit).Count();
-                team.NumberOfMembers = numberOfMembers;                
+                                       where pit.TeamId.Equals(team.TeamId) && pit.Status.Equals(ParticipantInTeamStatus.InTeam)
+                                       select pit).Count();
+                team.NumberOfMembers = numberOfMembers;
             }
 
             return team;
@@ -136,6 +136,13 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo
         {
             await context.TeamInMatches.AddRangeAsync(teams);
             await context.SaveChangesAsync();
+        }
+
+        public void UpdateStatusTeams(int matchId, TeamInMatchStatus status) // when cancel match 
+        {
+            (from tim in context.TeamInMatches
+             where tim.MatchId.Equals(matchId)
+             select tim).ToList().ForEach(team => team.Status = status);
         }
     }
 }

@@ -11,6 +11,7 @@ using UniCEC.Data.ViewModels.Entities.Match;
 using System.Linq;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Common;
+using UniCEC.Data.Repository.ImplRepo.TeamInMatchRepo;
 
 namespace UniCEC.Business.Services.MatchSvc
 {
@@ -19,14 +20,16 @@ namespace UniCEC.Business.Services.MatchSvc
         private IMatchRepo _matchRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ICompetitionRoundRepo _competitionRoundRepo;
+        private ITeamInMatchRepo _teamInMatchRepo;
         private DecodeToken _decodeToken;
 
         public MatchService(IMatchRepo matchRepo, IMemberInCompetitionRepo memberInCompetitionRepo
-                                , ICompetitionRoundRepo competitionRoundRepo)
+                                , ICompetitionRoundRepo competitionRoundRepo, ITeamInMatchRepo teamInMatchRepo)
         {
             _matchRepo = matchRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _competitionRoundRepo = competitionRoundRepo;
+            _teamInMatchRepo = teamInMatchRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -198,6 +201,10 @@ namespace UniCEC.Business.Services.MatchSvc
                     throw new ArgumentException("Invalid match status");
 
                 match.Status = model.Status.Value;
+                if (model.Status.Equals(MatchStatus.Cancel))
+                {
+                    _teamInMatchRepo.UpdateStatusTeams(match.Id, TeamInMatchStatus.Cancel);
+                }
             }
 
             await _matchRepo.Update();
