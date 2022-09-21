@@ -470,6 +470,14 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
 
             int memberId = await query.FirstOrDefaultAsync();
             return (memberId > 0) ? true : false;
+
+        }
+
+        public async Task<int> GetIdByUserWhenInsert(int userId, int clubId)
+        {
+            return await (from m in context.Members
+                          where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
+                          select m.Id).FirstOrDefaultAsync();
         }
 
     }

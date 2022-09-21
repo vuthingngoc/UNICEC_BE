@@ -127,7 +127,7 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMemberWithInActive = await _memberRepo.CheckExistedMemberInClubWhenInsert(userId, clubId);
             if (isMemberWithInActive)
             {
-                memberId = await _memberRepo.GetIdByUser(userId, clubId);
+                memberId = await _memberRepo.GetIdByUserWhenInsert(userId, clubId);
                 if (memberId == 0) throw new DbUpdateException();
                 Member mem = await _memberRepo.Get(memberId);
                 mem.StartTime = new LocalTime().GetLocalTime().DateTime;
