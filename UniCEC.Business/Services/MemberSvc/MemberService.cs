@@ -33,7 +33,7 @@ namespace UniCEC.Business.Services.MemberSvc
             _memberRepo = memberRepo;
             _clubRepo = clubRepo;
             _userRepo = userRepo;
-            _clubRoleRepo = clubRoleRepo;            
+            _clubRoleRepo = clubRoleRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -122,19 +122,39 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
 
-            Member member = new Member()
-            {
-                UserId = userId,
-                ClubId = clubId,
-                ClubRoleId = 4, // is member by default
-                Status = MemberStatus.Pending, // default status 
-                StartTime = new LocalTime().GetLocalTime().DateTime,
-            };
-            int memberId = await _memberRepo.Insert(member);
-            if (memberId == 0) throw new DbUpdateException();
 
-            club.TotalMember += 1;
-            await _clubRepo.Update();
+            int memberId = 0;
+            bool isMemberWithInActive = await _memberRepo.CheckExistedMemberInClubWhenInsert(userId, clubId);
+            if (isMemberWithInActive)
+            {
+                memberId = await _memberRepo.GetIdByUser(userId, clubId);
+                if (memberId == 0) throw new DbUpdateException();
+                Member mem = await _memberRepo.Get(memberId);
+                mem.StartTime = new LocalTime().GetLocalTime().DateTime;
+                mem.Status = MemberStatus.Pending; // default status 
+                await _memberRepo.Update();
+
+                club.TotalMember += 1;
+                await _clubRepo.Update();
+            }
+            //kh có record cũ thì mới tạo
+            else
+            {
+                Member member = new Member()
+                {
+                    UserId = userId,
+                    ClubId = clubId,
+                    ClubRoleId = 4, // is member by default
+                    Status = MemberStatus.Pending, // default status 
+                    StartTime = new LocalTime().GetLocalTime().DateTime,
+                };
+                memberId = await _memberRepo.Insert(member);
+                if (memberId == 0) throw new DbUpdateException();
+
+                club.TotalMember += 1;
+                await _clubRepo.Update();
+            }
+
 
             ViewMember viewMember = await _memberRepo.GetById(memberId);
 
@@ -161,9 +181,9 @@ namespace UniCEC.Business.Services.MemberSvc
                 member.Status = model.Status;
                 await _memberRepo.Update();
                 // send notification
-                Club club = await _clubRepo.Get(model.ClubId);                
+                Club club = await _clubRepo.Get(model.ClubId);
                 string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-                if(!string.IsNullOrEmpty(deviceToken))
+                if (!string.IsNullOrEmpty(deviceToken))
                 {
                     string body = (model.Status.Equals(MemberStatus.Active))
                     ? $"Chúc mừng bạn đã trở thành thành viên câu lạc bộ {club.Name}"
@@ -209,11 +229,11 @@ namespace UniCEC.Business.Services.MemberSvc
                 member.ClubRoleId = model.ClubRoleId;
                 await _memberRepo.Update();
                 return;
-            } 
+            }
 
             // if user is leader or vice president
             // proposer
-            int userId = _decodeToken.Decode(token, "Id");                        
+            int userId = _decodeToken.Decode(token, "Id");
             int clubRoleId = await _memberRepo.GetRoleMemberInClub(userId, member.ClubId);
             if (!clubRoleId.Equals(1) && !clubRoleId.Equals(2))
                 throw new UnauthorizedAccessException("You do not have permission to access this resource");
@@ -234,7 +254,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 || member.Status.Equals(MemberStatus.Inactive)
                 || member.Status.Equals(MemberStatus.Pending))
                 throw new NullReferenceException("Not found this member");
-            
+
             int userId = _decodeToken.Decode(token, "Id");
 
             if (!member.UserId.Equals(userId)) // if user is not leader or vice president

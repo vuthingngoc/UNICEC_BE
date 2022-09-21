@@ -166,6 +166,7 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
             return (memberId > 0) ? true : false;
         }
 
+       
         public async Task<List<ViewIntroClubMember>> GetLeadersByClub(int clubId)
         {
             var query = from m in context.Members
@@ -458,5 +459,18 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberRepo
                           where memberIds.Contains(m.Id)
                           select m.UserId).ToListAsync();
         }
+
+        //TA
+        public async Task<bool> CheckExistedMemberInClubWhenInsert(int userId, int clubId)
+        {
+            var query = from m in context.Members
+                        where m.UserId.Equals(userId) && m.ClubId.Equals(clubId)
+                                && m.Status.Equals(MemberStatus.Inactive)
+                        select m.Id;
+
+            int memberId = await query.FirstOrDefaultAsync();
+            return (memberId > 0) ? true : false;
+        }
+
     }
 }

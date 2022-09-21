@@ -669,7 +669,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 //Check User is Member of club
                 int memberId = await _memberRepo.GetIdByUser(_decodeToken.Decode(token, "Id"), model.ClubId);
                 Member member = await _memberRepo.Get(memberId);
-                if (member == null && member.Status == MemberStatus.Inactive) throw new ArgumentException("Member not found");
+                if (member == null || member.Status == MemberStatus.Inactive) throw new ArgumentException("Member not found");
 
                 //Check Member belong to this task
                 bool mtaCheck = await _memberTakesActivityRepo.CheckMemberTakesTask(competitionActivity.Id, memberId);
