@@ -26,6 +26,9 @@ namespace UniCEC.Data.Repository.ImplRepo.MemberTakesActivityRepo
         //remove member take task 
         public Task<bool> RemoveMemberTakeTask(int memberTakeActivityId);
 
+        //remove all task this member is doing
+        public Task RemoveMemberTakeAllTaskIsDoing(int memberId);
+
         //get list member take activity
         public Task<List<MemberTakesActivity>> ListMemberTakesActivity(int competitionActivityId);
 
