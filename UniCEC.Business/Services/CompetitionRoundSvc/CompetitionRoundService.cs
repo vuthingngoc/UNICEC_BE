@@ -15,6 +15,7 @@ using UniCEC.Data.Repository.ImplRepo.TeamRepo;
 using UniCEC.Data.RequestModels;
 using UniCEC.Data.ViewModels.Common;
 using UniCEC.Data.ViewModels.Entities.CompetitionRound;
+using System.Linq;
 
 namespace UniCEC.Business.Services.CompetitionRoundSvc
 {
@@ -98,14 +99,50 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                     CompetitionRound previousRound = await _competitionRoundRepo.GetRoundAtOrder(competitionRound.CompetitionId, previousRoundOrder);
                     if (previousRound.Status.Equals(CompetitionRoundStatus.Finished))
                     {
-                        bool isNextRound = true;
-                        // here
-                        List<int> teamIds = await _teamInRoundRepo.GetTeamIdsByRound(previousRound.Id, isNextRound);
+                        List<TeamInRound> teams = await _teamInRoundRepo.GetTeamsByRound(previousRound.Id);
                         // check existed rows in next round
-                        bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(competitionRound.Id);
-                        if (!isExisted) await _teamInRoundRepo.InsertMultiTeams(teamIds, id);
-                        // 
+                        bool isExisted = await _teamInRoundRepo.CheckExistedTeamsInRound(id);
+                        if (!isExisted)
+                        {
+                            teams = teams.Select(team => new TeamInRound()
+                            {
+                                Rank = team.Rank,
+                                RoundId = id,
+                                Scores = team.Scores,
+                                Status = team.Status,
+                                TeamId = team.TeamId
+                            }).ToList();
+                            await _teamInRoundRepo.InsertMultiTeams(teams);
+                        }
+                        else // update if any change
+                        {
+                            bool status = true;
+                            List<int> selectedRoundTeamIds = await _teamInRoundRepo.GetTeamIdsByRound(id, status);
+                            List<TeamInRound> previousRoundTeams = await _teamInRoundRepo.GetTeamsByRound(previousRound.Id);
 
+                            List<TeamInRound> differentPartTeams = 
+                                previousRoundTeams.Where(team => !selectedRoundTeamIds.Contains(team.TeamId)).ToList();
+
+                            if (differentPartTeams.Any())
+                            {
+                                differentPartTeams = differentPartTeams.Select(team => new TeamInRound()
+                                {
+                                    Rank = team.Rank,
+                                    RoundId = id,
+                                    Scores = team.Scores,
+                                    Status = team.Status,
+                                    TeamId = team.TeamId
+                                }).ToList();
+                                await _teamInRoundRepo.InsertMultiTeams(differentPartTeams);
+                            }
+                            else // empty list // get teams in previous round with status false, then compare with selected round
+                            { // wrong logic in here !!!
+                                List<int> previousRoundTeamIds = previousRoundTeams.Select(team => team.TeamId).ToList();
+                                List<int> differentPartTeamIds = 
+                                    selectedRoundTeamIds.Where(teamId => !previousRoundTeamIds.Contains(teamId)).ToList();
+                                await _teamInRoundRepo.DeleteMultiTeams(differentPartTeamIds, id);
+                            }
+                        }
                     }
                 }
             }

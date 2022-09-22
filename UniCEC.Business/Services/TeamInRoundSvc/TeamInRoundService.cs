@@ -155,7 +155,7 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
                 {
                     Rank = 0,// rank,
                     Scores = models[index].Scores,
-                    RoundId = models[index].RoundId,
+                    RoundId = competitionRoundId,
                     TeamId = models[index].TeamId,
                     Status = true // default status when insert                    
                 };
@@ -164,8 +164,8 @@ namespace UniCEC.Business.Services.TeamInRoundSvc
                 ViewTeamInRound viewModel = await _teamInRoundRepo.GetById(teamInRoundId, teamInRound.Status);
             }
 
-            await _teamInRoundRepo.UpdateRankTeamsInRound(models[0].RoundId);
-            return await _teamInRoundRepo.GetViewTeams(teamIds);
+            await _teamInRoundRepo.UpdateRankTeamsInRound(competitionRoundId);
+            return await _teamInRoundRepo.GetViewTeams(teamIds, competitionRoundId);
         }
 
         public async Task Update(string token, TeamInRoundUpdateModel model)
