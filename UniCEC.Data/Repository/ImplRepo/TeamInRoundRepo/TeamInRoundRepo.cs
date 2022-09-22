@@ -83,7 +83,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
 
             teamInRound.MembersInTeam = await GetMembersInTeam(teamInRound.TeamId);
             teamInRound.NumberOfParticipatedMatches = GetNumberOfParticipatedMatches(teamInRound.TeamId, teamInRound.RoundId);
-            
+
             return teamInRound;
         }
 
@@ -145,11 +145,11 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                           }).ToListAsync();
         }
 
-        public async Task<List<ViewTeamInRound>> GetViewTeams(List<int> teamIds)
+        public async Task<List<ViewTeamInRound>> GetViewTeams(List<int> teamIds, int roundId)
         {
             var query = from tir in context.TeamInRounds
                         join t in context.Teams on tir.TeamId equals t.Id
-                        where teamIds.Contains(tir.TeamId)
+                        where teamIds.Contains(tir.TeamId) && tir.RoundId.Equals(roundId)
                         select new { t, tir };
 
             List<ViewTeamInRound> items = await query.Select(selector => new ViewTeamInRound()
@@ -178,7 +178,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
                           join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
                           where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
                                   && tir.Status.Equals(true)
-                          orderby tir.Id 
+                          orderby tir.Id
                           select tir.Scores).LastOrDefaultAsync();
         }
 
@@ -209,7 +209,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public async Task InsertMultiTeams(List<TeamInRound> teams)
         {
             if (teams.Count > 0)
-            {   
+            {
                 await context.TeamInRounds.AddRangeAsync(teams);
                 await context.SaveChangesAsync();
             }
@@ -307,10 +307,33 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public int GetNumberOfParticipatedMatches(int teamId, int roundId)
         {
             return (from tim in context.TeamInMatches
-                        join m in context.Matches on tim.MatchId equals m.Id
-                        where m.RoundId.Equals(roundId) && tim.TeamId.Equals(teamId)
-                                && !m.Status.Equals(MatchStatus.IsDeleted) && !m.Status.Equals(MatchStatus.Cancel)
-                        select tim).ToList().Count;
+                    join m in context.Matches on tim.MatchId equals m.Id
+                    where m.RoundId.Equals(roundId) && tim.TeamId.Equals(teamId)
+                            && !m.Status.Equals(MatchStatus.IsDeleted) && !m.Status.Equals(MatchStatus.Cancel)
+                    select tim).ToList().Count;
+        }
+
+        public async Task<List<TeamInRound>> GetTeamsByRound(int roundId)
+        {
+            return await (from tir in context.TeamInRounds
+                          where tir.RoundId.Equals(roundId) && tir.Status.Equals(true)
+                          select tir).ToListAsync();
+        }
+
+        public async Task DeleteMultiTeams(List<TeamInRound> teams)
+        {
+            context.TeamInRounds.RemoveRange(teams);
+            await Update();
+        }
+
+        public async Task DeleteMultiTeams(List<int> teamIds, int roundId)
+        {
+            var teams = await (from tir in context.TeamInRounds
+                               where teamIds.Contains(tir.TeamId) && tir.RoundId.Equals(roundId)
+                               select tir).ToListAsync();
+
+            context.TeamInRounds.RemoveRange(teams);
+            await Update();
         }
     }
 }
