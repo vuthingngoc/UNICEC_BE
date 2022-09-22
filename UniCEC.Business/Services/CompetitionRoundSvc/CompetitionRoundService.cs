@@ -116,8 +116,7 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                         }
                         else // update if any change
                         {
-                            bool status = true;
-                            List<int> selectedRoundTeamIds = await _teamInRoundRepo.GetTeamIdsByRound(id, status);
+                            List<int> selectedRoundTeamIds = await _teamInRoundRepo.GetTeamIdsByRound(id, null);
                             List<TeamInRound> previousRoundTeams = await _teamInRoundRepo.GetTeamsByRound(previousRound.Id);
 
                             List<TeamInRound> differentPartTeams = 
@@ -135,14 +134,17 @@ namespace UniCEC.Business.Services.CompetitionRoundSvc
                                 }).ToList();
                                 await _teamInRoundRepo.InsertMultiTeams(differentPartTeams);
                             }
-                            else // empty list // get teams in previous round with status false, then compare with selected round
-                            { // wrong logic in here !!!
+                            else // empty list 
+                            {
                                 List<int> previousRoundTeamIds = previousRoundTeams.Select(team => team.TeamId).ToList();
                                 List<int> differentPartTeamIds = 
                                     selectedRoundTeamIds.Where(teamId => !previousRoundTeamIds.Contains(teamId)).ToList();
-                                await _teamInRoundRepo.DeleteMultiTeams(differentPartTeamIds, id);
+                                // just delete teams with status true
+                                await _teamInRoundRepo.DeleteMultiTeams(differentPartTeamIds, id, true); 
                             }
                         }
+
+                        await _teamInRoundRepo.UpdateRankTeamsInRound(id);
                     }
                 }
             }
