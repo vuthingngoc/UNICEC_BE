@@ -1113,7 +1113,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRepo
                         where ca.CompetitionId == c.Id && c.Status != CompetitionStatus.Draft
                               && c.Status != CompetitionStatus.Cancel
                               && c.Status != CompetitionStatus.PendingReview
-                              && c.Status != CompetitionStatus.Approve
+                              //&& c.Status != CompetitionStatus.Approve
                         from cic in context.CompetitionInClubs
                         where cic.ClubId == clubId && c.Id == cic.CompetitionId //&& c.CreateTime < new LocalTime().GetLocalTime().DateTime
                         //orderby c.CreateTime descending
