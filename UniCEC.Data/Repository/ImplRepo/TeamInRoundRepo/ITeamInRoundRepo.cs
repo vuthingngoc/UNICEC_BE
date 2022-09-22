@@ -27,6 +27,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public Task UpdateRankTeamsInRound(int roundId);
         public Task UpdateResultTeamsInRound(int roundId, int teamId, int? scores, bool? status);
         public Task DeleteMultiTeams(List<TeamInRound> teams);
-        public Task DeleteMultiTeams(List<int> teamIds, int roundId);
+        public Task DeleteMultiTeams(List<int> teamIds, int roundId, bool? status);
     }
 }

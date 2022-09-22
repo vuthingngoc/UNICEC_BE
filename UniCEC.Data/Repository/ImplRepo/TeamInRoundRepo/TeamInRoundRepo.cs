@@ -90,7 +90,7 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
         public async Task UpdateRankTeamsInRound(int roundId)
         {
             var query = from tir in context.TeamInRounds
-                        where tir.RoundId.Equals(roundId) && tir.Status.Equals(true)
+                        where tir.RoundId.Equals(roundId) //&& tir.Status.Equals(true)
                         select tir;
 
             int rank = 1;
@@ -326,12 +326,15 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             await Update();
         }
 
-        public async Task DeleteMultiTeams(List<int> teamIds, int roundId)
+        public async Task DeleteMultiTeams(List<int> teamIds, int roundId, bool? status)
         {
-            var teams = await (from tir in context.TeamInRounds
-                               where teamIds.Contains(tir.TeamId) && tir.RoundId.Equals(roundId)
-                               select tir).ToListAsync();
+            var query = from tir in context.TeamInRounds
+                        where teamIds.Contains(tir.TeamId) && tir.RoundId.Equals(roundId)
+                        select tir;
 
+            if (status.HasValue) query = query.Where(team => team.Status.Equals(status));
+
+            var teams = query.ToList();
             context.TeamInRounds.RemoveRange(teams);
             await Update();
         }
