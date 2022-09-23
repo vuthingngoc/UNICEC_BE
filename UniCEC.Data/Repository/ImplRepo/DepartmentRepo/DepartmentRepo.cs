@@ -145,7 +145,7 @@ namespace UniCEC.Data.Repository.ImplRepo.DepartmentRepo
         public async Task<List<ViewDepartment>> GetAllByUniversity(int universityId)
         {
             List<Department> departments = await (from d in context.Departments
-                                                  where d.UniversityId == universityId
+                                                  where d.UniversityId == universityId && d.Status.Equals(true)
                                                   select d).ToListAsync();
 
             List<ViewDepartment> result = new List<ViewDepartment>();
