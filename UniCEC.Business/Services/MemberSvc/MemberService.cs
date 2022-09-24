@@ -134,9 +134,9 @@ namespace UniCEC.Business.Services.MemberSvc
                 if (memberId == 0) throw new DbUpdateException();
                 Member mem = await _memberRepo.Get(memberId);
                 mem.StartTime = new LocalTime().GetLocalTime().DateTime;
+                mem.EndTime = DateTime.Parse("1/1/0001 12:00:00 AM"); // reset lại thời gian 
                 mem.Status = MemberStatus.Pending; // default status 
                 await _memberRepo.Update();
-
                 club.TotalMember += 1;
                 await _clubRepo.Update();
             }
