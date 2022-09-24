@@ -721,7 +721,9 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 if (members != null)
                 {
-                    List<int> memberIds = members.Select(member => member.MemberId).ToList();
+                    // no need to push noti to the member who update status of task
+                    List<int> memberIds = members.Where(member => member.MemberId != memberId)
+                                                    .Select(member => member.MemberId).ToList();
                     if (memberIds.Count > 0) listMemberIds.AddRange(memberIds);
                 }
 
@@ -738,6 +740,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 // save notification
                 List<Notification> notifications = new List<Notification>();
+                listMemberIds.Add(memberId); // member do this task
                 List<int> userIds = await _memberRepo.GetUserIdsByMembers(listMemberIds);
                 foreach (int userId in userIds)
                 {
