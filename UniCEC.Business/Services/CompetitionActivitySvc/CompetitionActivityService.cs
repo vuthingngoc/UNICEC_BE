@@ -488,7 +488,8 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                 await CheckMemberInCompetition(token, competitionActivity.CompetitionId, model.ClubId, false);
 
                 //Check Task Status
-                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling && competitionActivity.Status == CompetitionActivityStatus.Completed)
+                if (competitionActivity.Status == CompetitionActivityStatus.Cancelling
+                    && competitionActivity.Status == CompetitionActivityStatus.Completed)
                     throw new ArgumentException("Competition Activity has already be Cancel Or Compeleted");
 
                 //Check Competition Status
@@ -505,13 +506,34 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                                 && (competitionActivity.Status == CompetitionActivityStatus.Finished))
                         {
                             List<MemberTakesActivity> memberTakesActivities = await _memberTakesActivityRepo.ListMemberTakesActivity(competitionActivity.Id);
-                            if (memberTakesActivities.Count <= 0 && model.Status.Value == CompetitionActivityStatus.Completed) throw new ArgumentException("Hoạt động không có thành viên tham gia, không thể Duyệt");
+                            if (memberTakesActivities.Count <= 0 && model.Status.Value == CompetitionActivityStatus.Completed)
+                                throw new ArgumentException("Hoạt động không có thành viên tham gia, không thể Duyệt");
 
                             foreach (MemberTakesActivity memberTakesActivity in memberTakesActivities)
+                            {
+                                await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
+                            }
+
+                            // send notification
+                            string fullname = _decodeToken.DecodeText(token, "Fullname");
+                            List<int> memberIds = memberTakesActivities.Select(member => member.MemberId).ToList();
+                            List<string> deviceTokens = await _userRepo.GetDeviceTokenByMembers(memberIds);
+                            if (deviceTokens != null)
+                            {
+                                string message = (model.Status.Equals(CompetitionActivityStatus.Completed))
+                                                    ? $"{fullname} mới vừa chấp thuận công việc {competitionActivity.Name} của bạn"
+                                                    : $"{fullname} mới vừa từ chối công việc {competitionActivity.Name} của bạn";
+                                Notification notification = new Notification()
                                 {
-                                    await _seedsWalletService.UpdateAmount(memberTakesActivity.Member.UserId, competitionActivity.SeedsPoint);
-                                }
-                            
+                                    Title = "Thông báo",
+                                    Body = message,
+                                    RedirectUrl = "/viewCompetitionMemberTask",
+                                    CreateTime = new LocalTime().GetLocalTime().DateTime
+                                };
+
+                                await _notificationService.SendNotification(notification, deviceTokens);
+                            }
+
                         }
                         else
                         {
@@ -687,17 +709,17 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 // send notification
                 string fullname = _decodeToken.DecodeText(token, "Fullname");
-                List<MemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(competitionActivity.CompetitionId);                                                                                                                                                                                                                                                        
+                List<MemberInCompetition> managers = await _memberInCompetitionRepo.GetAllManagerCompOrEve(competitionActivity.CompetitionId);
                 List<MemberTakesActivity> members = await _memberTakesActivityRepo.ListMemberTakesActivity(model.CompetitionActivityId);
                 List<int> listMemberIds = new List<int>();
 
                 if (managers != null)
                 {
                     List<int> managerIds = managers.Select(manager => manager.MemberId).ToList();
-                    if (managerIds.Count > 0) listMemberIds.AddRange(managerIds);                    
+                    if (managerIds.Count > 0) listMemberIds.AddRange(managerIds);
                 }
 
-                if(members != null)
+                if (members != null)
                 {
                     List<int> memberIds = members.Select(member => member.MemberId).ToList();
                     if (memberIds.Count > 0) listMemberIds.AddRange(memberIds);
@@ -713,7 +735,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                     CreateTime = new LocalTime().GetLocalTime().DateTime
                 };
                 await _notificationService.SendNotification(notification, deviceTokens);
-                
+
                 // save notification
                 List<Notification> notifications = new List<Notification>();
                 List<int> userIds = await _memberRepo.GetUserIdsByMembers(listMemberIds);
@@ -727,7 +749,7 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
                         CreateTime = new LocalTime().GetLocalTime().DateTime,
                         UserId = userId
                     };
-                    notifications.Add(noti);                    
+                    notifications.Add(noti);
                 }
 
                 await _notificationRepo.InsertNotifications(notifications);
