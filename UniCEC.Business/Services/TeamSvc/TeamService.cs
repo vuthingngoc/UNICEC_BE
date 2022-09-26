@@ -228,8 +228,8 @@ namespace UniCEC.Business.Services.TeamSvc
                 int UserId = _decodeToken.Decode(token, "Id");
 
                 if (model.CompetitionId == 0
-                 || string.IsNullOrEmpty(model.Name)
-                 || string.IsNullOrEmpty(model.Description)) throw new ArgumentNullException("Competition Id Null || Name Null || Description Null");
+                 || string.IsNullOrEmpty(model.Name)) 
+                    throw new ArgumentNullException("Competition Id Null || Name Null");
 
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
                 //Check Competition
@@ -257,7 +257,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 {
                     CompetitionId = model.CompetitionId,
                     Name = model.Name,
-                    Description = model.Description,
+                    Description = model.Description ?? "",
                     //number of student in team
                     NumberOfStudentInTeam = 1,// auto vừa tạo là 1
                                               //generate code
