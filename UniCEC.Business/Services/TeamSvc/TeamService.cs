@@ -161,8 +161,8 @@ namespace UniCEC.Business.Services.TeamSvc
             }
 
             teams = (top.Equals(0))
-                    ? teams.OrderByDescending(team => team.TotalPoint).ToList()
-                    : teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
+                    ? teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint).ToList()
+                    : teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint).Take(top).ToList();
 
             for (int index = 0; index < teams.Count; index++)
             {
