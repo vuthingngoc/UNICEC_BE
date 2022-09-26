@@ -11,9 +11,7 @@ namespace UniCEC.Data.ViewModels.Entities.Team
         public int CompetitionId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        [JsonPropertyName("invited_code")]
-        public string InvitedCode { get; set; }
-        public TeamStatus Status { get; set; }
+        public bool Status { get; set; }
         [JsonPropertyName("number_of_member_in_team")]
         public int NumberOfMemberInTeam { get; set; }
         [JsonPropertyName("total_point")]

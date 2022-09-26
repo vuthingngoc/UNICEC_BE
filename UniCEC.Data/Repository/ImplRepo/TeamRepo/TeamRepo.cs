@@ -252,27 +252,29 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
 
         public async Task<List<ViewResultTeam>> GetFinalResultAllTeamsInComp(int competitionId)
         {
-            return await (from t in context.Teams
-                          where t.CompetitionId.Equals(competitionId)
-                          select new ViewResultTeam()
-                          {
-                              Id = t.Id,
-                              CompetitionId = t.CompetitionId,
-                              Description = t.Description,
-                              Name = t.Name,
-                              InvitedCode = t.InvitedCode,
-                              Status = t.Status,
-                              NumberOfMemberInTeam = t.NumberOfStudentInTeam,
-                              TotalPoint = 0, // calculate in service
-                              Rank = 0 // calculate in service
-                          }).ToListAsync();
+            var teams = await (from t in context.Teams
+                               join tir in context.TeamInRounds on t.Id equals tir.TeamId
+                               where t.CompetitionId.Equals(competitionId)
+                               select new ViewResultTeam()
+                               {
+                                   Id = t.Id,
+                                   CompetitionId = t.CompetitionId,
+                                   Description = t.Description,
+                                   Name = t.Name,
+                                   Status = tir.Status,
+                                   NumberOfMemberInTeam = t.NumberOfStudentInTeam,
+                                   TotalPoint = 0, // calculate in service
+                                   Rank = 0 // calculate in service
+                               }).Distinct().ToListAsync();
+
+            return teams.GroupBy(team => team.Id).Select(team => team.First()).ToList();
         }
 
         public async Task<List<int>> GetAllTeamIdsInComp(int competitionId)
         {
             return await (from t in context.Teams
-                         where t.CompetitionId.Equals(competitionId)
-                         select t.Id).ToListAsync();
+                          where t.CompetitionId.Equals(competitionId)
+                          select t.Id).ToListAsync();
         }
 
         public async Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId)

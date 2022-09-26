@@ -177,7 +177,6 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamInRoundRepo
             return await (from tir in context.TeamInRounds
                           join cr in context.CompetitionRounds on tir.RoundId equals cr.Id
                           where tir.TeamId.Equals(teamId) && cr.CompetitionId.Equals(competitionId)
-                                  && tir.Status.Equals(true)
                           orderby tir.Id
                           select tir.Scores).LastOrDefaultAsync();
         }
