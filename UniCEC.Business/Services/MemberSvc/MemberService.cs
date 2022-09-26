@@ -27,9 +27,9 @@ namespace UniCEC.Business.Services.MemberSvc
         private INotificationService _notificationService;
         private IMemberTakesActivityRepo _memberTakesActivityRepo;
         private DecodeToken _decodeToken;
-        
 
-        public MemberService(INotificationService notificationService, IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo, IMemberTakesActivityRepo memberTakesActivityRepo )
+
+        public MemberService(INotificationService notificationService, IMemberRepo memberRepo, IClubRepo clubRepo, IUserRepo userRepo, IClubRoleRepo clubRoleRepo, IMemberTakesActivityRepo memberTakesActivityRepo)
         {
             _notificationService = notificationService;
             _memberRepo = memberRepo;
@@ -125,7 +125,7 @@ namespace UniCEC.Business.Services.MemberSvc
             bool isMember = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
             if (isMember) throw new ArgumentException("The user has already in this club");
 
-
+            // processing
             int memberId = 0;
             bool isMemberWithInActive = await _memberRepo.CheckExistedMemberInClubWhenInsert(userId, clubId);
             if (isMemberWithInActive)
@@ -134,7 +134,7 @@ namespace UniCEC.Business.Services.MemberSvc
                 if (memberId == 0) throw new DbUpdateException();
                 Member mem = await _memberRepo.Get(memberId);
                 mem.StartTime = new LocalTime().GetLocalTime().DateTime;
-                mem.EndTime = DateTime.Parse("1/1/0001 12:00:00 AM"); // reset lại thời gian 
+                mem.EndTime = null; // reset lại thời gian 
                 mem.Status = MemberStatus.Pending; // default status 
                 await _memberRepo.Update();
                 club.TotalMember += 1;
@@ -282,18 +282,21 @@ namespace UniCEC.Business.Services.MemberSvc
             await _memberTakesActivityRepo.RemoveMemberTakeAllTaskIsDoing(memberId);
 
             // send notification
-            string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
-            if (!string.IsNullOrEmpty(deviceToken))
+            if (!member.UserId.Equals(userId)) // if user is kicked by club managers
             {
-                string body = $"{club.Name} đã mời bạn ra khỏi câu lạc bộ";
-                Notification notification = new Notification()
+                string deviceToken = await _userRepo.GetDeviceTokenByUser(member.UserId);
+                if (!string.IsNullOrEmpty(deviceToken))
                 {
-                    Title = "Thông báo",
-                    Body = body,
-                    RedirectUrl = "/notification",
-                    UserId = member.UserId,
-                };
-                await _notificationService.SendNotification(notification, deviceToken);
+                    string body = $"{club.Name} đã mời bạn ra khỏi câu lạc bộ";
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = body,
+                        RedirectUrl = "/notification",
+                        UserId = member.UserId,
+                    };
+                    await _notificationService.SendNotification(notification, deviceToken);
+                }
             }
         }
 
