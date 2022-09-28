@@ -85,7 +85,7 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 PagingResult<ViewTeam> result = await _teamRepo.GetAllTeamInCompetition(request);
 
-                if(result == null) throw new NullReferenceException();
+                if (result == null) throw new NullReferenceException();
 
                 return result;
 
@@ -161,8 +161,10 @@ namespace UniCEC.Business.Services.TeamSvc
             }
 
             teams = (top.Equals(0))
-                    ? teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint).ToList()
-                    : teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint).Take(top).ToList();
+                    ? teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint)
+                                                                    .ThenBy(team => team.Id).ToList()
+                    : teams.OrderByDescending(team => team.Status).ThenByDescending(team => team.TotalPoint)
+                                                                    .ThenBy(team => team.Id).Take(top).ToList();
 
             for (int index = 0; index < teams.Count; index++)
             {
@@ -228,7 +230,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 int UserId = _decodeToken.Decode(token, "Id");
 
                 if (model.CompetitionId == 0
-                 || string.IsNullOrEmpty(model.Name)) 
+                 || string.IsNullOrEmpty(model.Name))
                     throw new ArgumentNullException("Competition Id Null || Name Null");
 
                 Competition competition = await _competitionRepo.Get(model.CompetitionId);
@@ -237,7 +239,7 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //Check Competition can create Team StartTimeRegister < local time < StartTime
                 //nên chỉnh sang status
-                if(competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
+                if (competition.Status == CompetitionStatus.Pending) throw new ArgumentException("Không thể tạo team khi Cuộc Thi Sự Kiện đang bảo trì");
 
                 if (CheckDate(competition.StartTimeRegister, competition.StartTime) == false) throw new ArgumentException("Không thể tạo team khi đã qua thời gian tạo !");
 
@@ -400,7 +402,7 @@ namespace UniCEC.Business.Services.TeamSvc
                         {
                             if (numberOfMemberInTeam - competition.MaxNumber <= 0)
                             {
-                                team.Status = model.Status.Value;                         
+                                team.Status = model.Status.Value;
                             }
                             else
                             {
@@ -415,7 +417,7 @@ namespace UniCEC.Business.Services.TeamSvc
                     //Available
                     else
                     {
-                        team.Status = model.Status.Value;              
+                        team.Status = model.Status.Value;
                     }
                 }
                 await _teamRepo.Update();
@@ -495,10 +497,10 @@ namespace UniCEC.Business.Services.TeamSvc
                  || competition.Status == CompetitionStatus.Approve
                  || competition.Status == CompetitionStatus.Publish)
                     throw new ArgumentException("Can't do this action at this Competition State");
-                 
+
                 //Count số team Locked
                 int numberOfTeamIsLocked = await _teamRepo.CountNumberOfTeamIsLocked(model.CompetitionId);
-                
+
                 //update Number of team
                 competition.NumberOfTeam = numberOfTeamIsLocked;
                 await _competitionRepo.Update();
@@ -583,18 +585,18 @@ namespace UniCEC.Business.Services.TeamSvc
 
                 //Delete Participant In Team
                 await _participantInTeamRepo.DeleteParticipantInTeam(Participant_In_Team.Id);
-               
+
                 Team t = await _teamRepo.Get(team.Id);
                 t.NumberOfStudentInTeam = t.NumberOfStudentInTeam - 1;
                 //------------
-                if(t.NumberOfStudentInTeam == 0)
+                if (t.NumberOfStudentInTeam == 0)
                 {
                     await _teamRepo.DeleteTeam(team.Id);
                 }
                 else
                 {
                     await _teamRepo.Update();
-                }         
+                }
                 return true;
             }
             catch (Exception)
@@ -628,7 +630,7 @@ namespace UniCEC.Business.Services.TeamSvc
                 //4. Check Participant Id
                 Participant p = await _participantRepo.Get(participantId);
                 if (p == null) throw new ArgumentException("Participant not found");
-                
+
                 //5. Check xem participant này có trong team kh 
                 ParticipantInTeam participantInTeam = await _participantInTeamRepo.CheckParticipantInTeam(teamId, p.StudentId);
                 if (participantInTeam == null) throw new ArgumentException("member aren't participant in that team");
@@ -663,7 +665,7 @@ namespace UniCEC.Business.Services.TeamSvc
         }
 
 
-            public ViewParticipantInTeam TransformViewParticipantInTeam(ParticipantInTeam participantInTeam, int CompetitionId)
+        public ViewParticipantInTeam TransformViewParticipantInTeam(ParticipantInTeam participantInTeam, int CompetitionId)
         {
             return new ViewParticipantInTeam()
             {
@@ -775,6 +777,6 @@ namespace UniCEC.Business.Services.TeamSvc
             }
         }
 
-        
+
     }
 }
