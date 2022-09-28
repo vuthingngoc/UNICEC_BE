@@ -62,6 +62,7 @@ namespace UniCEC.Data.Repository.ImplRepo.UniversityRepo
         {
             return await (from u in context.Universities
                           join c in context.Cities on u.CityId equals c.Id
+                          where u.Id.Equals(id)
                           select new ViewUniversity()
                           {
                               Id = u.Id,
