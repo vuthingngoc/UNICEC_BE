@@ -216,11 +216,11 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public async Task<int> GetNumberOfRoundsByCompetition(int competitionId)
         {
             var query = from cr in context.CompetitionRounds
-                        where cr.CompetitionId.Equals(competitionId) 
+                        where cr.CompetitionId.Equals(competitionId)
                             && !cr.Status.Equals(CompetitionRoundStatus.Cancel)
                             && !cr.Status.Equals(CompetitionRoundStatus.IsDeleted)
                         select cr;
-            
+
             return await query.CountAsync();
         }
 
