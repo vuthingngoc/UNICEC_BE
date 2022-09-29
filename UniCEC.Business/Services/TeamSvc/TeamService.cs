@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UniCEC.Business.Utilities;
 using UniCEC.Data.Common;
@@ -8,7 +7,6 @@ using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
 using UniCEC.Data.Repository.ImplRepo.ClubRepo;
 using UniCEC.Data.Repository.ImplRepo.CompetitionRepo;
-using UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberInCompetitionRepo;
 using UniCEC.Data.Repository.ImplRepo.MemberRepo;
 using UniCEC.Data.Repository.ImplRepo.ParticipantInTeamRepo;
@@ -35,7 +33,6 @@ namespace UniCEC.Business.Services.TeamSvc
         private IMemberRepo _memberRepo;
         private IMemberInCompetitionRepo _memberInCompetitionRepo;
         private ITeamInRoundRepo _teamInRoundRepo;
-        private ICompetitionRoundRepo _competitionRoundRepo;
 
 
 
@@ -47,8 +44,7 @@ namespace UniCEC.Business.Services.TeamSvc
                            IParticipantInTeamRepo participantInTeamRepo,
                            IMemberRepo memberRepo,
                            IMemberInCompetitionRepo memberInCompetitionRepo,
-                           ITeamInRoundRepo teamInRoundRepo,
-                           ICompetitionRoundRepo competitionRoundRepo)
+                           ITeamInRoundRepo teamInRoundRepo)
         {
             _teamRepo = teamRepo;
             _participantRepo = participantRepo;
@@ -59,7 +55,6 @@ namespace UniCEC.Business.Services.TeamSvc
             _memberRepo = memberRepo;
             _memberInCompetitionRepo = memberInCompetitionRepo;
             _teamInRoundRepo = teamInRoundRepo;
-            _competitionRoundRepo = competitionRoundRepo;
             _decodeToken = new DecodeToken();
         }
 
@@ -157,20 +152,6 @@ namespace UniCEC.Business.Services.TeamSvc
             // Action
             List<ViewResultTeam> teams = await _teamRepo.GetFinalResultAllTeamsInComp(competitionId, top);
             if (teams == null) throw new NullReferenceException("Not found any teams in this competition");
-
-            //foreach (var team in teams)
-            //{
-            //    team.TotalPoint = await _teamInRoundRepo.GetTotalPointsTeam(team.Id, team.CompetitionId);
-            //}
-
-            //teams = (top.Equals(0))
-            //        ? teams.OrderByDescending(team => team.TotalPoint).ToList()
-            //        : teams.OrderByDescending(team => team.TotalPoint).Take(top).ToList();
-
-            //for (int index = 0; index < teams.Count; index++)
-            //{
-            //    teams[index].Rank = index + 1;
-            //}
 
             return teams;
         }
