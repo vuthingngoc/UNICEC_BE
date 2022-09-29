@@ -134,7 +134,7 @@ namespace UniCEC.API.Controllers
         [HttpGet("final-result-competition")]
         [SwaggerOperation(Summary = "Get final result all teams in a competition - Authenticated user")]
         [Authorize]
-        public async Task<IActionResult> GetResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int top)
+        public async Task<IActionResult> GetResultTeamsInCompetition([FromQuery, BindRequired] int competitionId, int? top)
         {
             try
             {

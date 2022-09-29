@@ -250,24 +250,54 @@ namespace UniCEC.Data.Repository.ImplRepo.TeamRepo
             return participants.Count;
         }
 
-        public async Task<List<ViewResultTeam>> GetFinalResultAllTeamsInComp(int competitionId)
+        private async Task<List<int>> GetRoundIdsByCompetition(int competitionId, bool isDesc)
         {
-            var teams = await (from t in context.Teams
-                               join tir in context.TeamInRounds on t.Id equals tir.TeamId
-                               where t.CompetitionId.Equals(competitionId)
-                               select new ViewResultTeam()
-                               {
-                                   Id = t.Id,
-                                   CompetitionId = t.CompetitionId,
-                                   Description = t.Description,
-                                   Name = t.Name,
-                                   Status = tir.Status,
-                                   NumberOfMemberInTeam = t.NumberOfStudentInTeam,
-                                   TotalPoint = 0, // calculate in service
-                                   Rank = 0 // calculate in service
-                               }).Distinct().ToListAsync();
+            var query = from cr in context.CompetitionRounds
+                        where cr.CompetitionId.Equals(competitionId)
+                        select cr;
 
-            return teams.GroupBy(team => team.Id).Select(team => team.First()).ToList();
+            if (isDesc) query = query.OrderByDescending(cr => cr.Order);
+
+            return await query.Select(cr => cr.Id).ToListAsync();
+        }
+
+        public async Task<List<ViewResultTeam>> GetFinalResultAllTeamsInComp(int competitionId, int? top)
+        {
+            bool isDesc = true;
+            List<int> descRoundIds = await GetRoundIdsByCompetition(competitionId, isDesc);
+            List<ViewResultTeam> result = new List<ViewResultTeam>();
+
+            foreach(var roundId in descRoundIds)
+            {
+                List<int> teamIds = result.Select(team => team.Id).ToList();
+
+                var teams = (from t in context.Teams
+                             join tir in context.TeamInRounds on t.Id equals tir.TeamId
+                             orderby tir.Status descending
+                             where tir.RoundId.Equals(roundId) && !teamIds.Contains(tir.TeamId)
+                             select new ViewResultTeam()
+                             {
+                                 Id = t.Id,
+                                 CompetitionId = t.CompetitionId,
+                                 Description = t.Description,
+                                 Name = t.Name,
+                                 Status = tir.Status,
+                                 NumberOfMemberInTeam = t.NumberOfStudentInTeam,
+                                 TotalPoint = tir.Scores,
+                                 Rank = 0 // calculate in service
+                             }).OrderByDescending(team => team.TotalPoint).ThenBy(team => team.Id).ToList();
+
+                result.AddRange(teams);
+            }
+
+            if (top.HasValue) result = result.Take(top.Value).ToList();
+
+            for (int index = 0; index < result.Count; index++)
+            {
+                result[index].Rank = index + 1;
+            }
+
+            return result;
         }
 
         public async Task<List<int>> GetAllTeamIdsInComp(int competitionId)

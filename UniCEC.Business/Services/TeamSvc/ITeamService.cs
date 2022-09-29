@@ -32,6 +32,6 @@ namespace UniCEC.Business.Services.TeamSvc
 
         // Gwi
         public Task<ViewTeamInCompetition> GetTotalResultTeamInCompetition(int competitionId, int teamId);
-        public Task<List<ViewResultTeam>> GetFinalResultTeamsInCompetition(string token, int competitionId, int top);
+        public Task<List<ViewResultTeam>> GetFinalResultTeamsInCompetition(string token, int competitionId, int? top);
     }
 }

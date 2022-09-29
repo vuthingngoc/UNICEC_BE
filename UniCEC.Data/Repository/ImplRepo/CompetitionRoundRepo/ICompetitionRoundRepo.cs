@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniCEC.Data.Enum;
 using UniCEC.Data.Models.DB;
@@ -21,7 +22,7 @@ namespace UniCEC.Data.Repository.ImplRepo.CompetitionRoundRepo
         public Task<bool> CheckExistedRound(int roundId);
         public Task<CompetitionRound> GetRoundAtOrder(int competitionId, int order);
         public Task<int> GetNumberOfRoundsByCompetition(int competitionId);
-        public Task<int> GetRoundTypeByMatch(int matchId);
+        public Task<int> GetRoundTypeByMatch(int matchId);        
 
         //TA
         //public Task<CompetitionRound> GetLastRound(int competitionId);       
