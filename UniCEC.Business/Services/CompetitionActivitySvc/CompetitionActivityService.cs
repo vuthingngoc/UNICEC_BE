@@ -729,14 +729,17 @@ namespace UniCEC.Business.Services.CompetitionActivitySvc
 
                 List<string> deviceTokens = await _userRepo.GetDeviceTokenByMembers(listMemberIds);
                 deviceTokens = deviceTokens.Where(token => !string.IsNullOrEmpty(token)).ToList();
-                Notification notification = new Notification()
+                if(deviceTokens.Count > 0)
                 {
-                    Title = "Thông báo",
-                    Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
-                    RedirectUrl = "/viewCompetitionMemberTask",
-                    CreateTime = new LocalTime().GetLocalTime().DateTime
-                };
-                await _notificationService.SendNotification(notification, deviceTokens);
+                    Notification notification = new Notification()
+                    {
+                        Title = "Thông báo",
+                        Body = $"{fullname} vừa cập nhật một trạng thái công việc!",
+                        RedirectUrl = "/viewCompetitionMemberTask",
+                        CreateTime = new LocalTime().GetLocalTime().DateTime
+                    };
+                    await _notificationService.SendNotification(notification, deviceTokens);
+                }
 
                 // save notification
                 List<Notification> notifications = new List<Notification>();
