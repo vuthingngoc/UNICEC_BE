@@ -147,34 +147,11 @@ namespace UniCEC.Business.Services.TeamSvc
             bool isExisted = await _competitionRepo.CheckExistedCompetition(competitionId);
             if (!isExisted) throw new ArgumentException("Not found this competition");
 
-            await CheckValidAuthorizedViewer(token, competitionId);
-
             // Action
             List<ViewResultTeam> teams = await _teamRepo.GetFinalResultAllTeamsInComp(competitionId, top);
             if (teams == null) throw new NullReferenceException("Not found any teams in this competition");
 
             return teams;
-        }
-
-        private async Task CheckValidAuthorizedViewer(string token, int competitionId)
-        {
-            int universityId = _decodeToken.Decode(token, "UniversityId");
-            bool isValid = await _competitionRepo.CheckExisteUniInCompetition(universityId, competitionId);
-            if (!isValid) throw new ArgumentException("You do not have permission to access this resource");
-            //CompetitionScopeStatus status = await _competitionRepo.GetScopeCompetition(competitionId);
-            //if (status.Equals(CompetitionScopeStatus.Club))
-            //{
-            //    int userId = _decodeToken.Decode(token, "Id");
-            //    List<int> clubIds = await _clubRepo.GetByCompetition(competitionId);
-            //    if(clubIds != null)
-            //    {
-            //        foreach (int clubId in clubIds)
-            //        {
-            //            bool isExisted = await _memberRepo.CheckExistedMemberInClub(userId, clubId);
-            //            if(!isExisted) throw new ArgumentException("You do not have permission to access this resource");
-            //        }
-            //    }
-            //}
         }
 
         //INSERT
